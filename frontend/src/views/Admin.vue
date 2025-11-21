@@ -52,7 +52,7 @@
                     <tr>
                       <th>Time</th>
                       <th>Customer</th>
-                      <th>Service</th>
+                      <th>Services</th>
                       <th>Barber</th>
                       <th>Status</th>
                       <th>Price</th>
@@ -62,7 +62,12 @@
                     <tr v-for="appointment in filteredAppointments" :key="appointment._id">
                       <td>{{ appointment.time }}</td>
                       <td>{{ appointment.customerName }}</td>
-                      <td>{{ appointment.serviceId?.name }}</td>
+                      <td>
+                        <span v-if="appointment.services?.length">
+                          {{ appointment.services.map(service => service.name).join(', ') }}
+                        </span>
+                        <span v-else class="text-muted">No services</span>
+                      </td>
                       <td>{{ appointment.barberId?.name }}</td>
                       <td>
                         <select v-model="appointment.status" @change="updateAppointmentStatus(appointment)" class="form-select form-select-sm">
@@ -311,7 +316,8 @@ export default {
       return this.appointments.filter(appointment => {
         const appointmentDate = new Date(appointment.date).toISOString().split('T')[0]
         const dateMatch = appointmentDate === this.selectedDate
-        const barberMatch = !this.selectedBarber || appointment.barberId?._id === this.selectedBarber
+        const barberId = appointment.barberId?._id || appointment.barberId
+        const barberMatch = !this.selectedBarber || barberId === this.selectedBarber
         return dateMatch && barberMatch
       })
     }
@@ -454,9 +460,10 @@ export default {
       }
     },
     getTimeSlotsForDay(dayIndex) {
-      return this.timeSlots.filter(slot => 
-        slot.dayOfWeek === dayIndex && slot.barberId === this.selectedBarberForSlots
-      )
+      return this.timeSlots.filter(slot => {
+        const slotBarberId = slot.barberId?._id || slot.barberId
+        return slot.dayOfWeek === dayIndex && slotBarberId === this.selectedBarberForSlots
+      })
     }
   }
 }
