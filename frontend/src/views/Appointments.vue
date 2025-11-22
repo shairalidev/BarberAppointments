@@ -79,13 +79,14 @@
               </button>
             </div>
             <div class="card-body">
-              <div class="row g-3 align-items-end mb-3">
-                <div class="col-md-6">
-                  <label class="form-label">Date</label>
-                  <input v-model="selectedDate" type="date" class="form-control" @change="handleAvailabilityRefresh">
+              <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+                <div>
+                  <p class="text-muted mb-1">Step 2 of 3</p>
+                  <h5 class="mb-0">Choose a date and time</h5>
+                  <small class="text-muted">Pick a day in the week view and then choose an available slot</small>
                 </div>
-                <div class="col-md-6">
-                  <label class="form-label">Barber</label>
+                <div class="d-flex flex-column">
+                  <label class="text-muted small mb-1">Barber</label>
                   <select v-model="selectedBarber" class="form-select" @change="handleAvailabilityRefresh">
                     <option value="" disabled>Select a barber</option>
                     <option v-for="barber in barbers" :key="barber._id" :value="barber._id">{{ barber.name }}</option>
@@ -93,16 +94,48 @@
                 </div>
               </div>
 
+              <div class="calendar-wrapper mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <button class="btn btn-light icon-button" @click="changeWeek(-1)">
+                    <i class="fas fa-chevron-left"></i>
+                  </button>
+                  <div class="text-center">
+                    <p class="text-muted small mb-1">{{ weekRangeLabel }}</p>
+                    <h5 class="mb-0">{{ monthLabel }}</h5>
+                  </div>
+                  <button class="btn btn-light icon-button" @click="changeWeek(1)">
+                    <i class="fas fa-chevron-right"></i>
+                  </button>
+                </div>
+
+                <div class="week-grid">
+                  <button
+                    v-for="day in weekDays"
+                    :key="day.value"
+                    class="day-card"
+                    :class="{ active: day.isSelected, today: day.isToday }"
+                    @click="selectDate(day.value)">
+                    <span class="weekday">{{ day.label }}</span>
+                    <span class="day-number">{{ day.number }}</span>
+                  </button>
+                </div>
+              </div>
+
               <div class="mb-3">
-                <label class="form-label">Available time slots</label>
-                <div class="d-flex flex-wrap gap-2">
+                <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                  <div>
+                    <p class="mb-0 fw-semibold">Available times</p>
+                    <small v-if="selectedDate" class="text-muted">What time works best for you on {{ formatDate(selectedDate) }}?</small>
+                  </div>
+                  <small class="text-muted">Times are listed in your local time zone.</small>
+                </div>
+                <div class="slot-grid">
                   <button
                     v-for="slot in availableTimes"
                     :key="slot"
-                    class="btn btn-outline-primary"
+                    class="btn btn-outline-primary slot-button"
                     :class="{ active: selectedTime === slot }"
-                    @click="selectedTime = slot"
-                  >
+                    @click="selectedTime = slot">
                     {{ slot }}
                   </button>
                   <div v-if="!availableTimes.length" class="text-muted small">
@@ -222,6 +255,7 @@ export default {
       selectedServices: [],
       selectedBarber: '',
       selectedDate: '',
+      currentWeekStart: '',
       selectedTime: '',
       availableTimes: [],
       currentStep: 1,
@@ -258,12 +292,68 @@ export default {
     selectedBarberName() {
       const barber = this.barbers.find(b => b._id === this.selectedBarber)
       return barber?.name
+    },
+    weekDays() {
+      const startValue = this.currentWeekStart || this.getStartOfWeek(new Date())
+      const start = new Date(startValue)
+
+      return Array.from({ length: 7 }, (_, index) => {
+        const date = new Date(start)
+        date.setDate(start.getDate() + index)
+        const value = this.formatDateValue(date)
+
+        return {
+          label: date.toLocaleDateString(undefined, { weekday: 'short' }),
+          number: String(date.getDate()).padStart(2, '0'),
+          value,
+          isSelected: this.selectedDate === value,
+          isToday: this.isSameDay(date, new Date())
+        }
+      })
+    },
+    monthLabel() {
+      const referenceDate = this.selectedDate || this.currentWeekStart || this.formatDateValue(new Date())
+      return new Date(referenceDate).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
+    },
+    weekRangeLabel() {
+      const start = new Date(this.currentWeekStart || this.getStartOfWeek(new Date()))
+      const end = new Date(start)
+      end.setDate(start.getDate() + 6)
+
+      const startLabel = start.toLocaleDateString(undefined, { month: 'short', day: '2-digit' })
+      const endLabel = end.toLocaleDateString(undefined, { month: 'short', day: '2-digit', year: 'numeric' })
+      return `${startLabel} - ${endLabel}`
     }
   },
   async mounted() {
     await Promise.all([this.fetchServices(), this.fetchBarbers()])
+
+    const today = new Date()
+    this.selectedDate = this.formatDateValue(today)
+    this.currentWeekStart = this.getStartOfWeek(today)
   },
   methods: {
+    formatDateValue(date) {
+      const parsedDate = new Date(date)
+      const year = parsedDate.getFullYear()
+      const month = String(parsedDate.getMonth() + 1).padStart(2, '0')
+      const day = String(parsedDate.getDate()).padStart(2, '0')
+      return `${year}-${month}-${day}`
+    },
+    getStartOfWeek(date) {
+      const parsedDate = new Date(date)
+      const day = parsedDate.getDay()
+      const diff = day === 0 ? -6 : 1 - day
+      parsedDate.setDate(parsedDate.getDate() + diff)
+      return this.formatDateValue(parsedDate)
+    },
+    isSameDay(dateA, dateB) {
+      return (
+        dateA.getFullYear() === dateB.getFullYear() &&
+        dateA.getMonth() === dateB.getMonth() &&
+        dateA.getDate() === dateB.getDate()
+      )
+    },
     async fetchServices() {
       try {
         const response = await axios.get(`${process.env.VUE_APP_API_URL}/services`)
@@ -283,6 +373,20 @@ export default {
         console.error('Error fetching barbers:', error)
       }
     },
+    changeWeek(direction) {
+      const start = new Date(this.currentWeekStart || this.getStartOfWeek(new Date()))
+      start.setDate(start.getDate() + 7 * direction)
+      this.currentWeekStart = this.formatDateValue(start)
+      this.selectedDate = this.formatDateValue(start)
+      this.selectedTime = ''
+      this.handleAvailabilityRefresh()
+    },
+    selectDate(date) {
+      this.selectedDate = date
+      this.currentWeekStart = this.getStartOfWeek(date)
+      this.selectedTime = ''
+      this.handleAvailabilityRefresh()
+    },
     async handleAvailabilityRefresh() {
       if (this.currentStep < 2) return
       this.selectedTime = ''
@@ -291,6 +395,8 @@ export default {
         this.availableTimes = []
         return
       }
+
+      this.currentWeekStart = this.getStartOfWeek(this.selectedDate)
 
       try {
         const response = await axios.get(`${process.env.VUE_APP_API_URL}/appointments/availability`, {
@@ -340,7 +446,9 @@ export default {
     },
     resetFlow() {
       this.selectedServices = []
-      this.selectedDate = ''
+      const today = new Date()
+      this.selectedDate = this.formatDateValue(today)
+      this.currentWeekStart = this.getStartOfWeek(today)
       this.selectedTime = ''
       this.currentStep = 1
       this.customer = {
@@ -411,5 +519,77 @@ export default {
 .btn-outline-primary.active {
   background: #2563eb;
   color: #fff;
+}
+
+.calendar-wrapper {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.icon-button {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid #e2e8f0;
+}
+
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 12px;
+}
+
+.day-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px;
+  background: #ffffff;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.day-card .weekday {
+  display: block;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.day-card .day-number {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.day-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+}
+
+.day-card.today {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.day-card.active {
+  border-color: #2563eb;
+  background: #e0e7ff;
+  box-shadow: 0 12px 30px rgba(37, 99, 235, 0.2);
+}
+
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.slot-button {
+  border-width: 1.5px;
+  border-radius: 12px;
+  padding: 10px 12px;
 }
 </style>
