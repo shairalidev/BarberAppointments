@@ -2,7 +2,7 @@
 
 ## GitHub Actions Deployment Setup
 
-### Required GitHub Secrets
+### Required GitHub Secrets testing
 
 Configure these secrets in your GitHub repository (Settings → Secrets and variables → Actions):
 
