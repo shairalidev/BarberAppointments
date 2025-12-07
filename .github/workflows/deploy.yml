@@ -49,9 +49,9 @@ jobs:
 
           echo "🟢 PM2 backend..."
           if pm2 describe barberapp-backend > /dev/null; then
-            pm2 restart barberapp-backend
+            pm2 restart barberapp-backend 
           else
-            NODE_ENV=production pm2 start server.js --name barberapp-backend
+            npm run start
           fi
 
           echo "📦 Frontend dependencies..."
