@@ -39,7 +39,7 @@ jobs:
           git fetch origin main
           git reset --hard origin/main
 
-          echo "Installing backend dependencies..."
+          echo "Installing backend despendencies..."
           cd backend
           npm ci
 
