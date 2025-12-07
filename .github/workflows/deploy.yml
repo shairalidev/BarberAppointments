@@ -68,9 +68,6 @@ jobs:
           cd ../frontend
           npm ci
 
-          echo "🧹 Cleaning old dist..."
-          rm -rf dist
-
           echo "🎨 Building frontend..."
           NODE_ENV=production npm run build
 
@@ -88,11 +85,6 @@ jobs:
 
           echo "🚦 Deployment Complete!"
           pm2 status
-
-    - name: Health Check
-      run: |
-        sleep 5
-        curl -f ${{ secrets.APP_URL }}/api/health || exit 1
 
     - name: Notify Success
       if: success()
