@@ -45,6 +45,7 @@ app.use('/api/appointments', require('./routes/appointments'));
 app.use('/api/barbers', verifyToken, require('./routes/barbers'));
 app.use('/api/services', verifyToken, require('./routes/services'));
 app.use('/api/timeslots', verifyToken, require('./routes/timeslots'));
+app.use('/api/restrictions', verifyToken, require('./routes/restrictions'));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

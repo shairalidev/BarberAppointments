@@ -6,9 +6,14 @@ import Toast from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
 import './assets/toast-custom.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
-import 'bootstrap/dist/js/bootstrap.bundle.min.js'
+import * as bootstrap from 'bootstrap'
+
+window.bootstrap = bootstrap
 
 setupAxiosInterceptors()
+
+const app = createApp(App)
+app.config.globalProperties.$bootstrap = bootstrap
 
 const toastOptions = {
   position: 'top-right',
@@ -28,4 +33,4 @@ const toastOptions = {
   newestOnTop: true
 }
 
-createApp(App).use(router).use(Toast, toastOptions).mount('#app')
+app.use(router).use(Toast, toastOptions).mount('#app')

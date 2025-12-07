@@ -44,13 +44,14 @@
               id="adminDropdown" 
               role="button" 
               data-bs-toggle="dropdown"
+              aria-expanded="false"
             >
               <div class="admin-avatar me-2">
                 <i class="fas fa-user-shield"></i>
               </div>
               <span class="fw-medium">{{ adminUser?.username }}</span>
             </a>
-            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="adminDropdown">
               <li>
                 <router-link class="dropdown-item" to="/admin">
                   <i class="fas fa-cog me-2"></i>Admin Panel
@@ -58,9 +59,9 @@
               </li>
               <li><hr class="dropdown-divider"></li>
               <li>
-                <button @click="logout" class="dropdown-item text-danger">
+                <a href="#" @click.prevent="logout" class="dropdown-item text-danger">
                   <i class="fas fa-sign-out-alt me-2"></i>Logout
-                </button>
+                </a>
               </li>
             </ul>
           </div>
@@ -71,6 +72,8 @@
 </template>
 
 <script>
+import { logout as authLogout } from '../utils/auth'
+
 export default {
   name: 'Navbar',
   computed: {
@@ -87,12 +90,7 @@ export default {
       this.$emit('show-login')
     },
     logout() {
-      localStorage.removeItem('adminToken')
-      localStorage.removeItem('adminUser')
-      if (this.$route.path === '/admin') {
-        this.$router.replace('/')
-      }
-      this.$emit('logout')
+      authLogout()
     }
   }
 }

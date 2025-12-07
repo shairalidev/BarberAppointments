@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <Navbar @show-login="showLoginModal" @logout="handleLogout" />
+    <Navbar v-if="$route.path !== '/admin'" @show-login="showLoginModal" @logout="handleLogout" />
     <router-view :key="$route.fullPath" />
     <LoginModal ref="loginModal" @login-success="handleLoginSuccess" />
     <Toast ref="toast" />
@@ -21,13 +21,17 @@ export default {
   },
   methods: {
     showLoginModal() {
-      this.$refs.loginModal.show()
+      this.$nextTick(() => {
+        if (this.$refs.loginModal) {
+          this.$refs.loginModal.show()
+        }
+      })
     },
     handleLoginSuccess() {
-      this.$router.replace('/admin')
+      this.$router.push('/admin')
+      this.$forceUpdate()
     },
     handleLogout() {
-      // Force reactivity update
       this.$forceUpdate()
     }
   }

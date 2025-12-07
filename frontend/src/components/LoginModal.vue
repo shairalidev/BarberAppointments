@@ -74,7 +74,6 @@
 
 <script>
 import axios from 'axios'
-import { Modal } from 'bootstrap'
 
 export default {
   name: 'LoginModal',
@@ -86,21 +85,21 @@ export default {
       },
       showPassword: false,
       loading: false,
-      error: '',
-      modal: null
+      error: ''
     }
-  },
-  mounted() {
-    this.modal = new Modal(this.$refs.loginModal)
   },
   methods: {
     show() {
       this.error = ''
       this.credentials = { username: '', password: '' }
-      this.modal.show()
+      const modalEl = this.$refs.loginModal
+      const modal = window.bootstrap.Modal.getOrCreateInstance(modalEl)
+      modal.show()
     },
     hide() {
-      this.modal.hide()
+      const modalEl = this.$refs.loginModal
+      const modal = window.bootstrap.Modal.getInstance(modalEl)
+      if (modal) modal.hide()
     },
     async login() {
       this.loading = true
