@@ -145,7 +145,7 @@ router.post('/', async (req, res) => {
     });
 
     const savedAppointment = await appointment.save();
-    const populated = await savedAppointment.populate('services').populate('barberId');
+    const populated = await savedAppointment.populate(['services', 'barberId']);
     res.status(201).json(populated);
   } catch (error) {
     if (error.code === 11000) {
