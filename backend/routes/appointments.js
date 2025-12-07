@@ -150,10 +150,11 @@ router.post('/', async (req, res) => {
       .populate('barberId');
     res.status(201).json(populated);
   } catch (error) {
+    console.error('Appointment creation error:', error);
     if (error.code === 11000) {
       return res.status(409).json({ message: 'Time slot already booked' });
     }
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ message: error.message, stack: error.stack });
   }
 });
 
