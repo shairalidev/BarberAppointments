@@ -14,15 +14,7 @@ mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.log('MongoDB connection error:', err));
 
-// Routes
-const { router: authRouter, verifyToken } = require('./routes/auth');
-app.use('/api/auth', authRouter);
-app.use('/api/appointments', require('./routes/appointments'));
-app.use('/api/barbers', verifyToken, require('./routes/barbers'));
-app.use('/api/services', verifyToken, require('./routes/services'));
-app.use('/api/timeslots', verifyToken, require('./routes/timeslots'));
-
-// Public routes (no auth required)
+// Public routes (no auth required) - MUST BE BEFORE PROTECTED ROUTES
 app.get('/api/services/public', async (req, res) => {
   try {
     const Service = require('./models/Service');
@@ -42,6 +34,14 @@ app.get('/api/barbers/public', async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+// Routes
+const { router: authRouter, verifyToken } = require('./routes/auth');
+app.use('/api/auth', authRouter);
+app.use('/api/appointments', require('./routes/appointments'));
+app.use('/api/barbers', verifyToken, require('./routes/barbers'));
+app.use('/api/services', verifyToken, require('./routes/services'));
+app.use('/api/timeslots', verifyToken, require('./routes/timeslots'));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
