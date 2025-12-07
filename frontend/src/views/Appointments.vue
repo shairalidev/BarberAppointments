@@ -245,9 +245,14 @@
 
 <script>
 import axios from 'axios'
+import { useToast } from 'vue-toastification'
 
 export default {
   name: 'Appointments',
+  setup() {
+    const toast = useToast()
+    return { toast }
+  },
   data() {
     return {
       services: [],
@@ -420,7 +425,9 @@ export default {
     },
     async submitBooking() {
       if (!this.canProceedFromSchedule) {
-        alert('Please select a date and time slot.')
+        this.toast.warning('Please select a date and time slot.', {
+          position: 'top-center'
+        })
         return
       }
 
@@ -437,11 +444,17 @@ export default {
           time: this.selectedTime
         })
 
-        alert('Appointment booked successfully! A confirmation email will be prepared from the admin template.')
+        this.toast.success('🎉 Appointment booked successfully!', {
+          timeout: 5000,
+          position: 'top-center'
+        })
         this.resetFlow()
       } catch (error) {
         const message = error.response?.data?.message || 'Error booking appointment. Please try another slot.'
-        alert(message)
+        this.toast.error(message, {
+          timeout: 5000,
+          position: 'top-center'
+        })
       }
     },
     resetFlow() {
@@ -473,6 +486,22 @@ export default {
 .booking-page {
   background: #f8fafc;
   min-height: 100vh;
+  padding-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+  .booking-page .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .booking-page h2 {
+    font-size: 1.75rem;
+  }
+  
+  .d-none.d-md-flex {
+    display: none !important;
+  }
 }
 
 .step-indicator {
@@ -544,6 +573,13 @@ export default {
   gap: 12px;
 }
 
+@media (max-width: 576px) {
+  .week-grid {
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 8px;
+  }
+}
+
 .day-card {
   border: 1px solid #e2e8f0;
   border-radius: 12px;
@@ -587,9 +623,61 @@ export default {
   gap: 10px;
 }
 
+@media (max-width: 576px) {
+  .slot-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+}
+
 .slot-button {
   border-width: 1.5px;
   border-radius: 12px;
   padding: 10px 12px;
+}
+
+@media (max-width: 576px) {
+  .slot-button {
+    padding: 8px 10px;
+    font-size: 0.9rem;
+  }
+}
+
+.card {
+  border-radius: 16px;
+}
+
+.card-header {
+  border-radius: 16px 16px 0 0 !important;
+}
+
+@media (max-width: 992px) {
+  .sticky-top {
+    position: relative !important;
+    top: 0 !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .service-card {
+    padding: 12px;
+  }
+  
+  .day-card {
+    padding: 8px;
+  }
+  
+  .day-card .day-number {
+    font-size: 1.2rem;
+  }
+  
+  .calendar-wrapper {
+    padding: 12px;
+  }
+  
+  .icon-button {
+    width: 36px;
+    height: 36px;
+  }
 }
 </style>

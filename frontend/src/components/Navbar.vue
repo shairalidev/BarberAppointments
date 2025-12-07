@@ -198,4 +198,41 @@ export default {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
+
+/* Mobile Optimizations */
+@media (max-width: 991px) {
+  .navbar-collapse {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+  
+  .nav-link {
+    padding: 0.75rem 1rem !important;
+    margin: 0.25rem 0;
+  }
+  
+  .navbar-nav .btn {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+  
+  .nav-link.active::after {
+    display: none;
+  }
+}
+
+@media (max-width: 576px) {
+  .brand-text {
+    font-size: 1.25rem;
+  }
+  
+  .brand-icon {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
+  }
+}
 </style>
