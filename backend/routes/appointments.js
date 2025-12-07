@@ -145,9 +145,11 @@ router.post('/', async (req, res) => {
     });
 
     const savedAppointment = await appointment.save();
-    await savedAppointment.populate('services');
-    await savedAppointment.populate('barberId');
-    res.status(201).json(savedAppointment);
+    const populatedAppointment = await Appointment.findById(savedAppointment._id)
+      .populate('services')
+      .populate('barberId');
+
+    res.status(201).json(populatedAppointment);
   } catch (error) {
     console.error('Appointment creation error:', error);
     if (error.code === 11000) {
