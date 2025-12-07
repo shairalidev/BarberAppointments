@@ -102,7 +102,8 @@ router.post('/', async (req, res) => {
     } = req.body;
 
     if (!customerName || !customerPhone || !barberId || !services?.length || !date || !time) {
-      return res.status(400).json({ message: 'Missing required fields' });
+      console.log('Missing fields:', { customerName: !!customerName, customerPhone: !!customerPhone, barberId: !!barberId, services: services?.length, date: !!date, time: !!time });
+      return res.status(400).json({ message: 'Missing required fields', received: { customerName: !!customerName, customerPhone: !!customerPhone, barberId: !!barberId, servicesCount: services?.length, date: !!date, time: !!time } });
     }
 
     const normalizedDate = normalizeDate(date);
