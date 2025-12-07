@@ -33,7 +33,7 @@ jobs:
           set -e
           echo "Starting BarberPro Deployment Pipeline..."
 
-          cd ${{ secrets.DEPLOY_PATH || '/var/www/barberpro' }}
+          cd /var/www/barberpro
 
           echo "Pulling latest code..."
           git fetch origin main
