@@ -36,18 +36,18 @@ fi
 
 # Create project directory
 echo "📁 Setting up project directory..."
-sudo mkdir -p /var/www/barberpro
-sudo mkdir -p /var/www/html/barberpro
-sudo chown -R $USER:$USER /var/www/barberpro
+sudo mkdir -p /var/www/BarberAppointments
+sudo mkdir -p /var/www/html/BarberAppointments
+sudo chown -R $USER:$USER /var/www/BarberAppointments
 
 # Clone repository if not exists
-if [ ! -d "/var/www/barberpro/.git" ]; then
+if [ ! -d "/var/www/BarberAppointments/.git" ]; then
     echo "📥 Cloning repository..."
     read -p "Enter your Git repository URL: " REPO_URL
-    git clone $REPO_URL /var/www/barberpro
+    git clone $REPO_URL /var/www/BarberAppointments
 fi
 
-cd /var/www/barberpro
+cd /var/www/BarberAppointments
 
 # Create uploads directory
 echo "📁 Creating uploads directory..."
@@ -69,8 +69,9 @@ echo "⚙️ Setting up frontend..."
 cd frontend
 npm install
 npm run build
-sudo cp -r dist/* /var/www/html/barberpro/
-sudo chown -R www-data:www-data /var/www/html/barberpro
+sudo mkdir -p /var/www/html/BarberAppointments
+sudo cp -r dist/* /var/www/html/BarberAppointments/
+sudo chown -R www-data:www-data /var/www/html/BarberAppointments
 cd ..
 
 # Copy Nginx configuration
@@ -107,4 +108,4 @@ echo "  pm2 status                    - Check backend status"
 echo "  pm2 logs barberpro-backend    - View backend logs"
 echo "  pm2 restart barberpro-backend - Restart backend"
 echo ""
-echo "Uploads directory: /var/www/barberpro/backend/uploads"
+echo "Uploads directory: /var/www/BarberAppointments/backend/uploads"

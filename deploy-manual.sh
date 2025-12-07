@@ -4,7 +4,7 @@ set -e
 
 echo "Starting BarberPro Deployment Pipeline..."
 
-cd /var/www/barberpro
+cd /var/www/BarberAppointments
 
 echo "Pulling latest code..."
 git fetch origin main
@@ -28,13 +28,14 @@ npm ci
 echo "Building frontend..."
 npm run build
 
-echo "Deploying frontend to /var/www/html/barberpro..."
-sudo rm -rf /var/www/html/barberpro/*
-sudo cp -r dist/* /var/www/html/barberpro/
+echo "Deploying frontend to /var/www/html/BarberAppointments..."
+sudo mkdir -p /var/www/html/BarberAppointments
+sudo rm -rf /var/www/html/BarberAppointments/*
+sudo cp -r dist/* /var/www/html/BarberAppointments/
 
 echo "Setting permissions..."
-sudo chown -R www-data:www-data /var/www/html/barberpro
-sudo chmod -R 755 /var/www/html/barberpro
+sudo chown -R www-data:www-data /var/www/html/BarberAppointments
+sudo chmod -R 755 /var/www/html/BarberAppointments
 
 echo "Ensuring uploads directory..."
 cd ..
