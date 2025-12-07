@@ -1,24 +1,36 @@
 <template>
   <div id="app">
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-      <div class="container">
-        <router-link class="navbar-brand fw-bold text-primary" to="/">
-          <i class="fas fa-cut me-2"></i>BarberPro
-        </router-link>
-        <div class="navbar-nav ms-auto">
-          <router-link class="nav-link px-3" to="/">Home</router-link>
-          <router-link class="nav-link px-3" to="/appointments">Book Now</router-link>
-          <router-link class="nav-link px-3" to="/admin">Admin</router-link>
-        </div>
-      </div>
-    </nav>
-    <router-view/>
+    <Navbar @show-login="showLoginModal" @logout="handleLogout" />
+    <router-view :key="$route.fullPath" />
+    <LoginModal ref="loginModal" @login-success="handleLoginSuccess" />
+    <Toast ref="toast" />
   </div>
 </template>
 
 <script>
+import Navbar from './components/Navbar.vue'
+import LoginModal from './components/LoginModal.vue'
+import Toast from './components/Toast.vue'
+
 export default {
-  name: 'App'
+  name: 'App',
+  components: {
+    Navbar,
+    LoginModal,
+    Toast
+  },
+  methods: {
+    showLoginModal() {
+      this.$refs.loginModal.show()
+    },
+    handleLoginSuccess() {
+      this.$router.replace('/admin')
+    },
+    handleLogout() {
+      // Force reactivity update
+      this.$forceUpdate()
+    }
+  }
 }
 </script>
 

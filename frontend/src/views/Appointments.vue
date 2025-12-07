@@ -356,7 +356,7 @@ export default {
     },
     async fetchServices() {
       try {
-        const response = await axios.get(`${process.env.VUE_APP_API_URL}/services`)
+        const response = await axios.get(`${process.env.VUE_APP_API_URL}/services/public`)
         this.services = response.data
       } catch (error) {
         console.error('Error fetching services:', error)
@@ -364,7 +364,7 @@ export default {
     },
     async fetchBarbers() {
       try {
-        const response = await axios.get(`${process.env.VUE_APP_API_URL}/barbers`)
+        const response = await axios.get(`${process.env.VUE_APP_API_URL}/barbers/public`)
         this.barbers = response.data
         if (!this.selectedBarber && this.barbers.length) {
           this.selectedBarber = this.barbers[0]._id

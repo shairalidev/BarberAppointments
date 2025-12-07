@@ -91,7 +91,7 @@ export default {
   methods: {
     async fetchServices() {
       try {
-        const response = await axios.get(`${process.env.VUE_APP_API_URL}/services`)
+        const response = await axios.get(`${process.env.VUE_APP_API_URL}/services/public`)
         this.services = response.data.slice(0, 3) // Show only first 3 services
       } catch (error) {
         console.error('Error fetching services:', error)

@@ -1,25 +1,75 @@
 <template>
-  <div class="admin-panel">
-    <div class="container-fluid py-4">
+  <div class="admin-panel bg-light min-vh-100">
+    <!-- Admin Header -->
+    <div class="admin-header bg-white shadow-sm py-3 mb-4">
+      <div class="container-fluid">
+        <div class="row align-items-center">
+          <div class="col">
+            <h2 class="mb-0 fw-bold text-primary">
+              <i class="fas fa-shield-alt me-2"></i>Admin Dashboard
+            </h2>
+            <p class="text-muted mb-0">Manage your barber shop operations</p>
+          </div>
+          <div class="col-auto">
+            <div class="d-flex align-items-center">
+              <div class="admin-info me-3">
+                <small class="text-muted">Welcome back,</small>
+                <div class="fw-semibold">{{ adminUser?.username }}</div>
+              </div>
+              <div class="admin-avatar">
+                <i class="fas fa-user-shield"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid">
       <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-3">
-          <div class="card">
-            <div class="card-header bg-primary text-white">
-              <h5 class="mb-0"><i class="fas fa-cog me-2"></i>Admin Panel</h5>
+        <!-- Enhanced Sidebar -->
+        <div class="col-md-3 mb-4">
+          <div class="card border-0 shadow-sm">
+            <div class="card-header bg-gradient-primary text-white border-0">
+              <h5 class="mb-0 fw-semibold">
+                <i class="fas fa-cog me-2"></i>Control Panel
+              </h5>
             </div>
             <div class="list-group list-group-flush">
-              <button @click="activeTab = 'calendar'" :class="['list-group-item', 'list-group-item-action', activeTab === 'calendar' ? 'active' : '']">
-                <i class="fas fa-calendar me-2"></i>Calendar
+              <button 
+                @click="activeTab = 'dashboard'" 
+                :class="['list-group-item', 'list-group-item-action', 'border-0', 'py-3', activeTab === 'dashboard' ? 'active' : '']"
+              >
+                <i class="fas fa-chart-line me-3 text-primary"></i>
+                <span class="fw-medium">Dashboard</span>
               </button>
-              <button @click="activeTab = 'services'" :class="['list-group-item', 'list-group-item-action', activeTab === 'services' ? 'active' : '']">
-                <i class="fas fa-cut me-2"></i>Services
+              <button 
+                @click="activeTab = 'calendar'" 
+                :class="['list-group-item', 'list-group-item-action', 'border-0', 'py-3', activeTab === 'calendar' ? 'active' : '']"
+              >
+                <i class="fas fa-calendar me-3 text-primary"></i>
+                <span class="fw-medium">Appointments</span>
               </button>
-              <button @click="activeTab = 'timeslots'" :class="['list-group-item', 'list-group-item-action', activeTab === 'timeslots' ? 'active' : '']">
-                <i class="fas fa-clock me-2"></i>Time Slots
+              <button 
+                @click="activeTab = 'services'" 
+                :class="['list-group-item', 'list-group-item-action', 'border-0', 'py-3', activeTab === 'services' ? 'active' : '']"
+              >
+                <i class="fas fa-cut me-3 text-primary"></i>
+                <span class="fw-medium">Services</span>
               </button>
-              <button @click="activeTab = 'barbers'" :class="['list-group-item', 'list-group-item-action', activeTab === 'barbers' ? 'active' : '']">
-                <i class="fas fa-user-tie me-2"></i>Barbers
+              <button 
+                @click="activeTab = 'barbers'" 
+                :class="['list-group-item', 'list-group-item-action', 'border-0', 'py-3', activeTab === 'barbers' ? 'active' : '']"
+              >
+                <i class="fas fa-user-tie me-3 text-primary"></i>
+                <span class="fw-medium">Barbers</span>
+              </button>
+              <button 
+                @click="activeTab = 'timeslots'" 
+                :class="['list-group-item', 'list-group-item-action', 'border-0', 'py-3', activeTab === 'timeslots' ? 'active' : '']"
+              >
+                <i class="fas fa-clock me-3 text-primary"></i>
+                <span class="fw-medium">Time Slots</span>
               </button>
             </div>
           </div>
@@ -27,8 +77,112 @@
 
         <!-- Main Content -->
         <div class="col-md-9">
+          <!-- Dashboard Tab -->
+          <div v-if="activeTab === 'dashboard'" class="dashboard-content">
+            <div class="row g-4 mb-4">
+              <div class="col-md-3">
+                <div class="stat-card bg-primary text-white">
+                  <div class="stat-icon">
+                    <i class="fas fa-calendar-check"></i>
+                  </div>
+                  <div class="stat-content">
+                    <h3 class="stat-number">{{ todayAppointments.length }}</h3>
+                    <p class="stat-label">Today's Appointments</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="stat-card bg-success text-white">
+                  <div class="stat-icon">
+                    <i class="fas fa-user-tie"></i>
+                  </div>
+                  <div class="stat-content">
+                    <h3 class="stat-number">{{ availableBarbers.length }}</h3>
+                    <p class="stat-label">Available Barbers</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="stat-card bg-info text-white">
+                  <div class="stat-icon">
+                    <i class="fas fa-cut"></i>
+                  </div>
+                  <div class="stat-content">
+                    <h3 class="stat-number">{{ services.length }}</h3>
+                    <p class="stat-label">Active Services</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="stat-card bg-warning text-white">
+                  <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                  </div>
+                  <div class="stat-content">
+                    <h3 class="stat-number">{{ pendingAppointments.length }}</h3>
+                    <p class="stat-label">Pending Bookings</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="row g-4">
+              <div class="col-md-8">
+                <div class="card border-0 shadow-sm">
+                  <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-semibold">Recent Appointments</h5>
+                  </div>
+                  <div class="card-body">
+                    <div class="table-responsive">
+                      <table class="table table-hover">
+                        <thead class="table-light">
+                          <tr>
+                            <th>Customer</th>
+                            <th>Service</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr v-for="appointment in recentAppointments" :key="appointment._id">
+                            <td class="fw-medium">{{ appointment.customerName }}</td>
+                            <td>{{ appointment.services?.[0]?.name || 'N/A' }}</td>
+                            <td>{{ appointment.time }}</td>
+                            <td>
+                              <span :class="getStatusBadgeClass(appointment.status)">{{ appointment.status }}</span>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card border-0 shadow-sm">
+                  <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-semibold">Quick Actions</h5>
+                  </div>
+                  <div class="card-body">
+                    <div class="d-grid gap-2">
+                      <button @click="activeTab = 'services'; showServiceForm = true" class="btn btn-outline-primary">
+                        <i class="fas fa-plus me-2"></i>Add Service
+                      </button>
+                      <button @click="activeTab = 'barbers'; showBarberForm = true" class="btn btn-outline-success">
+                        <i class="fas fa-user-plus me-2"></i>Add Barber
+                      </button>
+                      <button @click="activeTab = 'calendar'" class="btn btn-outline-info">
+                        <i class="fas fa-calendar me-2"></i>View Calendar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Calendar Tab -->
-          <div v-if="activeTab === 'calendar'" class="card">
+          <div v-if="activeTab === 'calendar'" class="card border-0 shadow-sm">
             <div class="card-header">
               <h5><i class="fas fa-calendar me-2"></i>Appointment Calendar</h5>
             </div>
@@ -286,7 +440,7 @@ export default {
   name: 'Admin',
   data() {
     return {
-      activeTab: 'calendar',
+      activeTab: 'dashboard',
       appointments: [],
       barbers: [],
       services: [],
@@ -312,6 +466,10 @@ export default {
     }
   },
   computed: {
+    adminUser() {
+      const user = localStorage.getItem('adminUser')
+      return user ? JSON.parse(user) : null
+    },
     filteredAppointments() {
       return this.appointments.filter(appointment => {
         const appointmentDate = new Date(appointment.date).toISOString().split('T')[0]
@@ -320,6 +478,22 @@ export default {
         const barberMatch = !this.selectedBarber || barberId === this.selectedBarber
         return dateMatch && barberMatch
       })
+    },
+    todayAppointments() {
+      const today = new Date().toISOString().split('T')[0]
+      return this.appointments.filter(appointment => {
+        const appointmentDate = new Date(appointment.date).toISOString().split('T')[0]
+        return appointmentDate === today
+      })
+    },
+    availableBarbers() {
+      return this.barbers.filter(barber => barber.available)
+    },
+    pendingAppointments() {
+      return this.appointments.filter(appointment => appointment.status === 'pending')
+    },
+    recentAppointments() {
+      return this.appointments.slice(0, 5)
     }
   },
   async mounted() {
@@ -464,7 +638,144 @@ export default {
         const slotBarberId = slot.barberId?._id || slot.barberId
         return slot.dayOfWeek === dayIndex && slotBarberId === this.selectedBarberForSlots
       })
+    },
+    getStatusBadgeClass(status) {
+      const classes = {
+        pending: 'badge bg-warning',
+        confirmed: 'badge bg-primary',
+        completed: 'badge bg-success',
+        cancelled: 'badge bg-danger'
+      }
+      return classes[status] || 'badge bg-secondary'
     }
   }
 }
 </script>
+
+<style scoped>
+.admin-panel {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.admin-header {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.admin-avatar {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.2rem;
+}
+
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+}
+
+.list-group-item {
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.list-group-item:hover {
+  background-color: rgba(59, 130, 246, 0.05);
+  border-left-color: #3b82f6;
+}
+
+.list-group-item.active {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(29, 78, 216, 0.1) 100%);
+  border-left-color: #3b82f6;
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+.stat-card {
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.stat-icon {
+  font-size: 2rem;
+  margin-right: 16px;
+  opacity: 0.8;
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin-bottom: 0;
+}
+
+.card {
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+.btn {
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.form-control, .form-select {
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  transition: all 0.2s ease;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+}
+
+.badge {
+  font-size: 0.75rem;
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dashboard-content {
+  animation: fadeIn 0.5s ease;
+}
+
+.card-header {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(10px);
+}
+</style>
