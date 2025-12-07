@@ -27,44 +27,56 @@ jobs:
         host: ${{ secrets.SERVER_HOST }}
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        port: ${{ secrets.SERVER_PORT }}
+        port: 22
         script_stop: true
         script: |
           set -e
-          echo "Starting BarberPro Deployment Pipeline..."
+          echo "🚀 Starting BarberAppointments Deployment..."
 
           cd /var/www/BarberAppointments
 
-          echo "Pulling latest code..."
+          echo "🔧 Fixing ownership before deploy..."
+          sudo chown -R ubuntu:ubuntu /var/www/BarberAppointments
+          sudo chmod -R 755 /var/www/BarberAppointments
+
+          echo "📥 Pulling latest code..."
           git fetch origin main
           git reset --hard origin/main
 
-          echo "Installing backend despendencies..."
+          echo "📦 Backend dependencies..."
           cd backend
           npm ci
 
-          echo "Ensuring PM2 backend process exists..."
-          if pm2 describe barberpro-backend > /dev/null; then
-            pm2 restart barberpro-backend
+          echo "🟢 PM2 backend..."
+          if pm2 describe barberapp-backend > /dev/null; then
+            pm2 restart barberapp-backend
           else
-            NODE_ENV=production pm2 start server.js --name barberpro-backend
+            NODE_ENV=production pm2 start server.js --name barberapp-backend
           fi
 
-          echo "Installing frontend dependencies..."
+          echo "📦 Frontend dependencies..."
           cd ../frontend
           npm ci
 
-          echo "Building frontend..."
+          echo "🧹 Cleaning old dist..."
+          rm -rf dist
+
+          echo "🎨 Building frontend..."
           NODE_ENV=production npm run build
 
-          echo "Setting permissions for dist..."
+          echo "🔐 Fixing dist permissions..."
           sudo chown -R www-data:www-data dist
           sudo chmod -R 755 dist
 
-          echo "Saving PM2 state..."
+          echo "📁 Ensuring uploads permissions..."
+          mkdir -p /var/www/BarberAppointments/backend/uploads
+          sudo chown -R www-data:www-data /var/www/BarberAppointments/backend/uploads
+          sudo chmod -R 755 /var/www/BarberAppointments/backend/uploads
+
+          echo "💾 Saving PM2 state..."
           pm2 save
 
-          echo "Deployment finished. PM2 Status:"
+          echo "🚦 Deployment Complete!"
           pm2 status
 
     - name: Health Check
