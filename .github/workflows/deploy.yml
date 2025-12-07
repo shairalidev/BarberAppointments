@@ -11,7 +11,7 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -20,10 +20,6 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-        cache-dependency-path: |
-          backend/package-lock.json
-          frontend/package-lock.json
 
     - name: Deploy to Server
       uses: appleboy/ssh-action@v1.0.0
@@ -31,77 +27,59 @@ jobs:
         host: ${{ secrets.SERVER_HOST }}
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        port: ${{ secrets.SERVER_PORT || 22 }}
+        port: ${{ secrets.SERVER_PORT }}
+        script_stop: true
         script: |
           set -e
-          
-          echo "🚀 Starting deployment..."
-          
-          # Navigate to project directory
+          echo "Starting BarberPro Deployment Pipeline..."
+
           cd ${{ secrets.DEPLOY_PATH || '/var/www/barberpro' }}
-          
-          # Pull latest code
-          echo "📥 Pulling latest code..."
-          git pull origin main
-          
-          # Backend deployment
-          echo "🔧 Setting up backend..."
+
+          echo "Pulling latest code..."
+          git fetch origin main
+          git reset --hard origin/main
+
+          echo "Installing backend dependencies..."
           cd backend
-          npm ci --production=false
-          
-          # Copy production environment file
-          if [ -f .env.production ]; then
-            cp .env.production .env
+          npm ci
+
+          echo "Ensuring PM2 backend process exists..."
+          if pm2 describe barberpro-backend > /dev/null; then
+            pm2 restart barberpro-backend
+          else
+            NODE_ENV=production pm2 start server.js --name barberpro-backend
           fi
-          
-          # Stop existing PM2 process
-          pm2 stop barberpro-backend || true
-          pm2 delete barberpro-backend || true
-          
-          # Start backend with PM2
-          echo "🚀 Starting backend with PM2..."
-          NODE_ENV=production pm2 start server.js --name barberpro-backend --env production
-          
-          # Frontend deployment
-          echo "🎨 Building frontend..."
+
+          echo "Installing frontend dependencies..."
           cd ../frontend
           npm ci
-          
-          # Build frontend for production
+
+          echo "Building frontend..."
           npm run build
-          
-          # Copy built files to web server directory
-          echo "📦 Deploying frontend build..."
+
+          echo "Deploying frontend to /var/www/html/barberpro..."
           sudo rm -rf /var/www/html/barberpro/*
           sudo cp -r dist/* /var/www/html/barberpro/
-          
-          # Set proper permissions
+
+          echo "Setting permissions..."
           sudo chown -R www-data:www-data /var/www/html/barberpro
           sudo chmod -R 755 /var/www/html/barberpro
-          
-          # Setup uploads directory
-          cd ..
-          mkdir -p backend/uploads
-          sudo chown -R www-data:www-data backend/uploads
-          sudo chmod -R 755 backend/uploads
-          
-          # Save PM2 configuration
+
+          echo "Saving PM2 state..."
           pm2 save
-          
-          # Show PM2 status
-          echo "✅ Deployment complete!"
+
+          echo "Deployment finished. PM2 Status:"
           pm2 status
-          pm2 logs barberpro-backend --lines 20
 
     - name: Health Check
       run: |
-        sleep 10
+        sleep 5
         curl -f ${{ secrets.APP_URL }}/api/health || exit 1
 
     - name: Notify Success
       if: success()
-      run: echo "✅ Deployment successful!"
+      run: echo "Deployment Successful ✔"
 
     - name: Notify Failure
       if: failure()
-      run: echo "❌ Deployment failed!"
+      run: echo "Deployment Failed ❌"
