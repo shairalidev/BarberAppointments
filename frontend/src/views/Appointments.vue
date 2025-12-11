@@ -28,13 +28,7 @@
                   <h5 class="mb-0">Choose services</h5>
                   <small class="text-muted">Select one or more services to continue</small>
                 </div>
-                <div class="d-flex align-items-center gap-2">
-                  <label class="text-muted small mb-0">Barber</label>
-                  <select v-model="selectedBarber" class="form-select form-select-sm" @change="handleAvailabilityRefresh">
-                    <option value="" disabled>Select a barber</option>
-                    <option v-for="barber in barbers" :key="barber._id" :value="barber._id">{{ barber.name }}</option>
-                  </select>
-                </div>
+
               </div>
             </div>
             <div class="card-body">
@@ -85,12 +79,11 @@
                   <h5 class="mb-0">Choose a date and time</h5>
                   <small class="text-muted">Pick a day in the week view and then choose an available slot</small>
                 </div>
-                <div class="d-flex flex-column">
+<div class="d-flex flex-column">
                   <label class="text-muted small mb-1">Barber</label>
-                  <select v-model="selectedBarber" class="form-select" @change="handleAvailabilityRefresh">
-                    <option value="" disabled>Select a barber</option>
-                    <option v-for="barber in barbers" :key="barber._id" :value="barber._id">{{ barber.name }}</option>
-                  </select>
+                  <div class="alert alert-info py-2 px-3 mb-0">
+                    <i class="fas fa-user-tie me-2"></i>{{ selectedBarberName || 'Professional Barber' }}
+                  </div>
                 </div>
               </div>
 
@@ -211,9 +204,9 @@
                 <span class="text-muted">Time</span>
                 <strong>{{ selectedTime || 'Pick a slot' }}</strong>
               </div>
-              <div class="d-flex justify-content-between mb-2">
+<div class="d-flex justify-content-between mb-2">
                 <span class="text-muted">Barber</span>
-                <strong>{{ selectedBarberName || 'Select a barber' }}</strong>
+                <strong>{{ selectedBarberName || 'Professional Barber' }}</strong>
               </div>
               <hr>
               <div>
@@ -288,11 +281,11 @@ export default {
     totalDuration() {
       return this.selectedServiceDetails.reduce((sum, s) => sum + s.duration, 0)
     },
-    canProceedFromServices() {
-      return this.selectedServices.length > 0 && !!this.selectedBarber
+canProceedFromServices() {
+      return this.selectedServices.length > 0
     },
-    canProceedFromSchedule() {
-      return !!(this.selectedDate && this.selectedTime && this.selectedBarber)
+canProceedFromSchedule() {
+      return !!(this.selectedDate && this.selectedTime)
     },
     selectedBarberName() {
       const barber = this.barbers.find(b => b._id === this.selectedBarber)
@@ -367,12 +360,13 @@ export default {
         console.error('Error fetching services:', error)
       }
     },
-    async fetchBarbers() {
+async fetchBarbers() {
       try {
         const response = await axios.get(`${process.env.VUE_APP_API_URL}/barbers/public`)
         this.barbers = response.data
-        if (!this.selectedBarber && this.barbers.length) {
-          this.selectedBarber = this.barbers[0]._id
+        // Auto-select the first available barber (single barber system)
+        if (this.barbers.length > 0) {
+          this.selectedBarber = this.barbers.find(b => b.available)?._id || this.barbers[0]._id
         }
       } catch (error) {
         console.error('Error fetching barbers:', error)
@@ -396,7 +390,7 @@ export default {
       if (this.currentStep < 2) return
       this.selectedTime = ''
 
-      if (!this.canProceedFromServices || !this.selectedDate) {
+if (!this.selectedServices.length || !this.selectedDate || !this.selectedBarber) {
         this.availableTimes = []
         return
       }

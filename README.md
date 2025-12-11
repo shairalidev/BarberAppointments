@@ -1,6 +1,6 @@
-# BarberPro - Professional Barber Appointments System
+# BarberPro - Single Barber Appointment System
 
-A modern, full-stack web application for managing barber appointments with professional UI/UX, admin authentication, and comprehensive management features.
+A modern, full-stack web application designed for individual barber shops with professional UI/UX, admin authentication, and streamlined appointment management.
 
 ## ✨ Features
 
@@ -13,12 +13,12 @@ A modern, full-stack web application for managing barber appointments with profe
 
 ### Admin Features
 - **Secure Authentication**: JWT-based admin login system
-- **Dashboard Overview**: Statistics cards showing today's appointments, available barbers, and pending bookings
+- **Calendar & Booking**: Interactive calendar with quick appointment booking
 - **Appointment Management**: View, filter, and update appointment statuses
 - **Service Management**: Add, edit, and delete services with pricing and duration
-- **Barber Management**: Manage barber profiles and availability
-- **Time Slot Management**: Configure weekly time slots for each barber
-- **Professional UI**: Modern admin panel with sidebar navigation and animations
+- **Time Slot Management**: Configure weekly working hours
+- **Mobile-Optimized**: Responsive design that works perfectly on mobile devices
+- **Quick Actions**: Book appointments directly from the admin panel
 
 ## 🚀 Tech Stack
 - **Frontend**: Vue.js 3, Vue Router, Bootstrap 5, Axios, Font Awesome
@@ -53,9 +53,9 @@ BarberAppointments/
 - npm or yarn
 
 ### Installation
-1. **Run the main setup script**:
+1. **Run the single-barber setup script**:
    ```bash
-   setup.bat
+   setup-single-barber.bat
    ```
 
 2. **Setup admin user** (run after starting the backend):
@@ -94,9 +94,10 @@ VUE_APP_API_URL=http://localhost:5000/api
 ## 🚀 Running the Application
 
 ### Option 1: Use batch files (Recommended)
-1. Start backend: `start-backend.bat`
-2. Start frontend: `start-frontend.bat`
-3. Setup admin: `setup-admin.bat` (first time only)
+1. Setup system: `setup-single-barber.bat` (first time only)
+2. Start backend: `start-backend.bat`
+3. Start frontend: `start-frontend.bat`
+4. Setup admin: `setup-admin.bat` (first time only)
 
 ### Option 2: Manual start
 1. **Start MongoDB service**
@@ -112,8 +113,8 @@ VUE_APP_API_URL=http://localhost:5000/api
    ```
 
 ## 🌐 Access the Application
-- **Customer Interface**: http://localhost:3000
-- **Admin Panel**: http://localhost:3000/admin
+- **Customer Booking**: http://localhost:3000
+- **Admin Dashboard**: http://localhost:3000/admin
 - **Backend API**: http://localhost:5000/api
 
 ## 🔐 Admin Access
@@ -181,15 +182,8 @@ VUE_APP_API_URL=http://localhost:5000/api
 }
 ```
 
-### Adding New Barbers
-```javascript
-// Example barber object
-{
-  "name": "John Smith",
-  "specialties": ["Haircut", "Beard Trim", "Hair Styling"],
-  "available": true
-}
-```
+### Managing Your Barber Profile
+The system is designed for single-barber operation. The primary barber profile is automatically created during setup with full service capabilities.
 
 ## 🛡️ Security Features
 - JWT token-based authentication
@@ -212,8 +206,8 @@ VUE_APP_API_URL=http://localhost:5000/api
 - Payment integration
 - Customer accounts and history
 - Advanced reporting and analytics
-- Multi-location support
 - Online reviews and ratings
+- Mobile app for customers
 
 ## 🤝 Contributing
 1. Fork the repository

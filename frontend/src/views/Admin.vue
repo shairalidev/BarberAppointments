@@ -6,9 +6,9 @@
         <div class="row align-items-center">
           <div class="col">
             <h2 class="mb-0 fw-bold text-primary">
-              <i class="fas fa-shield-alt me-2"></i>Admin Dashboard
+              <i class="fas fa-cut me-2"></i>BarberPro Dashboard
             </h2>
-            <p class="text-muted mb-0">Manage your barber shop operations</p>
+            <p class="text-muted mb-0">Manage appointments & bookings</p>
           </div>
           <div class="col-auto">
             <div class="dropdown">
@@ -36,231 +36,143 @@
       </div>
     </div>
 
-    <div class="container-fluid">
-      <div class="row">
-        <!-- Enhanced Sidebar -->
-        <div class="col-md-3 mb-4">
-          <div class="card border-0 shadow-sm">
-            <div class="card-header bg-gradient-primary text-white border-0">
-              <h5 class="mb-0 fw-semibold">
-                <i class="fas fa-cog me-2"></i>Control Panel
-              </h5>
-            </div>
-            <div class="list-group list-group-flush">
-              <button 
-                @click="activeTab = 'dashboard'" 
-                :class="['list-group-item', 'list-group-item-action', 'border-0', 'py-3', activeTab === 'dashboard' ? 'active' : '']"
-              >
-                <i class="fas fa-chart-line me-3 text-primary"></i>
-                <span class="fw-medium">Dashboard</span>
-              </button>
-              <button 
-                @click="activeTab = 'calendar'" 
-                :class="['list-group-item', 'list-group-item-action', 'border-0', 'py-3', activeTab === 'calendar' ? 'active' : '']"
-              >
-                <i class="fas fa-calendar-alt me-3 text-primary"></i>
-                <span class="fw-medium">Calendar View</span>
-              </button>
-              <button 
-                @click="activeTab = 'requests'" 
-                :class="['list-group-item', 'list-group-item-action', 'border-0', 'py-3', activeTab === 'requests' ? 'active' : '']"
-              >
-                <i class="fas fa-inbox me-3 text-primary"></i>
-                <span class="fw-medium">Booking Requests</span>
-                <span v-if="pendingAppointments.length" class="badge bg-danger ms-2">{{ pendingAppointments.length }}</span>
-              </button>
-              <button 
-                @click="activeTab = 'services'" 
-                :class="['list-group-item', 'list-group-item-action', 'border-0', 'py-3', activeTab === 'services' ? 'active' : '']"
-              >
-                <i class="fas fa-cut me-3 text-primary"></i>
-                <span class="fw-medium">Services</span>
-              </button>
-              <button 
-                @click="activeTab = 'barbers'" 
-                :class="['list-group-item', 'list-group-item-action', 'border-0', 'py-3', activeTab === 'barbers' ? 'active' : '']"
-              >
-                <i class="fas fa-user-tie me-3 text-primary"></i>
-                <span class="fw-medium">Barbers</span>
-              </button>
-              <button 
-                @click="activeTab = 'timeslots'" 
-                :class="['list-group-item', 'list-group-item-action', 'border-0', 'py-3', activeTab === 'timeslots' ? 'active' : '']"
-              >
-                <i class="fas fa-clock me-3 text-primary"></i>
-                <span class="fw-medium">Manage Slots</span>
-              </button>
-              <button 
-                @click="activeTab = 'restrictions'" 
-                :class="['list-group-item', 'list-group-item-action', 'border-0', 'py-3', activeTab === 'restrictions' ? 'active' : '']"
-              >
-                <i class="fas fa-ban me-3 text-primary"></i>
-                <span class="fw-medium">Date Restrictions</span>
-              </button>
-            </div>
-          </div>
-        </div>
+    <!-- Navigation Tabs -->
+    <div class="container-fluid mb-4">
+      <div class="nav-tabs-wrapper">
+        <ul class="nav nav-tabs nav-fill border-0">
+          <li class="nav-item">
+            <button 
+              @click="activeTab = 'calendar'" 
+              :class="['nav-link', 'fw-medium', activeTab === 'calendar' ? 'active' : '']"
+            >
+              <i class="fas fa-calendar-alt me-2"></i>Calendar & Booking
+            </button>
+          </li>
+          <li class="nav-item">
+            <button 
+              @click="activeTab = 'requests'" 
+              :class="['nav-link', 'fw-medium', 'position-relative', activeTab === 'requests' ? 'active' : '']"
+            >
+              <i class="fas fa-inbox me-2"></i>Booking Requests
+              <span v-if="pendingAppointments.length" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ pendingAppointments.length }}</span>
+            </button>
+          </li>
+          <li class="nav-item">
+            <button 
+              @click="activeTab = 'services'" 
+              :class="['nav-link', 'fw-medium', activeTab === 'services' ? 'active' : '']"
+            >
+              <i class="fas fa-cut me-2"></i>Services
+            </button>
+          </li>
+          <li class="nav-item">
+            <button 
+              @click="activeTab = 'timeslots'" 
+              :class="['nav-link', 'fw-medium', activeTab === 'timeslots' ? 'active' : '']"
+            >
+              <i class="fas fa-clock me-2"></i>Time Slots
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
 
-        <!-- Main Content -->
-        <div class="col-md-9">
-          <!-- Dashboard Tab -->
-          <div v-if="activeTab === 'dashboard'" class="dashboard-content">
-            <div class="row g-4 mb-4">
-              <div class="col-md-3">
-                <div class="stat-card bg-primary text-white">
-                  <div class="stat-icon">
-                    <i class="fas fa-calendar-check"></i>
+    <div class="container-fluid">
+
+          <!-- Calendar & Booking Tab -->
+          <div v-if="activeTab === 'calendar'" class="row g-4">
+            <!-- Calendar Section -->
+            <div class="col-lg-8">
+              <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                  <div class="d-flex justify-content-between align-items-center flex-wrap">
+                    <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Calendar</h5>
+                    <div class="d-flex gap-2">
+                      <button @click="showBookingModal = true" class="btn btn-sm btn-success">
+                        <i class="fas fa-plus me-1"></i>Book Appointment
+                      </button>
+                      <button @click="changeMonth(-1)" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-chevron-left"></i>
+                      </button>
+                      <button @click="goToToday" class="btn btn-sm btn-primary">Today</button>
+                      <button @click="changeMonth(1)" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-chevron-right"></i>
+                      </button>
+                    </div>
                   </div>
-                  <div class="stat-content">
-                    <h3 class="stat-number">{{ todayAppointments.length }}</h3>
-                    <p class="stat-label">Today's Appointments</p>
-                  </div>
+                  <h6 class="text-center mt-3 mb-0">{{ currentMonthYear }}</h6>
                 </div>
-              </div>
-              <div class="col-md-3">
-                <div class="stat-card bg-success text-white">
-                  <div class="stat-icon">
-                    <i class="fas fa-user-tie"></i>
-                  </div>
-                  <div class="stat-content">
-                    <h3 class="stat-number">{{ availableBarbers.length }}</h3>
-                    <p class="stat-label">Available Barbers</p>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-3">
-                <div class="stat-card bg-info text-white">
-                  <div class="stat-icon">
-                    <i class="fas fa-cut"></i>
-                  </div>
-                  <div class="stat-content">
-                    <h3 class="stat-number">{{ services.length }}</h3>
-                    <p class="stat-label">Active Services</p>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-3">
-                <div class="stat-card bg-warning text-white">
-                  <div class="stat-icon">
-                    <i class="fas fa-clock"></i>
-                  </div>
-                  <div class="stat-content">
-                    <h3 class="stat-number">{{ pendingAppointments.length }}</h3>
-                    <p class="stat-label">Pending Bookings</p>
+                <div class="card-body p-0">
+                  <div class="calendar-grid">
+                    <div class="calendar-header" v-for="day in ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']" :key="day">
+                      {{ day }}
+                    </div>
+                    <div 
+                      v-for="day in calendarDays" 
+                      :key="day.date"
+                      @click="selectCalendarDate(day)"
+                      :class="['calendar-day', {
+                        'other-month': !day.isCurrentMonth,
+                        'today': day.isToday,
+                        'selected': day.date === selectedCalendarDate,
+                        'has-bookings': day.hasBookings
+                      }]"
+                    >
+                      <span class="day-number">{{ day.dayNumber }}</span>
+                      <span v-if="day.bookingCount" class="booking-badge">{{ day.bookingCount }}</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
             
-            <div class="row g-4">
-              <div class="col-md-8">
-                <div class="card border-0 shadow-sm">
-                  <div class="card-header bg-white border-0 py-3">
-                    <h5 class="mb-0 fw-semibold">Recent Appointments</h5>
-                  </div>
-                  <div class="card-body">
-                    <div class="table-responsive">
-                      <table class="table table-hover">
-                        <thead class="table-light">
-                          <tr>
-                            <th>Customer</th>
-                            <th>Service</th>
-                            <th>Time</th>
-                            <th>Status</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr v-for="appointment in recentAppointments" :key="appointment._id">
-                            <td class="fw-medium">{{ appointment.customerName }}</td>
-                            <td>{{ appointment.services?.[0]?.name || 'N/A' }}</td>
-                            <td>{{ appointment.time }}</td>
-                            <td>
-                              <span :class="getStatusBadgeClass(appointment.status)">{{ appointment.status }}</span>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
+            <!-- Appointments List -->
+            <div class="col-lg-4">
+              <div v-if="selectedCalendarDate" class="card border-0 shadow-sm">
+                <div class="card-header bg-gradient-primary text-white">
+                  <h6 class="mb-0"><i class="fas fa-calendar-day me-2"></i>{{ formatSelectedDate }}</h6>
+                  <small class="opacity-75">{{ selectedDayAppointments.length }} appointment(s)</small>
                 </div>
-              </div>
-              <div class="col-md-4">
-                <div class="card border-0 shadow-sm">
-                  <div class="card-header bg-white border-0 py-3">
-                    <h5 class="mb-0 fw-semibold">Quick Actions</h5>
-                  </div>
-                  <div class="card-body">
-                    <div class="d-grid gap-2">
-                      <button @click="activeTab = 'services'; showServiceForm = true" class="btn btn-outline-primary">
-                        <i class="fas fa-plus me-2"></i>Add Service
-                      </button>
-                      <button @click="activeTab = 'barbers'; showBarberForm = true" class="btn btn-outline-success">
-                        <i class="fas fa-user-plus me-2"></i>Add Barber
-                      </button>
-                      <button @click="activeTab = 'calendar'" class="btn btn-outline-info">
-                        <i class="fas fa-calendar me-2"></i>View Calendar
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Calendar Tab -->
-          <div v-if="activeTab === 'calendar'" class="card border-0 shadow-sm">
-            <div class="card-header bg-white py-3">
-              <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Calendar View</h5>
-                <div class="d-flex gap-2">
-                  <button @click="changeMonth(-1)" class="btn btn-sm btn-outline-primary">
-                    <i class="fas fa-chevron-left"></i>
-                  </button>
-                  <button @click="goToToday" class="btn btn-sm btn-primary">Today</button>
-                  <button @click="changeMonth(1)" class="btn btn-sm btn-outline-primary">
-                    <i class="fas fa-chevron-right"></i>
-                  </button>
-                </div>
-              </div>
-              <h6 class="text-center mt-3 mb-0">{{ currentMonthYear }}</h6>
-            </div>
-            <div class="card-body p-0">
-              <div class="calendar-grid">
-                <div class="calendar-header" v-for="day in ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']" :key="day">
-                  {{ day }}
-                </div>
-                <div 
-                  v-for="day in calendarDays" 
-                  :key="day.date"
-                  @click="selectCalendarDate(day)"
-                  :class="['calendar-day', {
-                    'other-month': !day.isCurrentMonth,
-                    'today': day.isToday,
-                    'selected': day.date === selectedCalendarDate,
-                    'has-bookings': day.hasBookings
-                  }]"
-                >
-                  <span class="day-number">{{ day.dayNumber }}</span>
-                  <span v-if="day.bookingCount" class="booking-badge">{{ day.bookingCount }}</span>
-                </div>
-              </div>
-              
-              <!-- Selected Day Appointments -->
-              <div v-if="selectedCalendarDate" class="p-4 border-top">
-                <h6 class="mb-3">Appointments for {{ formatSelectedDate }}</h6>
-                <div v-if="selectedDayAppointments.length" class="list-group">
-                  <div v-for="apt in selectedDayAppointments" :key="apt._id" class="list-group-item">
-                    <div class="d-flex justify-content-between align-items-start">
-                      <div>
-                        <h6 class="mb-1">{{ apt.time }} - {{ apt.customerName }}</h6>
-                        <p class="mb-1 small text-muted">{{ apt.services?.map(s => s.name).join(', ') }}</p>
-                        <p class="mb-0 small"><i class="fas fa-user-tie me-1"></i>{{ apt.barberId?.name }}</p>
+                <div class="card-body p-0">
+                  <div v-if="selectedDayAppointments.length" class="appointments-list">
+                    <div v-for="apt in selectedDayAppointments" :key="apt._id" class="appointment-card">
+                      <div class="appointment-time">
+                        <i class="fas fa-clock text-primary"></i>
+                        <span class="fw-bold">{{ apt.time }}</span>
                       </div>
-                      <span :class="getStatusBadgeClass(apt.status)">{{ apt.status }}</span>
+                      <div class="appointment-details">
+                        <h6 class="customer-name mb-1">
+                          <i class="fas fa-user me-2 text-muted"></i>{{ apt.customerName }}
+                        </h6>
+                        <p class="services mb-1">
+                          <i class="fas fa-cut me-2 text-muted"></i>{{ apt.services?.map(s => s.name).join(', ') }}
+                        </p>
+                        <div class="appointment-meta">
+                          <span class="price"><i class="fas fa-dollar-sign me-1"></i>${{ apt.totalPrice }}</span>
+                          <span class="duration"><i class="fas fa-hourglass-half me-1"></i>{{ apt.totalDuration }}min</span>
+                        </div>
+                        <div v-if="apt.customerPhone" class="contact-info">
+                          <small class="text-muted"><i class="fas fa-phone me-1"></i>{{ apt.customerPhone }}</small>
+                        </div>
+                      </div>
+                      <div class="appointment-status">
+                        <span :class="getStatusBadgeClass(apt.status)">{{ apt.status }}</span>
+                        <div class="appointment-actions mt-2">
+                          <button v-if="apt.status === 'pending'" @click="updateAppointmentStatus(apt, 'confirmed')" class="btn btn-sm btn-success">
+                            <i class="fas fa-check"></i>
+                          </button>
+                          <button v-if="apt.status === 'confirmed'" @click="updateAppointmentStatus(apt, 'completed')" class="btn btn-sm btn-primary">
+                            <i class="fas fa-check-double"></i>
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
+                  <div v-else class="empty-state">
+                    <i class="fas fa-calendar-times fa-2x text-muted mb-2"></i>
+                    <p class="text-muted mb-0">No appointments scheduled</p>
+                  </div>
                 </div>
-                <p v-else class="text-muted mb-0">No appointments for this day</p>
               </div>
             </div>
           </div>
@@ -379,162 +291,80 @@
           </div>
 
           <!-- Time Slots Tab -->
-          <div v-if="activeTab === 'timeslots'" class="card">
-            <div class="card-header">
-              <h5><i class="fas fa-clock me-2"></i>Weekly Time Slots</h5>
+          <div v-if="activeTab === 'timeslots'" class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3">
+              <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Weekly Time Slots</h5>
+              <p class="text-muted mb-0 small">Manage your working hours for each day</p>
             </div>
             <div class="card-body">
-              <div class="row mb-3">
-                <div class="col-md-6">
-                  <select v-model="selectedBarberForSlots" class="form-select">
-                    <option value="">Select Barber</option>
-                    <option v-for="barber in barbers" :key="barber._id" :value="barber._id">
-                      {{ barber.name }}
-                    </option>
-                  </select>
-                </div>
+<div v-if="primaryBarber" class="alert alert-info d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-info-circle me-2"></i>Managing time slots for: <strong>{{ primaryBarber.name }}</strong></span>
+                <small class="text-muted">Total slots: {{ timeSlots.length }}</small>
               </div>
               
-              <div v-if="selectedBarberForSlots" class="row">
-                <div v-for="(day, index) in daysOfWeek" :key="index" class="col-md-6 mb-4">
-                  <div class="card">
-                    <div class="card-header">
-                      <h6>{{ day }}</h6>
+              <div v-if="primaryBarber" class="row g-4">
+                <div v-for="(day, index) in daysOfWeek" :key="index" class="col-lg-6 col-md-12">
+                  <div class="card border">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                      <h6 class="mb-0">{{ day }}</h6>
+                      <small class="text-muted">Day {{ index }}</small>
                     </div>
                     <div class="card-body">
-                      <div class="mb-2">
-                        <div class="row">
-                          <div class="col-5">
-                            <input v-model="newSlot[index].startTime" type="time" class="form-control form-control-sm">
+                      <div class="mb-3">
+                        <label class="form-label small">Add Time Slot</label>
+                        <div class="row g-2">
+                          <div class="col-4">
+                            <input v-model="newSlot[index].startTime" type="time" class="form-control form-control-sm" placeholder="Start">
                           </div>
-                          <div class="col-5">
-                            <input v-model="newSlot[index].endTime" type="time" class="form-control form-control-sm">
+                          <div class="col-4">
+                            <input v-model="newSlot[index].endTime" type="time" class="form-control form-control-sm" placeholder="End">
                           </div>
-                          <div class="col-2">
-                            <button @click="addTimeSlot(index)" class="btn btn-sm btn-primary">+</button>
+                          <div class="col-4">
+                            <button @click="addTimeSlot(index)" class="btn btn-sm btn-success w-100">
+                              <i class="fas fa-plus"></i>
+                            </button>
                           </div>
                         </div>
                       </div>
-                      <div v-for="slot in getTimeSlotsForDay(index)" :key="slot._id" class="d-flex justify-content-between align-items-center mb-1">
-                        <span>{{ slot.startTime }} - {{ slot.endTime }}</span>
-                        <button @click="deleteTimeSlot(slot._id)" class="btn btn-sm btn-outline-danger">×</button>
+                      <div class="time-slots-list">
+                        <div v-for="slot in getTimeSlotsForDay(index)" :key="slot._id" class="d-flex justify-content-between align-items-center p-2 bg-light rounded mb-2">
+                          <span class="fw-medium">{{ slot.startTime }} - {{ slot.endTime }}</span>
+                          <button @click="deleteTimeSlot(slot._id)" class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-trash"></i>
+                          </button>
+                        </div>
+                        <div v-if="!getTimeSlotsForDay(index).length" class="text-muted text-center py-2">
+                          <small>No time slots for {{ day }}</small>
+                          <br><small class="text-info">Slots found: {{ timeSlots.filter(s => s.dayOfWeek === index).length }}</small>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Date Restrictions Tab -->
-          <div v-if="activeTab === 'restrictions'" class="card border-0 shadow-sm">
-            <div class="card-header bg-white py-3">
-              <h5 class="mb-0"><i class="fas fa-ban me-2"></i>Date Restrictions</h5>
-            </div>
-            <div class="card-body">
-              <div class="card mb-4">
-                <div class="card-body">
-                  <h6 class="mb-3">Block Specific Date</h6>
-                  <div class="row g-3">
-                    <div class="col-md-4">
-                      <input v-model="restrictionForm.date" type="date" class="form-control" required>
-                    </div>
-                    <div class="col-md-6">
-                      <input v-model="restrictionForm.reason" type="text" class="form-control" placeholder="Reason (e.g., Holiday, Closed)" required>
-                    </div>
-                    <div class="col-md-2">
-                      <button @click="addRestriction" class="btn btn-danger w-100">
-                        <i class="fas fa-ban me-1"></i>Block
-                      </button>
                     </div>
                   </div>
                 </div>
               </div>
               
-              <h6 class="mb-3">Blocked Dates</h6>
-              <div v-if="restrictions.length" class="list-group">
-                <div v-for="restriction in restrictions" :key="restriction._id" class="list-group-item d-flex justify-content-between align-items-center">
-                  <div>
-                    <strong>{{ formatDate(restriction.date) }}</strong>
-                    <span class="text-muted ms-2">- {{ restriction.reason }}</span>
+              <!-- Debug Info -->
+              <div v-if="primaryBarber" class="mt-4">
+                <div class="card border-warning">
+                  <div class="card-header bg-warning bg-opacity-10">
+                    <h6 class="mb-0">Debug Info</h6>
                   </div>
-                  <button @click="removeRestriction(restriction._id)" class="btn btn-sm btn-outline-danger">
-                    <i class="fas fa-trash"></i>
-                  </button>
+                  <div class="card-body">
+                    <p><strong>Primary Barber ID:</strong> {{ primaryBarber._id }}</p>
+                    <p><strong>Total Time Slots:</strong> {{ timeSlots.length }}</p>
+                    <p><strong>Time Slots Data:</strong></p>
+                    <pre class="small">{{ JSON.stringify(timeSlots, null, 2) }}</pre>
+                  </div>
                 </div>
               </div>
-              <p v-else class="text-muted">No date restrictions set</p>
+              
+              <div v-else class="text-center py-5">
+                <i class="fas fa-user-times fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No barber found. Please add a barber first.</p>
+              </div>
             </div>
           </div>
 
-          <!-- Barbers Tab -->
-          <div v-if="activeTab === 'barbers'" class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <h5><i class="fas fa-user-tie me-2"></i>Barbers Management</h5>
-              <button @click="showBarberForm = true" class="btn btn-primary btn-sm">
-                <i class="fas fa-plus me-1"></i>Add Barber
-              </button>
-            </div>
-            <div class="card-body">
-              <!-- Barber Form -->
-              <div v-if="showBarberForm" class="card mb-4">
-                <div class="card-body">
-                  <form @submit.prevent="saveBarber">
-                    <div class="row">
-                      <div class="col-md-6">
-                        <div class="mb-3">
-                          <label class="form-label">Barber Name</label>
-                          <input v-model="barberForm.name" type="text" class="form-control" required>
-                        </div>
-                      </div>
-                      <div class="col-md-6">
-                        <div class="mb-3">
-                          <label class="form-label">Specialties (comma separated)</label>
-                          <input v-model="barberSpecialties" type="text" class="form-control" placeholder="Haircut, Beard Trim">
-                        </div>
-                      </div>
-                    </div>
-                    <div class="d-flex gap-2">
-                      <button type="submit" class="btn btn-success">Save Barber</button>
-                      <button @click="cancelBarberForm" type="button" class="btn btn-secondary">Cancel</button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-
-              <!-- Barbers List -->
-              <div class="table-responsive">
-                <table class="table table-striped">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Specialties</th>
-                      <th>Status</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="barber in barbers" :key="barber._id">
-                      <td>{{ barber.name }}</td>
-                      <td>{{ barber.specialties?.join(', ') }}</td>
-                      <td>
-                        <span :class="barber.available ? 'badge bg-success' : 'badge bg-danger'">
-                          {{ barber.available ? 'Available' : 'Unavailable' }}
-                        </span>
-                      </td>
-                      <td>
-                        <button @click="toggleBarberAvailability(barber)" class="btn btn-sm btn-outline-primary me-1">
-                          {{ barber.available ? 'Disable' : 'Enable' }}
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- Response Modal -->
@@ -565,6 +395,74 @@
         </div>
       </div>
     </div>
+
+    <!-- Booking Modal -->
+    <div v-if="showBookingModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" @click.self="showBookingModal = false">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-gradient-primary text-white">
+            <h5 class="modal-title"><i class="fas fa-plus me-2"></i>Book New Appointment</h5>
+            <button @click="showBookingModal = false" class="btn-close btn-close-white"></button>
+          </div>
+          <div class="modal-body">
+            <form @submit.prevent="quickBookAppointment">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Date</label>
+                  <input v-model="bookingForm.date" type="date" class="form-control" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Service</label>
+                  <select v-model="bookingForm.serviceId" @change="updateBookingPrice" class="form-select" required>
+                    <option value="">Select Service</option>
+                    <option v-for="service in services" :key="service._id" :value="service._id">
+                      {{ service.name }} - ${{ service.price }}
+                    </option>
+                  </select>
+                </div>
+                <div class="col-12" v-if="availableSlots.length">
+                  <label class="form-label">Available Times</label>
+                  <div class="time-slots-grid">
+                    <button 
+                      v-for="slot in availableSlots" 
+                      :key="slot"
+                      type="button"
+                      @click="bookingForm.time = slot"
+                      :class="['btn', 'btn-sm', bookingForm.time === slot ? 'btn-primary' : 'btn-outline-primary']"
+                    >
+                      {{ slot }}
+                    </button>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Customer Name</label>
+                  <input v-model="bookingForm.customerName" type="text" class="form-control" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Phone</label>
+                  <input v-model="bookingForm.customerPhone" type="tel" class="form-control" required>
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Email (Optional)</label>
+                  <input v-model="bookingForm.customerEmail" type="email" class="form-control">
+                </div>
+                <div class="col-12" v-if="bookingForm.totalPrice">
+                  <div class="alert alert-success">
+                    <strong><i class="fas fa-dollar-sign me-1"></i>Total: ${{ bookingForm.totalPrice }}</strong>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button @click="showBookingModal = false" class="btn btn-secondary">Cancel</button>
+            <button @click="quickBookAppointment" class="btn btn-success" :disabled="!bookingForm.time">
+              <i class="fas fa-check me-2"></i>Book Appointment
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -582,21 +480,14 @@ export default {
       services: [],
       timeSlots: [],
       selectedDate: new Date().toISOString().split('T')[0],
-      selectedBarber: '',
       selectedBarberForSlots: '',
       showServiceForm: false,
-      showBarberForm: false,
       serviceForm: {
         name: '',
         duration: '',
         price: '',
         description: ''
       },
-      barberForm: {
-        name: '',
-        available: true
-      },
-      barberSpecialties: '',
       daysOfWeek: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
       newSlot: Array(7).fill().map(() => ({ startTime: '', endTime: '' })),
       currentMonth: new Date().getMonth(),
@@ -608,11 +499,18 @@ export default {
         status: '',
         message: ''
       },
-      restrictions: [],
-      restrictionForm: {
-        date: '',
-        reason: ''
-      }
+      bookingForm: {
+        date: new Date().toISOString().split('T')[0],
+        serviceId: '',
+        time: '',
+        customerName: '',
+        customerPhone: '',
+        customerEmail: '',
+        totalPrice: 0
+      },
+availableSlots: [],
+      primaryBarber: null,
+      showBookingModal: false
     }
   },
   computed: {
@@ -620,30 +518,8 @@ export default {
       const user = localStorage.getItem('adminUser')
       return user ? JSON.parse(user) : null
     },
-    filteredAppointments() {
-      return this.appointments.filter(appointment => {
-        const appointmentDate = new Date(appointment.date).toISOString().split('T')[0]
-        const dateMatch = appointmentDate === this.selectedDate
-        const barberId = appointment.barberId?._id || appointment.barberId
-        const barberMatch = !this.selectedBarber || barberId === this.selectedBarber
-        return dateMatch && barberMatch
-      })
-    },
-    todayAppointments() {
-      const today = new Date().toISOString().split('T')[0]
-      return this.appointments.filter(appointment => {
-        const appointmentDate = new Date(appointment.date).toISOString().split('T')[0]
-        return appointmentDate === today
-      })
-    },
-    availableBarbers() {
-      return this.barbers.filter(barber => barber.available)
-    },
     pendingAppointments() {
       return this.appointments.filter(appointment => appointment.status === 'pending')
-    },
-    recentAppointments() {
-      return this.appointments.slice(0, 5)
     },
     currentMonthYear() {
       const date = new Date(this.currentYear, this.currentMonth)
@@ -691,6 +567,15 @@ export default {
   },
   async mounted() {
     await this.fetchData()
+    this.watchBookingFormChanges()
+  },
+  watch: {
+    'bookingForm.date'() {
+      this.fetchAvailableSlots()
+    },
+    'bookingForm.serviceId'() {
+      this.fetchAvailableSlots()
+    }
   },
   methods: {
     async fetchData() {
@@ -698,10 +583,16 @@ export default {
         this.fetchAppointments(),
         this.fetchBarbers(),
         this.fetchServices(),
-        this.fetchTimeSlots(),
-        this.fetchRestrictions()
+        this.fetchTimeSlots()
       ])
       this.selectedCalendarDate = new Date().toISOString().split('T')[0]
+      this.setPrimaryBarber()
+    },
+    setPrimaryBarber() {
+      if (this.barbers.length > 0) {
+        this.primaryBarber = this.barbers.find(b => b.available) || this.barbers[0]
+        this.selectedBarberForSlots = this.primaryBarber._id
+      }
     },
     async fetchAppointments() {
       try {
@@ -735,11 +626,12 @@ export default {
         console.error('Error fetching time slots:', error)
       }
     },
-    async updateAppointmentStatus(appointment) {
+async updateAppointmentStatus(appointment, newStatus) {
       try {
         await axios.put(`${process.env.VUE_APP_API_URL}/appointments/${appointment._id}`, {
-          status: appointment.status
+          status: newStatus
         })
+        await this.fetchAppointments()
       } catch (error) {
         console.error('Error updating appointment:', error)
       }
@@ -775,63 +667,116 @@ export default {
       this.showServiceForm = false
       this.serviceForm = { name: '', duration: '', price: '', description: '' }
     },
-    async saveBarber() {
+async quickBookAppointment() {
       try {
-        const barberData = {
-          ...this.barberForm,
-          specialties: this.barberSpecialties.split(',').map(s => s.trim()).filter(s => s)
+        if (!this.primaryBarber) {
+          alert('No barber available')
+          return
         }
-        await axios.post(`${process.env.VUE_APP_API_URL}/barbers`, barberData)
-        await this.fetchBarbers()
-        this.cancelBarberForm()
+        
+        const appointmentData = {
+          customerName: this.bookingForm.customerName,
+          customerPhone: this.bookingForm.customerPhone,
+          customerEmail: this.bookingForm.customerEmail,
+          barberId: this.primaryBarber._id,
+          services: [this.bookingForm.serviceId],
+          date: this.bookingForm.date,
+          time: this.bookingForm.time,
+          status: 'confirmed'
+        }
+        
+        await axios.post(`${process.env.VUE_APP_API_URL}/appointments`, appointmentData)
+        await this.fetchAppointments()
+        this.resetBookingForm()
+        this.showBookingModal = false
+        alert('Appointment booked successfully!')
       } catch (error) {
-        console.error('Error saving barber:', error)
+        console.error('Error booking appointment:', error)
+        alert('Error booking appointment: ' + (error.response?.data?.message || error.message))
       }
     },
-    cancelBarberForm() {
-      this.showBarberForm = false
-      this.barberForm = { name: '', available: true }
-      this.barberSpecialties = ''
+    resetBookingForm() {
+      this.bookingForm = {
+        date: new Date().toISOString().split('T')[0],
+        serviceId: '',
+        time: '',
+        customerName: '',
+        customerPhone: '',
+        customerEmail: '',
+        totalPrice: 0
+      }
+      this.availableSlots = []
     },
-    async toggleBarberAvailability(barber) {
+    updateBookingPrice() {
+      const service = this.services.find(s => s._id === this.bookingForm.serviceId)
+      this.bookingForm.totalPrice = service ? service.price : 0
+    },
+    async fetchAvailableSlots() {
+      if (!this.bookingForm.date || !this.bookingForm.serviceId || !this.primaryBarber) {
+        this.availableSlots = []
+        return
+      }
+      
       try {
-        await axios.put(`${process.env.VUE_APP_API_URL}/barbers/${barber._id}`, {
-          available: !barber.available
+        const service = this.services.find(s => s._id === this.bookingForm.serviceId)
+        if (!service) return
+        
+        const response = await axios.get(`${process.env.VUE_APP_API_URL}/appointments/availability`, {
+          params: {
+            barberId: this.primaryBarber._id,
+            date: this.bookingForm.date,
+            duration: service.duration
+          }
         })
-        await this.fetchBarbers()
+        
+        this.availableSlots = response.data.availableTimes || []
       } catch (error) {
-        console.error('Error updating barber:', error)
+        console.error('Error fetching available slots:', error)
+        this.availableSlots = []
       }
     },
-    async addTimeSlot(dayIndex) {
-      if (!this.selectedBarberForSlots || !this.newSlot[dayIndex].startTime || !this.newSlot[dayIndex].endTime) {
+    watchBookingFormChanges() {
+      this.$watch('bookingForm.serviceId', () => {
+        this.updateBookingPrice()
+        this.fetchAvailableSlots()
+      })
+    },
+async addTimeSlot(dayIndex) {
+      if (!this.primaryBarber || !this.newSlot[dayIndex].startTime || !this.newSlot[dayIndex].endTime) {
+        alert('Please fill in both start and end times')
         return
       }
       try {
         await axios.post(`${process.env.VUE_APP_API_URL}/timeslots`, {
-          barberId: this.selectedBarberForSlots,
+          barberId: this.primaryBarber._id,
           dayOfWeek: dayIndex,
           startTime: this.newSlot[dayIndex].startTime,
           endTime: this.newSlot[dayIndex].endTime
         })
         await this.fetchTimeSlots()
         this.newSlot[dayIndex] = { startTime: '', endTime: '' }
+        alert('Time slot added successfully!')
       } catch (error) {
         console.error('Error adding time slot:', error)
+        alert('Error adding time slot: ' + (error.response?.data?.message || error.message))
       }
     },
     async deleteTimeSlot(id) {
+      if (!confirm('Are you sure you want to delete this time slot?')) return
       try {
         await axios.delete(`${process.env.VUE_APP_API_URL}/timeslots/${id}`)
         await this.fetchTimeSlots()
+        alert('Time slot deleted successfully!')
       } catch (error) {
         console.error('Error deleting time slot:', error)
+        alert('Error deleting time slot: ' + (error.response?.data?.message || error.message))
       }
     },
-    getTimeSlotsForDay(dayIndex) {
+getTimeSlotsForDay(dayIndex) {
+      if (!this.primaryBarber) return []
       return this.timeSlots.filter(slot => {
         const slotBarberId = slot.barberId?._id || slot.barberId
-        return slot.dayOfWeek === dayIndex && slotBarberId === this.selectedBarberForSlots
+        return slot.dayOfWeek === dayIndex && slotBarberId === this.primaryBarber._id
       })
     },
     getStatusBadgeClass(status) {
@@ -916,34 +861,7 @@ export default {
         alert('Error updating appointment')
       }
     },
-    async addRestriction() {
-      if (!this.restrictionForm.date || !this.restrictionForm.reason) return
-      
-      try {
-        await axios.post(`${process.env.VUE_APP_API_URL}/restrictions`, this.restrictionForm)
-        await this.fetchRestrictions()
-        this.restrictionForm = { date: '', reason: '' }
-      } catch (error) {
-        console.error('Error adding restriction:', error)
-      }
-    },
-    async removeRestriction(id) {
-      try {
-        await axios.delete(`${process.env.VUE_APP_API_URL}/restrictions/${id}`)
-        await this.fetchRestrictions()
-      } catch (error) {
-        console.error('Error removing restriction:', error)
-      }
-    },
-    async fetchRestrictions() {
-      try {
-        const response = await axios.get(`${process.env.VUE_APP_API_URL}/restrictions`)
-        this.restrictions = response.data
-      } catch (error) {
-        console.error('Error fetching restrictions:', error)
-        this.restrictions = []
-      }
-    }
+
   }
 }
 </script>
@@ -1095,6 +1013,33 @@ export default {
   background-color: rgba(239, 68, 68, 0.1);
 }
 
+/* Navigation Tabs */
+.nav-tabs-wrapper {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 0.5rem;
+}
+
+.nav-tabs .nav-link {
+  border: none;
+  border-radius: 8px;
+  color: #6b7280;
+  transition: all 0.2s ease;
+  padding: 0.75rem 1rem;
+}
+
+.nav-tabs .nav-link:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.nav-tabs .nav-link.active {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
 .dropdown-header {
   font-size: 0.75rem;
   text-transform: uppercase;
@@ -1117,11 +1062,13 @@ export default {
   gap: 1px;
   background: #e5e7eb;
   border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .calendar-header {
   background: #f3f4f6;
-  padding: 12px;
+  padding: 12px 8px;
   text-align: center;
   font-weight: 600;
   font-size: 0.875rem;
@@ -1130,15 +1077,19 @@ export default {
 
 .calendar-day {
   background: white;
-  padding: 12px;
-  min-height: 80px;
+  padding: 8px;
+  min-height: 70px;
   cursor: pointer;
   position: relative;
   transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 .calendar-day:hover {
   background: #f9fafb;
+  transform: scale(1.02);
 }
 
 .calendar-day.other-month {
@@ -1154,6 +1105,7 @@ export default {
 .calendar-day.selected {
   background: #dbeafe;
   border: 2px solid #2563eb;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
 .calendar-day.has-bookings {
@@ -1167,33 +1119,209 @@ export default {
 
 .day-number {
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
 }
 
 .booking-badge {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 6px;
+  right: 6px;
   background: #10b981;
   color: white;
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 600;
 }
 
+/* Time Slots Grid */
+.time-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.time-slots-grid .btn {
+  font-size: 0.8rem;
+  padding: 6px 8px;
+}
+
+/* Appointment Cards */
+.appointments-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.appointment-card {
+  display: flex;
+  align-items: flex-start;
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color 0.2s;
+}
+
+.appointment-card:hover {
+  background-color: #f8fafc;
+}
+
+.appointment-card:last-child {
+  border-bottom: none;
+}
+
+.appointment-time {
+  min-width: 80px;
+  text-align: center;
+  margin-right: 1rem;
+}
+
+.appointment-time i {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.appointment-details {
+  flex: 1;
+}
+
+.customer-name {
+  color: #1f2937;
+  font-size: 1rem;
+}
+
+.services {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.appointment-meta {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.price {
+  color: #059669;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.duration {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.contact-info {
+  font-size: 0.75rem;
+}
+
+.appointment-status {
+  text-align: center;
+  min-width: 100px;
+}
+
+.appointment-actions {
+  display: flex;
+  gap: 0.25rem;
+  justify-content: center;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+/* Mobile Responsive */
 @media (max-width: 768px) {
+  .appointment-card {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .appointment-time {
+    min-width: auto;
+    text-align: left;
+    margin-right: 0;
+  }
+  
+  .appointment-time i {
+    display: inline;
+    margin-bottom: 0;
+    margin-right: 0.5rem;
+  }
+  
+  .appointment-status {
+    min-width: auto;
+    text-align: left;
+  }
+  
+  .appointment-actions {
+    justify-content: flex-start;
+  }
   .calendar-day {
-    min-height: 60px;
-    padding: 8px;
+    min-height: 50px;
+    padding: 4px;
   }
   
   .calendar-header {
-    padding: 8px;
+    padding: 6px 4px;
+    font-size: 0.7rem;
+  }
+  
+  .day-number {
+    font-size: 0.8rem;
+  }
+  
+  .booking-badge {
+    width: 16px;
+    height: 16px;
+    font-size: 0.6rem;
+    top: 4px;
+    right: 4px;
+  }
+  
+  .time-slots-grid {
+    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+    gap: 6px;
+  }
+  
+  .admin-panel .col-lg-3 {
+    order: 2;
+  }
+  
+  .admin-panel .col-lg-9 {
+    order: 1;
+  }
+}
+
+@media (max-width: 576px) {
+  .calendar-day {
+    min-height: 40px;
+    padding: 2px;
+  }
+  
+  .calendar-header {
+    padding: 4px 2px;
+    font-size: 0.65rem;
+  }
+  
+  .day-number {
+    font-size: 0.7rem;
+  }
+  
+  .card-body {
+    padding: 1rem;
+  }
+  
+  .btn-sm {
+    padding: 0.25rem 0.5rem;
     font-size: 0.75rem;
   }
 }
