@@ -56,7 +56,7 @@
               </div>
               <div class="d-flex justify-content-between align-items-center mt-3">
                 <small class="text-muted">You can choose multiple services before continuing.</small>
-                <button class="btn btn-primary" :disabled="!canProceedFromServices" @click="goToStep(2)">Choose time</button>
+                <button class="btn btn-primary" @click="goToStep(2)">Choose time</button>
               </div>
             </div>
           </div>
@@ -81,9 +81,12 @@
                 </div>
 <div class="d-flex flex-column">
                   <label class="text-muted small mb-1">Barber</label>
-                  <div class="alert alert-info py-2 px-3 mb-0">
-                    <i class="fas fa-user-tie me-2"></i>{{ selectedBarberName || 'Professional Barber' }}
-                  </div>
+                  <select v-model="selectedBarber" @change="handleAvailabilityRefresh" class="form-select">
+                    <option value="">Select a barber</option>
+                    <option v-for="barber in barbers" :key="barber._id" :value="barber._id">
+                      {{ barber.name }}
+                    </option>
+                  </select>
                 </div>
               </div>
 
@@ -257,6 +260,7 @@ export default {
       selectedTime: '',
       availableTimes: [],
       currentStep: 1,
+      availabilityTimeout: null,
       customer: {
         name: '',
         phone: '',
@@ -330,6 +334,11 @@ canProceedFromSchedule() {
     this.selectedDate = this.formatDateValue(today)
     this.currentWeekStart = this.getStartOfWeek(today)
   },
+  
+  beforeUnmount() {
+    // Clean up timeout when component is destroyed
+    clearTimeout(this.availabilityTimeout)
+  },
   methods: {
     formatDateValue(date) {
       const parsedDate = new Date(date)
@@ -364,9 +373,10 @@ async fetchBarbers() {
       try {
         const response = await axios.get(`${process.env.VUE_APP_API_URL}/barbers/public`)
         this.barbers = response.data
-        // Auto-select the first available barber (single barber system)
+        // Auto-select Shair Ali Barber (single barber system)
         if (this.barbers.length > 0) {
-          this.selectedBarber = this.barbers.find(b => b.available)?._id || this.barbers[0]._id
+          const shairAliBarber = this.barbers.find(b => b.name === 'Shair Ali Barber')
+          this.selectedBarber = shairAliBarber?._id || this.barbers[0]._id
         }
       } catch (error) {
         console.error('Error fetching barbers:', error)
@@ -378,23 +388,34 @@ async fetchBarbers() {
       this.currentWeekStart = this.formatDateValue(start)
       this.selectedDate = this.formatDateValue(start)
       this.selectedTime = ''
-      this.handleAvailabilityRefresh()
+      
+      // Debounce availability refresh
+      clearTimeout(this.availabilityTimeout)
+      this.availabilityTimeout = setTimeout(() => {
+        this.handleAvailabilityRefresh()
+      }, 300)
     },
     selectDate(date) {
       this.selectedDate = date
       this.currentWeekStart = this.getStartOfWeek(date)
       this.selectedTime = ''
-      this.handleAvailabilityRefresh()
+      // Debounce availability refresh to prevent excessive API calls
+      clearTimeout(this.availabilityTimeout)
+      this.availabilityTimeout = setTimeout(() => {
+        this.handleAvailabilityRefresh()
+      }, 300)
     },
     async handleAvailabilityRefresh() {
       if (this.currentStep < 2) return
       this.selectedTime = ''
 
-if (!this.selectedServices.length || !this.selectedDate || !this.selectedBarber) {
+      if (!this.selectedDate || !this.selectedBarber) {
         this.availableTimes = []
         return
       }
-
+      
+      // Use default duration if no services selected
+      const duration = this.totalDuration || 30
       this.currentWeekStart = this.getStartOfWeek(this.selectedDate)
 
       try {
@@ -402,13 +423,22 @@ if (!this.selectedServices.length || !this.selectedDate || !this.selectedBarber)
           params: {
             barberId: this.selectedBarber,
             date: this.selectedDate,
-            duration: this.totalDuration
+            duration: duration
           }
         })
+        
         this.availableTimes = response.data.availableTimes || []
+        
+        // Show additional info in console for debugging
+        if (response.data.totalSlots !== undefined) {
+          console.log(`Found ${response.data.totalSlots} available slots for ${this.selectedDate}`);
+        }
       } catch (error) {
         console.error('Error fetching availability:', error)
         this.availableTimes = []
+        this.toast.error('Unable to load available times. Please try again.', {
+          position: 'top-center'
+        })
       }
     },
     goToStep(step) {
@@ -425,8 +455,36 @@ if (!this.selectedServices.length || !this.selectedDate || !this.selectedBarber)
         return
       }
 
+      // Validate slot availability before booking
       try {
-        await axios.post(`${process.env.VUE_APP_API_URL}/appointments`, {
+        const validationResponse = await axios.post(`${process.env.VUE_APP_API_URL}/appointments/validate-slot`, {
+          barberId: this.selectedBarber,
+          date: this.selectedDate,
+          time: this.selectedTime,
+          duration: this.totalDuration || 30
+        })
+
+        if (!validationResponse.data.available) {
+          this.toast.error(validationResponse.data.reason, {
+            timeout: 5000,
+            position: 'top-center'
+          })
+          
+          // Refresh availability and suggest alternatives
+          await this.handleAvailabilityRefresh()
+          return
+        }
+      } catch (validationError) {
+        console.error('Slot validation failed:', validationError)
+        this.toast.error('Unable to validate time slot. Please try again.', {
+          position: 'top-center'
+        })
+        return
+      }
+
+      // Proceed with booking
+      try {
+        const response = await axios.post(`${process.env.VUE_APP_API_URL}/appointments`, {
           customerName: this.customer.name,
           customerPhone: this.customer.phone,
           customerEmail: this.customer.email,
@@ -438,13 +496,39 @@ if (!this.selectedServices.length || !this.selectedDate || !this.selectedBarber)
           time: this.selectedTime
         })
 
-        this.toast.success('🎉 Appointment booked successfully!', {
+        this.toast.success('🎉 Booking request submitted successfully!', {
           timeout: 5000,
           position: 'top-center'
         })
+        
+        // Show additional message if provided by backend
+        if (response.data.message) {
+          setTimeout(() => {
+            this.toast.info(response.data.message, {
+              timeout: 7000,
+              position: 'top-center'
+            })
+          }, 1000)
+        }
+        
         this.resetFlow()
       } catch (error) {
-        const message = error.response?.data?.message || 'Error booking appointment. Please try another slot.'
+        const errorData = error.response?.data
+        let message = 'Error booking appointment. Please try another slot.'
+        
+        if (errorData?.message) {
+          message = errorData.message
+        }
+        
+        // If slot conflict, refresh availability
+        if (error.response?.status === 409) {
+          await this.handleAvailabilityRefresh()
+          
+          if (errorData?.availableTimes?.length) {
+            message += ` ${errorData.availableTimes.length} alternative slots are available.`
+          }
+        }
+        
         this.toast.error(message, {
           timeout: 5000,
           position: 'top-center'
@@ -458,6 +542,11 @@ if (!this.selectedServices.length || !this.selectedDate || !this.selectedBarber)
       this.currentWeekStart = this.getStartOfWeek(today)
       this.selectedTime = ''
       this.currentStep = 1
+      this.availableTimes = []
+      
+      // Clear any pending availability refresh
+      clearTimeout(this.availabilityTimeout)
+      
       this.customer = {
         name: '',
         phone: '',

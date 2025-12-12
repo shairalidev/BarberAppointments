@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const emailScheduler = require('./services/emailScheduler');
 require('dotenv').config();
 
 const app = express();
@@ -50,4 +51,20 @@ app.use('/api/restrictions', verifyToken, require('./routes/restrictions'));
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  
+  // Start email scheduler
+  emailScheduler.start();
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully');
+  emailScheduler.stop();
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT received, shutting down gracefully');
+  emailScheduler.stop();
+  process.exit(0);
 });

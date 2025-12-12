@@ -39,13 +39,14 @@
     <!-- Navigation Tabs -->
     <div class="container-fluid mb-4">
       <div class="nav-tabs-wrapper">
-        <ul class="nav nav-tabs nav-fill border-0">
+        <ul class="nav nav-tabs border-0 mobile-nav">
           <li class="nav-item">
             <button 
               @click="activeTab = 'calendar'" 
               :class="['nav-link', 'fw-medium', activeTab === 'calendar' ? 'active' : '']"
             >
-              <i class="fas fa-calendar-alt me-2"></i>Calendar & Booking
+              <i class="fas fa-calendar-alt nav-icon"></i>
+              <span class="nav-text">Calendar</span>
             </button>
           </li>
           <li class="nav-item">
@@ -53,8 +54,9 @@
               @click="activeTab = 'requests'" 
               :class="['nav-link', 'fw-medium', 'position-relative', activeTab === 'requests' ? 'active' : '']"
             >
-              <i class="fas fa-inbox me-2"></i>Booking Requests
-              <span v-if="pendingAppointments.length" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ pendingAppointments.length }}</span>
+              <i class="fas fa-inbox nav-icon"></i>
+              <span class="nav-text">Requests</span>
+              <span v-if="pendingAppointments.length" class="nav-badge">{{ pendingAppointments.length }}</span>
             </button>
           </li>
           <li class="nav-item">
@@ -62,7 +64,8 @@
               @click="activeTab = 'services'" 
               :class="['nav-link', 'fw-medium', activeTab === 'services' ? 'active' : '']"
             >
-              <i class="fas fa-cut me-2"></i>Services
+              <i class="fas fa-cut nav-icon"></i>
+              <span class="nav-text">Services</span>
             </button>
           </li>
           <li class="nav-item">
@@ -70,107 +73,145 @@
               @click="activeTab = 'timeslots'" 
               :class="['nav-link', 'fw-medium', activeTab === 'timeslots' ? 'active' : '']"
             >
-              <i class="fas fa-clock me-2"></i>Time Slots
+              <i class="fas fa-clock nav-icon"></i>
+              <span class="nav-text">Slots</span>
+            </button>
+          </li>
+          <li class="nav-item">
+            <button 
+              @click="activeTab = 'profile'" 
+              :class="['nav-link', 'fw-medium', activeTab === 'profile' ? 'active' : '']"
+            >
+              <i class="fas fa-user-cog nav-icon"></i>
+              <span class="nav-text">Profile</span>
             </button>
           </li>
         </ul>
       </div>
     </div>
 
-    <div class="container-fluid">
+    <div class="container-fluid admin-content">
 
           <!-- Calendar & Booking Tab -->
-          <div v-if="activeTab === 'calendar'" class="row g-4">
-            <!-- Calendar Section -->
-            <div class="col-lg-8">
-              <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white py-3">
-                  <div class="d-flex justify-content-between align-items-center flex-wrap">
-                    <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Calendar</h5>
-                    <div class="d-flex gap-2">
-                      <button @click="showBookingModal = true" class="btn btn-sm btn-success">
-                        <i class="fas fa-plus me-1"></i>Book Appointment
-                      </button>
-                      <button @click="changeMonth(-1)" class="btn btn-sm btn-outline-primary">
-                        <i class="fas fa-chevron-left"></i>
-                      </button>
-                      <button @click="goToToday" class="btn btn-sm btn-primary">Today</button>
-                      <button @click="changeMonth(1)" class="btn btn-sm btn-outline-primary">
-                        <i class="fas fa-chevron-right"></i>
-                      </button>
+          <div v-if="activeTab === 'calendar'" class="calendar-tab">
+            <!-- Mobile Calendar Controls -->
+            <div class="mobile-calendar-controls d-lg-none mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <button @click="changeMonth(-1)" class="btn btn-outline-primary btn-sm">
+                  <i class="fas fa-chevron-left"></i>
+                </button>
+                <h6 class="mb-0 fw-bold">{{ currentMonthYear }}</h6>
+                <button @click="changeMonth(1)" class="btn btn-outline-primary btn-sm">
+                  <i class="fas fa-chevron-right"></i>
+                </button>
+              </div>
+              <div class="d-flex gap-2 justify-content-center">
+                <button @click="goToToday" class="btn btn-primary btn-sm">Today</button>
+                <button @click="showBookingModal = true" class="btn btn-success btn-sm">
+                  <i class="fas fa-plus me-1"></i>Book
+                </button>
+              </div>
+            </div>
+
+            <div class="row g-3">
+              <!-- Calendar Section -->
+              <div class="col-12 col-lg-8">
+                <div class="card border-0 shadow-sm calendar-card">
+                  <div class="card-header bg-white py-3 d-none d-lg-block">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Calendar</h5>
+                      <div class="d-flex gap-2">
+                        <button @click="showBookingModal = true" class="btn btn-sm btn-success">
+                          <i class="fas fa-plus me-1"></i>Book Appointment
+                        </button>
+                        <button @click="changeMonth(-1)" class="btn btn-sm btn-outline-primary">
+                          <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button @click="goToToday" class="btn btn-sm btn-primary">Today</button>
+                        <button @click="changeMonth(1)" class="btn btn-sm btn-outline-primary">
+                          <i class="fas fa-chevron-right"></i>
+                        </button>
+                      </div>
                     </div>
+                    <h6 class="text-center mt-3 mb-0">{{ currentMonthYear }}</h6>
                   </div>
-                  <h6 class="text-center mt-3 mb-0">{{ currentMonthYear }}</h6>
-                </div>
-                <div class="card-body p-0">
-                  <div class="calendar-grid">
-                    <div class="calendar-header" v-for="day in ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']" :key="day">
-                      {{ day }}
-                    </div>
-                    <div 
-                      v-for="day in calendarDays" 
-                      :key="day.date"
-                      @click="selectCalendarDate(day)"
-                      :class="['calendar-day', {
-                        'other-month': !day.isCurrentMonth,
-                        'today': day.isToday,
-                        'selected': day.date === selectedCalendarDate,
-                        'has-bookings': day.hasBookings
-                      }]"
-                    >
-                      <span class="day-number">{{ day.dayNumber }}</span>
-                      <span v-if="day.bookingCount" class="booking-badge">{{ day.bookingCount }}</span>
+                  <div class="card-body p-2 p-lg-3">
+                    <div class="calendar-grid">
+                      <div class="calendar-header" v-for="day in ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']" :key="day">
+                        {{ day }}
+                      </div>
+                      <div 
+                        v-for="day in calendarDays" 
+                        :key="day.date"
+                        @click="selectCalendarDate(day)"
+                        :class="['calendar-day', {
+                          'other-month': !day.isCurrentMonth,
+                          'today': day.isToday,
+                          'selected': day.date === selectedCalendarDate,
+                          'has-bookings': day.hasBookings
+                        }]"
+                      >
+                        <span class="day-number">{{ day.dayNumber }}</span>
+                        <span v-if="day.bookingCount" class="booking-badge">{{ day.bookingCount }}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-            
-            <!-- Appointments List -->
-            <div class="col-lg-4">
-              <div v-if="selectedCalendarDate" class="card border-0 shadow-sm">
-                <div class="card-header bg-gradient-primary text-white">
-                  <h6 class="mb-0"><i class="fas fa-calendar-day me-2"></i>{{ formatSelectedDate }}</h6>
-                  <small class="opacity-75">{{ selectedDayAppointments.length }} appointment(s)</small>
-                </div>
-                <div class="card-body p-0">
-                  <div v-if="selectedDayAppointments.length" class="appointments-list">
-                    <div v-for="apt in selectedDayAppointments" :key="apt._id" class="appointment-card">
-                      <div class="appointment-time">
-                        <i class="fas fa-clock text-primary"></i>
-                        <span class="fw-bold">{{ apt.time }}</span>
-                      </div>
-                      <div class="appointment-details">
-                        <h6 class="customer-name mb-1">
-                          <i class="fas fa-user me-2 text-muted"></i>{{ apt.customerName }}
-                        </h6>
-                        <p class="services mb-1">
-                          <i class="fas fa-cut me-2 text-muted"></i>{{ apt.services?.map(s => s.name).join(', ') }}
-                        </p>
-                        <div class="appointment-meta">
-                          <span class="price"><i class="fas fa-dollar-sign me-1"></i>${{ apt.totalPrice }}</span>
-                          <span class="duration"><i class="fas fa-hourglass-half me-1"></i>{{ apt.totalDuration }}min</span>
+              
+              <!-- Appointments List -->
+              <div class="col-12 col-lg-4">
+                <div v-if="selectedCalendarDate" class="card border-0 shadow-sm appointments-card">
+                  <div class="card-header bg-gradient-primary text-white">
+                    <h6 class="mb-0 d-none d-lg-block"><i class="fas fa-calendar-day me-2"></i>{{ formatSelectedDate }}</h6>
+                    <h6 class="mb-0 d-lg-none"><i class="fas fa-calendar-day me-2"></i>Selected Day</h6>
+                    <small class="opacity-75">{{ selectedDayAppointments.length }} appointment(s)</small>
+                  </div>
+                  <div class="card-body p-0">
+                    <div v-if="selectedDayAppointments.length" class="appointments-list">
+                      <div v-for="apt in selectedDayAppointments" :key="apt._id" class="appointment-card">
+                        <div class="appointment-header d-flex justify-content-between align-items-start mb-2">
+                          <div class="appointment-time-mobile">
+                            <i class="fas fa-clock text-primary me-1"></i>
+                            <span class="fw-bold">{{ apt.time }}</span>
+                          </div>
+                          <span :class="getStatusBadgeClass(apt.status)">{{ apt.status }}</span>
                         </div>
-                        <div v-if="apt.customerPhone" class="contact-info">
-                          <small class="text-muted"><i class="fas fa-phone me-1"></i>{{ apt.customerPhone }}</small>
+                        <div class="appointment-details">
+                          <h6 class="customer-name mb-1">
+                            <i class="fas fa-user me-2 text-muted"></i>{{ apt.customerName }}
+                          </h6>
+                          <p class="services mb-1">
+                            <i class="fas fa-cut me-2 text-muted"></i>{{ apt.services?.map(s => s.name).join(', ') }}
+                          </p>
+                          <div class="appointment-meta d-flex justify-content-between mb-2">
+                            <span class="price"><i class="fas fa-dollar-sign me-1"></i>${{ apt.totalPrice }}</span>
+                            <span class="duration"><i class="fas fa-hourglass-half me-1"></i>{{ apt.totalDuration }}min</span>
+                          </div>
+                          <div v-if="apt.customerPhone" class="contact-info mb-2">
+                            <small class="text-muted"><i class="fas fa-phone me-1"></i>{{ apt.customerPhone }}</small>
+                          </div>
                         </div>
-                      </div>
-                      <div class="appointment-status">
-                        <span :class="getStatusBadgeClass(apt.status)">{{ apt.status }}</span>
-                        <div class="appointment-actions mt-2">
-                          <button v-if="apt.status === 'pending'" @click="updateAppointmentStatus(apt, 'confirmed')" class="btn btn-sm btn-success">
-                            <i class="fas fa-check"></i>
+                        <div class="appointment-actions d-flex gap-2 justify-content-center">
+                          <button v-if="apt.status === 'pending'" @click="openResponseModal(apt, 'confirmed')" class="btn btn-sm btn-success flex-fill">
+                            <i class="fas fa-check me-1"></i>Accept
                           </button>
-                          <button v-if="apt.status === 'confirmed'" @click="updateAppointmentStatus(apt, 'completed')" class="btn btn-sm btn-primary">
-                            <i class="fas fa-check-double"></i>
+                          <button v-if="apt.status === 'pending'" @click="openResponseModal(apt, 'cancelled')" class="btn btn-sm btn-outline-danger flex-fill">
+                            <i class="fas fa-times me-1"></i>Reject
+                          </button>
+                          <button v-if="apt.status === 'confirmed'" @click="confirmAction(apt, 'completed')" class="btn btn-sm btn-primary flex-fill">
+                            <i class="fas fa-flag-checkered me-1"></i>Complete
+                          </button>
+                          <button v-if="apt.status === 'confirmed'" @click="setReminder(apt)" class="btn btn-sm btn-warning">
+                            <i class="fas fa-bell"></i>
                           </button>
                         </div>
                       </div>
                     </div>
-                  </div>
-                  <div v-else class="empty-state">
-                    <i class="fas fa-calendar-times fa-2x text-muted mb-2"></i>
-                    <p class="text-muted mb-0">No appointments scheduled</p>
+                    <div v-else class="empty-state text-center py-4">
+                      <i class="fas fa-calendar-times fa-2x text-muted mb-2"></i>
+                      <p class="text-muted mb-0">No appointments scheduled</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -178,193 +219,411 @@
           </div>
 
           <!-- Booking Requests Tab -->
-          <div v-if="activeTab === 'requests'" class="card border-0 shadow-sm">
-            <div class="card-header bg-white py-3">
-              <h5 class="mb-0"><i class="fas fa-inbox me-2"></i>Booking Requests</h5>
-            </div>
-            <div class="card-body">
-              <div v-if="pendingAppointments.length" class="list-group">
-                <div v-for="apt in pendingAppointments" :key="apt._id" class="list-group-item mb-3 border rounded">
-                  <div class="row">
-                    <div class="col-md-8">
-                      <h6 class="mb-2">{{ apt.customerName }}</h6>
-                      <p class="mb-1 small"><i class="fas fa-calendar me-1"></i>{{ formatDate(apt.date) }} at {{ apt.time }}</p>
-                      <p class="mb-1 small"><i class="fas fa-cut me-1"></i>{{ apt.services?.map(s => s.name).join(', ') }}</p>
-                      <p class="mb-1 small"><i class="fas fa-user-tie me-1"></i>{{ apt.barberId?.name }}</p>
-                      <p class="mb-1 small"><i class="fas fa-phone me-1"></i>{{ apt.customerPhone }}</p>
-                      <p v-if="apt.customerEmail" class="mb-1 small"><i class="fas fa-envelope me-1"></i>{{ apt.customerEmail }}</p>
-                      <p v-if="apt.notes" class="mb-0 small text-muted"><i class="fas fa-note-sticky me-1"></i>{{ apt.notes }}</p>
-                    </div>
-                    <div class="col-md-4 text-end">
-                      <h5 class="text-primary mb-3">${{ apt.totalPrice }}</h5>
-                      <div class="d-grid gap-2">
-                        <button @click="openResponseModal(apt, 'confirmed')" class="btn btn-success btn-sm">
-                          <i class="fas fa-check me-1"></i>Accept
-                        </button>
-                        <button @click="openResponseModal(apt, 'cancelled')" class="btn btn-danger btn-sm">
-                          <i class="fas fa-times me-1"></i>Reject
-                        </button>
+          <div v-if="activeTab === 'requests'" class="requests-tab">
+            <div class="card border-0 shadow-sm">
+              <div class="card-header bg-white py-3">
+                <h5 class="mb-0"><i class="fas fa-inbox me-2"></i>Booking Requests</h5>
+                <small class="text-muted">{{ pendingAppointments.length }} pending request(s)</small>
+              </div>
+              <div class="card-body p-2 p-lg-3">
+                <div v-if="pendingAppointments.length" class="requests-list">
+                  <div v-for="apt in pendingAppointments" :key="apt._id" class="request-card card mb-3">
+                    <div class="card-body p-3">
+                      <div class="row g-3">
+                        <div class="col-12 col-lg-8">
+                          <div class="request-header d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="mb-0 fw-bold">{{ apt.customerName }}</h6>
+                            <span class="badge bg-warning text-dark d-lg-none">Pending</span>
+                          </div>
+                          <div class="request-details">
+                            <div class="detail-item mb-1">
+                              <i class="fas fa-calendar me-2 text-primary"></i>
+                              <span class="fw-medium">{{ formatDate(apt.date) }} at {{ apt.time }}</span>
+                            </div>
+                            <div class="detail-item mb-1">
+                              <i class="fas fa-cut me-2 text-success"></i>
+                              <span>{{ apt.services?.map(s => s.name).join(', ') }}</span>
+                            </div>
+                            <div class="detail-item mb-1">
+                              <i class="fas fa-user-tie me-2 text-info"></i>
+                              <span>{{ apt.barberId?.name }}</span>
+                            </div>
+                            <div class="detail-item mb-1">
+                              <i class="fas fa-phone me-2 text-secondary"></i>
+                              <span>{{ apt.customerPhone }}</span>
+                            </div>
+                            <div v-if="apt.customerEmail" class="detail-item mb-1">
+                              <i class="fas fa-envelope me-2 text-secondary"></i>
+                              <span>{{ apt.customerEmail }}</span>
+                            </div>
+                            <div v-if="apt.notes" class="detail-item">
+                              <i class="fas fa-note-sticky me-2 text-muted"></i>
+                              <span class="text-muted">{{ apt.notes }}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-12 col-lg-4">
+                          <div class="request-actions text-center text-lg-end">
+                            <div class="price-display mb-3">
+                              <h4 class="text-primary mb-0">${{ apt.totalPrice }}</h4>
+                              <small class="text-muted">Total Amount</small>
+                            </div>
+                            <div class="action-buttons d-grid gap-2">
+                              <button @click="openResponseModal(apt, 'confirmed')" class="btn btn-success">
+                                <i class="fas fa-check me-2"></i>Accept Request
+                              </button>
+                              <button @click="openResponseModal(apt, 'cancelled')" class="btn btn-outline-danger">
+                                <i class="fas fa-times me-2"></i>Reject Request
+                              </button>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <div v-else class="text-center py-5">
-                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                <p class="text-muted">No pending booking requests</p>
+                <div v-else class="empty-state text-center py-5">
+                  <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                  <h5 class="text-muted">No Pending Requests</h5>
+                  <p class="text-muted mb-0">All booking requests have been processed</p>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Services Tab -->
-          <div v-if="activeTab === 'services'" class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <h5><i class="fas fa-cut me-2"></i>Services Management</h5>
-              <button @click="showServiceForm = true" class="btn btn-primary btn-sm">
-                <i class="fas fa-plus me-1"></i>Add Service
-              </button>
-            </div>
-            <div class="card-body">
-              <!-- Service Form -->
-              <div v-if="showServiceForm" class="card mb-4">
-                <div class="card-body">
-                  <form @submit.prevent="saveService">
-                    <div class="row">
-                      <div class="col-md-6">
-                        <div class="mb-3">
-                          <label class="form-label">Service Name</label>
-                          <input v-model="serviceForm.name" type="text" class="form-control" required>
-                        </div>
-                      </div>
-                      <div class="col-md-3">
-                        <div class="mb-3">
-                          <label class="form-label">Duration (minutes)</label>
-                          <input v-model="serviceForm.duration" type="number" class="form-control" required>
-                        </div>
-                      </div>
-                      <div class="col-md-3">
-                        <div class="mb-3">
-                          <label class="form-label">Price ($)</label>
-                          <input v-model="serviceForm.price" type="number" step="0.01" class="form-control" required>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="mb-3">
-                      <label class="form-label">Description</label>
-                      <textarea v-model="serviceForm.description" class="form-control" rows="2"></textarea>
-                    </div>
-                    <div class="d-flex gap-2">
-                      <button type="submit" class="btn btn-success">Save Service</button>
-                      <button @click="cancelServiceForm" type="button" class="btn btn-secondary">Cancel</button>
-                    </div>
-                  </form>
+          <div v-if="activeTab === 'services'" class="services-tab">
+            <div class="card border-0 shadow-sm">
+              <div class="card-header bg-white py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h5 class="mb-0"><i class="fas fa-cut me-2"></i>Services Management</h5>
+                    <small class="text-muted">{{ services.length }} service(s) available</small>
+                  </div>
+                  <button @click="showServiceForm = true" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus me-1"></i><span class="d-none d-sm-inline">Add Service</span>
+                  </button>
                 </div>
               </div>
+              <div class="card-body p-2 p-lg-3">
+                <!-- Service Form -->
+                <div v-if="showServiceForm" class="service-form-card card mb-4">
+                  <div class="card-header bg-light">
+                    <h6 class="mb-0">{{ serviceForm._id ? 'Edit Service' : 'Add New Service' }}</h6>
+                  </div>
+                  <div class="card-body">
+                    <form @submit.prevent="saveService">
+                      <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                          <label class="form-label fw-medium">Service Name</label>
+                          <input v-model="serviceForm.name" type="text" class="form-control" required>
+                        </div>
+                        <div class="col-6 col-md-3">
+                          <label class="form-label fw-medium">Duration (min)</label>
+                          <input v-model="serviceForm.duration" type="number" class="form-control" required>
+                        </div>
+                        <div class="col-6 col-md-3">
+                          <label class="form-label fw-medium">Price ($)</label>
+                          <input v-model="serviceForm.price" type="number" step="0.01" class="form-control" required>
+                        </div>
+                        <div class="col-12">
+                          <label class="form-label fw-medium">Description</label>
+                          <textarea v-model="serviceForm.description" class="form-control" rows="2" placeholder="Brief description of the service..."></textarea>
+                        </div>
+                      </div>
+                      <div class="d-flex gap-2 mt-3">
+                        <button type="submit" class="btn btn-success">
+                          <i class="fas fa-save me-1"></i>{{ serviceForm._id ? 'Update' : 'Save' }} Service
+                        </button>
+                        <button @click="cancelServiceForm" type="button" class="btn btn-outline-secondary">
+                          <i class="fas fa-times me-1"></i>Cancel
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
 
-              <!-- Services List -->
-              <div class="table-responsive">
-                <table class="table table-striped">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Duration</th>
-                      <th>Price</th>
-                      <th>Description</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="service in services" :key="service._id">
-                      <td>{{ service.name }}</td>
-                      <td>{{ service.duration }} min</td>
-                      <td>${{ service.price }}</td>
-                      <td>{{ service.description }}</td>
-                      <td>
-                        <button @click="editService(service)" class="btn btn-sm btn-outline-primary me-1">Edit</button>
-                        <button @click="deleteService(service._id)" class="btn btn-sm btn-outline-danger">Delete</button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                <!-- Services List - Mobile Cards -->
+                <div class="d-lg-none">
+                  <div v-for="service in services" :key="service._id" class="service-card card mb-3">
+                    <div class="card-body p-3">
+                      <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 class="mb-0 fw-bold">{{ service.name }}</h6>
+                        <span class="badge bg-primary">${{ service.price }}</span>
+                      </div>
+                      <div class="service-details mb-3">
+                        <div class="d-flex justify-content-between text-muted small mb-1">
+                          <span><i class="fas fa-clock me-1"></i>{{ service.duration }} minutes</span>
+                        </div>
+                        <p class="text-muted small mb-0">{{ service.description || 'No description available' }}</p>
+                      </div>
+                      <div class="service-actions d-flex gap-2">
+                        <button @click="editService(service)" class="btn btn-sm btn-outline-primary flex-fill">
+                          <i class="fas fa-edit me-1"></i>Edit
+                        </button>
+                        <button @click="deleteService(service._id)" class="btn btn-sm btn-outline-danger flex-fill">
+                          <i class="fas fa-trash me-1"></i>Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Services List - Desktop Table -->
+                <div class="d-none d-lg-block">
+                  <div class="table-responsive">
+                    <table class="table table-hover">
+                      <thead class="table-light">
+                        <tr>
+                          <th>Service Name</th>
+                          <th>Duration</th>
+                          <th>Price</th>
+                          <th>Description</th>
+                          <th class="text-center">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="service in services" :key="service._id">
+                          <td class="fw-medium">{{ service.name }}</td>
+                          <td>{{ service.duration }} min</td>
+                          <td class="fw-bold text-success">${{ service.price }}</td>
+                          <td class="text-muted">{{ service.description || 'No description' }}</td>
+                          <td class="text-center">
+                            <div class="btn-group" role="group">
+                              <button @click="editService(service)" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-edit"></i>
+                              </button>
+                              <button @click="deleteService(service._id)" class="btn btn-sm btn-outline-danger">
+                                <i class="fas fa-trash"></i>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div v-if="!services.length" class="empty-state text-center py-5">
+                  <i class="fas fa-cut fa-3x text-muted mb-3"></i>
+                  <h5 class="text-muted">No Services Available</h5>
+                  <p class="text-muted mb-3">Start by adding your first service</p>
+                  <button @click="showServiceForm = true" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Add Your First Service
+                  </button>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Time Slots Tab -->
-          <div v-if="activeTab === 'timeslots'" class="card border-0 shadow-sm">
-            <div class="card-header bg-white py-3">
-              <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Weekly Time Slots</h5>
-              <p class="text-muted mb-0 small">Manage your working hours for each day</p>
-            </div>
-            <div class="card-body">
-<div v-if="primaryBarber" class="alert alert-info d-flex justify-content-between align-items-center">
-                <span><i class="fas fa-info-circle me-2"></i>Managing time slots for: <strong>{{ primaryBarber.name }}</strong></span>
-                <small class="text-muted">Total slots: {{ timeSlots.length }}</small>
+          <div v-if="activeTab === 'timeslots'" class="timeslots-tab">
+            <div class="card border-0 shadow-sm">
+              <div class="card-header bg-white py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Weekly Time Slots</h5>
+                    <small class="text-muted">Manage your working hours for each day</small>
+                  </div>
+                  <div v-if="primaryBarber" class="d-none d-lg-block">
+                    <span class="badge bg-info">{{ timeSlots.length }} total slots</span>
+                  </div>
+                </div>
               </div>
-              
-              <div v-if="primaryBarber" class="row g-4">
-                <div v-for="(day, index) in daysOfWeek" :key="index" class="col-lg-6 col-md-12">
-                  <div class="card border">
-                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                      <h6 class="mb-0">{{ day }}</h6>
-                      <small class="text-muted">Day {{ index }}</small>
+              <div class="card-body p-2 p-lg-3">
+                <div v-if="primaryBarber" class="alert alert-info d-flex flex-column d-lg-flex-row justify-content-between align-items-start align-items-lg-center mb-4">
+                  <span><i class="fas fa-info-circle me-2"></i>Managing time slots for: <strong>{{ primaryBarber.name }}</strong></span>
+                  <small class="text-muted mt-1 mt-lg-0">Total slots: {{ timeSlots.length }}</small>
+                </div>
+                
+                <div v-if="primaryBarber" class="timeslots-grid">
+                  <div v-for="(day, index) in daysOfWeek" :key="index" class="day-schedule-card">
+                    <div class="day-header">
+                      <div class="day-info">
+                        <h6 class="day-name">{{ day }}</h6>
+                        <span class="slot-count">{{ getTimeSlotsForDay(index).length }} slots</span>
+                      </div>
+                      <div class="day-status">
+                        <span :class="getTimeSlotsForDay(index).length ? 'status-active' : 'status-inactive'">
+                          {{ getTimeSlotsForDay(index).length ? 'Active' : 'Closed' }}
+                        </span>
+                      </div>
                     </div>
-                    <div class="card-body">
-                      <div class="mb-3">
-                        <label class="form-label small">Add Time Slot</label>
-                        <div class="row g-2">
-                          <div class="col-4">
-                            <input v-model="newSlot[index].startTime" type="time" class="form-control form-control-sm" placeholder="Start">
+                    
+                    <div class="add-slot-section">
+                      <div class="add-slot-form">
+                        <div class="time-inputs">
+                          <div class="time-input-group">
+                            <label class="time-label">From</label>
+                            <input v-model="newSlot[index].startTime" type="time" class="time-input">
                           </div>
-                          <div class="col-4">
-                            <input v-model="newSlot[index].endTime" type="time" class="form-control form-control-sm" placeholder="End">
-                          </div>
-                          <div class="col-4">
-                            <button @click="addTimeSlot(index)" class="btn btn-sm btn-success w-100">
-                              <i class="fas fa-plus"></i>
-                            </button>
+                          <div class="time-separator">to</div>
+                          <div class="time-input-group">
+                            <label class="time-label">To</label>
+                            <input v-model="newSlot[index].endTime" type="time" class="time-input">
                           </div>
                         </div>
+                        <button @click="addTimeSlot(index)" class="add-slot-btn">
+                          <i class="fas fa-plus me-1"></i>Add Slot
+                        </button>
                       </div>
-                      <div class="time-slots-list">
-                        <div v-for="slot in getTimeSlotsForDay(index)" :key="slot._id" class="d-flex justify-content-between align-items-center p-2 bg-light rounded mb-2">
-                          <span class="fw-medium">{{ slot.startTime }} - {{ slot.endTime }}</span>
-                          <button @click="deleteTimeSlot(slot._id)" class="btn btn-sm btn-outline-danger">
+                    </div>
+                    
+                    <div class="slots-list">
+                      <div v-if="getTimeSlotsForDay(index).length" class="slots-header">
+                        <span class="slots-title">Working Hours</span>
+                      </div>
+                      <div class="slots-container">
+                        <div v-for="slot in getTimeSlotsForDay(index)" :key="slot._id" class="slot-item">
+                          <div class="slot-time">
+                            <i class="fas fa-clock slot-icon"></i>
+                            <span class="time-range">{{ slot.startTime }} - {{ slot.endTime }}</span>
+                          </div>
+                          <button @click="deleteTimeSlot(slot._id)" class="delete-slot-btn">
                             <i class="fas fa-trash"></i>
                           </button>
                         </div>
-                        <div v-if="!getTimeSlotsForDay(index).length" class="text-muted text-center py-2">
-                          <small>No time slots for {{ day }}</small>
-                          <br><small class="text-info">Slots found: {{ timeSlots.filter(s => s.dayOfWeek === index).length }}</small>
+                        <div v-if="!getTimeSlotsForDay(index).length" class="no-slots">
+                          <i class="fas fa-moon text-muted mb-2"></i>
+                          <p class="no-slots-text">Closed on {{ day }}</p>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              
-              <!-- Debug Info -->
-              <div v-if="primaryBarber" class="mt-4">
-                <div class="card border-warning">
-                  <div class="card-header bg-warning bg-opacity-10">
-                    <h6 class="mb-0">Debug Info</h6>
-                  </div>
-                  <div class="card-body">
-                    <p><strong>Primary Barber ID:</strong> {{ primaryBarber._id }}</p>
-                    <p><strong>Total Time Slots:</strong> {{ timeSlots.length }}</p>
-                    <p><strong>Time Slots Data:</strong></p>
-                    <pre class="small">{{ JSON.stringify(timeSlots, null, 2) }}</pre>
-                  </div>
+                
+                <div v-else class="text-center py-5">
+                  <i class="fas fa-user-times fa-3x text-muted mb-3"></i>
+                  <p class="text-muted">No barber found. Please add a barber first.</p>
                 </div>
-              </div>
-              
-              <div v-else class="text-center py-5">
-                <i class="fas fa-user-times fa-3x text-muted mb-3"></i>
-                <p class="text-muted">No barber found. Please add a barber first.</p>
               </div>
             </div>
           </div>
 
+          <!-- Profile Tab -->
+          <div v-if="activeTab === 'profile'" class="profile-tab">
+            <div class="row g-3 g-lg-4">
+              <div class="col-12 col-lg-6">
+                <div class="card border-0 shadow-sm h-100">
+                  <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-user-tie me-2"></i>Barber Profile</h5>
+                    <small class="opacity-75">Manage your business profile</small>
+                  </div>
+                  <div class="card-body p-3">
+                    <form @submit.prevent="updateBarberProfile">
+                      <div class="row g-3">
+                        <div class="col-12">
+                          <label class="form-label fw-medium">Barber Name</label>
+                          <input v-model="barberProfile.name" type="text" class="form-control" required>
+                        </div>
+                        <div class="col-12">
+                          <label class="form-label fw-medium">Email</label>
+                          <input v-model="barberProfile.email" type="email" class="form-control" placeholder="barber@example.com">
+                          <small class="text-muted">This email will receive booking notifications</small>
+                        </div>
+                        <div class="col-12">
+                          <label class="form-label fw-medium">Specialties</label>
+                          <input v-model="barberProfile.specialties" type="text" class="form-control" placeholder="Haircut, Beard Trim, Styling">
+                          <small class="text-muted">Separate multiple specialties with commas</small>
+                        </div>
+                        <div class="col-12">
+                          <label class="form-label fw-medium">Phone</label>
+                          <input v-model="barberProfile.phone" type="tel" class="form-control" placeholder="+1 (555) 123-4567">
+                        </div>
+                        <div class="col-12">
+                          <label class="form-label fw-medium">Bio</label>
+                          <textarea v-model="barberProfile.bio" class="form-control" rows="3" placeholder="Tell customers about yourself and your experience..."></textarea>
+                        </div>
+                      </div>
+                      <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary">
+                          <i class="fas fa-save me-2"></i>Update Profile
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-lg-6">
+                <div class="card border-0 shadow-sm h-100">
+                  <div class="card-header bg-gradient-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-user-shield me-2"></i>Admin Settings</h5>
+                    <small class="opacity-75">Manage your admin account</small>
+                  </div>
+                  <div class="card-body p-3">
+                    <form @submit.prevent="updateAdminProfile">
+                      <div class="row g-3">
+                        <div class="col-12">
+                          <label class="form-label fw-medium">Admin Name</label>
+                          <input v-model="adminProfile.name" type="text" class="form-control" required>
+                        </div>
+                        <div class="col-12">
+                          <label class="form-label fw-medium">Email</label>
+                          <input v-model="adminProfile.email" type="email" class="form-control" required>
+                        </div>
+                        <div class="col-12">
+                          <div class="password-section">
+                            <h6 class="text-muted mb-3"><i class="fas fa-lock me-2"></i>Change Password</h6>
+                            <div class="row g-3">
+                              <div class="col-12">
+                                <label class="form-label fw-medium">Current Password</label>
+                                <div class="input-group">
+                                  <input v-model="adminProfile.currentPassword" :type="showCurrentPassword ? 'text' : 'password'" class="form-control" placeholder="Enter current password">
+                                  <button @click="showCurrentPassword = !showCurrentPassword" type="button" class="btn btn-outline-secondary">
+                                    <i :class="showCurrentPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                                  </button>
+                                </div>
+                              </div>
+                              <div class="col-12">
+                                <label class="form-label fw-medium">New Password</label>
+                                <div class="input-group">
+                                  <input v-model="adminProfile.newPassword" :type="showNewPassword ? 'text' : 'password'" class="form-control" placeholder="Enter new password">
+                                  <button @click="showNewPassword = !showNewPassword" type="button" class="btn btn-outline-secondary">
+                                    <i :class="showNewPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                                  </button>
+                                </div>
+                              </div>
+                              <div class="col-12">
+                                <label class="form-label fw-medium">Confirm New Password</label>
+                                <div class="input-group">
+                                  <input v-model="adminProfile.confirmPassword" :type="showConfirmPassword ? 'text' : 'password'" class="form-control" placeholder="Confirm new password">
+                                  <button @click="showConfirmPassword = !showConfirmPassword" type="button" class="btn btn-outline-secondary">
+                                    <i :class="showConfirmPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-success">
+                          <i class="fas fa-save me-2"></i>Update Settings
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+    </div>
+
+    <!-- Professional Toast Notifications -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+      <div v-for="(toast, index) in toasts" :key="toast.id" 
+           :class="['toast', 'show', `toast-${toast.type}`]" 
+           role="alert">
+        <div class="toast-header">
+          <i :class="getToastIcon(toast.type)" class="me-2"></i>
+          <strong class="me-auto">{{ getToastTitle(toast.type) }}</strong>
+          <button @click="removeToast(index)" type="button" class="btn-close" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+          {{ toast.message }}
+        </div>
+      </div>
     </div>
 
     <!-- Response Modal -->
@@ -463,12 +722,54 @@
         </div>
       </div>
     </div>
+
+    <!-- Confirmation Modal -->
+    <div v-if="confirmModal.show" class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" @click.self="confirmModal.show = false">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content confirmation-modal">
+          <div class="modal-header border-0 pb-0">
+            <div class="confirmation-icon">
+              <i :class="confirmModal.action === 'confirmed' ? 'fas fa-check-circle text-success' : 'fas fa-flag-checkered text-primary'"></i>
+            </div>
+            <button @click="confirmModal.show = false" class="btn-close"></button>
+          </div>
+          <div class="modal-body text-center">
+            <h5 class="mb-3">{{ confirmModal.action === 'confirmed' ? 'Approve Appointment?' : 'Mark as Complete?' }}</h5>
+            <p class="text-muted mb-4">{{ confirmModal.message }}</p>
+            <div class="appointment-preview">
+              <div class="preview-item">
+                <i class="fas fa-user me-2"></i>{{ confirmModal.appointment?.customerName }}
+              </div>
+              <div class="preview-item">
+                <i class="fas fa-calendar me-2"></i>{{ formatDate(confirmModal.appointment?.date) }} at {{ confirmModal.appointment?.time }}
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer border-0 pt-0">
+            <button @click="confirmModal.show = false" class="btn btn-light">Cancel</button>
+            <button @click="executeAction" :class="confirmModal.action === 'confirmed' ? 'btn btn-success' : 'btn btn-primary'">
+              <i :class="confirmModal.action === 'confirmed' ? 'fas fa-check me-2' : 'fas fa-flag-checkered me-2'"></i>
+              {{ confirmModal.action === 'confirmed' ? 'Approve' : 'Complete' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import axios from 'axios'
 import { logout as authLogout } from '../utils/auth'
+
+// Add axios interceptor for authentication
+axios.interceptors.request.use((config) => {
+  const token = localStorage.getItem('adminToken')
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
 
 export default {
   name: 'Admin',
@@ -510,7 +811,32 @@ export default {
       },
 availableSlots: [],
       primaryBarber: null,
-      showBookingModal: false
+      showBookingModal: false,
+barberProfile: {
+        name: '',
+        email: '',
+        specialties: '',
+        phone: '',
+        bio: ''
+      },
+adminProfile: {
+        name: '',
+        email: '',
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      },
+      confirmModal: {
+        show: false,
+        appointment: null,
+        action: '',
+        message: ''
+      },
+      toasts: [],
+      toastId: 0,
+      showCurrentPassword: false,
+      showNewPassword: false,
+      showConfirmPassword: false
     }
   },
   computed: {
@@ -543,13 +869,8 @@ availableSlots: [],
         days.push(this.createDayObject(date, true))
       }
       
-      const remainingDays = 42 - days.length
-      for (let i = 1; i <= remainingDays; i++) {
-        const date = new Date(this.currentYear, this.currentMonth + 1, i)
-        days.push(this.createDayObject(date, false))
-      }
-      
-      return days
+      // Limit to 35 days (5 rows × 7 days)
+      return days.slice(0, 35)
     },
     selectedDayAppointments() {
       if (!this.selectedCalendarDate) return []
@@ -568,6 +889,7 @@ availableSlots: [],
   async mounted() {
     await this.fetchData()
     this.watchBookingFormChanges()
+    this.loadAdminProfile()
   },
   watch: {
     'bookingForm.date'() {
@@ -592,6 +914,7 @@ availableSlots: [],
       if (this.barbers.length > 0) {
         this.primaryBarber = this.barbers.find(b => b.available) || this.barbers[0]
         this.selectedBarberForSlots = this.primaryBarber._id
+        this.loadAdminProfile()
       }
     },
     async fetchAppointments() {
@@ -670,7 +993,7 @@ async updateAppointmentStatus(appointment, newStatus) {
 async quickBookAppointment() {
       try {
         if (!this.primaryBarber) {
-          alert('No barber available')
+          this.showToast('No barber available', 'warning')
           return
         }
         
@@ -689,10 +1012,10 @@ async quickBookAppointment() {
         await this.fetchAppointments()
         this.resetBookingForm()
         this.showBookingModal = false
-        alert('Appointment booked successfully!')
+        this.showToast('Appointment booked successfully!', 'success')
       } catch (error) {
         console.error('Error booking appointment:', error)
-        alert('Error booking appointment: ' + (error.response?.data?.message || error.message))
+        this.showToast('Error booking appointment: ' + (error.response?.data?.message || error.message), 'error')
       }
     },
     resetBookingForm() {
@@ -743,7 +1066,7 @@ async quickBookAppointment() {
     },
 async addTimeSlot(dayIndex) {
       if (!this.primaryBarber || !this.newSlot[dayIndex].startTime || !this.newSlot[dayIndex].endTime) {
-        alert('Please fill in both start and end times')
+        this.showToast('Please fill in both start and end times', 'warning')
         return
       }
       try {
@@ -755,10 +1078,10 @@ async addTimeSlot(dayIndex) {
         })
         await this.fetchTimeSlots()
         this.newSlot[dayIndex] = { startTime: '', endTime: '' }
-        alert('Time slot added successfully!')
+        this.showToast('Time slot added successfully!', 'success')
       } catch (error) {
         console.error('Error adding time slot:', error)
-        alert('Error adding time slot: ' + (error.response?.data?.message || error.message))
+        this.showToast('Error adding time slot: ' + (error.response?.data?.message || error.message), 'error')
       }
     },
     async deleteTimeSlot(id) {
@@ -766,10 +1089,10 @@ async addTimeSlot(dayIndex) {
       try {
         await axios.delete(`${process.env.VUE_APP_API_URL}/timeslots/${id}`)
         await this.fetchTimeSlots()
-        alert('Time slot deleted successfully!')
+        this.showToast('Time slot deleted successfully!', 'success')
       } catch (error) {
         console.error('Error deleting time slot:', error)
-        alert('Error deleting time slot: ' + (error.response?.data?.message || error.message))
+        this.showToast('Error deleting time slot: ' + (error.response?.data?.message || error.message), 'error')
       }
     },
 getTimeSlotsForDay(dayIndex) {
@@ -849,19 +1172,197 @@ getTimeSlotsForDay(dayIndex) {
     },
     async respondToAppointment() {
       try {
+        // Check for conflicts when accepting
+        if (this.responseModal.status === 'confirmed') {
+          const conflictCheck = await axios.get(`${process.env.VUE_APP_API_URL}/appointments/availability`, {
+            params: {
+              barberId: this.responseModal.appointment.barberId._id || this.responseModal.appointment.barberId,
+              date: this.responseModal.appointment.date,
+              duration: this.responseModal.appointment.totalDuration
+            }
+          })
+          
+          if (!conflictCheck.data.availableTimes.includes(this.responseModal.appointment.time)) {
+            this.showToast('⚠️ Time slot conflict detected! This slot is no longer available.', 'warning')
+            await this.fetchAppointments()
+            this.responseModal.show = false
+            return
+          }
+        }
+        
         await axios.put(`${process.env.VUE_APP_API_URL}/appointments/${this.responseModal.appointment._id}`, {
           status: this.responseModal.status,
-          responseMessage: this.responseModal.message
+          responseMessage: this.responseModal.message,
+          sendEmail: true
         })
+        
         await this.fetchAppointments()
         this.responseModal.show = false
-        alert(`Appointment ${this.responseModal.status}. Email will be sent to customer.`)
+        
+        const statusText = this.responseModal.status === 'confirmed' ? 'accepted' : 'rejected'
+        const icon = this.responseModal.status === 'confirmed' ? '✅' : '❌'
+        this.showToast(`${icon} Appointment ${statusText} successfully! Customer has been notified.`, 'success')
       } catch (error) {
         console.error('Error responding to appointment:', error)
-        alert('Error updating appointment')
+        const errorMsg = error.response?.data?.message || error.message
+        if (errorMsg.includes('conflict')) {
+          this.showToast('⚠️ ' + errorMsg, 'warning')
+        } else {
+          this.showToast('❌ Error updating appointment: ' + errorMsg, 'error')
+        }
       }
     },
 
+async setReminder(appointment) {
+      try {
+        const response = await axios.post(`${process.env.VUE_APP_API_URL}/appointments/${appointment._id}/reminder`)
+        
+        if (response.data.scheduledFor) {
+          const scheduledTime = new Date(response.data.scheduledFor).toLocaleTimeString()
+          this.showToast(`🔔 Reminder scheduled for ${scheduledTime} (10 min before appointment)`, 'success')
+        } else {
+          this.showToast(`⏰ ${response.data.message}`, 'info')
+        }
+      } catch (error) {
+        console.error('Error setting reminder:', error)
+        this.showToast('❌ Failed to set reminder: ' + (error.response?.data?.message || error.message), 'error')
+      }
+    },
+    confirmAction(appointment, action) {
+      this.confirmModal = {
+        show: true,
+        appointment,
+        action,
+        message: action === 'confirmed' 
+          ? 'This will approve the appointment and notify the customer.'
+          : 'This will mark the appointment as completed.'
+      }
+    },
+    async executeAction() {
+      try {
+        await this.updateAppointmentStatus(this.confirmModal.appointment, this.confirmModal.action)
+        this.confirmModal.show = false
+      } catch (error) {
+        console.error('Error executing action:', error)
+      }
+    },
+    async updateBarberProfile() {
+      try {
+        if (!this.primaryBarber) return
+const updateData = {
+          name: this.barberProfile.name,
+          email: this.barberProfile.email,
+          specialties: this.barberProfile.specialties.split(',').map(s => s.trim()).filter(s => s),
+          phone: this.barberProfile.phone,
+          bio: this.barberProfile.bio
+        }
+        await axios.put(`${process.env.VUE_APP_API_URL}/barbers/${this.primaryBarber._id}`, updateData)
+        await this.fetchBarbers()
+        this.showToast('Barber profile updated successfully!', 'success')
+      } catch (error) {
+        console.error('Error updating barber profile:', error)
+        this.showToast('Error updating profile', 'error')
+      }
+    },
+    async updateAdminProfile() {
+      try {
+        if (this.adminProfile.newPassword && this.adminProfile.newPassword !== this.adminProfile.confirmPassword) {
+          this.showToast('New passwords do not match', 'warning')
+          return
+        }
+        
+        if (!this.adminProfile.name.trim()) {
+          this.showToast('Admin name is required', 'warning')
+          return
+        }
+        
+        if (!this.adminProfile.email.trim()) {
+          this.showToast('Email is required', 'warning')
+          return
+        }
+        
+        const updateData = {
+          name: this.adminProfile.name.trim(),
+          email: this.adminProfile.email.trim()
+        }
+        
+        if (this.adminProfile.newPassword) {
+          if (!this.adminProfile.currentPassword) {
+            this.showToast('Current password is required to change password', 'warning')
+            return
+          }
+          updateData.currentPassword = this.adminProfile.currentPassword
+          updateData.newPassword = this.adminProfile.newPassword
+        }
+        
+        const response = await axios.put(`${process.env.VUE_APP_API_URL}/auth/profile`, updateData)
+        
+        // Update localStorage with new admin data
+        if (response.data.admin) {
+          localStorage.setItem('adminUser', JSON.stringify(response.data.admin))
+        }
+        
+        this.showToast('Admin settings updated successfully!', 'success')
+        this.adminProfile.currentPassword = ''
+        this.adminProfile.newPassword = ''
+        this.adminProfile.confirmPassword = ''
+        
+        // Reload admin profile data
+        this.loadAdminProfile()
+      } catch (error) {
+        console.error('Error updating admin profile:', error)
+        this.showToast('Error updating settings: ' + (error.response?.data?.message || error.message), 'error')
+      }
+    },
+    loadAdminProfile() {
+      if (this.adminUser) {
+        this.adminProfile.name = this.adminUser.name || this.adminUser.username || ''
+        this.adminProfile.email = this.adminUser.email || ''
+      }
+      if (this.primaryBarber) {
+        this.barberProfile.name = this.primaryBarber.name || ''
+        this.barberProfile.email = this.primaryBarber.email || ''
+        this.barberProfile.phone = this.primaryBarber.phone || ''
+        this.barberProfile.bio = this.primaryBarber.bio || ''
+        this.barberProfile.specialties = Array.isArray(this.primaryBarber.specialties) 
+          ? this.primaryBarber.specialties.join(', ') 
+          : this.primaryBarber.specialties || ''
+      }
+    },
+    showToast(message, type = 'info') {
+      const toast = {
+        id: ++this.toastId,
+        message,
+        type
+      }
+      this.toasts.push(toast)
+      setTimeout(() => {
+        this.removeToast(this.toasts.findIndex(t => t.id === toast.id))
+      }, 4000)
+    },
+    removeToast(index) {
+      if (index > -1) {
+        this.toasts.splice(index, 1)
+      }
+    },
+    getToastIcon(type) {
+      const icons = {
+        success: 'fas fa-check-circle text-success',
+        error: 'fas fa-exclamation-circle text-danger',
+        warning: 'fas fa-exclamation-triangle text-warning',
+        info: 'fas fa-info-circle text-info'
+      }
+      return icons[type] || icons.info
+    },
+    getToastTitle(type) {
+      const titles = {
+        success: 'Success',
+        error: 'Error',
+        warning: 'Warning',
+        info: 'Information'
+      }
+      return titles[type] || titles.info
+    }
   }
 }
 </script>
@@ -869,6 +1370,64 @@ getTimeSlotsForDay(dayIndex) {
 <style scoped>
 .admin-panel {
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  padding: 0 1rem;
+}
+
+.admin-content {
+  padding: 0 1rem;
+}
+
+/* Desktop Optimizations */
+@media (min-width: 992px) {
+  .admin-panel {
+    padding: 0 2rem;
+  }
+  
+  .admin-content {
+    padding: 0 2rem;
+  }
+  
+  .calendar-container,
+  .timeslots-container,
+  .profile-container {
+    height: calc(100vh - 200px);
+    min-height: 600px;
+  }
+  
+  .calendar-card,
+  .appointments-card,
+  .profile-card,
+  .admin-settings-card {
+    height: 100%;
+  }
+  
+  .calendar-body {
+    height: calc(100% - 80px);
+    overflow: hidden;
+  }
+  
+  .appointments-body {
+    height: calc(100% - 80px);
+    overflow-y: auto;
+  }
+  
+  .profile-body,
+  .admin-settings-body {
+    height: calc(100% - 80px);
+    overflow-y: auto;
+  }
+  
+  .timeslots-body {
+    height: calc(100% - 80px);
+    overflow-y: auto;
+  }
+  
+  .timeslots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+    height: 100%;
+  }
 }
 
 .admin-header {
@@ -942,6 +1501,7 @@ getTimeSlotsForDay(dayIndex) {
 .card {
   border-radius: 12px;
   transition: all 0.2s ease;
+  margin-bottom: 1.5rem;
 }
 
 .card:hover {
@@ -956,6 +1516,7 @@ getTimeSlotsForDay(dayIndex) {
   border-radius: 8px;
   font-weight: 500;
   transition: all 0.2s ease;
+  margin: 0.25rem;
 }
 
 .btn:hover {
@@ -966,6 +1527,8 @@ getTimeSlotsForDay(dayIndex) {
   border-radius: 8px;
   border: 1px solid #d1d5db;
   transition: all 0.2s ease;
+  margin-bottom: 0.5rem;
+  padding: 0.75rem;
 }
 
 .form-control:focus, .form-select:focus {
@@ -1038,6 +1601,154 @@ getTimeSlotsForDay(dayIndex) {
   background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
   color: white;
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Mobile Navigation */
+.mobile-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.nav-icon {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 1.1rem;
+}
+
+.nav-text {
+  display: block;
+  font-size: 0.8rem;
+}
+
+.nav-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #dc2626;
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+/* Professional Animations */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.card {
+  animation: slideInUp 0.6s ease-out;
+}
+
+.appointment-card {
+  animation: fadeInScale 0.4s ease-out;
+}
+
+.btn:active {
+  animation: pulse 0.2s ease-in-out;
+}
+
+/* Confirmation Modal */
+.confirmation-modal {
+  border-radius: 20px;
+  border: none;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  animation: fadeInScale 0.3s ease-out;
+}
+
+.confirmation-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  font-size: 1.5rem;
+}
+
+.appointment-preview {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.preview-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.preview-item:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .mobile-nav {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .nav-item {
+    flex: 1;
+    min-width: 80px;
+    max-width: 100px;
+  }
+  
+  .nav-link {
+    padding: 0.75rem 0.5rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .nav-text {
+    font-size: 0.7rem;
+  }
+  
+  .nav-icon {
+    font-size: 1rem;
+    margin-bottom: 0.2rem;
+  }
 }
 
 .dropdown-header {
@@ -1160,8 +1871,7 @@ getTimeSlotsForDay(dayIndex) {
 }
 
 .appointment-card {
-  display: flex;
-  align-items: flex-start;
+  position: relative;
   padding: 1rem;
   border-bottom: 1px solid #e5e7eb;
   transition: background-color 0.2s;
@@ -1175,10 +1885,16 @@ getTimeSlotsForDay(dayIndex) {
   border-bottom: none;
 }
 
+.appointment-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
 .appointment-time {
   min-width: 80px;
   text-align: center;
-  margin-right: 1rem;
 }
 
 .appointment-time i {
@@ -1222,15 +1938,29 @@ getTimeSlotsForDay(dayIndex) {
   font-size: 0.75rem;
 }
 
-.appointment-status {
-  text-align: center;
-  min-width: 100px;
+.appointment-status-corner {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
 }
 
-.appointment-actions {
+.appointment-footer {
   display: flex;
-  gap: 0.25rem;
-  justify-content: center;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f3f4f6;
+}
+
+.appointment-actions-left {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.appointment-actions-right {
+  display: flex;
+  gap: 0.5rem;
 }
 
 .empty-state {
@@ -1238,41 +1968,32 @@ getTimeSlotsForDay(dayIndex) {
   padding: 3rem 1rem;
 }
 
-/* Mobile Responsive */
+/* Mobile Responsive Styles */
 @media (max-width: 768px) {
-  .appointment-card {
-    flex-direction: column;
-    gap: 0.75rem;
+  .admin-panel {
+    padding: 0 0.5rem;
   }
   
-  .appointment-time {
-    min-width: auto;
-    text-align: left;
-    margin-right: 0;
+  .admin-content {
+    padding: 0 0.5rem;
   }
   
-  .appointment-time i {
-    display: inline;
-    margin-bottom: 0;
-    margin-right: 0.5rem;
+  /* Mobile Calendar */
+  .mobile-calendar-controls {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   }
   
-  .appointment-status {
-    min-width: auto;
-    text-align: left;
-  }
-  
-  .appointment-actions {
-    justify-content: flex-start;
-  }
   .calendar-day {
-    min-height: 50px;
-    padding: 4px;
+    min-height: 45px;
+    padding: 4px 2px;
   }
   
   .calendar-header {
-    padding: 6px 4px;
-    font-size: 0.7rem;
+    padding: 8px 4px;
+    font-size: 0.75rem;
   }
   
   .day-number {
@@ -1283,32 +2004,179 @@ getTimeSlotsForDay(dayIndex) {
     width: 16px;
     height: 16px;
     font-size: 0.6rem;
-    top: 4px;
-    right: 4px;
+    top: 2px;
+    right: 2px;
   }
   
-  .time-slots-grid {
-    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
-    gap: 6px;
+  /* Mobile Appointments */
+  .appointment-card {
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    margin: 0.5rem;
+    padding: 1rem;
   }
   
-  .admin-panel .col-lg-3 {
-    order: 2;
+  .appointment-header {
+    border-bottom: 1px solid #f3f4f6;
+    padding-bottom: 0.5rem;
   }
   
-  .admin-panel .col-lg-9 {
-    order: 1;
+  .appointment-time-mobile {
+    font-size: 0.9rem;
+  }
+  
+  .appointment-actions {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #f3f4f6;
+  }
+  
+  /* Mobile Requests */
+  .request-card {
+    border-radius: 12px;
+    margin-bottom: 1rem;
+  }
+  
+  .request-header {
+    margin-bottom: 1rem;
+  }
+  
+  .detail-item {
+    font-size: 0.9rem;
+    padding: 0.25rem 0;
+  }
+  
+  .price-display {
+    text-align: center;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+  }
+  
+  /* Mobile Services */
+  .service-card {
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+  }
+  
+  .service-form-card {
+    border-radius: 12px;
+  }
+  
+  /* Mobile Time Slots */
+  .timeslots-grid {
+    display: block;
+  }
+  
+  .day-schedule-card {
+    margin-bottom: 1rem;
+  }
+  
+  .time-inputs {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .time-separator {
+    text-align: center;
+    padding: 0.5rem 0;
+    font-weight: 600;
+  }
+  
+  /* Mobile Profile */
+  .profile-tab .row {
+    margin: 0;
+  }
+  
+  .password-section {
+    background: #f8fafc;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+  }
+  
+  /* Mobile Navigation */
+  .mobile-nav {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .mobile-nav::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .nav-item {
+    flex: 0 0 auto;
+    min-width: 70px;
+  }
+  
+  .nav-link {
+    padding: 0.75rem 0.5rem;
+    text-align: center;
+    white-space: nowrap;
+  }
+  
+  .nav-text {
+    font-size: 0.7rem;
+  }
+  
+  .nav-icon {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  /* Mobile Cards */
+  .card {
+    border-radius: 12px;
+    margin-bottom: 1rem;
+  }
+  
+  .card-body {
+    padding: 1rem;
+  }
+  
+  /* Mobile Buttons */
+  .btn {
+    margin: 0.125rem;
+    font-size: 0.875rem;
+  }
+  
+  .btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8rem;
+  }
+  
+  /* Mobile Forms */
+  .form-control {
+    padding: 0.75rem;
+    font-size: 1rem;
+  }
+  
+  .form-label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
   }
 }
 
 @media (max-width: 576px) {
+  .admin-panel {
+    padding: 0 0.25rem;
+  }
+  
+  .admin-content {
+    padding: 0 0.25rem;
+  }
+  
   .calendar-day {
-    min-height: 40px;
-    padding: 2px;
+    min-height: 35px;
+    padding: 2px 1px;
   }
   
   .calendar-header {
-    padding: 4px 2px;
+    padding: 6px 2px;
     font-size: 0.65rem;
   }
   
@@ -1316,13 +2184,412 @@ getTimeSlotsForDay(dayIndex) {
     font-size: 0.7rem;
   }
   
+  .booking-badge {
+    width: 14px;
+    height: 14px;
+    font-size: 0.55rem;
+  }
+  
   .card-body {
-    padding: 1rem;
+    padding: 0.75rem;
   }
   
   .btn-sm {
     padding: 0.25rem 0.5rem;
     font-size: 0.75rem;
   }
+  
+  .mobile-calendar-controls {
+    padding: 0.75rem;
+  }
+  
+  .appointment-card {
+    margin: 0.25rem;
+    padding: 0.75rem;
+  }
+  
+  .nav-link {
+    padding: 0.5rem 0.25rem;
+  }
+  
+  .nav-text {
+    font-size: 0.65rem;
+  }
+  
+  .nav-icon {
+    font-size: 0.9rem;
+  }
+}
+
+/* Professional Time Slots Design */
+.day-schedule-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border: 1px solid #e5e7eb;
+}
+
+/* Desktop Time Slots Grid */
+@media (min-width: 992px) {
+  .timeslots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .timeslots-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1400px) {
+  .timeslots-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.day-schedule-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.day-header {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.day-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.slot-count {
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.status-active {
+  background: #dcfce7;
+  color: #166534;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-inactive {
+  background: #fef2f2;
+  color: #991b1b;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.add-slot-section {
+  padding: 1rem;
+  background: #fafbfc;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.add-slot-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.time-inputs {
+  display: flex;
+  align-items: end;
+  gap: 0.75rem;
+}
+
+.time-input-group {
+  flex: 1;
+}
+
+.time-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.time-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.time-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  outline: none;
+}
+
+.time-separator {
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-weight: 500;
+  padding-bottom: 0.5rem;
+}
+
+.add-slot-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-slot-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.slots-list {
+  padding: 1rem;
+}
+
+.slots-header {
+  margin-bottom: 0.75rem;
+}
+
+.slots-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.slots-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.slot-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  margin-bottom: 0.5rem;
+}
+
+.slot-item:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.slot-time {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.slot-icon {
+  color: #3b82f6;
+  font-size: 0.9rem;
+}
+
+.time-range {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 0.9rem;
+}
+
+.delete-slot-btn {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.8rem;
+}
+
+.delete-slot-btn:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  transform: scale(1.05);
+}
+
+.no-slots {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: #6b7280;
+}
+
+.no-slots-text {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .time-inputs {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .time-separator {
+    text-align: center;
+    padding: 0;
+  }
+  
+  .day-header {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+}
+
+/* Professional Toast Notifications */
+.toast {
+  min-width: 300px;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(10px);
+  margin-bottom: 0.75rem;
+  animation: slideInRight 0.3s ease-out;
+}
+
+.toast-success {
+  background: rgba(16, 185, 129, 0.95);
+  color: white;
+}
+
+.toast-error {
+  background: rgba(239, 68, 68, 0.95);
+  color: white;
+}
+
+.toast-warning {
+  background: rgba(245, 158, 11, 0.95);
+  color: white;
+}
+
+.toast-info {
+  background: rgba(59, 130, 246, 0.95);
+  color: white;
+}
+
+.toast-header {
+  background: transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  color: inherit;
+  padding: 0.75rem 1rem;
+}
+
+.toast-body {
+  padding: 0.75rem 1rem;
+  font-weight: 500;
+}
+
+.toast .btn-close {
+  filter: brightness(0) invert(1);
+  opacity: 0.8;
+}
+
+.toast .btn-close:hover {
+  opacity: 1;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 576px) {
+  .toast {
+    min-width: 280px;
+    margin: 0 0.5rem 0.75rem 0.5rem;
+  }
+  
+  .toast-container {
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 1rem;
+  }
+}
+
+/* Password Input Groups */
+.input-group {
+  display: flex;
+  width: 100%;
+}
+
+.input-group .form-control {
+  flex: 1;
+  margin-bottom: 0;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.input-group .btn {
+  border-color: #d1d5db;
+  color: #6b7280;
+  margin: 0;
+  padding: 0.75rem 0.75rem;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-left: 0;
+  flex-shrink: 0;
+  width: auto;
+}
+
+.input-group .btn:hover {
+  background-color: #f3f4f6;
+  border-color: #d1d5db;
+  color: #374151;
+}
+
+.input-group .form-control:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+  z-index: 3;
+}
+
+.input-group .form-control:focus + .btn {
+  border-color: #3b82f6;
 }
 </style>

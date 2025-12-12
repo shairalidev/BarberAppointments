@@ -16,7 +16,8 @@ const appointmentSchema = new mongoose.Schema({
     type: String,
     enum: ['pending', 'confirmed', 'completed', 'cancelled'],
     default: 'pending'
-  }
+  },
+  responseMessage: { type: String }
 }, { timestamps: true });
 
 appointmentSchema.index({ barberId: 1, date: 1, time: 1 }, { unique: true });
