@@ -53,10 +53,10 @@ export default {
     },
     getTitle(type) {
       const titles = {
-        success: 'Success',
-        error: 'Error',
-        warning: 'Warning',
-        info: 'Information'
+        success: this.$t('common.success'),
+        error: this.$t('common.error'),
+        warning: this.$t('common.warning'),
+        info: this.$t('common.info')
       }
       return titles[type] || titles.info
     }

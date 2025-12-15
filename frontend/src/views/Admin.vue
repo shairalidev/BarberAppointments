@@ -11,16 +11,16 @@
             <p class="text-muted mb-0">{{ $t('admin.manageBookings') }}</p>
           </div>
           <div class="col-auto">
-            <div class="d-flex align-items-center gap-3">
-              <button 
-                @click="toggleLanguage" 
+            <div class="d-flex flex-wrap align-items-center justify-content-end gap-2 gap-md-3 action-toolbar">
+              <button
+                @click="toggleLanguage"
                 class="btn btn-outline-primary btn-sm px-2"
                 :title="currentLocale === 'en' ? 'Switch to German' : 'Switch to English'"
               >
                 {{ currentLocale === 'en' ? 'DE' : 'EN' }}
               </button>
-              <button 
-                @click="toggleTheme" 
+              <button
+                @click="toggleTheme"
                 :class="['theme-toggle', { active: isDark }]"
                 :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
               >
@@ -56,7 +56,7 @@
     <!-- Navigation Tabs -->
     <div class="container-fluid mb-4">
       <div class="nav-tabs-wrapper">
-        <ul class="nav nav-tabs border-0 mobile-nav">
+        <ul class="nav nav-tabs border-0 mobile-nav flex-nowrap overflow-auto" role="tablist">
           <li class="nav-item">
             <button 
               @click="activeTab = 'calendar'" 
@@ -1476,6 +1476,10 @@ async setReminder(appointment) {
   background-color: var(--bg-secondary) !important;
 }
 
+.action-toolbar {
+  min-width: 260px;
+}
+
 .admin-avatar {
   width: 48px;
   height: 48px;
@@ -1643,6 +1647,7 @@ async setReminder(appointment) {
   border-radius: 12px;
   box-shadow: var(--shadow-md);
   padding: 0.5rem;
+  overflow-x: auto;
 }
 
 .nav-tabs .nav-link {
@@ -1675,6 +1680,11 @@ async setReminder(appointment) {
   display: flex;
   justify-content: space-between;
   gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.mobile-nav::-webkit-scrollbar {
+  display: none;
 }
 
 .nav-icon {
@@ -1702,6 +1712,25 @@ async setReminder(appointment) {
   align-items: center;
   justify-content: center;
   font-weight: 600;
+}
+
+@media (max-width: 991px) {
+  .action-toolbar {
+    width: 100%;
+  }
+
+  .nav-tabs-wrapper {
+    padding: 0.35rem 0.5rem;
+  }
+
+  .mobile-nav {
+    gap: 0.35rem;
+  }
+
+  .mobile-nav .nav-link {
+    min-width: 120px;
+    text-align: center;
+  }
 }
 
 /* Professional Animations */

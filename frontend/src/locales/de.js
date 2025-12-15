@@ -206,6 +206,7 @@ export default {
     defaultCredentials: 'Standard: admin / admin'
   },
   toast: {
+    availabilityError: 'Verfügbare Zeiten können nicht geladen werden. Bitte versuche es erneut.',
     appointmentAccepted: 'Termin erfolgreich angenommen! Kunde wurde benachrichtigt.',
     appointmentRejected: 'Termin erfolgreich abgelehnt! Kunde wurde benachrichtigt.',
     appointmentUpdateError: '❌ Fehler beim Aktualisieren des Termins: {message}',
