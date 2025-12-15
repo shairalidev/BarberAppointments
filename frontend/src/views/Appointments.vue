@@ -361,6 +361,20 @@ canProceedFromSchedule() {
         dateA.getDate() === dateB.getDate()
       )
     },
+    formatBackendMessage(message) {
+      if (!message) return ''
+
+      if (this.$te(message)) {
+        return this.$t(message)
+      }
+
+      const namespacedKey = message.startsWith('backend.') ? message : `backend.${message}`
+      if (this.$te(namespacedKey)) {
+        return this.$t(namespacedKey)
+      }
+
+      return message
+    },
     async fetchServices() {
       try {
         const response = await axios.get(`${process.env.VUE_APP_API_URL}/services/public`)
@@ -471,7 +485,7 @@ async fetchBarbers() {
             timeout: 5000,
             position: 'top-center'
           })
-          
+
           // Refresh availability and suggest alternatives
           await this.handleAvailabilityRefresh()
           return
@@ -502,7 +516,7 @@ async fetchBarbers() {
           timeout: 5000,
           position: 'top-center'
         })
-        
+
         // Show additional message if provided by backend
         if (response.data.message) {
           setTimeout(() => {

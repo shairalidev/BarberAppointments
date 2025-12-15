@@ -941,6 +941,20 @@ adminProfile: {
         this.loadAdminProfile()
       }
     },
+    resolveBackendMessage(message) {
+      if (!message) return ''
+
+      if (this.$te(message)) {
+        return this.$t(message)
+      }
+
+      const namespacedKey = message.startsWith('backend.') ? message : `backend.${message}`
+      if (this.$te(namespacedKey)) {
+        return this.$t(namespacedKey)
+      }
+
+      return message
+    },
     async fetchAppointments() {
       try {
         const response = await axios.get(`${process.env.VUE_APP_API_URL}/appointments`)
@@ -1238,7 +1252,7 @@ getTimeSlotsForDay(dayIndex) {
         this.showToast(this.$t(statusKey), 'success')
       } catch (error) {
         console.error('Error responding to appointment:', error)
-        const errorMsg = error.response?.data?.message || error.message
+        const errorMsg = this.resolveBackendMessage(error.response?.data?.message || error.message)
         if (errorMsg.includes('conflict')) {
           this.showToast(this.$t('toast.conflictWarning', { message: errorMsg }), 'warning')
         } else {
@@ -1678,7 +1692,8 @@ async setReminder(appointment) {
 /* Mobile Navigation */
 .mobile-nav {
   display: flex;
-  justify-content: space-between;
+  align-items: stretch;
+  justify-content: flex-start;
   gap: 0.5rem;
   white-space: nowrap;
 }
@@ -1687,16 +1702,20 @@ async setReminder(appointment) {
   display: none;
 }
 
-.nav-icon {
-  display: block;
-  margin-bottom: 0.25rem;
-  font-size: 1.1rem;
+.mobile-nav::-webkit-scrollbar {
+  display: none;
 }
 
-.nav-text {
-  display: block;
-  font-size: 0.8rem;
-}
+  .nav-icon {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 1.1rem;
+  }
+
+  .nav-text {
+    display: block;
+    font-size: 0.8rem;
+  }
 
 .nav-badge {
   position: absolute;
@@ -2221,22 +2240,26 @@ async setReminder(appointment) {
   
   .nav-item {
     flex: 0 0 auto;
-    min-width: 70px;
+    min-width: 150px;
   }
-  
+
   .nav-link {
-    padding: 0.75rem 0.5rem;
-    text-align: center;
+    padding: 0.65rem 0.75rem;
+    text-align: left;
     white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
   }
-  
+
   .nav-text {
-    font-size: 0.7rem;
+    font-size: 0.85rem;
   }
-  
+
   .nav-icon {
     font-size: 1rem;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0;
   }
   
   /* Mobile Cards */
