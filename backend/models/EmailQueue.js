@@ -2,10 +2,10 @@ const mongoose = require('mongoose');
 
 const emailQueueSchema = new mongoose.Schema({
   appointmentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Appointment', required: true },
-  emailType: { 
-    type: String, 
-    enum: ['reminder', 'confirmation', 'rejection'], 
-    required: true 
+  emailType: {
+    type: String,
+    enum: ['reminder', 'confirmation', 'rejection', 'booking_received'],
+    required: true
   },
   recipientEmail: { type: String, required: true },
   recipientName: { type: String, required: true },

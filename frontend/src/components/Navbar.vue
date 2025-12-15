@@ -18,7 +18,7 @@
       </button>
       
       <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav me-auto">
+        <ul class="navbar-nav me-auto w-100 w-lg-auto">
           <li class="nav-item">
             <router-link class="nav-link px-3 fw-medium" to="/" exact-active-class="active">
               <i class="fas fa-home me-1"></i>{{ $t('nav.home') }}
@@ -31,10 +31,10 @@
           </li>
         </ul>
         
-        <div class="navbar-nav">
+        <div class="navbar-actions d-none d-lg-flex align-items-center">
           <div class="nav-item me-2">
-            <button 
-              @click="toggleLanguage" 
+            <button
+              @click="toggleLanguage"
               class="btn btn-outline-primary btn-sm px-2"
               :title="currentLocale === 'en' ? 'Switch to German' : 'Switch to English'"
             >
@@ -42,8 +42,8 @@
             </button>
           </div>
           <div class="nav-item me-3">
-            <button 
-              @click="toggleTheme" 
+            <button
+              @click="toggleTheme"
               :class="['theme-toggle', { active: isDark }]"
               :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
             >
@@ -57,11 +57,11 @@
             </button>
           </div>
           <div v-else class="nav-item dropdown">
-            <a 
-              class="nav-link dropdown-toggle d-flex align-items-center" 
-              href="#" 
-              id="adminDropdown" 
-              role="button" 
+            <a
+              class="nav-link dropdown-toggle d-flex align-items-center"
+              href="#"
+              id="adminDropdown"
+              role="button"
               data-bs-toggle="dropdown"
               aria-expanded="false"
             >
@@ -83,6 +83,43 @@
                 </a>
               </li>
             </ul>
+          </div>
+        </div>
+
+        <div class="mobile-actions d-lg-none w-100 mt-3">
+          <div class="d-flex flex-wrap align-items-center gap-2">
+            <button
+              @click="toggleLanguage"
+              class="btn btn-outline-primary btn-sm flex-grow-1"
+              :title="currentLocale === 'en' ? 'Switch to German' : 'Switch to English'"
+            >
+              <i class="fas fa-language me-2"></i>{{ currentLocale === 'en' ? 'Deutsch' : 'English' }}
+            </button>
+            <button
+              @click="toggleTheme"
+              :class="['theme-toggle', 'flex-grow-1', { active: isDark }]"
+              :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+            >
+              <i class="fas fa-sun theme-toggle-icon sun-icon"></i>
+              <i class="fas fa-moon theme-toggle-icon moon-icon"></i>
+            </button>
+            <button
+              v-if="!isLoggedIn"
+              @click="showLogin"
+              class="btn btn-outline-primary btn-sm flex-grow-1"
+            >
+              <i class="fas fa-shield-alt me-2"></i>{{ $t('nav.admin') }}
+            </button>
+            <div v-else class="flex-grow-1">
+              <div class="btn-group w-100">
+                <router-link class="btn btn-primary btn-sm" to="/admin">
+                  <i class="fas fa-cog me-2"></i>{{ $t('nav.admin') }}
+                </router-link>
+                <button @click.prevent="logout" class="btn btn-outline-danger btn-sm">
+                  <i class="fas fa-sign-out-alt"></i>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -127,6 +164,10 @@ export default {
   backdrop-filter: blur(10px);
   background-color: var(--bg-secondary) !important;
   border-bottom: 1px solid var(--border-color);
+}
+
+.navbar-actions {
+  gap: 0.25rem;
 }
 
 .brand-icon {
@@ -243,6 +284,16 @@ export default {
   .navbar-nav .btn {
     width: 100%;
     margin-top: 0.5rem;
+  }
+
+  .mobile-actions .btn,
+  .mobile-actions .theme-toggle {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .mobile-actions .btn-group .btn {
+    width: auto;
   }
   
   .nav-link.active::after {
