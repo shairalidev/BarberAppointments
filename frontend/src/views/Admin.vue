@@ -1054,7 +1054,7 @@ async quickBookAppointment() {
       } catch (error) {
         console.error('Error booking appointment:', error)
         this.showToast(
-          this.$t('toast.bookingError', { message: this.resolveBackendMessage(error.response?.data?.message || error.message) }),
+          this.$t('toast.bookingError', { message: error.response?.data?.message || error.message }),
           'error'
         )
       }
@@ -1123,7 +1123,7 @@ async addTimeSlot(dayIndex) {
       } catch (error) {
         console.error('Error adding time slot:', error)
         this.showToast(
-          this.$t('toast.timeSlotAddError', { message: this.resolveBackendMessage(error.response?.data?.message || error.message) }),
+          this.$t('toast.timeSlotAddError', { message: error.response?.data?.message || error.message }),
           'error'
         )
       }
@@ -1137,7 +1137,7 @@ async addTimeSlot(dayIndex) {
       } catch (error) {
         console.error('Error deleting time slot:', error)
         this.showToast(
-          this.$t('toast.timeSlotDeleteError', { message: this.resolveBackendMessage(error.response?.data?.message || error.message) }),
+          this.$t('toast.timeSlotDeleteError', { message: error.response?.data?.message || error.message }),
           'error'
         )
       }
@@ -1269,12 +1269,12 @@ async setReminder(appointment) {
           const scheduledTime = new Date(response.data.scheduledFor).toLocaleTimeString()
           this.showToast(this.$t('toast.reminderScheduled', { time: scheduledTime }), 'success')
         } else {
-          this.showToast(this.$t('toast.reminderInfo', { message: this.resolveBackendMessage(response.data.message) }), 'info')
+          this.showToast(this.$t('toast.reminderInfo', { message: response.data.message }), 'info')
         }
       } catch (error) {
         console.error('Error setting reminder:', error)
         this.showToast(
-          this.$t('toast.reminderError', { message: this.resolveBackendMessage(error.response?.data?.message || error.message) }),
+          this.$t('toast.reminderError', { message: error.response?.data?.message || error.message }),
           'error'
         )
       }
@@ -1363,7 +1363,7 @@ async setReminder(appointment) {
       } catch (error) {
         console.error('Error updating admin profile:', error)
         this.showToast(
-          this.$t('toast.settingsUpdateError', { message: this.resolveBackendMessage(error.response?.data?.message || error.message) }),
+          this.$t('toast.settingsUpdateError', { message: error.response?.data?.message || error.message }),
           'error'
         )
       }
@@ -1696,7 +1696,10 @@ async setReminder(appointment) {
   justify-content: flex-start;
   gap: 0.5rem;
   white-space: nowrap;
-  padding: 0.35rem 0.5rem;
+}
+
+.mobile-nav::-webkit-scrollbar {
+  display: none;
 }
 
 .mobile-nav::-webkit-scrollbar {
@@ -1741,32 +1744,11 @@ async setReminder(appointment) {
 
   .mobile-nav {
     gap: 0.35rem;
-    padding: 0.35rem 0.25rem;
   }
 
   .mobile-nav .nav-link {
-    min-width: 150px;
-    text-align: left;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-    padding: 0.65rem 0.75rem;
-  }
-
-  .mobile-nav .nav-icon {
-    display: inline-flex;
-    margin: 0;
-    font-size: 1rem;
-  }
-
-  .mobile-nav .nav-text {
-    font-size: 0.85rem;
-  }
-
-  .mobile-nav .nav-badge {
-    top: 6px;
-    right: 6px;
+    min-width: 120px;
+    text-align: center;
   }
 }
 
