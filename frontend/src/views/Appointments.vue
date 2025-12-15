@@ -480,7 +480,7 @@ async fetchBarbers() {
 
         if (!validationResponse.data.available) {
           this.toast.error(this.$t('toast.bookingValidationError', {
-            reason: this.formatBackendMessage(validationResponse.data.reason)
+            reason: validationResponse.data.reason
           }), {
             timeout: 5000,
             position: 'top-center'
@@ -521,7 +521,7 @@ async fetchBarbers() {
         if (response.data.message) {
           setTimeout(() => {
             this.toast.info(this.$t('toast.backendInfo', {
-              message: this.formatBackendMessage(response.data.message)
+              message: response.data.message
             }), {
               timeout: 7000,
               position: 'top-center'
@@ -536,7 +536,7 @@ async fetchBarbers() {
 
         if (errorData?.message) {
           message = this.$t('toast.bookingErrorWithReason', {
-            reason: this.formatBackendMessage(errorData.message)
+            reason: errorData.message
           })
         }
 
