@@ -3,16 +3,16 @@
     <div class="container py-5">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <p class="text-primary fw-semibold mb-1">Step {{ currentStep }} of 3</p>
-          <h2 class="fw-bold mb-0">Schedule your visit</h2>
-          <p class="text-muted">Choose services, pick an available time, and share your details to confirm.</p>
+          <p class="text-primary fw-semibold mb-1">{{ $t('booking.step') }} {{ currentStep }} {{ $t('booking.of') }} 3</p>
+          <h2 class="fw-bold mb-0">{{ $t('booking.title') }}</h2>
+          <p class="text-muted">{{ $t('booking.subtitle') }}</p>
         </div>
         <div class="d-none d-md-flex align-items-center gap-3">
           <div v-for="step in steps" :key="step.number" class="step-indicator" :class="{ active: currentStep === step.number, completed: currentStep > step.number }">
             <span class="badge rounded-circle me-2" :class="currentStep >= step.number ? 'bg-primary' : 'bg-light text-muted'">{{ step.number }}</span>
             <div class="d-flex flex-column">
-              <small class="text-muted">{{ step.subtitle }}</small>
-              <strong>{{ step.label }}</strong>
+              <small class="text-muted">{{ $t(`booking.stepSubtitle${step.number}`) }}</small>
+              <strong>{{ $t(`booking.step${step.number}`) }}</strong>
             </div>
           </div>
         </div>
@@ -22,11 +22,11 @@
         <div class="col-lg-8">
           <!-- Step 1: Services -->
           <div v-if="currentStep === 1" class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-white py-3">
+            <div class="card-header py-3">
               <div class="d-flex justify-content-between align-items-center">
                 <div>
-                  <h5 class="mb-0">Choose services</h5>
-                  <small class="text-muted">Select one or more services to continue</small>
+                  <h5 class="mb-0">{{ $t('booking.step1') }}</h5>
+                  <small class="text-muted">{{ $t('booking.chooseServices') }}</small>
                 </div>
 
               </div>
@@ -55,18 +55,18 @@
                 </div>
               </div>
               <div class="d-flex justify-content-between align-items-center mt-3">
-                <small class="text-muted">You can choose multiple services before continuing.</small>
-                <button class="btn btn-primary" @click="goToStep(2)">Choose time</button>
+                <small class="text-muted">{{ $t('booking.youCanChooseMultiple') }}</small>
+                <button class="btn btn-primary" @click="goToStep(2)">{{ $t('booking.chooseTime') }}</button>
               </div>
             </div>
           </div>
 
           <!-- Step 2: Date and Time -->
           <div v-if="currentStep === 2" class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
               <div>
-                <h5 class="mb-0">Pick a date and time</h5>
-                <small class="text-muted">Only free slots are shown for the selected barber</small>
+                <h5 class="mb-0">{{ $t('booking.pickDateTime') }}</h5>
+                <small class="text-muted">{{ $t('booking.pickDateTimeDesc') }}</small>
               </div>
               <button class="btn btn-link text-decoration-none" @click="goToStep(1)">
                 <i class="fas fa-arrow-left me-1"></i> Services
@@ -121,9 +121,9 @@
                 <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                   <div>
                     <p class="mb-0 fw-semibold">Available times</p>
-                    <small v-if="selectedDate" class="text-muted">What time works best for you on {{ formatDate(selectedDate) }}?</small>
+                    <small v-if="selectedDate" class="text-muted">{{ $t('booking.whatTimeWorks') }} {{ formatDate(selectedDate) }}?</small>
                   </div>
-                  <small class="text-muted">Times are listed in your local time zone.</small>
+                  <small class="text-muted">{{ $t('booking.timesInLocalTimezone') }}</small>
                 </div>
                 <div class="slot-grid">
                   <button
@@ -141,18 +141,18 @@
               </div>
 
               <div class="d-flex justify-content-between align-items-center">
-                <button class="btn btn-outline-secondary" @click="goToStep(1)">Back</button>
-                <button class="btn btn-primary" :disabled="!canProceedFromSchedule" @click="goToStep(3)">Continue</button>
+                <button class="btn btn-outline-secondary" @click="goToStep(1)">{{ $t('common.back') }}</button>
+                <button class="btn btn-primary" :disabled="!canProceedFromSchedule" @click="goToStep(3)">{{ $t('common.continue') }}</button>
               </div>
             </div>
           </div>
 
           <!-- Step 3: Contact details -->
           <div v-if="currentStep === 3" class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
               <div>
-                <h5 class="mb-0">Your details</h5>
-                <small class="text-muted">We will send confirmation to your email</small>
+                <h5 class="mb-0">{{ $t('booking.yourDetails') }}</h5>
+                <small class="text-muted">{{ $t('booking.detailsDesc') }}</small>
               </div>
               <button class="btn btn-link text-decoration-none" @click="goToStep(2)">
                 <i class="fas fa-arrow-left me-1"></i> Date & time
@@ -161,20 +161,20 @@
             <div class="card-body">
               <form @submit.prevent="submitBooking" class="row g-3">
                 <div class="col-md-6">
-                  <label class="form-label">Full name *</label>
+                  <label class="form-label">{{ $t('booking.fullName') }} *</label>
                   <input v-model="customer.name" type="text" class="form-control" required>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Mobile number *</label>
+                  <label class="form-label">{{ $t('booking.mobileNumber') }} *</label>
                   <input v-model="customer.phone" type="tel" class="form-control" required>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Email</label>
-                  <input v-model="customer.email" type="email" class="form-control" placeholder="you@example.com">
+                  <label class="form-label">{{ $t('booking.email') }}</label>
+                  <input v-model="customer.email" type="email" class="form-control" :placeholder="$t('booking.youAtExample')">
                 </div>
                 <div class="col-12">
                   <label class="form-label">Special requests</label>
-                  <textarea v-model="customer.notes" class="form-control" rows="3" placeholder="Anything else we should know?"></textarea>
+                  <textarea v-model="customer.notes" class="form-control" rows="3" :placeholder="$t('booking.anythingElseToKnow')"></textarea>
                 </div>
                 <div class="col-12">
                   <div class="form-check">
@@ -185,8 +185,8 @@
                   </div>
                 </div>
                 <div class="col-12 d-flex justify-content-between align-items-center">
-                  <button type="button" class="btn btn-outline-secondary" @click="goToStep(2)">Back</button>
-                  <button type="submit" class="btn btn-primary">Book now</button>
+                  <button type="button" class="btn btn-outline-secondary" @click="goToStep(2)">{{ $t('common.back') }}</button>
+                  <button type="submit" class="btn btn-primary">{{ $t('booking.bookNow') }}</button>
                 </div>
               </form>
             </div>
@@ -195,21 +195,21 @@
 
         <div class="col-lg-4">
           <div class="card border-0 shadow-sm sticky-top" style="top: 100px;">
-            <div class="card-header bg-white py-3">
-              <h6 class="mb-0">Summary</h6>
+            <div class="card-header py-3">
+              <h6 class="mb-0">{{ $t('booking.summary') }}</h6>
             </div>
             <div class="card-body">
               <div class="d-flex justify-content-between mb-2">
-                <span class="text-muted">Date</span>
-                <strong>{{ selectedDate ? formatDate(selectedDate) : 'Choose a date' }}</strong>
+                <span class="text-muted">{{ $t('booking.date') }}</span>
+                <strong>{{ selectedDate ? formatDate(selectedDate) : $t('booking.chooseDate') }}</strong>
               </div>
               <div class="d-flex justify-content-between mb-2">
-                <span class="text-muted">Time</span>
-                <strong>{{ selectedTime || 'Pick a slot' }}</strong>
+                <span class="text-muted">{{ $t('booking.time') }}</span>
+                <strong>{{ selectedTime || $t('booking.pickSlot') }}</strong>
               </div>
 <div class="d-flex justify-content-between mb-2">
-                <span class="text-muted">Barber</span>
-                <strong>{{ selectedBarberName || 'Professional Barber' }}</strong>
+                <span class="text-muted">{{ $t('booking.barber') }}</span>
+                <strong>{{ selectedBarberName || $t('booking.professionalBarber') }}</strong>
               </div>
               <hr>
               <div>
@@ -220,15 +220,15 @@
                     <strong>{{ formatCurrency(service.price) }}</strong>
                   </div>
                 </div>
-                <p v-else class="text-muted small">No services selected</p>
+                <p v-else class="text-muted small">{{ $t('booking.noServicesSelected') }}</p>
               </div>
               <hr>
               <div class="d-flex justify-content-between">
-                <span>Total duration</span>
+                <span>{{ $t('booking.totalDuration') }}</span>
                 <strong>{{ totalDuration }} min</strong>
               </div>
               <div class="d-flex justify-content-between">
-                <span>Total price</span>
+                <span>{{ $t('booking.totalPrice') }}</span>
                 <strong>{{ formatCurrency(totalPrice) }}</strong>
               </div>
             </div>
@@ -567,9 +567,10 @@ async fetchBarbers() {
 
 <style scoped>
 .booking-page {
-  background: #f8fafc;
+  background: var(--bg-primary);
   min-height: 100vh;
   padding-bottom: 2rem;
+  color: var(--text-primary);
 }
 
 @media (max-width: 768px) {
@@ -593,34 +594,35 @@ async fetchBarbers() {
   padding: 0.5rem 0.75rem;
   border-radius: 12px;
   transition: all 0.2s ease;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .step-indicator.active {
-  background: #eef2ff;
-  color: #1d4ed8;
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--primary);
 }
 
 .step-indicator.completed {
-  color: #22c55e;
+  color: var(--success);
 }
 
 .service-card {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
-  background: #fff;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .service-card:hover {
-  border-color: #cbd5e1;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  border-color: var(--text-muted);
+  box-shadow: var(--shadow-lg);
 }
 
 .service-card.selected {
-  border-color: #2563eb;
+  border-color: var(--primary);
   box-shadow: 0 12px 25px rgba(37, 99, 235, 0.15);
 }
 
@@ -634,10 +636,10 @@ async fetchBarbers() {
 }
 
 .calendar-wrapper {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   border-radius: 14px;
   padding: 16px;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
 }
 
 .icon-button {
@@ -647,7 +649,9 @@ async fetchBarbers() {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .week-grid {
@@ -664,39 +668,40 @@ async fetchBarbers() {
 }
 
 .day-card {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 12px;
-  background: #ffffff;
+  background: var(--bg-secondary);
   text-align: left;
   transition: all 0.2s ease;
+  color: var(--text-primary);
 }
 
 .day-card .weekday {
   display: block;
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .day-card .day-number {
   font-size: 1.4rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .day-card:hover {
-  border-color: #cbd5e1;
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+  border-color: var(--text-muted);
+  box-shadow: var(--shadow-lg);
 }
 
 .day-card.today {
-  border-color: #cbd5e1;
-  background: #f8fafc;
+  border-color: var(--text-muted);
+  background: var(--bg-tertiary);
 }
 
 .day-card.active {
-  border-color: #2563eb;
-  background: #e0e7ff;
+  border-color: var(--primary);
+  background: rgba(59, 130, 246, 0.1);
   box-shadow: 0 12px 30px rgba(37, 99, 235, 0.2);
 }
 

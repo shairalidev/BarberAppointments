@@ -67,17 +67,23 @@ export default {
 <style scoped>
 .toast {
   border-radius: 12px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-lg);
   border: none;
   margin-bottom: 12px;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .toast-header {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid var(--border-color);
   border-radius: 12px 12px 0 0;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .toast-body {
   border-radius: 0 0 12px 12px;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
 }
 </style>

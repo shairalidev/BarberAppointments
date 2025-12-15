@@ -1,10 +1,12 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
+import i18n from './i18n'
 import { setupAxiosInterceptors } from './utils/auth'
 import Toast from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
 import './assets/toast-custom.css'
+import './assets/theme.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import * as bootstrap from 'bootstrap'
 
@@ -33,4 +35,4 @@ const toastOptions = {
   newestOnTop: true
 }
 
-app.use(router).use(Toast, toastOptions).mount('#app')
+app.use(router).use(i18n).use(Toast, toastOptions).mount('#app')

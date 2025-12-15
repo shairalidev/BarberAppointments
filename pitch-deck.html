@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BarberPro - Pitch Deck</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .slide {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .slide-content {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        
+        .slide h1 {
+            color: #2c3e50;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+        
+        .slide h2 {
+            color: #3498db;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #3498db;
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .tech-badge {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            margin: 0.25rem;
+            display: inline-block;
+            font-size: 0.9rem;
+        }
+        
+        .navigation {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+        }
+        
+        .nav-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            margin: 0 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-btn:hover {
+            background: #2980b9;
+            transform: scale(1.1);
+        }
+        
+        .slide-counter {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: rgba(255,255,255,0.9);
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: 600;
+        }
+        
+        .icon-large {
+            font-size: 3rem;
+            color: #3498db;
+            margin-bottom: 1rem;
+        }
+        
+        .screenshot-placeholder {
+            background: linear-gradient(135deg, #f1f2f6, #ddd);
+            border-radius: 10px;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 1.2rem;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-counter">
+        <span id="currentSlide">1</span> / <span id="totalSlides">10</span>
+    </div>
+
+    <!-- Slide 1: Title -->
+    <div class="slide" id="slide-1">
+        <div class="slide-content text-center">
+            <i class="fas fa-cut icon-large"></i>
+            <h1 class="display-3 mb-4">BarberPro</h1>
+            <h2 class="h3 text-muted mb-4">Single Barber Appointment System</h2>
+            <p class="lead">A modern, full-stack web application designed for individual barber shops with professional UI/UX, admin authentication, and streamlined appointment management.</p>
+            <div class="mt-4">
+                <span class="tech-badge">Vue.js 3</span>
+                <span class="tech-badge">Node.js</span>
+                <span class="tech-badge">MongoDB</span>
+                <span class="tech-badge">Bootstrap 5</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 2: Problem & Solution -->
+    <div class="slide" id="slide-2" style="display: none;">
+        <div class="slide-content">
+            <h1 class="text-center mb-5">The Problem & Our Solution</h1>
+            <div class="row">
+                <div class="col-md-6">
+                    <h2><i class="fas fa-exclamation-triangle text-warning"></i> The Problem</h2>
+                    <ul class="list-unstyled">
+                        <li class="mb-3"><i class="fas fa-times text-danger me-2"></i> Manual appointment booking via phone calls</li>
+                        <li class="mb-3"><i class="fas fa-times text-danger me-2"></i> Double bookings and scheduling conflicts</li>
+                        <li class="mb-3"><i class="fas fa-times text-danger me-2"></i> No online presence for modern customers</li>
+                        <li class="mb-3"><i class="fas fa-times text-danger me-2"></i> Difficulty managing services and pricing</li>
+                        <li class="mb-3"><i class="fas fa-times text-danger me-2"></i> Lost revenue from missed appointments</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h2><i class="fas fa-lightbulb text-warning"></i> Our Solution</h2>
+                    <ul class="list-unstyled">
+                        <li class="mb-3"><i class="fas fa-check text-success me-2"></i> 24/7 online booking system</li>
+                        <li class="mb-3"><i class="fas fa-check text-success me-2"></i> Real-time availability checking</li>
+                        <li class="mb-3"><i class="fas fa-check text-success me-2"></i> Professional web presence</li>
+                        <li class="mb-3"><i class="fas fa-check text-success me-2"></i> Complete service management</li>
+                        <li class="mb-3"><i class="fas fa-check text-success me-2"></i> Automated appointment tracking</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: Customer Features -->
+    <div class="slide" id="slide-3" style="display: none;">
+        <div class="slide-content">
+            <h1 class="text-center mb-5">Customer Experience</h1>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <h3><i class="fas fa-calendar-check text-primary"></i> 3-Step Booking Process</h3>
+                        <p>Intuitive booking flow: Service Selection → Date/Time → Customer Details</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3><i class="fas fa-clock text-primary"></i> Real-time Availability</h3>
+                        <p>Dynamic time slots based on service duration and barber availability</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3><i class="fas fa-mobile-alt text-primary"></i> Mobile-First Design</h3>
+                        <p>Responsive design with Bootstrap 5 and smooth animations</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <h3><i class="fas fa-scissors text-primary"></i> Service Selection</h3>
+                        <p>Multiple services with pricing and duration display</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3><i class="fas fa-calendar-alt text-primary"></i> Interactive Calendar</h3>
+                        <p>Week view calendar with intuitive date selection</p>
+                    </div>
+                    <div class="screenshot-placeholder">
+                        <i class="fas fa-image me-2"></i> Customer Booking Interface
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Admin Features -->
+    <div class="slide" id="slide-4" style="display: none;">
+        <div class="slide-content">
+            <h1 class="text-center mb-5">Admin Dashboard Features</h1>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <h3><i class="fas fa-shield-alt text-primary"></i> Secure Authentication</h3>
+                        <p>JWT-based login system with password hashing</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3><i class="fas fa-calendar text-primary"></i> Calendar Management</h3>
+                        <p>Interactive calendar with quick appointment booking</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3><i class="fas fa-tasks text-primary"></i> Appointment Management</h3>
+                        <p>View, filter, and update appointment statuses</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <h3><i class="fas fa-cogs text-primary"></i> Service Management</h3>
+                        <p>Add, edit, delete services with pricing and duration</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3><i class="fas fa-clock text-primary"></i> Time Slot Management</h3>
+                        <p>Configure weekly working hours and availability</p>
+                    </div>
+                    <div class="screenshot-placeholder">
+                        <i class="fas fa-image me-2"></i> Admin Dashboard Interface
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Technical Architecture -->
+    <div class="slide" id="slide-5" style="display: none;">
+        <div class="slide-content">
+            <h1 class="text-center mb-5">Technical Architecture</h1>
+            <div class="row text-center">
+                <div class="col-md-4">
+                    <i class="fab fa-vuejs icon-large" style="color: #4FC08D;"></i>
+                    <h3>Frontend</h3>
+                    <div class="tech-badge">Vue.js 3</div>
+                    <div class="tech-badge">Vue Router</div>
+                    <div class="tech-badge">Bootstrap 5</div>
+                    <div class="tech-badge">Axios</div>
+                    <div class="tech-badge">Font Awesome</div>
+                </div>
+                <div class="col-md-4">
+                    <i class="fab fa-node-js icon-large" style="color: #68A063;"></i>
+                    <h3>Backend</h3>
+                    <div class="tech-badge">Node.js</div>
+                    <div class="tech-badge">Express.js</div>
+                    <div class="tech-badge">JWT</div>
+                    <div class="tech-badge">bcryptjs</div>
+                    <div class="tech-badge">Mongoose</div>
+                </div>
+                <div class="col-md-4">
+                    <i class="fas fa-database icon-large" style="color: #4DB33D;"></i>
+                    <h3>Database</h3>
+                    <div class="tech-badge">MongoDB</div>
+                    <div class="tech-badge">Cloud Ready</div>
+                    <div class="tech-badge">Scalable</div>
+                </div>
+            </div>
+            <div class="mt-5">
+                <h3 class="text-center mb-4">Key Technical Features</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i> RESTful API Design</li>
+                            <li><i class="fas fa-check text-success me-2"></i> JWT Authentication</li>
+                            <li><i class="fas fa-check text-success me-2"></i> Responsive Design</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i> Input Validation</li>
+                            <li><i class="fas fa-check text-success me-2"></i> CORS Configuration</li>
+                            <li><i class="fas fa-check text-success me-2"></i> Environment Variables</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: API Endpoints -->
+    <div class="slide" id="slide-6" style="display: none;">
+        <div class="slide-content">
+            <h1 class="text-center mb-5">API Functionality</h1>
+            <div class="row">
+                <div class="col-md-6">
+                    <h3><i class="fas fa-globe text-success"></i> Public Endpoints</h3>
+                    <div class="feature-card">
+                        <strong>Customer Booking</strong>
+                        <ul class="mt-2 mb-0">
+                            <li>View available services</li>
+                            <li>Check barber availability</li>
+                            <li>Create appointments</li>
+                            <li>Check time slot availability</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h3><i class="fas fa-lock text-warning"></i> Protected Admin Endpoints</h3>
+                    <div class="feature-card">
+                        <strong>Admin Management</strong>
+                        <ul class="mt-2 mb-0">
+                            <li>Manage all appointments</li>
+                            <li>CRUD operations for services</li>
+                            <li>Barber profile management</li>
+                            <li>Time slot configuration</li>
+                            <li>Authentication system</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4">
+                <h3 class="text-center">Security Features</h3>
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <i class="fas fa-key icon-large" style="color: #e74c3c;"></i>
+                        <h5>JWT Tokens</h5>
+                        <p>Secure authentication</p>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <i class="fas fa-shield-alt icon-large" style="color: #27ae60;"></i>
+                        <h5>Password Hashing</h5>
+                        <p>bcryptjs encryption</p>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <i class="fas fa-filter icon-large" style="color: #f39c12;"></i>
+                        <h5>Input Validation</h5>
+                        <p>Data sanitization</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: User Journey -->
+    <div class="slide" id="slide-7" style="display: none;">
+        <div class="slide-content">
+            <h1 class="text-center mb-5">Customer Booking Journey</h1>
+            <div class="row">
+                <div class="col-md-3 text-center">
+                    <div class="feature-card">
+                        <i class="fas fa-mouse-pointer icon-large" style="color: #3498db;"></i>
+                        <h4>Step 1</h4>
+                        <h5>Visit Website</h5>
+                        <p>Customer lands on professional booking page</p>
+                    </div>
+                </div>
+                <div class="col-md-3 text-center">
+                    <div class="feature-card">
+                        <i class="fas fa-scissors icon-large" style="color: #e74c3c;"></i>
+                        <h4>Step 2</h4>
+                        <h5>Select Services</h5>
+                        <p>Choose from available services with pricing</p>
+                    </div>
+                </div>
+                <div class="col-md-3 text-center">
+                    <div class="feature-card">
+                        <i class="fas fa-calendar-alt icon-large" style="color: #27ae60;"></i>
+                        <h4>Step 3</h4>
+                        <h5>Pick Date & Time</h5>
+                        <p>Select from real-time available slots</p>
+                    </div>
+                </div>
+                <div class="col-md-3 text-center">
+                    <div class="feature-card">
+                        <i class="fas fa-user icon-large" style="color: #f39c12;"></i>
+                        <h4>Step 4</h4>
+                        <h5>Enter Details</h5>
+                        <p>Provide contact information and confirm</p>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-5 text-center">
+                <h3>Admin Workflow</h3>
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <div class="feature-card">
+                            <i class="fas fa-bell text-primary"></i>
+                            <h5>Receive Notification</h5>
+                            <p>New appointment appears in dashboard</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="feature-card">
+                            <i class="fas fa-check-circle text-success"></i>
+                            <h5>Confirm Appointment</h5>
+                            <p>Update status and manage schedule</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="feature-card">
+                            <i class="fas fa-chart-line text-info"></i>
+                            <h5>Track Business</h5>
+                            <p>Monitor appointments and revenue</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 8: Benefits -->
+    <div class="slide" id="slide-8" style="display: none;">
+        <div class="slide-content">
+            <h1 class="text-center mb-5">Business Benefits</h1>
+            <div class="row">
+                <div class="col-md-6">
+                    <h3><i class="fas fa-chart-line text-success"></i> Increased Revenue</h3>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-arrow-up text-success me-2"></i> 24/7 booking availability</li>
+                        <li class="mb-2"><i class="fas fa-arrow-up text-success me-2"></i> Reduced no-shows with confirmations</li>
+                        <li class="mb-2"><i class="fas fa-arrow-up text-success me-2"></i> Professional online presence</li>
+                        <li class="mb-2"><i class="fas fa-arrow-up text-success me-2"></i> Efficient time management</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h3><i class="fas fa-clock text-primary"></i> Time Savings</h3>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-save text-primary me-2"></i> No more phone booking calls</li>
+                        <li class="mb-2"><i class="fas fa-save text-primary me-2"></i> Automated scheduling</li>
+                        <li class="mb-2"><i class="fas fa-save text-primary me-2"></i> Digital appointment management</li>
+                        <li class="mb-2"><i class="fas fa-save text-primary me-2"></i> Quick service updates</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <h3><i class="fas fa-users text-info"></i> Better Customer Experience</h3>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-smile text-info me-2"></i> Convenient online booking</li>
+                        <li class="mb-2"><i class="fas fa-smile text-info me-2"></i> Real-time availability</li>
+                        <li class="mb-2"><i class="fas fa-smile text-info me-2"></i> Mobile-friendly interface</li>
+                        <li class="mb-2"><i class="fas fa-smile text-info me-2"></i> Professional appearance</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h3><i class="fas fa-cog text-warning"></i> Operational Efficiency</h3>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-cogs text-warning me-2"></i> Centralized management</li>
+                        <li class="mb-2"><i class="fas fa-cogs text-warning me-2"></i> Service pricing control</li>
+                        <li class="mb-2"><i class="fas fa-cogs text-warning me-2"></i> Working hours management</li>
+                        <li class="mb-2"><i class="fas fa-cogs text-warning me-2"></i> Appointment tracking</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 9: Setup & Deployment -->
+    <div class="slide" id="slide-9" style="display: none;">
+        <div class="slide-content">
+            <h1 class="text-center mb-5">Easy Setup & Deployment</h1>
+            <div class="row">
+                <div class="col-md-6">
+                    <h3><i class="fas fa-rocket text-primary"></i> Quick Setup</h3>
+                    <div class="feature-card">
+                        <h5>Automated Installation</h5>
+                        <p>One-click setup scripts for easy deployment</p>
+                        <code>setup-single-barber.bat</code>
+                    </div>
+                    <div class="feature-card">
+                        <h5>Admin Configuration</h5>
+                        <p>Automated admin user creation</p>
+                        <code>setup-admin.bat</code>
+                    </div>
+                    <div class="feature-card">
+                        <h5>Environment Ready</h5>
+                        <p>Pre-configured for development and production</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h3><i class="fas fa-cloud text-success"></i> Deployment Options</h3>
+                    <div class="feature-card">
+                        <h5>Local Hosting</h5>
+                        <p>Run on your own computer or server</p>
+                    </div>
+                    <div class="feature-card">
+                        <h5>Cloud Ready</h5>
+                        <p>Deploy to AWS, Heroku, or any cloud provider</p>
+                    </div>
+                    <div class="feature-card">
+                        <h5>Database Options</h5>
+                        <p>Local MongoDB or MongoDB Atlas cloud</p>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4">
+                <h3 class="text-center">System Requirements</h3>
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <i class="fab fa-node-js icon-large" style="color: #68A063;"></i>
+                        <h5>Node.js v14+</h5>
+                    </div>
+                    <div class="col-md-4">
+                        <i class="fas fa-database icon-large" style="color: #4DB33D;"></i>
+                        <h5>MongoDB</h5>
+                    </div>
+                    <div class="col-md-4">
+                        <i class="fas fa-globe icon-large" style="color: #3498db;"></i>
+                        <h5>Web Browser</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 10: Call to Action -->
+    <div class="slide" id="slide-10" style="display: none;">
+        <div class="slide-content text-center">
+            <i class="fas fa-cut icon-large"></i>
+            <h1 class="display-4 mb-4">Ready to Modernize Your Barber Shop?</h1>
+            <p class="lead mb-5">BarberPro provides everything you need to take your barber business online and streamline your operations.</p>
+            
+            <div class="row mb-5">
+                <div class="col-md-4">
+                    <i class="fas fa-calendar-check icon-large" style="color: #27ae60;"></i>
+                    <h4>Professional Booking</h4>
+                    <p>Give your customers a modern booking experience</p>
+                </div>
+                <div class="col-md-4">
+                    <i class="fas fa-chart-line icon-large" style="color: #3498db;"></i>
+                    <h4>Grow Your Business</h4>
+                    <p>Increase revenue with 24/7 online availability</p>
+                </div>
+                <div class="col-md-4">
+                    <i class="fas fa-mobile-alt icon-large" style="color: #e74c3c;"></i>
+                    <h4>Mobile Ready</h4>
+                    <p>Works perfectly on all devices</p>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h3>Get Started Today!</h3>
+                <p class="text-muted">Contact us to set up BarberPro for your business</p>
+            </div>
+
+            <div class="mt-4">
+                <span class="tech-badge">Vue.js 3</span>
+                <span class="tech-badge">Node.js</span>
+                <span class="tech-badge">MongoDB</span>
+                <span class="tech-badge">Bootstrap 5</span>
+                <span class="tech-badge">JWT Auth</span>
+                <span class="tech-badge">Mobile First</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="navigation">
+        <button class="nav-btn" onclick="previousSlide()">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <button class="nav-btn" onclick="nextSlide()">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentSlideIndex = 1;
+        const totalSlides = 10;
+
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+            
+            if (n > totalSlides) currentSlideIndex = 1;
+            if (n < 1) currentSlideIndex = totalSlides;
+            
+            slides.forEach(slide => slide.style.display = 'none');
+            document.getElementById(`slide-${currentSlideIndex}`).style.display = 'flex';
+            
+            document.getElementById('currentSlide').textContent = currentSlideIndex;
+            document.getElementById('totalSlides').textContent = totalSlides;
+        }
+
+        function nextSlide() {
+            currentSlideIndex++;
+            showSlide(currentSlideIndex);
+        }
+
+        function previousSlide() {
+            currentSlideIndex--;
+            showSlide(currentSlideIndex);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                previousSlide();
+            }
+        });
+
+        // Initialize
+        showSlide(currentSlideIndex);
+    </script>
+</body>
+</html>

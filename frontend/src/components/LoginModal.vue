@@ -4,38 +4,38 @@
       <div class="modal-content border-0 shadow-lg">
         <div class="modal-header border-0 pb-0">
           <h5 class="modal-title fw-bold text-primary">
-            <i class="fas fa-shield-alt me-2"></i>Admin Login
+            <i class="fas fa-shield-alt me-2"></i>{{ $t('login.adminLogin') }}
           </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body p-4">
           <form @submit.prevent="login">
             <div class="mb-3">
-              <label class="form-label fw-semibold">Username</label>
+              <label class="form-label fw-semibold">{{ $t('login.username') }}</label>
               <div class="input-group">
-                <span class="input-group-text bg-light border-end-0">
+                <span class="input-group-text border-end-0">
                   <i class="fas fa-user text-muted"></i>
                 </span>
                 <input 
                   v-model="credentials.username" 
                   type="text" 
                   class="form-control border-start-0 ps-0" 
-                  placeholder="Enter username"
+                  :placeholder="$t('login.enterUsername')"
                   required
                 >
               </div>
             </div>
             <div class="mb-4">
-              <label class="form-label fw-semibold">Password</label>
+              <label class="form-label fw-semibold">{{ $t('login.password') }}</label>
               <div class="input-group">
-                <span class="input-group-text bg-light border-end-0">
+                <span class="input-group-text border-end-0">
                   <i class="fas fa-lock text-muted"></i>
                 </span>
                 <input 
                   v-model="credentials.password" 
                   :type="showPassword ? 'text' : 'password'" 
                   class="form-control border-start-0 border-end-0 ps-0" 
-                  placeholder="Enter password"
+                  :placeholder="$t('login.enterPassword')"
                   required
                 >
                 <button 
@@ -57,13 +57,13 @@
             >
               <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
               <i v-else class="fas fa-sign-in-alt me-2"></i>
-              {{ loading ? 'Signing In...' : 'Sign In' }}
+              {{ loading ? $t('login.signingIn') : $t('login.signIn') }}
             </button>
           </form>
           <div class="text-center mt-3">
             <small class="text-muted">
               <i class="fas fa-info-circle me-1"></i>
-              Default: admin / admin
+              {{ $t('login.defaultCredentials') }}
             </small>
           </div>
         </div>
@@ -126,29 +126,40 @@ export default {
 <style scoped>
 .modal-content {
   border-radius: 16px;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .input-group-text {
   border-radius: 8px 0 0 8px;
+  background-color: var(--bg-tertiary);
+  border-color: var(--border-color);
+  color: var(--text-secondary);
 }
 
 .form-control {
   border-radius: 0 8px 8px 0;
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
 }
 
 .form-control:focus {
   box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
-  border-color: #3b82f6;
+  border-color: var(--primary);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .btn-primary {
   border-radius: 8px;
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  background: var(--primary);
   border: none;
   transition: all 0.2s;
 }
 
 .btn-primary:hover {
+  background: var(--primary-hover);
   transform: translateY(-1px);
   box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
 }

@@ -21,20 +21,39 @@
         <ul class="navbar-nav me-auto">
           <li class="nav-item">
             <router-link class="nav-link px-3 fw-medium" to="/" exact-active-class="active">
-              <i class="fas fa-home me-1"></i>Home
+              <i class="fas fa-home me-1"></i>{{ $t('nav.home') }}
             </router-link>
           </li>
           <li class="nav-item">
             <router-link class="nav-link px-3 fw-medium" to="/appointments" active-class="active">
-              <i class="fas fa-calendar-plus me-1"></i>Book Now
+              <i class="fas fa-calendar-plus me-1"></i>{{ $t('nav.bookNow') }}
             </router-link>
           </li>
         </ul>
         
         <div class="navbar-nav">
+          <div class="nav-item me-2">
+            <button 
+              @click="toggleLanguage" 
+              class="btn btn-outline-primary btn-sm px-2"
+              :title="currentLocale === 'en' ? 'Switch to German' : 'Switch to English'"
+            >
+              {{ currentLocale === 'en' ? 'DE' : 'EN' }}
+            </button>
+          </div>
+          <div class="nav-item me-3">
+            <button 
+              @click="toggleTheme" 
+              :class="['theme-toggle', { active: isDark }]"
+              :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+            >
+              <i class="fas fa-sun theme-toggle-icon sun-icon"></i>
+              <i class="fas fa-moon theme-toggle-icon moon-icon"></i>
+            </button>
+          </div>
           <div v-if="!isLoggedIn" class="nav-item">
             <button @click="showLogin" class="btn btn-outline-primary btn-sm px-3">
-              <i class="fas fa-shield-alt me-1"></i>Admin
+              <i class="fas fa-shield-alt me-1"></i>{{ $t('nav.admin') }}
             </button>
           </div>
           <div v-else class="nav-item dropdown">
@@ -73,9 +92,16 @@
 
 <script>
 import { logout as authLogout } from '../utils/auth'
+import { useTheme } from '../composables/useTheme'
+import { useLanguage } from '../composables/useLanguage'
 
 export default {
   name: 'Navbar',
+  setup() {
+    const { isDark, toggleTheme } = useTheme()
+    const { currentLocale, toggleLanguage } = useLanguage()
+    return { isDark, toggleTheme, currentLocale, toggleLanguage }
+  },
   computed: {
     isLoggedIn() {
       return !!localStorage.getItem('adminToken')
@@ -99,7 +125,8 @@ export default {
 <style scoped>
 .navbar {
   backdrop-filter: blur(10px);
-  background-color: rgba(255, 255, 255, 0.95) !important;
+  background-color: var(--bg-secondary) !important;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .brand-icon {
@@ -123,19 +150,19 @@ export default {
 }
 
 .nav-link {
-  color: #64748b !important;
+  color: var(--text-secondary) !important;
   transition: all 0.2s ease;
   border-radius: 8px;
   position: relative;
 }
 
 .nav-link:hover {
-  color: #3b82f6 !important;
+  color: var(--primary) !important;
   background-color: rgba(59, 130, 246, 0.1);
 }
 
 .nav-link.active {
-  color: #3b82f6 !important;
+  color: var(--primary) !important;
   background-color: rgba(59, 130, 246, 0.1);
 }
 
@@ -147,7 +174,7 @@ export default {
   transform: translateX(-50%);
   width: 20px;
   height: 3px;
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  background: var(--primary);
   border-radius: 2px;
 }
 
@@ -164,10 +191,11 @@ export default {
 }
 
 .dropdown-menu {
-  border: none;
+  border: 1px solid var(--border-color);
   border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-lg);
   margin-top: 8px;
+  background-color: var(--bg-secondary);
 }
 
 .dropdown-item {
@@ -179,20 +207,20 @@ export default {
 
 .dropdown-item:hover {
   background-color: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  color: var(--primary);
 }
 
 .btn-outline-primary {
   border-radius: 20px;
-  border: 2px solid #3b82f6;
-  color: #3b82f6;
+  border: 2px solid var(--primary);
+  color: var(--primary);
   font-weight: 600;
   transition: all 0.2s;
 }
 
 .btn-outline-primary:hover {
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-  border-color: #3b82f6;
+  background: var(--primary);
+  border-color: var(--primary);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
@@ -202,9 +230,9 @@ export default {
   .navbar-collapse {
     margin-top: 1rem;
     padding: 1rem;
-    background: white;
+    background: var(--bg-secondary);
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--shadow-md);
   }
   
   .nav-link {

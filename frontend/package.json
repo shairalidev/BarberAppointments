@@ -9,10 +9,12 @@
     "start": "NODE_ENV=production pm2 start server.js --name barberapp-backend"
   },
   "dependencies": {
+    "@vueuse/core": "^14.1.0",
     "axios": "^1.5.0",
     "bootstrap": "^5.3.1",
     "bootstrap-vue-next": "^0.14.0",
     "vue": "^3.3.4",
+    "vue-i18n": "^9.14.5",
     "vue-router": "^4.2.4",
     "vue-toastification": "^2.0.0-rc.5"
   },

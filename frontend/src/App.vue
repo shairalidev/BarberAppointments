@@ -11,6 +11,7 @@
 import Navbar from './components/Navbar.vue'
 import LoginModal from './components/LoginModal.vue'
 import Toast from './components/Toast.vue'
+import { useTheme } from './composables/useTheme'
 
 export default {
   name: 'App',
@@ -18,6 +19,10 @@ export default {
     Navbar,
     LoginModal,
     Toast
+  },
+  setup() {
+    // Initialize theme
+    useTheme()
   },
   methods: {
     showLoginModal() {
@@ -43,7 +48,50 @@ export default {
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background-color: #f8fafc;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary) !important;
+}
+
+.text-primary {
+  color: var(--primary) !important;
+}
+
+.text-secondary {
+  color: var(--text-secondary) !important;
+}
+
+.bg-primary {
+  background-color: var(--primary) !important;
+}
+
+.bg-secondary {
+  background-color: var(--text-secondary) !important;
+}
+
+.bg-success {
+  background-color: var(--success) !important;
+}
+
+.bg-danger {
+  background-color: var(--danger) !important;
+}
+
+.bg-warning {
+  background-color: var(--warning) !important;
+}
+
+.bg-info {
+  background-color: var(--info) !important;
+}
+
+.card-header {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border-bottom: 1px solid var(--border-color) !important;
 }
 
 .navbar-brand {
@@ -53,16 +101,16 @@ body {
 
 .nav-link {
   font-weight: 500;
-  color: #64748b !important;
+  color: var(--text-secondary) !important;
   transition: color 0.2s;
 }
 
 .nav-link:hover {
-  color: #3b82f6 !important;
+  color: var(--primary) !important;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  background: var(--primary);
   border: none;
   border-radius: 8px;
   font-weight: 600;
@@ -71,18 +119,21 @@ body {
 }
 
 .btn-primary:hover {
+  background: var(--primary-hover);
   transform: translateY(-1px);
   box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
 }
 
 .card {
-  border: none;
+  border: 1px solid var(--border-color);
   border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
   transition: all 0.2s;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .card:hover {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-lg);
 }
 </style>

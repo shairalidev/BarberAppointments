@@ -7,14 +7,14 @@
         <div class="row align-items-center min-vh-90">
           <div class="col-lg-7 col-md-8 text-white hero-content">
             <div class="badge bg-white bg-opacity-25 text-white mb-3 px-3 py-2">💈 Premium Grooming</div>
-            <h1 class="display-2 fw-bold mb-3 hero-title">Your Style,<br>Our Expertise</h1>
-            <p class="lead mb-4 fs-5 hero-subtitle">Experience luxury grooming with master barbers. Book online and step into excellence.</p>
+            <h1 class="display-2 fw-bold mb-3 hero-title">{{ $t('home.title') }}</h1>
+            <p class="lead mb-4 fs-5 hero-subtitle">{{ $t('home.subtitle') }}</p>
             <div class="d-flex flex-column flex-sm-row gap-3">
               <router-link class="btn btn-light btn-lg px-5 py-3 shadow-lg" to="/appointments">
-                <i class="fas fa-calendar-check me-2"></i>Book Now
+                <i class="fas fa-calendar-check me-2"></i>{{ $t('home.bookNow') }}
               </router-link>
               <a href="tel:+1234567890" class="btn btn-outline-light btn-lg px-5 py-3">
-                <i class="fas fa-phone me-2"></i>Call Us
+                <i class="fas fa-phone me-2"></i>{{ $t('home.callUs') }}
               </a>
             </div>
           </div>
@@ -51,9 +51,9 @@
     <section class="services-section py-5">
       <div class="container py-4">
         <div class="text-center mb-5">
-          <span class="badge bg-primary bg-opacity-10 text-primary mb-3 px-3 py-2">Our Services</span>
-          <h2 class="display-5 fw-bold mb-3">Premium Grooming Services</h2>
-          <p class="text-muted fs-6">Tailored services for the modern gentleman</p>
+          <span class="badge bg-primary bg-opacity-10 text-primary mb-3 px-3 py-2">{{ $t('home.services') }}</span>
+          <h2 class="display-5 fw-bold mb-3">{{ $t('home.servicesSubtitle') }}</h2>
+          <p class="text-muted fs-6">{{ $t('home.servicesDescription') }}</p>
         </div>
         <div class="row g-4">
           <div class="col-lg-4 col-md-6" v-for="service in services" :key="service._id">
@@ -72,14 +72,14 @@
         </div>
         <div class="text-center mt-5">
           <router-link class="btn btn-primary btn-lg px-5" to="/appointments">
-            View All Services <i class="fas fa-arrow-right ms-2"></i>
+            {{ $t('home.viewAllServices') }} <i class="fas fa-arrow-right ms-2"></i>
           </router-link>
         </div>
       </div>
     </section>
 
     <!-- Features Section -->
-    <section class="features-section py-5 bg-light">
+    <section class="features-section py-5">
       <div class="container py-4">
         <div class="row g-4">
           <div class="col-lg-3 col-md-6">
@@ -87,8 +87,8 @@
               <div class="feature-icon mb-3">
                 <i class="fas fa-calendar-check"></i>
               </div>
-              <h6 class="fw-bold mb-2">Easy Booking</h6>
-              <p class="text-muted small mb-0">Book online 24/7 in seconds</p>
+              <h6 class="fw-bold mb-2">{{ $t('home.features.easyBooking') }}</h6>
+              <p class="text-muted small mb-0">{{ $t('home.features.easyBookingDesc') }}</p>
             </div>
           </div>
           <div class="col-lg-3 col-md-6">
@@ -96,8 +96,8 @@
               <div class="feature-icon mb-3">
                 <i class="fas fa-user-tie"></i>
               </div>
-              <h6 class="fw-bold mb-2">Expert Barbers</h6>
-              <p class="text-muted small mb-0">Certified professionals</p>
+              <h6 class="fw-bold mb-2">{{ $t('home.features.expertBarbers') }}</h6>
+              <p class="text-muted small mb-0">{{ $t('home.features.expertBarbersDesc') }}</p>
             </div>
           </div>
           <div class="col-lg-3 col-md-6">
@@ -105,8 +105,8 @@
               <div class="feature-icon mb-3">
                 <i class="fas fa-star"></i>
               </div>
-              <h6 class="fw-bold mb-2">Premium Quality</h6>
-              <p class="text-muted small mb-0">Top-tier products used</p>
+              <h6 class="fw-bold mb-2">{{ $t('home.features.premiumQuality') }}</h6>
+              <p class="text-muted small mb-0">{{ $t('home.features.premiumQualityDesc') }}</p>
             </div>
           </div>
           <div class="col-lg-3 col-md-6">
@@ -114,8 +114,8 @@
               <div class="feature-icon mb-3">
                 <i class="fas fa-shield-alt"></i>
               </div>
-              <h6 class="fw-bold mb-2">Hygiene First</h6>
-              <p class="text-muted small mb-0">Sanitized equipment</p>
+              <h6 class="fw-bold mb-2">{{ $t('home.features.hygieneFirst') }}</h6>
+              <p class="text-muted small mb-0">{{ $t('home.features.hygieneFirstDesc') }}</p>
             </div>
           </div>
         </div>
@@ -126,10 +126,10 @@
     <section class="cta-section py-5">
       <div class="container py-4">
         <div class="cta-card text-center text-white p-5">
-          <h2 class="display-6 fw-bold mb-3">Ready for a Fresh Look?</h2>
-          <p class="lead mb-4">Book your appointment today and experience the difference</p>
+          <h2 class="display-6 fw-bold mb-3">{{ $t('home.cta.title') }}</h2>
+          <p class="lead mb-4">{{ $t('home.cta.subtitle') }}</p>
           <router-link class="btn btn-light btn-lg px-5 py-3" to="/appointments">
-            <i class="fas fa-calendar-plus me-2"></i>Schedule Appointment
+            <i class="fas fa-calendar-plus me-2"></i>{{ $t('home.cta.button') }}
           </router-link>
         </div>
       </div>
@@ -209,7 +209,7 @@ export default {
   left: 0;
   width: 100%;
   height: 100px;
-  background: #fff;
+  background: var(--bg-primary);
   clip-path: polygon(0 50%, 100% 0, 100% 100%, 0 100%);
 }
 
@@ -256,28 +256,29 @@ export default {
 
 /* Services Section */
 .services-section {
-  background: #fff;
+  background: var(--bg-primary);
 }
 
 .service-card {
-  background: #fff;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 2rem;
   transition: all 0.3s ease;
   cursor: pointer;
+  color: var(--text-primary);
 }
 
 .service-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  border-color: #3b82f6;
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary);
 }
 
 .service-icon {
   width: 60px;
   height: 60px;
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  background: var(--primary);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -290,42 +291,47 @@ export default {
 .service-card .price {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #3b82f6;
+  color: var(--primary);
 }
 
 .service-card .duration {
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 0.9rem;
 }
 
 /* Features Section */
+.features-section {
+  background: var(--bg-tertiary);
+}
+
 .feature-card {
-  background: white;
+  background: var(--bg-secondary);
   padding: 2rem 1rem;
   border-radius: 12px;
   transition: all 0.3s ease;
+  color: var(--text-primary);
 }
 
 .feature-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-lg);
 }
 
 .feature-icon {
   width: 70px;
   height: 70px;
-  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  background: rgba(59, 130, 246, 0.1);
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-size: 1.8rem;
-  color: #3b82f6;
+  color: var(--primary);
 }
 
 /* CTA Section */
 .cta-section {
-  background: #f9fafb;
+  background: var(--bg-primary);
 }
 
 .cta-card {

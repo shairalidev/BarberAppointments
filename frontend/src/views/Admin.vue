@@ -1,20 +1,36 @@
 <template>
-  <div class="admin-panel bg-light min-vh-100">
+  <div class="admin-panel min-vh-100">
     <!-- Admin Header -->
-    <div class="admin-header bg-white shadow-sm py-3 mb-4">
+    <div class="admin-header shadow-sm py-3 mb-4">
       <div class="container-fluid">
         <div class="row align-items-center">
           <div class="col">
             <h2 class="mb-0 fw-bold text-primary">
-              <i class="fas fa-cut me-2"></i>BarberPro Dashboard
+              <i class="fas fa-cut me-2"></i>{{ $t('admin.dashboard') }}
             </h2>
-            <p class="text-muted mb-0">Manage appointments & bookings</p>
+            <p class="text-muted mb-0">{{ $t('admin.manageBookings') }}</p>
           </div>
           <div class="col-auto">
-            <div class="dropdown">
+            <div class="d-flex align-items-center gap-3">
+              <button 
+                @click="toggleLanguage" 
+                class="btn btn-outline-primary btn-sm px-2"
+                :title="currentLocale === 'en' ? 'Switch to German' : 'Switch to English'"
+              >
+                {{ currentLocale === 'en' ? 'DE' : 'EN' }}
+              </button>
+              <button 
+                @click="toggleTheme" 
+                :class="['theme-toggle', { active: isDark }]"
+                :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+              >
+                <i class="fas fa-sun theme-toggle-icon sun-icon"></i>
+                <i class="fas fa-moon theme-toggle-icon moon-icon"></i>
+              </button>
+              <div class="dropdown">
               <button class="btn btn-link text-decoration-none p-0 d-flex align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <div class="admin-info me-3 text-start">
-                  <small class="text-muted">Welcome back,</small>
+                  <small class="text-muted">{{ $t('admin.welcomeBack') }}</small>
                   <div class="fw-semibold text-dark">{{ adminUser?.username }}</div>
                 </div>
                 <div class="admin-avatar">
@@ -22,14 +38,15 @@
                 </div>
               </button>
               <ul class="dropdown-menu dropdown-menu-end shadow-lg">
-                <li><h6 class="dropdown-header">Admin Account</h6></li>
+                <li><h6 class="dropdown-header">{{ $t('admin.adminAccount') }}</h6></li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
                   <button @click="logout" class="dropdown-item text-danger d-flex align-items-center">
-                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                    <i class="fas fa-sign-out-alt me-2"></i>{{ $t('admin.logout') }}
                   </button>
                 </li>
               </ul>
+              </div>
             </div>
           </div>
         </div>
@@ -46,7 +63,7 @@
               :class="['nav-link', 'fw-medium', activeTab === 'calendar' ? 'active' : '']"
             >
               <i class="fas fa-calendar-alt nav-icon"></i>
-              <span class="nav-text">Calendar</span>
+              <span class="nav-text">{{ $t('admin.calendar') }}</span>
             </button>
           </li>
           <li class="nav-item">
@@ -55,7 +72,7 @@
               :class="['nav-link', 'fw-medium', 'position-relative', activeTab === 'requests' ? 'active' : '']"
             >
               <i class="fas fa-inbox nav-icon"></i>
-              <span class="nav-text">Requests</span>
+              <span class="nav-text">{{ $t('admin.requests') }}</span>
               <span v-if="pendingAppointments.length" class="nav-badge">{{ pendingAppointments.length }}</span>
             </button>
           </li>
@@ -65,7 +82,7 @@
               :class="['nav-link', 'fw-medium', activeTab === 'services' ? 'active' : '']"
             >
               <i class="fas fa-cut nav-icon"></i>
-              <span class="nav-text">Services</span>
+              <span class="nav-text">{{ $t('admin.services') }}</span>
             </button>
           </li>
           <li class="nav-item">
@@ -74,7 +91,7 @@
               :class="['nav-link', 'fw-medium', activeTab === 'timeslots' ? 'active' : '']"
             >
               <i class="fas fa-clock nav-icon"></i>
-              <span class="nav-text">Slots</span>
+              <span class="nav-text">{{ $t('admin.slots') }}</span>
             </button>
           </li>
           <li class="nav-item">
@@ -83,7 +100,7 @@
               :class="['nav-link', 'fw-medium', activeTab === 'profile' ? 'active' : '']"
             >
               <i class="fas fa-user-cog nav-icon"></i>
-              <span class="nav-text">Profile</span>
+              <span class="nav-text">{{ $t('admin.profile') }}</span>
             </button>
           </li>
         </ul>
@@ -117,7 +134,7 @@
               <!-- Calendar Section -->
               <div class="col-12 col-lg-8">
                 <div class="card border-0 shadow-sm calendar-card">
-                  <div class="card-header bg-white py-3 d-none d-lg-block">
+                  <div class="card-header py-3 d-none d-lg-block">
                     <div class="d-flex justify-content-between align-items-center">
                       <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Calendar</h5>
                       <div class="d-flex gap-2">
@@ -221,7 +238,7 @@
           <!-- Booking Requests Tab -->
           <div v-if="activeTab === 'requests'" class="requests-tab">
             <div class="card border-0 shadow-sm">
-              <div class="card-header bg-white py-3">
+              <div class="card-header py-3">
                 <h5 class="mb-0"><i class="fas fa-inbox me-2"></i>Booking Requests</h5>
                 <small class="text-muted">{{ pendingAppointments.length }} pending request(s)</small>
               </div>
@@ -294,7 +311,7 @@
           <!-- Services Tab -->
           <div v-if="activeTab === 'services'" class="services-tab">
             <div class="card border-0 shadow-sm">
-              <div class="card-header bg-white py-3">
+              <div class="card-header py-3">
                 <div class="d-flex justify-content-between align-items-center">
                   <div>
                     <h5 class="mb-0"><i class="fas fa-cut me-2"></i>Services Management</h5>
@@ -308,7 +325,7 @@
               <div class="card-body p-2 p-lg-3">
                 <!-- Service Form -->
                 <div v-if="showServiceForm" class="service-form-card card mb-4">
-                  <div class="card-header bg-light">
+                  <div class="card-header">
                     <h6 class="mb-0">{{ serviceForm._id ? 'Edit Service' : 'Add New Service' }}</h6>
                   </div>
                   <div class="card-body">
@@ -419,7 +436,7 @@
           <!-- Time Slots Tab -->
           <div v-if="activeTab === 'timeslots'" class="timeslots-tab">
             <div class="card border-0 shadow-sm">
-              <div class="card-header bg-white py-3">
+              <div class="card-header py-3">
                 <div class="d-flex justify-content-between align-items-center">
                   <div>
                     <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Weekly Time Slots</h5>
@@ -761,6 +778,8 @@
 <script>
 import axios from 'axios'
 import { logout as authLogout } from '../utils/auth'
+import { useTheme } from '../composables/useTheme'
+import { useLanguage } from '../composables/useLanguage'
 
 // Add axios interceptor for authentication
 axios.interceptors.request.use((config) => {
@@ -773,6 +792,11 @@ axios.interceptors.request.use((config) => {
 
 export default {
   name: 'Admin',
+  setup() {
+    const { isDark, toggleTheme } = useTheme()
+    const { currentLocale, toggleLanguage } = useLanguage()
+    return { isDark, toggleTheme, currentLocale, toggleLanguage }
+  },
   data() {
     return {
       activeTab: 'calendar',
@@ -1369,8 +1393,9 @@ const updateData = {
 
 <style scoped>
 .admin-panel {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-tertiary) 100%);
   padding: 0 1rem;
+  color: var(--text-primary);
 }
 
 .admin-content {
@@ -1431,7 +1456,8 @@ const updateData = {
 }
 
 .admin-header {
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-secondary) !important;
 }
 
 .admin-avatar {
@@ -1448,6 +1474,23 @@ const updateData = {
 
 .bg-gradient-primary {
   background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+  color: white !important;
+}
+
+.bg-gradient-primary h1, .bg-gradient-primary h2, .bg-gradient-primary h3,
+.bg-gradient-primary h4, .bg-gradient-primary h5, .bg-gradient-primary h6,
+.bg-gradient-primary small, .bg-gradient-primary .small {
+  color: white !important;
+}
+
+.bg-gradient-success {
+  color: white !important;
+}
+
+.bg-gradient-success h1, .bg-gradient-success h2, .bg-gradient-success h3,
+.bg-gradient-success h4, .bg-gradient-success h5, .bg-gradient-success h6,
+.bg-gradient-success small, .bg-gradient-success .small {
+  color: white !important;
 }
 
 .list-group-item {
@@ -1552,7 +1595,9 @@ const updateData = {
 }
 
 .card-header {
-  background: rgba(255, 255, 255, 0.8) !important;
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border-bottom: 1px solid var(--border-color) !important;
   backdrop-filter: blur(10px);
 }
 
@@ -1578,30 +1623,35 @@ const updateData = {
 
 /* Navigation Tabs */
 .nav-tabs-wrapper {
-  background: white;
+  background: var(--bg-secondary);
   border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
   padding: 0.5rem;
 }
 
 .nav-tabs .nav-link {
   border: none;
   border-radius: 8px;
-  color: #6b7280;
+  color: var(--text-secondary);
   transition: all 0.2s ease;
   padding: 0.75rem 1rem;
 }
 
 .nav-tabs .nav-link:hover {
   background-color: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  color: var(--primary);
 }
 
 .nav-tabs .nav-link.active {
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-  color: white;
+  background: var(--primary) !important;
+  color: white !important;
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
   transform: translateY(-2px);
+}
+
+.nav-tabs .nav-link.active .nav-text,
+.nav-tabs .nav-link.active .nav-icon {
+  color: white !important;
 }
 
 /* Mobile Navigation */
@@ -1770,24 +1820,24 @@ const updateData = {
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 1px;
-  background: #e5e7eb;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  overflow: hidden;
+  gap: 8px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px;
 }
 
 .calendar-header {
-  background: #f3f4f6;
+  background: var(--bg-tertiary);
   padding: 12px 8px;
   text-align: center;
   font-weight: 600;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .calendar-day {
-  background: white;
+  background: var(--bg-secondary);
   padding: 8px;
   min-height: 70px;
   cursor: pointer;
@@ -1796,36 +1846,51 @@ const updateData = {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  color: var(--text-primary);
+  border-radius: 8px;
 }
 
 .calendar-day:hover {
-  background: #f9fafb;
+  background: var(--bg-tertiary);
   transform: scale(1.02);
 }
 
 .calendar-day.other-month {
-  background: #fafafa;
-  color: #9ca3af;
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+  opacity: 0.6;
 }
 
 .calendar-day.today {
-  background: #eff6ff;
-  border: 2px solid #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+  border: 2px solid var(--primary);
 }
 
 .calendar-day.selected {
-  background: #dbeafe;
-  border: 2px solid #2563eb;
+  background: rgba(59, 130, 246, 0.2);
+  border: 2px solid var(--primary);
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
 .calendar-day.has-bookings {
-  background: #d1fae5;
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--text-primary);
 }
 
 .calendar-day.has-bookings.selected {
-  background: #a7f3d0;
-  border: 2px solid #10b981;
+  background: rgba(16, 185, 129, 0.3);
+  border: 2px solid var(--success);
+  color: var(--text-primary);
+}
+
+.dark-theme .calendar-day.has-bookings {
+  background: rgba(16, 185, 129, 0.3);
+  color: white;
+}
+
+.dark-theme .calendar-day.has-bookings.selected {
+  background: rgba(16, 185, 129, 0.4);
+  color: white;
 }
 
 .day-number {
@@ -1873,12 +1938,13 @@ const updateData = {
 .appointment-card {
   position: relative;
   padding: 1rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
   transition: background-color 0.2s;
+  color: var(--text-primary);
 }
 
 .appointment-card:hover {
-  background-color: #f8fafc;
+  background-color: var(--bg-tertiary);
 }
 
 .appointment-card:last-child {
@@ -2223,12 +2289,13 @@ const updateData = {
 
 /* Professional Time Slots Design */
 .day-schedule-card {
-  background: white;
+  background: var(--bg-secondary);
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-lg);
   overflow: hidden;
   transition: all 0.3s ease;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
 }
 
 /* Desktop Time Slots Grid */
@@ -2258,24 +2325,24 @@ const updateData = {
 }
 
 .day-header {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-primary) 100%);
   padding: 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .day-name {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--text-primary);
   margin: 0;
 }
 
 .slot-count {
   font-size: 0.8rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
@@ -2299,8 +2366,8 @@ const updateData = {
 
 .add-slot-section {
   padding: 1rem;
-  background: #fafbfc;
-  border-bottom: 1px solid #e5e7eb;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .add-slot-form {
@@ -2332,15 +2399,17 @@ const updateData = {
 .time-input {
   width: 100%;
   padding: 0.5rem;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-color);
   border-radius: 8px;
   font-size: 0.9rem;
   font-weight: 500;
   transition: all 0.2s ease;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .time-input:focus {
-  border-color: #3b82f6;
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   outline: none;
 }
@@ -2399,16 +2468,17 @@ const updateData = {
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem;
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
   border-radius: 10px;
   transition: all 0.2s ease;
   margin-bottom: 0.5rem;
+  color: var(--text-primary);
 }
 
 .slot-item:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
+  background: var(--bg-primary);
+  border-color: var(--border-color);
 }
 
 .slot-time {
@@ -2418,13 +2488,13 @@ const updateData = {
 }
 
 .slot-icon {
-  color: #3b82f6;
+  color: var(--primary);
   font-size: 0.9rem;
 }
 
 .time-range {
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
   font-size: 0.9rem;
 }
 
@@ -2487,17 +2557,17 @@ const updateData = {
 }
 
 .toast-success {
-  background: rgba(16, 185, 129, 0.95);
+  background: rgba(59, 130, 246, 0.95);
   color: white;
 }
 
 .toast-error {
-  background: rgba(239, 68, 68, 0.95);
+  background: rgba(59, 130, 246, 0.95);
   color: white;
 }
 
 .toast-warning {
-  background: rgba(245, 158, 11, 0.95);
+  background: rgba(59, 130, 246, 0.95);
   color: white;
 }
 
