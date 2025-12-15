@@ -374,16 +374,23 @@ export default {
     formatBackendMessage(message) {
       if (!message) return ''
 
-      const backendMessageMap = {
-        'Slot is already booked or outside working hours': 'backend.slotNotAvailable',
-        'No working hours configured for this day': 'backend.noWorkingHours',
-        'Slot reserved for 5 minutes': 'backend.slotReserved',
-        'Time slot is no longer available': 'backend.slotUnavailable',
-        'Selected time slot is no longer available': 'backend.slotUnavailable',
-        'Time slot already booked': 'backend.slotUnavailable',
-        'Time slot was just booked by another customer': 'backend.slotUnavailable',
-        'Slot is available': 'backend.slotAvailable',
-        'Appointment request submitted successfully. You will receive confirmation once approved.': 'backend.bookingRequestSubmitted'
+      if (this.$te(message)) {
+        return this.$t(message)
+      }
+
+      const namespacedKey = message.startsWith('backend.') ? message : `backend.${message}`
+      if (this.$te(namespacedKey)) {
+        return this.$t(namespacedKey)
+      }
+
+      return message
+    },
+    async fetchServices() {
+      try {
+        const response = await axios.get(`${process.env.VUE_APP_API_URL}/services/public`)
+        this.services = response.data
+      } catch (error) {
+        console.error('Error fetching services:', error)
       }
 
       if (backendMessageMap[message] && this.$te(backendMessageMap[message])) {
@@ -514,7 +521,7 @@ export default {
 
         if (!validationResponse.data.available) {
           this.toast.error(this.$t('toast.bookingValidationError', {
-            reason: this.formatBackendMessage(validationResponse.data.reason)
+            reason: validationResponse.data.reason
           }), {
             timeout: 5000,
             position: 'top-center'
@@ -556,7 +563,7 @@ export default {
         if (response.data.message) {
           setTimeout(() => {
             this.toast.info(this.$t('toast.backendInfo', {
-              message: this.formatBackendMessage(response.data.message)
+              message: response.data.message
             }), {
               timeout: 7000,
               position: 'top-center'
@@ -571,7 +578,7 @@ export default {
 
         if (errorData?.message) {
           message = this.$t('toast.bookingErrorWithReason', {
-            reason: this.formatBackendMessage(errorData.message)
+            reason: errorData.message
           })
         }
 

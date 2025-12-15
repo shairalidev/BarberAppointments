@@ -210,14 +210,8 @@ export default {
     appointmentAccepted: 'Termin erfolgreich angenommen! Kunde wurde benachrichtigt.',
     appointmentRejected: 'Termin erfolgreich abgelehnt! Kunde wurde benachrichtigt.',
     appointmentUpdateError: '❌ Fehler beim Aktualisieren des Termins: {message}',
-    backendInfo: 'ℹ️ {message}',
     barberProfileUpdated: 'Barber-Profil erfolgreich aktualisiert!',
     bookingError: 'Fehler bei der Terminbuchung: {message}',
-    bookingErrorWithReason: 'Fehler bei der Terminbuchung: {reason}',
-    bookingGenericError: 'Fehler bei der Terminbuchung. Bitte versuche einen anderen Slot.',
-    bookingRequestSuccess: '🎉 Buchungsanfrage erfolgreich gesendet!',
-    bookingValidationError: 'Buchung nicht möglich: {reason}',
-    bookingConflictAlternatives: '{count} alternative Slots sind verfügbar.',
     bookingSuccess: 'Termin erfolgreich gebucht!',
     conflictWarning: '⚠️ {message}',
     currentPasswordRequired: 'Aktuelles Passwort wird zum Ändern des Passworts benötigt',
@@ -225,8 +219,6 @@ export default {
     noBarber: 'Kein Barber verfügbar',
     passwordMismatch: 'Neue Passwörter stimmen nicht überein',
     profileUpdateError: 'Fehler beim Aktualisieren des Profils',
-    selectTimeSlot: 'Bitte wähle Datum und Uhrzeit aus.',
-    slotValidationError: 'Zeitslot konnte nicht validiert werden. Bitte versuche es erneut.',
     reminderError: '❌ Erinnerung konnte nicht gesetzt werden: {message}',
     reminderInfo: '⏰ {message}',
     reminderScheduled: '🔔 Erinnerung geplant für {time} (10 Minuten vor dem Termin)',
@@ -240,13 +232,5 @@ export default {
     profileUpdated: 'Profil erfolgreich aktualisiert!',
     settingsUpdated: 'Einstellungen erfolgreich aktualisiert!',
     adminNameRequired: 'Admin-Name ist erforderlich'
-  },
-  backend: {
-    slotNotAvailable: 'Der Slot ist bereits gebucht oder außerhalb der Arbeitszeiten.',
-    noWorkingHours: 'Für diesen Tag sind keine Arbeitszeiten konfiguriert.',
-    slotReserved: 'Slot für 5 Minuten reserviert.',
-    slotUnavailable: 'Diese Zeit ist nicht mehr verfügbar.',
-    slotAvailable: 'Slot ist verfügbar.',
-    bookingRequestSubmitted: 'Terminanfrage erfolgreich eingereicht. Sie erhalten eine Bestätigung nach Freigabe.'
   }
 }

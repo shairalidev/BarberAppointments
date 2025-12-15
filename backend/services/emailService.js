@@ -5,10 +5,6 @@ const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KE
 const isConfigured = !!process.env.RESEND_API_KEY;
 
 class EmailService {
-  static isConfigured() {
-    return isConfigured;
-  }
-
   static async sendBookingReceived(appointment, barber) {
     if (!resend) {
       console.log('Email service not configured - skipping booking receipt email');

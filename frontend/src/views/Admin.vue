@@ -1054,7 +1054,7 @@ async quickBookAppointment() {
       } catch (error) {
         console.error('Error booking appointment:', error)
         this.showToast(
-          this.$t('toast.bookingError', { message: this.resolveBackendMessage(error.response?.data?.message || error.message) }),
+          this.$t('toast.bookingError', { message: error.response?.data?.message || error.message }),
           'error'
         )
       }
@@ -1123,7 +1123,7 @@ async addTimeSlot(dayIndex) {
       } catch (error) {
         console.error('Error adding time slot:', error)
         this.showToast(
-          this.$t('toast.timeSlotAddError', { message: this.resolveBackendMessage(error.response?.data?.message || error.message) }),
+          this.$t('toast.timeSlotAddError', { message: error.response?.data?.message || error.message }),
           'error'
         )
       }
@@ -1137,7 +1137,7 @@ async addTimeSlot(dayIndex) {
       } catch (error) {
         console.error('Error deleting time slot:', error)
         this.showToast(
-          this.$t('toast.timeSlotDeleteError', { message: this.resolveBackendMessage(error.response?.data?.message || error.message) }),
+          this.$t('toast.timeSlotDeleteError', { message: error.response?.data?.message || error.message }),
           'error'
         )
       }
@@ -1269,12 +1269,12 @@ async setReminder(appointment) {
           const scheduledTime = new Date(response.data.scheduledFor).toLocaleTimeString()
           this.showToast(this.$t('toast.reminderScheduled', { time: scheduledTime }), 'success')
         } else {
-          this.showToast(this.$t('toast.reminderInfo', { message: this.resolveBackendMessage(response.data.message) }), 'info')
+          this.showToast(this.$t('toast.reminderInfo', { message: response.data.message }), 'info')
         }
       } catch (error) {
         console.error('Error setting reminder:', error)
         this.showToast(
-          this.$t('toast.reminderError', { message: this.resolveBackendMessage(error.response?.data?.message || error.message) }),
+          this.$t('toast.reminderError', { message: error.response?.data?.message || error.message }),
           'error'
         )
       }
@@ -1363,7 +1363,7 @@ async setReminder(appointment) {
       } catch (error) {
         console.error('Error updating admin profile:', error)
         this.showToast(
-          this.$t('toast.settingsUpdateError', { message: this.resolveBackendMessage(error.response?.data?.message || error.message) }),
+          this.$t('toast.settingsUpdateError', { message: error.response?.data?.message || error.message }),
           'error'
         )
       }
@@ -1664,11 +1664,6 @@ async setReminder(appointment) {
   overflow-x: auto;
 }
 
-.nav-tabs {
-  flex-wrap: nowrap;
-  gap: 0.5rem;
-}
-
 .nav-tabs .nav-link {
   border: none;
   border-radius: 10px;
@@ -1706,6 +1701,34 @@ async setReminder(appointment) {
   color: white !important;
 }
 
+/* Mobile Navigation */
+.mobile-nav {
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.mobile-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.mobile-nav::-webkit-scrollbar {
+  display: none;
+}
+
+  .nav-icon {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 1.1rem;
+  }
+
+  .nav-text {
+    display: block;
+    font-size: 0.8rem;
+  }
+
 .nav-badge {
   margin-left: auto;
   background: #dc2626;
@@ -1720,20 +1743,6 @@ async setReminder(appointment) {
   font-weight: 600;
 }
 
-/* Mobile Navigation */
-.mobile-nav {
-  display: flex;
-  align-items: stretch;
-  justify-content: flex-start;
-  gap: 0.5rem;
-  white-space: nowrap;
-  padding: 0.35rem 0.5rem;
-}
-
-.mobile-nav::-webkit-scrollbar {
-  display: none;
-}
-
 @media (max-width: 991px) {
   .action-toolbar {
     width: 100%;
@@ -1745,29 +1754,11 @@ async setReminder(appointment) {
 
   .mobile-nav {
     gap: 0.35rem;
-    padding: 0.35rem 0.25rem;
   }
 
   .mobile-nav .nav-link {
-    min-width: 160px;
-    width: auto;
-    justify-content: flex-start;
-    gap: 0.65rem;
-    padding: 0.65rem 0.85rem;
-  }
-
-  .mobile-nav .nav-icon {
-    font-size: 1rem;
-  }
-
-  .mobile-nav .nav-text {
-    font-size: 0.9rem;
-  }
-
-  .mobile-nav .nav-badge {
-    position: relative;
-    top: auto;
-    right: auto;
+    min-width: 120px;
+    text-align: center;
   }
 }
 

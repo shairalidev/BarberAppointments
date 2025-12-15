@@ -210,14 +210,8 @@ export default {
     appointmentAccepted: 'Appointment accepted successfully! Customer has been notified.',
     appointmentRejected: 'Appointment rejected successfully! Customer has been notified.',
     appointmentUpdateError: '❌ Error updating appointment: {message}',
-    backendInfo: 'ℹ️ {message}',
     barberProfileUpdated: 'Barber profile updated successfully!',
     bookingError: 'Error booking appointment: {message}',
-    bookingErrorWithReason: 'Error booking appointment: {reason}',
-    bookingGenericError: 'Error booking appointment. Please try another slot.',
-    bookingRequestSuccess: '🎉 Booking request submitted successfully!',
-    bookingValidationError: 'Unable to book: {reason}',
-    bookingConflictAlternatives: '{count} alternative slots are available.',
     bookingSuccess: 'Appointment booked successfully!',
     conflictWarning: '⚠️ {message}',
     currentPasswordRequired: 'Current password is required to change password',
@@ -225,8 +219,6 @@ export default {
     noBarber: 'No barber available',
     passwordMismatch: 'New passwords do not match',
     profileUpdateError: 'Error updating profile',
-    selectTimeSlot: 'Please select a date and time slot.',
-    slotValidationError: 'Unable to validate time slot. Please try again.',
     reminderError: '❌ Failed to set reminder: {message}',
     reminderInfo: '⏰ {message}',
     reminderScheduled: '🔔 Reminder scheduled for {time} (10 min before appointment)',
@@ -240,13 +232,5 @@ export default {
     profileUpdated: 'Profile updated successfully!',
     settingsUpdated: 'Settings updated successfully!',
     adminNameRequired: 'Admin name is required'
-  },
-  backend: {
-    slotNotAvailable: 'Slot is already booked or outside working hours.',
-    noWorkingHours: 'No working hours configured for this day.',
-    slotReserved: 'Slot reserved for 5 minutes.',
-    slotUnavailable: 'This time is no longer available.',
-    slotAvailable: 'Slot is available.',
-    bookingRequestSubmitted: 'Appointment request submitted successfully. You will receive confirmation once approved.'
   }
 }
