@@ -208,8 +208,8 @@ router.post('/', async (req, res) => {
     await savedAppointment.populate('services');
     await savedAppointment.populate('barberId');
     
-    // Schedule confirmation email if customer provided email
-    if (customerEmail) {
+    // Schedule confirmation email if customer provided email and email service is configured
+    if (customerEmail && EmailService.isConfigured()) {
       try {
         await emailScheduler.scheduleEmail(
           savedAppointment._id,
@@ -239,6 +239,11 @@ router.post('/', async (req, res) => {
 
 // Update appointment with advanced slot management
 router.put('/:id', async (req, res) => {
+  console.log('\n\n🔄 APPOINTMENT UPDATE REQUEST RECEIVED');
+  console.log('Appointment ID:', req.params.id);
+  console.log('Request body:', JSON.stringify(req.body, null, 2));
+  console.log('Timestamp:', new Date().toISOString());
+  
   try {
     const { sendEmail, responseMessage, ...update } = req.body;
     
@@ -253,40 +258,112 @@ router.put('/:id', async (req, res) => {
 
     // Handle status changes with slot validation
     if (update.status && update.status !== currentAppointment.status) {
+      console.log('\n=== APPOINTMENT STATUS UPDATE ===');
+      console.log('Appointment ID:', req.params.id);
+      console.log('Current Status:', currentAppointment.status);
+      console.log('New Status:', update.status);
+      console.log('Customer:', currentAppointment.customerName);
+      console.log('Date/Time:', currentAppointment.date.toISOString().split('T')[0], 'at', currentAppointment.time);
+      
       if (update.status === 'confirmed') {
-        // Check for double booking when confirming
-        const conflictingAppointments = await Appointment.find({
-          _id: { $ne: req.params.id },
-          barberId: currentAppointment.barberId,
-          date: currentAppointment.date,
-          status: 'confirmed',
-          $or: [
-            {
-              $and: [
-                { time: { $lte: currentAppointment.time } },
-                { $expr: { $gte: [{ $add: [timeStringToMinutes('$time'), '$totalDuration'] }, timeStringToMinutes(currentAppointment.time)] } }
-              ]
-            },
-            {
-              $and: [
-                { time: { $gte: currentAppointment.time } },
-                { time: { $lt: minutesToTimeString(timeStringToMinutes(currentAppointment.time) + currentAppointment.totalDuration) } }
-              ]
-            }
-          ]
+        console.log('\n🔍 STARTING CONFLICT DETECTION...');
+        
+        // Check for double booking when confirming - only check OTHER confirmed appointments
+        const currentStartMinutes = timeStringToMinutes(currentAppointment.time);
+        const currentEndMinutes = currentStartMinutes + currentAppointment.totalDuration;
+        
+        console.log('Current appointment time range:', {
+          startTime: currentAppointment.time,
+          endTime: minutesToTimeString(currentEndMinutes),
+          duration: currentAppointment.totalDuration,
+          startMinutes: currentStartMinutes,
+          endMinutes: currentEndMinutes
         });
         
+        const conflictingAppointments = await Appointment.find({
+          _id: { $ne: req.params.id }, // Exclude current appointment
+          barberId: currentAppointment.barberId._id || currentAppointment.barberId,
+          date: currentAppointment.date,
+          status: 'confirmed' // Only check OTHER confirmed appointments
+        });
+        
+        console.log('\n📋 CONFLICT CHECK QUERY RESULTS:');
+        console.log('- Excluding appointment ID:', req.params.id);
+        console.log('- Barber ID:', currentAppointment.barberId._id || currentAppointment.barberId);
+        console.log('- Date:', currentAppointment.date.toISOString().split('T')[0]);
+        console.log('- Status filter: confirmed');
+        console.log('- Found', conflictingAppointments.length, 'other confirmed appointments');
+        
+        // Only check if there are other confirmed appointments
         if (conflictingAppointments.length > 0) {
-          return res.status(409).json({ 
-            message: 'Time slot conflict detected. Another appointment is already confirmed for this time.',
-            conflictingAppointments: conflictingAppointments.map(apt => ({
-              id: apt._id,
-              customerName: apt.customerName,
+          console.log('\n📝 EXISTING CONFIRMED APPOINTMENTS:');
+          // Log all existing confirmed appointments
+          conflictingAppointments.forEach((apt, index) => {
+            const aptStartMinutes = timeStringToMinutes(apt.time);
+            const aptEndMinutes = aptStartMinutes + apt.totalDuration;
+            const overlaps = currentStartMinutes < aptEndMinutes && currentEndMinutes > aptStartMinutes;
+            
+            console.log(`${index + 1}. ${apt.customerName}:`, {
+              id: apt._id.toString(),
+              time: apt.time,
+              duration: apt.totalDuration,
+              timeRange: `${apt.time} - ${minutesToTimeString(aptEndMinutes)}`,
+              startMinutes: aptStartMinutes,
+              endMinutes: aptEndMinutes,
+              overlapsWithCurrent: overlaps
+            });
+          });
+          
+          // Check for actual time overlaps
+          const hasConflict = conflictingAppointments.some(apt => {
+            const aptStartMinutes = timeStringToMinutes(apt.time);
+            const aptEndMinutes = aptStartMinutes + apt.totalDuration;
+            
+            // Check if there's any overlap
+            return currentStartMinutes < aptEndMinutes && currentEndMinutes > aptStartMinutes;
+          });
+          
+          console.log('\n⚖️ OVERLAP ANALYSIS:');
+          console.log('Current:', currentStartMinutes, '-', currentEndMinutes, 'minutes');
+          conflictingAppointments.forEach((apt, index) => {
+            const aptStartMinutes = timeStringToMinutes(apt.time);
+            const aptEndMinutes = aptStartMinutes + apt.totalDuration;
+            const overlaps = currentStartMinutes < aptEndMinutes && currentEndMinutes > aptStartMinutes;
+            console.log(`Existing ${index + 1}:`, aptStartMinutes, '-', aptEndMinutes, 'minutes', overlaps ? '❌ OVERLAPS' : '✅ NO OVERLAP');
+          });
+          
+          console.log('\n🎯 FINAL CONFLICT RESULT:', hasConflict ? '❌ CONFLICT DETECTED' : '✅ NO CONFLICT');
+          
+          if (hasConflict) {
+            const conflictDetails = conflictingAppointments.filter(apt => {
+              const aptStartMinutes = timeStringToMinutes(apt.time);
+              const aptEndMinutes = aptStartMinutes + apt.totalDuration;
+              return currentStartMinutes < aptEndMinutes && currentEndMinutes > aptStartMinutes;
+            });
+            
+            console.log('\n🚨 CONFLICTING APPOINTMENTS:', conflictDetails.map(apt => ({
+              customer: apt.customerName,
               time: apt.time,
               duration: apt.totalDuration
-            }))
-          });
+            })));
+            
+            console.log('\n❌ RETURNING 409 CONFLICT ERROR');
+            
+            return res.status(409).json({ 
+              message: 'Time slot conflict detected! This slot is no longer available.',
+              conflictingAppointments: conflictDetails.map(apt => ({
+                id: apt._id,
+                customerName: apt.customerName,
+                time: apt.time,
+                duration: apt.totalDuration
+              }))
+            });
+          }
+        } else {
+          console.log('\n✅ NO OTHER CONFIRMED APPOINTMENTS - Proceeding with confirmation');
         }
+        
+        console.log('\n🔍 CONFLICT DETECTION COMPLETE - No conflicts found');
       }
     }
 
@@ -303,8 +380,8 @@ router.put('/:id', async (req, res) => {
       .populate('barberId')
       .populate('services');
     
-    // Handle email notifications and scheduling
-    if (sendEmail) {
+    // Handle email notifications and scheduling only if email service is configured
+    if (sendEmail && EmailService.isConfigured()) {
       try {
         if (appointment.status === 'confirmed') {
           // Send confirmation email immediately if customer has email
@@ -340,11 +417,25 @@ router.put('/:id', async (req, res) => {
         console.error('Email scheduling failed:', emailError);
         // Don't fail the request if email scheduling fails
       }
+    } else if (sendEmail && !EmailService.isConfigured()) {
+      console.log('Email service not configured - skipping email notifications');
     }
+    
+    console.log('\n✅ APPOINTMENT UPDATE SUCCESSFUL');
+    console.log('Final appointment status:', appointment.status);
+    console.log('Customer:', appointment.customerName);
+    console.log('=== END APPOINTMENT UPDATE ===\n');
     
     res.json(appointment);
   } catch (error) {
-    console.error('Appointment update error:', error);
+    console.log('\n❌ APPOINTMENT UPDATE ERROR');
+    console.error('Error type:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+    console.log('Request ID:', req.params.id);
+    console.log('Request body:', JSON.stringify(req.body, null, 2));
+    console.log('=== END ERROR LOG ===\n');
+    
     res.status(400).json({ message: error.message });
   }
 });
@@ -455,6 +546,10 @@ router.post('/:id/reminder', async (req, res) => {
     
     if (!appointment) {
       return res.status(404).json({ message: 'Appointment not found' });
+    }
+    
+    if (!EmailService.isConfigured()) {
+      return res.json({ message: 'Email service not configured - reminders disabled' });
     }
     
     if (!appointment.barberId.email) {

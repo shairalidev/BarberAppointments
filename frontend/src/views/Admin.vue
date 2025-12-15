@@ -3,36 +3,54 @@
     <!-- Admin Header -->
     <div class="admin-header shadow-sm py-3 mb-4">
       <div class="container-fluid">
-        <div class="row align-items-center">
+        <div class="row align-items-start justify-content-between">
           <div class="col">
             <h2 class="mb-0 fw-bold text-primary">
               <i class="fas fa-cut me-2"></i>{{ $t('admin.dashboard') }}
             </h2>
-            <p class="text-muted mb-0">{{ $t('admin.manageBookings') }}</p>
+            <p class="text-muted mb-0 d-none d-md-block">{{ $t('admin.manageBookings') }}</p>
           </div>
           <div class="col-auto">
-            <div class="d-flex flex-wrap align-items-center justify-content-end gap-2 gap-md-3 action-toolbar">
-              <button
-                @click="toggleLanguage"
-                class="btn btn-outline-primary btn-sm px-2"
-                :title="currentLocale === 'en' ? 'Switch to German' : 'Switch to English'"
-              >
-                {{ currentLocale === 'en' ? 'DE' : 'EN' }}
-              </button>
-              <button
-                @click="toggleTheme"
-                :class="['theme-toggle', { active: isDark }]"
-                :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
-              >
-                <i class="fas fa-sun theme-toggle-icon sun-icon"></i>
-                <i class="fas fa-moon theme-toggle-icon moon-icon"></i>
-              </button>
+            <div class="d-flex align-items-center justify-content-end gap-2 gap-md-3 action-toolbar">
+              <div class="d-none d-md-flex gap-2">
+                <button
+                  @click="toggleLanguage"
+                  class="btn btn-outline-primary btn-sm px-2"
+                  :title="currentLocale === 'en' ? 'Switch to German' : 'Switch to English'"
+                >
+                  {{ currentLocale === 'en' ? 'DE' : 'EN' }}
+                </button>
+                <button
+                  @click="toggleTheme"
+                  :class="['theme-toggle', { active: isDark }]"
+                  :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+                >
+                  <i class="fas fa-sun theme-toggle-icon sun-icon"></i>
+                  <i class="fas fa-moon theme-toggle-icon moon-icon"></i>
+                </button>
+              </div>
               <div class="dropdown">
               <button class="btn btn-link text-decoration-none p-0 d-flex align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <div class="admin-info me-3 text-start">
-                  <small class="text-muted">{{ $t('admin.welcomeBack') }}</small>
-                  <div class="fw-semibold text-dark">{{ adminUser?.username }}</div>
+                <div class="d-flex flex-column gap-1 d-md-none me-2">
+                  <button
+                    @click.stop="toggleLanguage"
+                    class="btn btn-outline-primary btn-sm px-2"
+                    style="font-size: 0.6rem; padding: 0.2rem 0.4rem;"
+                    :title="currentLocale === 'en' ? 'Switch to German' : 'Switch to English'"
+                  >
+                    {{ currentLocale === 'en' ? 'DE' : 'EN' }}
+                  </button>
+                  <button
+                    @click.stop="toggleTheme"
+                    :class="['theme-toggle', { active: isDark }]"
+                    style="font-size: 0.7rem; padding: 0.2rem 0.4rem;"
+                    :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+                  >
+                    <i class="fas fa-sun theme-toggle-icon sun-icon"></i>
+                    <i class="fas fa-moon theme-toggle-icon moon-icon"></i>
+                  </button>
                 </div>
+
                 <div class="admin-avatar">
                   <i class="fas fa-user-shield"></i>
                 </div>
@@ -54,7 +72,7 @@
     </div>
 
     <!-- Navigation Tabs -->
-    <div class="container-fluid mb-4">
+    <div class="mb-4">
       <div class="nav-tabs-wrapper">
         <ul class="nav nav-tabs border-0 mobile-nav flex-nowrap overflow-auto" role="tablist">
           <li class="nav-item">
@@ -180,8 +198,7 @@
               <div class="col-12 col-lg-4">
                 <div v-if="selectedCalendarDate" class="card border-0 shadow-sm appointments-card">
                   <div class="card-header bg-gradient-primary text-white">
-                    <h6 class="mb-0 d-none d-lg-block"><i class="fas fa-calendar-day me-2"></i>{{ formatSelectedDate }}</h6>
-                    <h6 class="mb-0 d-lg-none"><i class="fas fa-calendar-day me-2"></i>{{ $t('admin.selectedDay') }}</h6>
+                    <h6 class="mb-0"><i class="fas fa-calendar-day me-2"></i><span class="d-none d-lg-inline">{{ formatSelectedDate }}</span><span class="d-lg-none">{{ formatSelectedDate }}</span></h6>
                       <small class="opacity-75">{{ selectedDayAppointments.length }} {{ $t('admin.appointments') }}</small>
                   </div>
                   <div class="card-body p-0">
@@ -899,7 +916,8 @@ adminProfile: {
     selectedDayAppointments() {
       if (!this.selectedCalendarDate) return []
       return this.appointments.filter(apt => {
-        const aptDate = new Date(apt.date).toISOString().split('T')[0]
+        // Handle date comparison without timezone issues
+        const aptDate = apt.date.split('T')[0]
         return aptDate === this.selectedCalendarDate
       })
     },
@@ -1162,9 +1180,14 @@ getTimeSlotsForDay(dayIndex) {
       authLogout()
     },
     createDayObject(date, isCurrentMonth) {
-      const dateStr = date.toISOString().split('T')[0]
+      // Create date string in local timezone to avoid UTC conversion issues
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      const dateStr = `${year}-${month}-${day}`
+      
       const bookings = this.appointments.filter(apt => {
-        const aptDate = new Date(apt.date).toISOString().split('T')[0]
+        const aptDate = apt.date.split('T')[0]
         return aptDate === dateStr
       })
       
@@ -1219,23 +1242,8 @@ getTimeSlotsForDay(dayIndex) {
     },
     async respondToAppointment() {
       try {
-        // Check for conflicts when accepting
-        if (this.responseModal.status === 'confirmed') {
-          const conflictCheck = await axios.get(`${process.env.VUE_APP_API_URL}/appointments/availability`, {
-            params: {
-              barberId: this.responseModal.appointment.barberId._id || this.responseModal.appointment.barberId,
-              date: this.responseModal.appointment.date,
-              duration: this.responseModal.appointment.totalDuration
-            }
-          })
-          
-          if (!conflictCheck.data.availableTimes.includes(this.responseModal.appointment.time)) {
-            this.showToast(this.$t('toast.timeSlotConflict'), 'warning')
-            await this.fetchAppointments()
-            this.responseModal.show = false
-            return
-          }
-        }
+        // Skip frontend availability check when accepting pending appointments
+        // The backend will handle proper conflict detection
         
         await axios.put(`${process.env.VUE_APP_API_URL}/appointments/${this.responseModal.appointment._id}`, {
           status: this.responseModal.status,
@@ -1253,7 +1261,7 @@ getTimeSlotsForDay(dayIndex) {
       } catch (error) {
         console.error('Error responding to appointment:', error)
         const errorMsg = this.resolveBackendMessage(error.response?.data?.message || error.message)
-        if (errorMsg.includes('conflict')) {
+        if (error.response?.status === 409 || errorMsg.toLowerCase().includes('conflict')) {
           this.showToast(this.$t('toast.conflictWarning', { message: errorMsg }), 'warning')
         } else {
           this.showToast(this.$t('toast.appointmentUpdateError', { message: errorMsg }), 'error')
@@ -1435,53 +1443,56 @@ async setReminder(appointment) {
 /* Desktop Optimizations */
 @media (min-width: 992px) {
   .admin-panel {
-    padding: 0 2rem;
+    /*padding: 0 2rem;*/
   }
   
   .admin-content {
-    padding: 0 2rem;
+    /*padding: 0 2rem;*/
   }
   
-  .calendar-container,
-  .timeslots-container,
-  .profile-container {
-    height: calc(100vh - 200px);
+  .calendar-tab .row {
+    height: calc(100vh - 250px);
     min-height: 600px;
   }
   
   .calendar-card,
-  .appointments-card,
-  .profile-card,
-  .admin-settings-card {
+  .appointments-card {
     height: 100%;
+    display: flex;
+    flex-direction: column;
   }
   
-  .calendar-body {
-    height: calc(100% - 80px);
+  .calendar-card .card-body,
+  .appointments-card .card-body {
+    flex: 1;
     overflow: hidden;
   }
   
-  .appointments-body {
-    height: calc(100% - 80px);
+  .appointments-list {
+    height: 100%;
     overflow-y: auto;
   }
   
-  .profile-body,
-  .admin-settings-body {
-    height: calc(100% - 80px);
-    overflow-y: auto;
+  .profile-tab .row .col-12 {
+    height: calc(100vh - 250px);
+    min-height: 600px;
   }
   
-  .timeslots-body {
-    height: calc(100% - 80px);
+  .profile-tab .card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .profile-tab .card-body {
+    flex: 1;
     overflow-y: auto;
   }
   
   .timeslots-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 1.5rem;
-    height: 100%;
   }
 }
 
@@ -1748,17 +1759,62 @@ async setReminder(appointment) {
     width: 100%;
   }
 
+  .admin-header {
+    padding: 0.5rem 0 !important;
+  }
+
+  .admin-header .row {
+    align-items: center;
+  }
+
+  .admin-header .action-toolbar {
+    justify-content: flex-end;
+    min-width: auto;
+  }
+
   .nav-tabs-wrapper {
-    padding: 0.35rem 0.5rem;
+    padding: 0.25rem;
+    margin-bottom: 1rem;
   }
 
   .mobile-nav {
-    gap: 0.35rem;
+    gap: 0.15rem;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+  }
+
+  .mobile-nav .nav-item {
+    flex: 1;
+    min-width: 0;
   }
 
   .mobile-nav .nav-link {
-    min-width: 120px;
+    padding: 0.4rem 0.2rem;
     text-align: center;
+    font-size: 0.7rem;
+    min-width: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-icon {
+    font-size: 0.8rem !important;
+    margin-bottom: 0.1rem;
+  }
+
+  .nav-text {
+    font-size: 0.6rem !important;
+    line-height: 1;
+  }
+
+  .nav-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    min-width: 14px;
+    height: 14px;
+    font-size: 0.6rem;
   }
 }
 
@@ -2120,10 +2176,11 @@ async setReminder(appointment) {
   
   /* Mobile Calendar */
   .mobile-calendar-controls {
-    background: white;
+    background: var(--bg-secondary);
     border-radius: 12px;
     padding: 1rem;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
   }
   
   .calendar-day {
@@ -2312,6 +2369,40 @@ async setReminder(appointment) {
   
   .admin-content {
     padding: 0 0.25rem;
+  }
+
+  .admin-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .admin-header p {
+    font-size: 0.8rem;
+  }
+
+  .admin-avatar {
+    width: 60px;
+    height: 60px;
+    font-size: 1rem;
+  }
+
+  .admin-info {
+    font-size: 0.8rem;
+  }
+
+  .nav-tabs-wrapper {
+    padding: 0.2rem;
+  }
+
+  .mobile-nav .nav-link {
+    padding: 0.3rem 0.1rem;
+  }
+
+  .nav-icon {
+    font-size: 0.7rem !important;
+  }
+
+  .nav-text {
+    font-size: 0.55rem !important;
   }
   
   .calendar-day {

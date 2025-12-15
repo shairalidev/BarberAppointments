@@ -238,11 +238,13 @@ export default {
   font-size: clamp(2.5rem, 8vw, 4.5rem);
   line-height: 1.1;
   text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  color: white !important;
 }
 
 .hero-subtitle {
   font-size: clamp(1rem, 2.5vw, 1.25rem);
   opacity: 0.95;
+  color: white !important;
 }
 
 /* Stats Section */

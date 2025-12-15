@@ -383,7 +383,12 @@ export default {
         return this.$t(namespacedKey)
       }
 
-      return message
+      // Fallback: humanize backend keys so users never see raw identifiers
+      const humanized = message
+        .replace(/^backend[.:]/, '')
+        .replace(/^toast[.:]/, '')
+        .replace(/[._]/g, ' ')
+      return humanized.charAt(0).toUpperCase() + humanized.slice(1)
     },
     async fetchServices() {
       try {
@@ -392,35 +397,7 @@ export default {
       } catch (error) {
         console.error('Error fetching services:', error)
       }
-
-      if (backendMessageMap[message] && this.$te(backendMessageMap[message])) {
-        return this.$t(backendMessageMap[message])
-      }
-
-      if (this.$te(message)) {
-        return this.$t(message)
-      }
-
-      const namespacedKey = message.startsWith('backend.') ? message : `backend.${message}`
-      if (this.$te(namespacedKey)) {
-        return this.$t(namespacedKey)
-      }
-
-      // Fallback: humanize backend keys so users never see raw identifiers
-      const humanized = message
-        .replace(/^backend[.:]/, '')
-        .replace(/^toast[.:]/, '')
-        .replace(/[._]/g, ' ')
-      return humanized.charAt(0).toUpperCase() + humanized.slice(1)
     },
-      async fetchServices() {
-        try {
-          const response = await axios.get(`${process.env.VUE_APP_API_URL}/services/public`)
-          this.services = response.data
-        } catch (error) {
-          console.error('Error fetching services:', error)
-        }
-      },
       async fetchBarbers() {
         try {
           const response = await axios.get(`${process.env.VUE_APP_API_URL}/barbers/public`)
@@ -521,7 +498,7 @@ export default {
 
         if (!validationResponse.data.available) {
           this.toast.error(this.$t('toast.bookingValidationError', {
-            reason: validationResponse.data.reason
+            reason: validationResponse.data.reason || 'Time slot no longer available'
           }), {
             timeout: 5000,
             position: 'top-center'
@@ -562,9 +539,7 @@ export default {
         // Show additional message if provided by backend
         if (response.data.message) {
           setTimeout(() => {
-            this.toast.info(this.$t('toast.backendInfo', {
-              message: response.data.message
-            }), {
+            this.toast.info(this.formatBackendMessage(response.data.message), {
               timeout: 7000,
               position: 'top-center'
             })
@@ -578,7 +553,7 @@ export default {
 
         if (errorData?.message) {
           message = this.$t('toast.bookingErrorWithReason', {
-            reason: errorData.message
+            reason: this.formatBackendMessage(errorData.message)
           })
         }
 
