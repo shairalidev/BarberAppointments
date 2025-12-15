@@ -11,16 +11,16 @@
             <p class="text-muted mb-0">{{ $t('admin.manageBookings') }}</p>
           </div>
           <div class="col-auto">
-            <div class="d-flex align-items-center gap-3">
-              <button 
-                @click="toggleLanguage" 
+            <div class="d-flex flex-wrap align-items-center justify-content-end gap-2 gap-md-3 action-toolbar">
+              <button
+                @click="toggleLanguage"
                 class="btn btn-outline-primary btn-sm px-2"
                 :title="currentLocale === 'en' ? 'Switch to German' : 'Switch to English'"
               >
                 {{ currentLocale === 'en' ? 'DE' : 'EN' }}
               </button>
-              <button 
-                @click="toggleTheme" 
+              <button
+                @click="toggleTheme"
                 :class="['theme-toggle', { active: isDark }]"
                 :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
               >
@@ -56,7 +56,7 @@
     <!-- Navigation Tabs -->
     <div class="container-fluid mb-4">
       <div class="nav-tabs-wrapper">
-        <ul class="nav nav-tabs border-0 mobile-nav">
+        <ul class="nav nav-tabs border-0 mobile-nav flex-nowrap overflow-auto" role="tablist">
           <li class="nav-item">
             <button 
               @click="activeTab = 'calendar'" 
@@ -123,10 +123,10 @@
                 </button>
               </div>
               <div class="d-flex gap-2 justify-content-center">
-                <button @click="goToToday" class="btn btn-primary btn-sm">Today</button>
-                <button @click="showBookingModal = true" class="btn btn-success btn-sm">
-                  <i class="fas fa-plus me-1"></i>Book
-                </button>
+                <button @click="goToToday" class="btn btn-primary btn-sm">{{ $t('admin.today') }}</button>
+                  <button @click="showBookingModal = true" class="btn btn-success btn-sm">
+                    <i class="fas fa-plus me-1"></i>{{ $t('admin.bookAppointment') }}
+                  </button>
               </div>
             </div>
 
@@ -136,15 +136,15 @@
                 <div class="card border-0 shadow-sm calendar-card">
                   <div class="card-header py-3 d-none d-lg-block">
                     <div class="d-flex justify-content-between align-items-center">
-                      <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Calendar</h5>
+                      <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>{{ $t('admin.calendar') }}</h5>
                       <div class="d-flex gap-2">
                         <button @click="showBookingModal = true" class="btn btn-sm btn-success">
-                          <i class="fas fa-plus me-1"></i>Book Appointment
+                          <i class="fas fa-plus me-1"></i>{{ $t('admin.bookAppointment') }}
                         </button>
                         <button @click="changeMonth(-1)" class="btn btn-sm btn-outline-primary">
                           <i class="fas fa-chevron-left"></i>
                         </button>
-                        <button @click="goToToday" class="btn btn-sm btn-primary">Today</button>
+                        <button @click="goToToday" class="btn btn-sm btn-primary">{{ $t('admin.today') }}</button>
                         <button @click="changeMonth(1)" class="btn btn-sm btn-outline-primary">
                           <i class="fas fa-chevron-right"></i>
                         </button>
@@ -181,8 +181,8 @@
                 <div v-if="selectedCalendarDate" class="card border-0 shadow-sm appointments-card">
                   <div class="card-header bg-gradient-primary text-white">
                     <h6 class="mb-0 d-none d-lg-block"><i class="fas fa-calendar-day me-2"></i>{{ formatSelectedDate }}</h6>
-                    <h6 class="mb-0 d-lg-none"><i class="fas fa-calendar-day me-2"></i>Selected Day</h6>
-                    <small class="opacity-75">{{ selectedDayAppointments.length }} appointment(s)</small>
+                    <h6 class="mb-0 d-lg-none"><i class="fas fa-calendar-day me-2"></i>{{ $t('admin.selectedDay') }}</h6>
+                      <small class="opacity-75">{{ selectedDayAppointments.length }} {{ $t('admin.appointments') }}</small>
                   </div>
                   <div class="card-body p-0">
                     <div v-if="selectedDayAppointments.length" class="appointments-list">
@@ -210,15 +210,15 @@
                           </div>
                         </div>
                         <div class="appointment-actions d-flex gap-2 justify-content-center">
-                          <button v-if="apt.status === 'pending'" @click="openResponseModal(apt, 'confirmed')" class="btn btn-sm btn-success flex-fill">
-                            <i class="fas fa-check me-1"></i>Accept
-                          </button>
-                          <button v-if="apt.status === 'pending'" @click="openResponseModal(apt, 'cancelled')" class="btn btn-sm btn-outline-danger flex-fill">
-                            <i class="fas fa-times me-1"></i>Reject
-                          </button>
-                          <button v-if="apt.status === 'confirmed'" @click="confirmAction(apt, 'completed')" class="btn btn-sm btn-primary flex-fill">
-                            <i class="fas fa-flag-checkered me-1"></i>Complete
-                          </button>
+                            <button v-if="apt.status === 'pending'" @click="openResponseModal(apt, 'confirmed')" class="btn btn-sm btn-success flex-fill">
+                              <i class="fas fa-check me-1"></i>{{ $t('admin.accept') }}
+                            </button>
+                            <button v-if="apt.status === 'pending'" @click="openResponseModal(apt, 'cancelled')" class="btn btn-sm btn-outline-danger flex-fill">
+                              <i class="fas fa-times me-1"></i>{{ $t('admin.reject') }}
+                            </button>
+                            <button v-if="apt.status === 'confirmed'" @click="confirmAction(apt, 'completed')" class="btn btn-sm btn-primary flex-fill">
+                              <i class="fas fa-flag-checkered me-1"></i>{{ $t('admin.complete') }}
+                            </button>
                           <button v-if="apt.status === 'confirmed'" @click="setReminder(apt)" class="btn btn-sm btn-warning">
                             <i class="fas fa-bell"></i>
                           </button>
@@ -227,7 +227,7 @@
                     </div>
                     <div v-else class="empty-state text-center py-4">
                       <i class="fas fa-calendar-times fa-2x text-muted mb-2"></i>
-                      <p class="text-muted mb-0">No appointments scheduled</p>
+                      <p class="text-muted mb-0">{{ $t('admin.noAppointmentsScheduled') }}</p>
                     </div>
                   </div>
                 </div>
@@ -239,7 +239,7 @@
           <div v-if="activeTab === 'requests'" class="requests-tab">
             <div class="card border-0 shadow-sm">
               <div class="card-header py-3">
-                <h5 class="mb-0"><i class="fas fa-inbox me-2"></i>Booking Requests</h5>
+                <h5 class="mb-0"><i class="fas fa-inbox me-2"></i>{{ $t('admin.bookingRequests') }}</h5>
                 <small class="text-muted">{{ pendingAppointments.length }} pending request(s)</small>
               </div>
               <div class="card-body p-2 p-lg-3">
@@ -250,7 +250,7 @@
                         <div class="col-12 col-lg-8">
                           <div class="request-header d-flex justify-content-between align-items-start mb-2">
                             <h6 class="mb-0 fw-bold">{{ apt.customerName }}</h6>
-                            <span class="badge bg-warning text-dark d-lg-none">Pending</span>
+                            <span class="badge bg-warning text-dark d-lg-none">{{ $t('admin.pending') }}</span>
                           </div>
                           <div class="request-details">
                             <div class="detail-item mb-1">
@@ -283,14 +283,14 @@
                           <div class="request-actions text-center text-lg-end">
                             <div class="price-display mb-3">
                               <h4 class="text-primary mb-0">${{ apt.totalPrice }}</h4>
-                              <small class="text-muted">Total Amount</small>
+                              <small class="text-muted">{{ $t('admin.totalAmount') }}</small>
                             </div>
                             <div class="action-buttons d-grid gap-2">
                               <button @click="openResponseModal(apt, 'confirmed')" class="btn btn-success">
-                                <i class="fas fa-check me-2"></i>Accept Request
+                                <i class="fas fa-check me-2"></i>{{ $t('admin.acceptRequest') }}
                               </button>
                               <button @click="openResponseModal(apt, 'cancelled')" class="btn btn-outline-danger">
-                                <i class="fas fa-times me-2"></i>Reject Request
+                                <i class="fas fa-times me-2"></i>{{ $t('admin.rejectRequest') }}
                               </button>
                             </div>
                           </div>
@@ -301,8 +301,8 @@
                 </div>
                 <div v-else class="empty-state text-center py-5">
                   <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                  <h5 class="text-muted">No Pending Requests</h5>
-                  <p class="text-muted mb-0">All booking requests have been processed</p>
+                  <h5 class="text-muted">{{ $t('admin.noPendingRequests') }}</h5>
+                  <p class="text-muted mb-0">{{ $t('admin.allRequestsProcessed') }}</p>
                 </div>
               </div>
             </div>
@@ -314,11 +314,11 @@
               <div class="card-header py-3">
                 <div class="d-flex justify-content-between align-items-center">
                   <div>
-                    <h5 class="mb-0"><i class="fas fa-cut me-2"></i>Services Management</h5>
-                    <small class="text-muted">{{ services.length }} service(s) available</small>
+                    <h5 class="mb-0"><i class="fas fa-cut me-2"></i>{{ $t('admin.servicesManagement') }}</h5>
+                    <small class="text-muted">{{ services.length }} {{ $t('admin.servicesAvailable') }}</small>
                   </div>
                   <button @click="showServiceForm = true" class="btn btn-primary btn-sm">
-                    <i class="fas fa-plus me-1"></i><span class="d-none d-sm-inline">Add Service</span>
+                    <i class="fas fa-plus me-1"></i><span class="d-none d-sm-inline">{{ $t('admin.addService') }}</span>
                   </button>
                 </div>
               </div>
@@ -326,34 +326,34 @@
                 <!-- Service Form -->
                 <div v-if="showServiceForm" class="service-form-card card mb-4">
                   <div class="card-header">
-                    <h6 class="mb-0">{{ serviceForm._id ? 'Edit Service' : 'Add New Service' }}</h6>
+                    <h6 class="mb-0">{{ serviceForm._id ? $t('admin.editService') : $t('admin.addService') }}</h6>
                   </div>
                   <div class="card-body">
                     <form @submit.prevent="saveService">
                       <div class="row g-3">
                         <div class="col-12 col-md-6">
-                          <label class="form-label fw-medium">Service Name</label>
+                          <label class="form-label fw-medium">{{ $t('admin.serviceName') }}</label>
                           <input v-model="serviceForm.name" type="text" class="form-control" required>
                         </div>
                         <div class="col-6 col-md-3">
-                          <label class="form-label fw-medium">Duration (min)</label>
+                          <label class="form-label fw-medium">{{ $t('admin.durationMinutes') }}</label>
                           <input v-model="serviceForm.duration" type="number" class="form-control" required>
                         </div>
                         <div class="col-6 col-md-3">
-                          <label class="form-label fw-medium">Price ($)</label>
+                          <label class="form-label fw-medium">{{ $t('admin.price') }}</label>
                           <input v-model="serviceForm.price" type="number" step="0.01" class="form-control" required>
                         </div>
                         <div class="col-12">
-                          <label class="form-label fw-medium">Description</label>
+                          <label class="form-label fw-medium">{{ $t('admin.description') }}</label>
                           <textarea v-model="serviceForm.description" class="form-control" rows="2" placeholder="Brief description of the service..."></textarea>
                         </div>
                       </div>
                       <div class="d-flex gap-2 mt-3">
                         <button type="submit" class="btn btn-success">
-                          <i class="fas fa-save me-1"></i>{{ serviceForm._id ? 'Update' : 'Save' }} Service
+                          <i class="fas fa-save me-1"></i>{{ serviceForm._id ? $t('common.update') : $t('common.save') }} {{ $t('admin.service') }}
                         </button>
                         <button @click="cancelServiceForm" type="button" class="btn btn-outline-secondary">
-                          <i class="fas fa-times me-1"></i>Cancel
+                          <i class="fas fa-times me-1"></i>{{ $t('common.cancel') }}
                         </button>
                       </div>
                     </form>
@@ -370,16 +370,16 @@
                       </div>
                       <div class="service-details mb-3">
                         <div class="d-flex justify-content-between text-muted small mb-1">
-                          <span><i class="fas fa-clock me-1"></i>{{ service.duration }} minutes</span>
+                          <span><i class="fas fa-clock me-1"></i>{{ service.duration }} {{ $t('admin.minutes') }}</span>
                         </div>
-                        <p class="text-muted small mb-0">{{ service.description || 'No description available' }}</p>
+                        <p class="text-muted small mb-0">{{ service.description || $t('admin.noDescriptionAvailable') }}</p>
                       </div>
                       <div class="service-actions d-flex gap-2">
                         <button @click="editService(service)" class="btn btn-sm btn-outline-primary flex-fill">
-                          <i class="fas fa-edit me-1"></i>Edit
+                          <i class="fas fa-edit me-1"></i>{{ $t('common.edit') }}
                         </button>
                         <button @click="deleteService(service._id)" class="btn btn-sm btn-outline-danger flex-fill">
-                          <i class="fas fa-trash me-1"></i>Delete
+                          <i class="fas fa-trash me-1"></i>{{ $t('common.delete') }}
                         </button>
                       </div>
                     </div>
@@ -392,19 +392,19 @@
                     <table class="table table-hover">
                       <thead class="table-light">
                         <tr>
-                          <th>Service Name</th>
-                          <th>Duration</th>
-                          <th>Price</th>
-                          <th>Description</th>
-                          <th class="text-center">Actions</th>
+                          <th>{{ $t('admin.serviceName') }}</th>
+                          <th>{{ $t('admin.duration') }}</th>
+                          <th>{{ $t('admin.price') }}</th>
+                          <th>{{ $t('admin.description') }}</th>
+                          <th class="text-center">{{ $t('admin.actions') }}</th>
                         </tr>
                       </thead>
                       <tbody>
                         <tr v-for="service in services" :key="service._id">
                           <td class="fw-medium">{{ service.name }}</td>
-                          <td>{{ service.duration }} min</td>
+                          <td>{{ service.duration }} {{ $t('admin.minutes') }}</td>
                           <td class="fw-bold text-success">${{ service.price }}</td>
-                          <td class="text-muted">{{ service.description || 'No description' }}</td>
+                          <td class="text-muted">{{ service.description || $t('admin.noDescription') }}</td>
                           <td class="text-center">
                             <div class="btn-group" role="group">
                               <button @click="editService(service)" class="btn btn-sm btn-outline-primary">
@@ -423,10 +423,10 @@
 
                 <div v-if="!services.length" class="empty-state text-center py-5">
                   <i class="fas fa-cut fa-3x text-muted mb-3"></i>
-                  <h5 class="text-muted">No Services Available</h5>
-                  <p class="text-muted mb-3">Start by adding your first service</p>
+                  <h5 class="text-muted">{{ $t('admin.noServicesAvailable') }}</h5>
+                  <p class="text-muted mb-3">{{ $t('admin.addFirstServicePrompt') }}</p>
                   <button @click="showServiceForm = true" class="btn btn-primary">
-                    <i class="fas fa-plus me-2"></i>Add Your First Service
+                    <i class="fas fa-plus me-2"></i>{{ $t('admin.addFirstService') }}
                   </button>
                 </div>
               </div>
@@ -439,18 +439,18 @@
               <div class="card-header py-3">
                 <div class="d-flex justify-content-between align-items-center">
                   <div>
-                    <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Weekly Time Slots</h5>
-                    <small class="text-muted">Manage your working hours for each day</small>
+                    <h5 class="mb-0"><i class="fas fa-clock me-2"></i>{{ $t('admin.weeklyTimeSlots') }}</h5>
+                    <small class="text-muted">{{ $t('admin.manageWorkingHours') }}</small>
                   </div>
                   <div v-if="primaryBarber" class="d-none d-lg-block">
-                    <span class="badge bg-info">{{ timeSlots.length }} total slots</span>
+                    <span class="badge bg-info">{{ timeSlots.length }} {{ $t('admin.totalSlots') }}</span>
                   </div>
                 </div>
               </div>
               <div class="card-body p-2 p-lg-3">
                 <div v-if="primaryBarber" class="alert alert-info d-flex flex-column d-lg-flex-row justify-content-between align-items-start align-items-lg-center mb-4">
-                  <span><i class="fas fa-info-circle me-2"></i>Managing time slots for: <strong>{{ primaryBarber.name }}</strong></span>
-                  <small class="text-muted mt-1 mt-lg-0">Total slots: {{ timeSlots.length }}</small>
+                  <span><i class="fas fa-info-circle me-2"></i>{{ $t('admin.managingTimeSlotsFor') }} <strong>{{ primaryBarber.name }}</strong></span>
+                  <small class="text-muted mt-1 mt-lg-0">{{ $t('admin.totalSlots') }}: {{ timeSlots.length }}</small>
                 </div>
                 
                 <div v-if="primaryBarber" class="timeslots-grid">
@@ -458,11 +458,11 @@
                     <div class="day-header">
                       <div class="day-info">
                         <h6 class="day-name">{{ day }}</h6>
-                        <span class="slot-count">{{ getTimeSlotsForDay(index).length }} slots</span>
+                        <span class="slot-count">{{ getTimeSlotsForDay(index).length }} {{ $t('admin.slots') }}</span>
                       </div>
                       <div class="day-status">
                         <span :class="getTimeSlotsForDay(index).length ? 'status-active' : 'status-inactive'">
-                          {{ getTimeSlotsForDay(index).length ? 'Active' : 'Closed' }}
+                          {{ getTimeSlotsForDay(index).length ? $t('admin.active') : $t('admin.closed') }}
                         </span>
                       </div>
                     </div>
@@ -471,24 +471,24 @@
                       <div class="add-slot-form">
                         <div class="time-inputs">
                           <div class="time-input-group">
-                            <label class="time-label">From</label>
+                            <label class="time-label">{{ $t('admin.from') }}</label>
                             <input v-model="newSlot[index].startTime" type="time" class="time-input">
                           </div>
-                          <div class="time-separator">to</div>
+                          <div class="time-separator">{{ $t('admin.to') }}</div>
                           <div class="time-input-group">
-                            <label class="time-label">To</label>
+                            <label class="time-label">{{ $t('admin.to') }}</label>
                             <input v-model="newSlot[index].endTime" type="time" class="time-input">
                           </div>
                         </div>
                         <button @click="addTimeSlot(index)" class="add-slot-btn">
-                          <i class="fas fa-plus me-1"></i>Add Slot
+                          <i class="fas fa-plus me-1"></i>{{ $t('admin.addSlot') }}
                         </button>
                       </div>
                     </div>
                     
                     <div class="slots-list">
                       <div v-if="getTimeSlotsForDay(index).length" class="slots-header">
-                        <span class="slots-title">Working Hours</span>
+                        <span class="slots-title">{{ $t('admin.workingHours') }}</span>
                       </div>
                       <div class="slots-container">
                         <div v-for="slot in getTimeSlotsForDay(index)" :key="slot._id" class="slot-item">
@@ -502,7 +502,7 @@
                         </div>
                         <div v-if="!getTimeSlotsForDay(index).length" class="no-slots">
                           <i class="fas fa-moon text-muted mb-2"></i>
-                          <p class="no-slots-text">Closed on {{ day }}</p>
+                          <p class="no-slots-text">{{ $t('admin.closedOn') }} {{ day }}</p>
                         </div>
                       </div>
                     </div>
@@ -511,7 +511,7 @@
                 
                 <div v-else class="text-center py-5">
                   <i class="fas fa-user-times fa-3x text-muted mb-3"></i>
-                  <p class="text-muted">No barber found. Please add a barber first.</p>
+                  <p class="text-muted">{{ $t('admin.noBarberFound') }}</p>
                 </div>
               </div>
             </div>
@@ -523,38 +523,38 @@
               <div class="col-12 col-lg-6">
                 <div class="card border-0 shadow-sm h-100">
                   <div class="card-header bg-gradient-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-user-tie me-2"></i>Barber Profile</h5>
-                    <small class="opacity-75">Manage your business profile</small>
+                    <h5 class="mb-0"><i class="fas fa-user-tie me-2"></i>{{ $t('admin.barberProfile') }}</h5>
+                    <small class="opacity-75">{{ $t('admin.manageBusinessProfile') }}</small>
                   </div>
                   <div class="card-body p-3">
                     <form @submit.prevent="updateBarberProfile">
                       <div class="row g-3">
                         <div class="col-12">
-                          <label class="form-label fw-medium">Barber Name</label>
+                          <label class="form-label fw-medium">{{ $t('admin.barberName') }}</label>
                           <input v-model="barberProfile.name" type="text" class="form-control" required>
                         </div>
                         <div class="col-12">
-                          <label class="form-label fw-medium">Email</label>
+                          <label class="form-label fw-medium">{{ $t('admin.email') }}</label>
                           <input v-model="barberProfile.email" type="email" class="form-control" placeholder="barber@example.com">
-                          <small class="text-muted">This email will receive booking notifications</small>
+                          <small class="text-muted">{{ $t('admin.emailNotificationsInfo') }}</small>
                         </div>
                         <div class="col-12">
-                          <label class="form-label fw-medium">Specialties</label>
+                          <label class="form-label fw-medium">{{ $t('admin.specialties') }}</label>
                           <input v-model="barberProfile.specialties" type="text" class="form-control" placeholder="Haircut, Beard Trim, Styling">
-                          <small class="text-muted">Separate multiple specialties with commas</small>
+                          <small class="text-muted">{{ $t('admin.specialtiesHelp') }}</small>
                         </div>
                         <div class="col-12">
-                          <label class="form-label fw-medium">Phone</label>
+                          <label class="form-label fw-medium">{{ $t('admin.phone') }}</label>
                           <input v-model="barberProfile.phone" type="tel" class="form-control" placeholder="+1 (555) 123-4567">
                         </div>
                         <div class="col-12">
-                          <label class="form-label fw-medium">Bio</label>
+                          <label class="form-label fw-medium">{{ $t('admin.bio') }}</label>
                           <textarea v-model="barberProfile.bio" class="form-control" rows="3" placeholder="Tell customers about yourself and your experience..."></textarea>
                         </div>
                       </div>
                       <div class="d-grid mt-4">
                         <button type="submit" class="btn btn-primary">
-                          <i class="fas fa-save me-2"></i>Update Profile
+                          <i class="fas fa-save me-2"></i>{{ $t('admin.updateProfile') }}
                         </button>
                       </div>
                     </form>
@@ -564,46 +564,46 @@
               <div class="col-12 col-lg-6">
                 <div class="card border-0 shadow-sm h-100">
                   <div class="card-header bg-gradient-success text-white">
-                    <h5 class="mb-0"><i class="fas fa-user-shield me-2"></i>Admin Settings</h5>
-                    <small class="opacity-75">Manage your admin account</small>
+                    <h5 class="mb-0"><i class="fas fa-user-shield me-2"></i>{{ $t('admin.adminSettings') }}</h5>
+                    <small class="opacity-75">{{ $t('admin.manageAdminAccount') }}</small>
                   </div>
                   <div class="card-body p-3">
                     <form @submit.prevent="updateAdminProfile">
                       <div class="row g-3">
                         <div class="col-12">
-                          <label class="form-label fw-medium">Admin Name</label>
+                          <label class="form-label fw-medium">{{ $t('admin.adminName') }}</label>
                           <input v-model="adminProfile.name" type="text" class="form-control" required>
                         </div>
                         <div class="col-12">
-                          <label class="form-label fw-medium">Email</label>
+                          <label class="form-label fw-medium">{{ $t('admin.email') }}</label>
                           <input v-model="adminProfile.email" type="email" class="form-control" required>
                         </div>
                         <div class="col-12">
                           <div class="password-section">
-                            <h6 class="text-muted mb-3"><i class="fas fa-lock me-2"></i>Change Password</h6>
+                            <h6 class="text-muted mb-3"><i class="fas fa-lock me-2"></i>{{ $t('admin.changePassword') }}</h6>
                             <div class="row g-3">
                               <div class="col-12">
-                                <label class="form-label fw-medium">Current Password</label>
+                                <label class="form-label fw-medium">{{ $t('admin.currentPassword') }}</label>
                                 <div class="input-group">
-                                  <input v-model="adminProfile.currentPassword" :type="showCurrentPassword ? 'text' : 'password'" class="form-control" placeholder="Enter current password">
+                                  <input v-model="adminProfile.currentPassword" :type="showCurrentPassword ? 'text' : 'password'" class="form-control" :placeholder="$t('admin.enterCurrentPassword')">
                                   <button @click="showCurrentPassword = !showCurrentPassword" type="button" class="btn btn-outline-secondary">
                                     <i :class="showCurrentPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
                                   </button>
                                 </div>
                               </div>
                               <div class="col-12">
-                                <label class="form-label fw-medium">New Password</label>
+                                <label class="form-label fw-medium">{{ $t('admin.newPassword') }}</label>
                                 <div class="input-group">
-                                  <input v-model="adminProfile.newPassword" :type="showNewPassword ? 'text' : 'password'" class="form-control" placeholder="Enter new password">
+                                  <input v-model="adminProfile.newPassword" :type="showNewPassword ? 'text' : 'password'" class="form-control" :placeholder="$t('admin.enterNewPassword')">
                                   <button @click="showNewPassword = !showNewPassword" type="button" class="btn btn-outline-secondary">
                                     <i :class="showNewPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
                                   </button>
                                 </div>
                               </div>
                               <div class="col-12">
-                                <label class="form-label fw-medium">Confirm New Password</label>
+                                <label class="form-label fw-medium">{{ $t('admin.confirmNewPassword') }}</label>
                                 <div class="input-group">
-                                  <input v-model="adminProfile.confirmPassword" :type="showConfirmPassword ? 'text' : 'password'" class="form-control" placeholder="Confirm new password">
+                                  <input v-model="adminProfile.confirmPassword" :type="showConfirmPassword ? 'text' : 'password'" class="form-control" :placeholder="$t('admin.confirmNewPassword')">
                                   <button @click="showConfirmPassword = !showConfirmPassword" type="button" class="btn btn-outline-secondary">
                                     <i :class="showConfirmPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
                                   </button>
@@ -615,7 +615,7 @@
                       </div>
                       <div class="d-grid mt-4">
                         <button type="submit" class="btn btn-success">
-                          <i class="fas fa-save me-2"></i>Update Settings
+                          <i class="fas fa-save me-2"></i>{{ $t('admin.updateSettings') }}
                         </button>
                       </div>
                     </form>
@@ -650,22 +650,22 @@
           <div class="modal-header">
             <h5 class="modal-title">
               <i :class="responseModal.status === 'confirmed' ? 'fas fa-check-circle text-success' : 'fas fa-times-circle text-danger'"></i>
-              {{ responseModal.status === 'confirmed' ? 'Accept Booking' : 'Reject Booking' }}
+              {{ responseModal.status === 'confirmed' ? $t('admin.acceptBooking') : $t('admin.rejectBooking') }}
             </h5>
             <button @click="responseModal.show = false" class="btn-close"></button>
           </div>
           <div class="modal-body">
-            <p><strong>Customer:</strong> {{ responseModal.appointment?.customerName }}</p>
-            <p><strong>Date:</strong> {{ formatDate(responseModal.appointment?.date) }} at {{ responseModal.appointment?.time }}</p>
+            <p><strong>{{ $t('admin.customer') }}:</strong> {{ responseModal.appointment?.customerName }}</p>
+            <p><strong>{{ $t('booking.date') }}:</strong> {{ formatDate(responseModal.appointment?.date) }} {{ $t('common.at') }} {{ responseModal.appointment?.time }}</p>
             <div class="mb-3">
-              <label class="form-label">Message to Customer</label>
+              <label class="form-label">{{ $t('admin.messageToCustomer') }}</label>
               <textarea v-model="responseModal.message" class="form-control" rows="3"></textarea>
             </div>
           </div>
           <div class="modal-footer">
-            <button @click="responseModal.show = false" class="btn btn-secondary">Cancel</button>
+            <button @click="responseModal.show = false" class="btn btn-secondary">{{ $t('common.cancel') }}</button>
             <button @click="respondToAppointment" :class="responseModal.status === 'confirmed' ? 'btn btn-success' : 'btn btn-danger'">
-              {{ responseModal.status === 'confirmed' ? 'Accept & Notify' : 'Reject & Notify' }}
+              {{ responseModal.status === 'confirmed' ? $t('admin.acceptAndNotify') : $t('admin.rejectAndNotify') }}
             </button>
           </div>
         </div>
@@ -677,27 +677,27 @@
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header bg-gradient-primary text-white">
-            <h5 class="modal-title"><i class="fas fa-plus me-2"></i>Book New Appointment</h5>
+            <h5 class="modal-title"><i class="fas fa-plus me-2"></i>{{ $t('admin.bookNewAppointment') }}</h5>
             <button @click="showBookingModal = false" class="btn-close btn-close-white"></button>
           </div>
           <div class="modal-body">
             <form @submit.prevent="quickBookAppointment">
               <div class="row g-3">
                 <div class="col-md-6">
-                  <label class="form-label">Date</label>
+                  <label class="form-label">{{ $t('booking.date') }}</label>
                   <input v-model="bookingForm.date" type="date" class="form-control" required>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Service</label>
+                  <label class="form-label">{{ $t('admin.service') }}</label>
                   <select v-model="bookingForm.serviceId" @change="updateBookingPrice" class="form-select" required>
-                    <option value="">Select Service</option>
+                    <option value="">{{ $t('admin.selectService') }}</option>
                     <option v-for="service in services" :key="service._id" :value="service._id">
                       {{ service.name }} - ${{ service.price }}
                     </option>
                   </select>
                 </div>
                 <div class="col-12" v-if="availableSlots.length">
-                  <label class="form-label">Available Times</label>
+                  <label class="form-label">{{ $t('booking.availableTimes') }}</label>
                   <div class="time-slots-grid">
                     <button 
                       v-for="slot in availableSlots" 
@@ -711,29 +711,29 @@
                   </div>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Customer Name</label>
+                  <label class="form-label">{{ $t('admin.customerName') }}</label>
                   <input v-model="bookingForm.customerName" type="text" class="form-control" required>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Phone</label>
+                  <label class="form-label">{{ $t('admin.phone') }}</label>
                   <input v-model="bookingForm.customerPhone" type="tel" class="form-control" required>
                 </div>
                 <div class="col-12">
-                  <label class="form-label">Email (Optional)</label>
+                  <label class="form-label">{{ $t('admin.emailOptional') }}</label>
                   <input v-model="bookingForm.customerEmail" type="email" class="form-control">
                 </div>
                 <div class="col-12" v-if="bookingForm.totalPrice">
                   <div class="alert alert-success">
-                    <strong><i class="fas fa-dollar-sign me-1"></i>Total: ${{ bookingForm.totalPrice }}</strong>
+                    <strong><i class="fas fa-dollar-sign me-1"></i>{{ $t('admin.totalAmount') }}: ${{ bookingForm.totalPrice }}</strong>
                   </div>
                 </div>
               </div>
             </form>
           </div>
           <div class="modal-footer">
-            <button @click="showBookingModal = false" class="btn btn-secondary">Cancel</button>
+            <button @click="showBookingModal = false" class="btn btn-secondary">{{ $t('common.cancel') }}</button>
             <button @click="quickBookAppointment" class="btn btn-success" :disabled="!bookingForm.time">
-              <i class="fas fa-check me-2"></i>Book Appointment
+              <i class="fas fa-check me-2"></i>{{ $t('admin.bookAppointment') }}
             </button>
           </div>
         </div>
@@ -751,22 +751,22 @@
             <button @click="confirmModal.show = false" class="btn-close"></button>
           </div>
           <div class="modal-body text-center">
-            <h5 class="mb-3">{{ confirmModal.action === 'confirmed' ? 'Approve Appointment?' : 'Mark as Complete?' }}</h5>
+            <h5 class="mb-3">{{ confirmModal.action === 'confirmed' ? $t('admin.approveAppointmentQuestion') : $t('admin.markAsCompleteQuestion') }}</h5>
             <p class="text-muted mb-4">{{ confirmModal.message }}</p>
             <div class="appointment-preview">
               <div class="preview-item">
                 <i class="fas fa-user me-2"></i>{{ confirmModal.appointment?.customerName }}
               </div>
               <div class="preview-item">
-                <i class="fas fa-calendar me-2"></i>{{ formatDate(confirmModal.appointment?.date) }} at {{ confirmModal.appointment?.time }}
+                <i class="fas fa-calendar me-2"></i>{{ formatDate(confirmModal.appointment?.date) }} {{ $t('common.at') }} {{ confirmModal.appointment?.time }}
               </div>
             </div>
           </div>
           <div class="modal-footer border-0 pt-0">
-            <button @click="confirmModal.show = false" class="btn btn-light">Cancel</button>
+            <button @click="confirmModal.show = false" class="btn btn-light">{{ $t('common.cancel') }}</button>
             <button @click="executeAction" :class="confirmModal.action === 'confirmed' ? 'btn btn-success' : 'btn btn-primary'">
               <i :class="confirmModal.action === 'confirmed' ? 'fas fa-check me-2' : 'fas fa-flag-checkered me-2'"></i>
-              {{ confirmModal.action === 'confirmed' ? 'Approve' : 'Complete' }}
+              {{ confirmModal.action === 'confirmed' ? $t('admin.approve') : $t('admin.complete') }}
             </button>
           </div>
         </div>
@@ -941,6 +941,20 @@ adminProfile: {
         this.loadAdminProfile()
       }
     },
+    resolveBackendMessage(message) {
+      if (!message) return ''
+
+      if (this.$te(message)) {
+        return this.$t(message)
+      }
+
+      const namespacedKey = message.startsWith('backend.') ? message : `backend.${message}`
+      if (this.$te(namespacedKey)) {
+        return this.$t(namespacedKey)
+      }
+
+      return message
+    },
     async fetchAppointments() {
       try {
         const response = await axios.get(`${process.env.VUE_APP_API_URL}/appointments`)
@@ -1017,7 +1031,7 @@ async updateAppointmentStatus(appointment, newStatus) {
 async quickBookAppointment() {
       try {
         if (!this.primaryBarber) {
-          this.showToast('No barber available', 'warning')
+          this.showToast(this.$t('toast.noBarber'), 'warning')
           return
         }
         
@@ -1036,10 +1050,13 @@ async quickBookAppointment() {
         await this.fetchAppointments()
         this.resetBookingForm()
         this.showBookingModal = false
-        this.showToast('Appointment booked successfully!', 'success')
+        this.showToast(this.$t('toast.bookingSuccess'), 'success')
       } catch (error) {
         console.error('Error booking appointment:', error)
-        this.showToast('Error booking appointment: ' + (error.response?.data?.message || error.message), 'error')
+        this.showToast(
+          this.$t('toast.bookingError', { message: this.resolveBackendMessage(error.response?.data?.message || error.message) }),
+          'error'
+        )
       }
     },
     resetBookingForm() {
@@ -1090,7 +1107,7 @@ async quickBookAppointment() {
     },
 async addTimeSlot(dayIndex) {
       if (!this.primaryBarber || !this.newSlot[dayIndex].startTime || !this.newSlot[dayIndex].endTime) {
-        this.showToast('Please fill in both start and end times', 'warning')
+        this.showToast(this.$t('toast.timeSlotRequired'), 'warning')
         return
       }
       try {
@@ -1102,10 +1119,13 @@ async addTimeSlot(dayIndex) {
         })
         await this.fetchTimeSlots()
         this.newSlot[dayIndex] = { startTime: '', endTime: '' }
-        this.showToast('Time slot added successfully!', 'success')
+        this.showToast(this.$t('toast.timeSlotAdded'), 'success')
       } catch (error) {
         console.error('Error adding time slot:', error)
-        this.showToast('Error adding time slot: ' + (error.response?.data?.message || error.message), 'error')
+        this.showToast(
+          this.$t('toast.timeSlotAddError', { message: this.resolveBackendMessage(error.response?.data?.message || error.message) }),
+          'error'
+        )
       }
     },
     async deleteTimeSlot(id) {
@@ -1113,10 +1133,13 @@ async addTimeSlot(dayIndex) {
       try {
         await axios.delete(`${process.env.VUE_APP_API_URL}/timeslots/${id}`)
         await this.fetchTimeSlots()
-        this.showToast('Time slot deleted successfully!', 'success')
+        this.showToast(this.$t('toast.timeSlotDeleted'), 'success')
       } catch (error) {
         console.error('Error deleting time slot:', error)
-        this.showToast('Error deleting time slot: ' + (error.response?.data?.message || error.message), 'error')
+        this.showToast(
+          this.$t('toast.timeSlotDeleteError', { message: this.resolveBackendMessage(error.response?.data?.message || error.message) }),
+          'error'
+        )
       }
     },
 getTimeSlotsForDay(dayIndex) {
@@ -1207,7 +1230,7 @@ getTimeSlotsForDay(dayIndex) {
           })
           
           if (!conflictCheck.data.availableTimes.includes(this.responseModal.appointment.time)) {
-            this.showToast('⚠️ Time slot conflict detected! This slot is no longer available.', 'warning')
+            this.showToast(this.$t('toast.timeSlotConflict'), 'warning')
             await this.fetchAppointments()
             this.responseModal.show = false
             return
@@ -1223,16 +1246,17 @@ getTimeSlotsForDay(dayIndex) {
         await this.fetchAppointments()
         this.responseModal.show = false
         
-        const statusText = this.responseModal.status === 'confirmed' ? 'accepted' : 'rejected'
-        const icon = this.responseModal.status === 'confirmed' ? '✅' : '❌'
-        this.showToast(`${icon} Appointment ${statusText} successfully! Customer has been notified.`, 'success')
+        const statusKey = this.responseModal.status === 'confirmed'
+          ? 'toast.appointmentAccepted'
+          : 'toast.appointmentRejected'
+        this.showToast(this.$t(statusKey), 'success')
       } catch (error) {
         console.error('Error responding to appointment:', error)
-        const errorMsg = error.response?.data?.message || error.message
+        const errorMsg = this.resolveBackendMessage(error.response?.data?.message || error.message)
         if (errorMsg.includes('conflict')) {
-          this.showToast('⚠️ ' + errorMsg, 'warning')
+          this.showToast(this.$t('toast.conflictWarning', { message: errorMsg }), 'warning')
         } else {
-          this.showToast('❌ Error updating appointment: ' + errorMsg, 'error')
+          this.showToast(this.$t('toast.appointmentUpdateError', { message: errorMsg }), 'error')
         }
       }
     },
@@ -1243,13 +1267,16 @@ async setReminder(appointment) {
         
         if (response.data.scheduledFor) {
           const scheduledTime = new Date(response.data.scheduledFor).toLocaleTimeString()
-          this.showToast(`🔔 Reminder scheduled for ${scheduledTime} (10 min before appointment)`, 'success')
+          this.showToast(this.$t('toast.reminderScheduled', { time: scheduledTime }), 'success')
         } else {
-          this.showToast(`⏰ ${response.data.message}`, 'info')
+          this.showToast(this.$t('toast.reminderInfo', { message: this.resolveBackendMessage(response.data.message) }), 'info')
         }
       } catch (error) {
         console.error('Error setting reminder:', error)
-        this.showToast('❌ Failed to set reminder: ' + (error.response?.data?.message || error.message), 'error')
+        this.showToast(
+          this.$t('toast.reminderError', { message: this.resolveBackendMessage(error.response?.data?.message || error.message) }),
+          'error'
+        )
       }
     },
     confirmAction(appointment, action) {
@@ -1273,7 +1300,7 @@ async setReminder(appointment) {
     async updateBarberProfile() {
       try {
         if (!this.primaryBarber) return
-const updateData = {
+        const updateData = {
           name: this.barberProfile.name,
           email: this.barberProfile.email,
           specialties: this.barberProfile.specialties.split(',').map(s => s.trim()).filter(s => s),
@@ -1282,26 +1309,26 @@ const updateData = {
         }
         await axios.put(`${process.env.VUE_APP_API_URL}/barbers/${this.primaryBarber._id}`, updateData)
         await this.fetchBarbers()
-        this.showToast('Barber profile updated successfully!', 'success')
+        this.showToast(this.$t('toast.barberProfileUpdated'), 'success')
       } catch (error) {
         console.error('Error updating barber profile:', error)
-        this.showToast('Error updating profile', 'error')
+        this.showToast(this.$t('toast.profileUpdateError'), 'error')
       }
     },
     async updateAdminProfile() {
       try {
         if (this.adminProfile.newPassword && this.adminProfile.newPassword !== this.adminProfile.confirmPassword) {
-          this.showToast('New passwords do not match', 'warning')
+          this.showToast(this.$t('toast.passwordMismatch'), 'warning')
           return
         }
-        
+
         if (!this.adminProfile.name.trim()) {
-          this.showToast('Admin name is required', 'warning')
+          this.showToast(this.$t('toast.adminNameRequired'), 'warning')
           return
         }
-        
+
         if (!this.adminProfile.email.trim()) {
-          this.showToast('Email is required', 'warning')
+          this.showToast(this.$t('toast.emailRequired'), 'warning')
           return
         }
         
@@ -1312,7 +1339,7 @@ const updateData = {
         
         if (this.adminProfile.newPassword) {
           if (!this.adminProfile.currentPassword) {
-            this.showToast('Current password is required to change password', 'warning')
+            this.showToast(this.$t('toast.currentPasswordRequired'), 'warning')
             return
           }
           updateData.currentPassword = this.adminProfile.currentPassword
@@ -1326,7 +1353,7 @@ const updateData = {
           localStorage.setItem('adminUser', JSON.stringify(response.data.admin))
         }
         
-        this.showToast('Admin settings updated successfully!', 'success')
+        this.showToast(this.$t('toast.settingsUpdated'), 'success')
         this.adminProfile.currentPassword = ''
         this.adminProfile.newPassword = ''
         this.adminProfile.confirmPassword = ''
@@ -1335,7 +1362,10 @@ const updateData = {
         this.loadAdminProfile()
       } catch (error) {
         console.error('Error updating admin profile:', error)
-        this.showToast('Error updating settings: ' + (error.response?.data?.message || error.message), 'error')
+        this.showToast(
+          this.$t('toast.settingsUpdateError', { message: this.resolveBackendMessage(error.response?.data?.message || error.message) }),
+          'error'
+        )
       }
     },
     loadAdminProfile() {
@@ -1380,10 +1410,10 @@ const updateData = {
     },
     getToastTitle(type) {
       const titles = {
-        success: 'Success',
-        error: 'Error',
-        warning: 'Warning',
-        info: 'Information'
+        success: this.$t('common.success'),
+        error: this.$t('common.error'),
+        warning: this.$t('common.warning'),
+        info: this.$t('common.info')
       }
       return titles[type] || titles.info
     }
@@ -1458,6 +1488,10 @@ const updateData = {
 .admin-header {
   border-bottom: 1px solid var(--border-color);
   background-color: var(--bg-secondary) !important;
+}
+
+.action-toolbar {
+  min-width: 260px;
 }
 
 .admin-avatar {
@@ -1627,14 +1661,32 @@ const updateData = {
   border-radius: 12px;
   box-shadow: var(--shadow-md);
   padding: 0.5rem;
+  overflow-x: auto;
+}
+
+.nav-tabs {
+  flex-wrap: nowrap;
+  gap: 0.5rem;
 }
 
 .nav-tabs .nav-link {
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   color: var(--text-secondary);
   transition: all 0.2s ease;
   padding: 0.75rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: left;
+}
+
+.nav-tabs .nav-icon {
+  font-size: 1rem;
+}
+
+.nav-tabs .nav-text {
+  font-size: 0.9rem;
 }
 
 .nav-tabs .nav-link:hover {
@@ -1654,38 +1706,69 @@ const updateData = {
   color: white !important;
 }
 
-/* Mobile Navigation */
-.mobile-nav {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-.nav-icon {
-  display: block;
-  margin-bottom: 0.25rem;
-  font-size: 1.1rem;
-}
-
-.nav-text {
-  display: block;
-  font-size: 0.8rem;
-}
-
 .nav-badge {
-  position: absolute;
-  top: -5px;
-  right: -5px;
+  margin-left: auto;
   background: #dc2626;
   color: white;
   border-radius: 50%;
-  width: 18px;
+  min-width: 18px;
   height: 18px;
   font-size: 0.7rem;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
+}
+
+/* Mobile Navigation */
+.mobile-nav {
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  white-space: nowrap;
+  padding: 0.35rem 0.5rem;
+}
+
+.mobile-nav::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 991px) {
+  .action-toolbar {
+    width: 100%;
+  }
+
+  .nav-tabs-wrapper {
+    padding: 0.35rem 0.5rem;
+  }
+
+  .mobile-nav {
+    gap: 0.35rem;
+    padding: 0.35rem 0.25rem;
+  }
+
+  .mobile-nav .nav-link {
+    min-width: 160px;
+    width: auto;
+    justify-content: flex-start;
+    gap: 0.65rem;
+    padding: 0.65rem 0.85rem;
+  }
+
+  .mobile-nav .nav-icon {
+    font-size: 1rem;
+  }
+
+  .mobile-nav .nav-text {
+    font-size: 0.9rem;
+  }
+
+  .mobile-nav .nav-badge {
+    position: relative;
+    top: auto;
+    right: auto;
+  }
 }
 
 /* Professional Animations */
@@ -2176,22 +2259,26 @@ const updateData = {
   
   .nav-item {
     flex: 0 0 auto;
-    min-width: 70px;
+    min-width: 150px;
   }
-  
+
   .nav-link {
-    padding: 0.75rem 0.5rem;
-    text-align: center;
+    padding: 0.65rem 0.75rem;
+    text-align: left;
     white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
   }
-  
+
   .nav-text {
-    font-size: 0.7rem;
+    font-size: 0.85rem;
   }
-  
+
   .nav-icon {
     font-size: 1rem;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0;
   }
   
   /* Mobile Cards */

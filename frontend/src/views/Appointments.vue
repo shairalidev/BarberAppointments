@@ -1,7 +1,7 @@
 <template>
   <div class="booking-page">
     <div class="container py-5">
-      <div class="d-flex justify-content-between align-items-center mb-4">
+      <div class="d-flex justify-content-between align-items-center mb-4 booking-header">
         <div>
           <p class="text-primary fw-semibold mb-1">{{ $t('booking.step') }} {{ currentStep }} {{ $t('booking.of') }} 3</p>
           <h2 class="fw-bold mb-0">{{ $t('booking.title') }}</h2>
@@ -56,7 +56,9 @@
               </div>
               <div class="d-flex justify-content-between align-items-center mt-3">
                 <small class="text-muted">{{ $t('booking.youCanChooseMultiple') }}</small>
-                <button class="btn btn-primary" @click="goToStep(2)">{{ $t('booking.chooseTime') }}</button>
+                <button class="btn btn-primary" :disabled="!canProceedFromServices" @click="goToStep(2)">
+                  {{ $t('booking.chooseTime') }}
+                </button>
               </div>
             </div>
           </div>
@@ -186,7 +188,14 @@
                 </div>
                 <div class="col-12 d-flex justify-content-between align-items-center">
                   <button type="button" class="btn btn-outline-secondary" @click="goToStep(2)">{{ $t('common.back') }}</button>
-                  <button type="submit" class="btn btn-primary">{{ $t('booking.bookNow') }}</button>
+                  <button
+                    type="submit"
+                    class="btn btn-primary"
+                    :disabled="isSubmitting || !canProceedFromSchedule"
+                  >
+                    <span v-if="isSubmitting" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    {{ isSubmitting ? $t('common.loading') : $t('booking.bookNow') }}
+                  </button>
                 </div>
               </form>
             </div>
@@ -268,6 +277,7 @@ export default {
         notes: '',
         marketingOptIn: true
       },
+      isSubmitting: false,
       steps: [
         { number: 1, label: 'Services', subtitle: 'Choose' },
         { number: 2, label: 'Date & time', subtitle: 'Schedule' },
@@ -285,10 +295,10 @@ export default {
     totalDuration() {
       return this.selectedServiceDetails.reduce((sum, s) => sum + s.duration, 0)
     },
-canProceedFromServices() {
+    canProceedFromServices() {
       return this.selectedServices.length > 0
     },
-canProceedFromSchedule() {
+    canProceedFromSchedule() {
       return !!(this.selectedDate && this.selectedTime)
     },
     selectedBarberName() {
@@ -361,18 +371,53 @@ canProceedFromSchedule() {
         dateA.getDate() === dateB.getDate()
       )
     },
-    async fetchServices() {
-      try {
-        const response = await axios.get(`${process.env.VUE_APP_API_URL}/services/public`)
-        this.services = response.data
-      } catch (error) {
-        console.error('Error fetching services:', error)
+    formatBackendMessage(message) {
+      if (!message) return ''
+
+      const backendMessageMap = {
+        'Slot is already booked or outside working hours': 'backend.slotNotAvailable',
+        'No working hours configured for this day': 'backend.noWorkingHours',
+        'Slot reserved for 5 minutes': 'backend.slotReserved',
+        'Time slot is no longer available': 'backend.slotUnavailable',
+        'Selected time slot is no longer available': 'backend.slotUnavailable',
+        'Time slot already booked': 'backend.slotUnavailable',
+        'Time slot was just booked by another customer': 'backend.slotUnavailable',
+        'Slot is available': 'backend.slotAvailable',
+        'Appointment request submitted successfully. You will receive confirmation once approved.': 'backend.bookingRequestSubmitted'
       }
+
+      if (backendMessageMap[message] && this.$te(backendMessageMap[message])) {
+        return this.$t(backendMessageMap[message])
+      }
+
+      if (this.$te(message)) {
+        return this.$t(message)
+      }
+
+      const namespacedKey = message.startsWith('backend.') ? message : `backend.${message}`
+      if (this.$te(namespacedKey)) {
+        return this.$t(namespacedKey)
+      }
+
+      // Fallback: humanize backend keys so users never see raw identifiers
+      const humanized = message
+        .replace(/^backend[.:]/, '')
+        .replace(/^toast[.:]/, '')
+        .replace(/[._]/g, ' ')
+      return humanized.charAt(0).toUpperCase() + humanized.slice(1)
     },
-async fetchBarbers() {
-      try {
-        const response = await axios.get(`${process.env.VUE_APP_API_URL}/barbers/public`)
-        this.barbers = response.data
+      async fetchServices() {
+        try {
+          const response = await axios.get(`${process.env.VUE_APP_API_URL}/services/public`)
+          this.services = response.data
+        } catch (error) {
+          console.error('Error fetching services:', error)
+        }
+      },
+      async fetchBarbers() {
+        try {
+          const response = await axios.get(`${process.env.VUE_APP_API_URL}/barbers/public`)
+          this.barbers = response.data
         // Auto-select Shair Ali Barber (single barber system)
         if (this.barbers.length > 0) {
           const shairAliBarber = this.barbers.find(b => b.name === 'Shair Ali Barber')
@@ -436,7 +481,7 @@ async fetchBarbers() {
       } catch (error) {
         console.error('Error fetching availability:', error)
         this.availableTimes = []
-        this.toast.error('Unable to load available times. Please try again.', {
+        this.toast.error(this.$t('toast.availabilityError'), {
           position: 'top-center'
         })
       }
@@ -449,11 +494,14 @@ async fetchBarbers() {
     },
     async submitBooking() {
       if (!this.canProceedFromSchedule) {
-        this.toast.warning('Please select a date and time slot.', {
+        this.toast.warning(this.$t('toast.selectTimeSlot'), {
           position: 'top-center'
         })
         return
       }
+
+      if (this.isSubmitting) return
+      this.isSubmitting = true
 
       // Validate slot availability before booking
       try {
@@ -465,20 +513,23 @@ async fetchBarbers() {
         })
 
         if (!validationResponse.data.available) {
-          this.toast.error(validationResponse.data.reason, {
+          this.toast.error(this.$t('toast.bookingValidationError', {
+            reason: this.formatBackendMessage(validationResponse.data.reason)
+          }), {
             timeout: 5000,
             position: 'top-center'
           })
-          
+
           // Refresh availability and suggest alternatives
           await this.handleAvailabilityRefresh()
           return
         }
       } catch (validationError) {
         console.error('Slot validation failed:', validationError)
-        this.toast.error('Unable to validate time slot. Please try again.', {
+        this.toast.error(this.$t('toast.slotValidationError'), {
           position: 'top-center'
         })
+        this.isSubmitting = false
         return
       }
 
@@ -496,43 +547,51 @@ async fetchBarbers() {
           time: this.selectedTime
         })
 
-        this.toast.success('🎉 Booking request submitted successfully!', {
+        this.toast.success(this.$t('toast.bookingRequestSuccess'), {
           timeout: 5000,
           position: 'top-center'
         })
-        
+
         // Show additional message if provided by backend
         if (response.data.message) {
           setTimeout(() => {
-            this.toast.info(response.data.message, {
+            this.toast.info(this.$t('toast.backendInfo', {
+              message: this.formatBackendMessage(response.data.message)
+            }), {
               timeout: 7000,
               position: 'top-center'
             })
           }, 1000)
         }
-        
+
         this.resetFlow()
       } catch (error) {
         const errorData = error.response?.data
-        let message = 'Error booking appointment. Please try another slot.'
-        
+        let message = this.$t('toast.bookingGenericError')
+
         if (errorData?.message) {
-          message = errorData.message
+          message = this.$t('toast.bookingErrorWithReason', {
+            reason: this.formatBackendMessage(errorData.message)
+          })
         }
-        
+
         // If slot conflict, refresh availability
         if (error.response?.status === 409) {
           await this.handleAvailabilityRefresh()
-          
+
           if (errorData?.availableTimes?.length) {
-            message += ` ${errorData.availableTimes.length} alternative slots are available.`
+            message += ` ${this.$t('toast.bookingConflictAlternatives', {
+              count: errorData.availableTimes.length
+            })}`
           }
         }
-        
+
         this.toast.error(message, {
           timeout: 5000,
           position: 'top-center'
         })
+      } finally {
+        this.isSubmitting = false
       }
     },
     resetFlow() {
@@ -573,12 +632,21 @@ async fetchBarbers() {
   color: var(--text-primary);
 }
 
+.booking-header {
+  gap: 1rem;
+}
+
 @media (max-width: 768px) {
   .booking-page .container {
     padding-left: 1rem;
     padding-right: 1rem;
   }
-  
+
+  .booking-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+
   .booking-page h2 {
     font-size: 1.75rem;
   }
