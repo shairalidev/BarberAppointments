@@ -3,6 +3,86 @@ const { Resend } = require('resend');
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 class EmailService {
+  static async sendBookingReceived(appointment, barber) {
+    if (!resend) {
+      console.log('Email service not configured - skipping booking receipt email');
+      return;
+    }
+
+    const emailHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Appointment Request Received - BarberPro</title>
+      <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f8fafc; }
+        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%); color: white; padding: 30px; text-align: center; }
+        .header h1 { margin: 0; font-size: 28px; font-weight: 700; }
+        .header p { margin: 10px 0 0 0; opacity: 0.9; }
+        .content { padding: 40px 30px; }
+        .appointment-card { background: #f0f9ff; border-radius: 12px; padding: 25px; margin: 20px 0; border-left: 4px solid #0ea5e9; }
+        .detail-row { display: flex; justify-content: space-between; margin: 12px 0; padding: 8px 0; border-bottom: 1px solid #e5e7eb; }
+        .detail-label { font-weight: 600; color: #374151; }
+        .detail-value { color: #6b7280; }
+        .footer { background: #f8fafc; padding: 30px; text-align: center; color: #6b7280; font-size: 14px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>✂️ BarberPro</h1>
+          <p>Your appointment request was received</p>
+        </div>
+        <div class="content">
+          <h2 style="color: #1f2937; margin-bottom: 20px;">Hello ${appointment.customerName}!</h2>
+          <p style="color: #6b7280; line-height: 1.6;">Thanks for booking with us. We'll review your request and confirm shortly.</p>
+
+          <div class="appointment-card">
+            <h3 style="margin-top: 0; color: #1f2937;">Requested Appointment</h3>
+            <div class="detail-row">
+              <span class="detail-label">📅 Date & Time</span>
+              <span class="detail-value">${new Date(appointment.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} at ${appointment.time}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">✂️ Services</span>
+              <span class="detail-value">${appointment.services?.map(s => s.name).join(', ')}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">👨💼 Barber</span>
+              <span class="detail-value">${barber?.name || 'Professional Barber'}</span>
+            </div>
+            <div class="detail-row" style="border-bottom: none;">
+              <span class="detail-label">💰 Estimated Total</span>
+              <span class="detail-value">$${appointment.totalPrice}</span>
+            </div>
+          </div>
+
+          <p style="color: #6b7280; line-height: 1.6;">You'll receive another email once your booking is confirmed or if we need to adjust the time.</p>
+        </div>
+        <div class="footer">
+          <p><strong>BarberPro</strong> - Professional Barber Services</p>
+          <p>We're excited to see you soon!</p>
+        </div>
+      </div>
+    </body>
+    </html>`;
+
+    try {
+      await resend.emails.send({
+        from: 'BarberPro <noreply@barberpro.com>',
+        to: [appointment.customerEmail],
+        subject: '✂️ Booking received - pending confirmation',
+        html: emailHtml,
+      });
+    } catch (error) {
+      console.error('Error sending booking receipt email:', error);
+      throw error;
+    }
+  }
+
   static async sendAppointmentConfirmation(appointment, barber) {
     if (!resend) {
       console.log('Email service not configured - skipping confirmation email');

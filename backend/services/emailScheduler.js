@@ -150,6 +150,13 @@ class EmailScheduler {
       let emailSent = false;
       
       switch (emailItem.emailType) {
+        case 'booking_received':
+          if (appointment.customerEmail) {
+            await EmailService.sendBookingReceived(appointment, appointment.barberId);
+            emailSent = true;
+          }
+          break;
+
         case 'reminder':
           if (appointment.barberId?.email) {
             await EmailService.sendBarberReminder(appointment, appointment.barberId);
