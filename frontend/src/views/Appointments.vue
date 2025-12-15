@@ -436,7 +436,7 @@ async fetchBarbers() {
       } catch (error) {
         console.error('Error fetching availability:', error)
         this.availableTimes = []
-        this.toast.error('Unable to load available times. Please try again.', {
+        this.toast.error(this.$t('toast.availabilityError'), {
           position: 'top-center'
         })
       }
@@ -449,7 +449,7 @@ async fetchBarbers() {
     },
     async submitBooking() {
       if (!this.canProceedFromSchedule) {
-        this.toast.warning('Please select a date and time slot.', {
+        this.toast.warning(this.$t('toast.selectTimeSlot'), {
           position: 'top-center'
         })
         return
@@ -465,7 +465,9 @@ async fetchBarbers() {
         })
 
         if (!validationResponse.data.available) {
-          this.toast.error(validationResponse.data.reason, {
+          this.toast.error(this.$t('toast.bookingValidationError', {
+            reason: validationResponse.data.reason
+          }), {
             timeout: 5000,
             position: 'top-center'
           })
@@ -476,7 +478,7 @@ async fetchBarbers() {
         }
       } catch (validationError) {
         console.error('Slot validation failed:', validationError)
-        this.toast.error('Unable to validate time slot. Please try again.', {
+        this.toast.error(this.$t('toast.slotValidationError'), {
           position: 'top-center'
         })
         return
@@ -496,7 +498,7 @@ async fetchBarbers() {
           time: this.selectedTime
         })
 
-        this.toast.success('🎉 Booking request submitted successfully!', {
+        this.toast.success(this.$t('toast.bookingRequestSuccess'), {
           timeout: 5000,
           position: 'top-center'
         })
@@ -504,31 +506,37 @@ async fetchBarbers() {
         // Show additional message if provided by backend
         if (response.data.message) {
           setTimeout(() => {
-            this.toast.info(response.data.message, {
+            this.toast.info(this.$t('toast.backendInfo', {
+              message: response.data.message
+            }), {
               timeout: 7000,
               position: 'top-center'
             })
           }, 1000)
         }
-        
+
         this.resetFlow()
       } catch (error) {
         const errorData = error.response?.data
-        let message = 'Error booking appointment. Please try another slot.'
-        
+        let message = this.$t('toast.bookingGenericError')
+
         if (errorData?.message) {
-          message = errorData.message
+          message = this.$t('toast.bookingErrorWithReason', {
+            reason: errorData.message
+          })
         }
-        
+
         // If slot conflict, refresh availability
         if (error.response?.status === 409) {
           await this.handleAvailabilityRefresh()
-          
+
           if (errorData?.availableTimes?.length) {
-            message += ` ${errorData.availableTimes.length} alternative slots are available.`
+            message += ` ${this.$t('toast.bookingConflictAlternatives', {
+              count: errorData.availableTimes.length
+            })}`
           }
         }
-        
+
         this.toast.error(message, {
           timeout: 5000,
           position: 'top-center'
