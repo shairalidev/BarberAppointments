@@ -1,7 +1,7 @@
 <template>
   <div class="booking-page">
     <div class="container py-5">
-      <div class="d-flex justify-content-between align-items-center mb-4">
+      <div class="d-flex justify-content-between align-items-center mb-4 booking-header">
         <div>
           <p class="text-primary fw-semibold mb-1">{{ $t('booking.step') }} {{ currentStep }} {{ $t('booking.of') }} 3</p>
           <h2 class="fw-bold mb-0">{{ $t('booking.title') }}</h2>
@@ -56,7 +56,9 @@
               </div>
               <div class="d-flex justify-content-between align-items-center mt-3">
                 <small class="text-muted">{{ $t('booking.youCanChooseMultiple') }}</small>
-                <button class="btn btn-primary" @click="goToStep(2)">{{ $t('booking.chooseTime') }}</button>
+                <button class="btn btn-primary" :disabled="!canProceedFromServices" @click="goToStep(2)">
+                  {{ $t('booking.chooseTime') }}
+                </button>
               </div>
             </div>
           </div>
@@ -186,7 +188,14 @@
                 </div>
                 <div class="col-12 d-flex justify-content-between align-items-center">
                   <button type="button" class="btn btn-outline-secondary" @click="goToStep(2)">{{ $t('common.back') }}</button>
-                  <button type="submit" class="btn btn-primary">{{ $t('booking.bookNow') }}</button>
+                  <button
+                    type="submit"
+                    class="btn btn-primary"
+                    :disabled="isSubmitting || !canProceedFromSchedule"
+                  >
+                    <span v-if="isSubmitting" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    {{ isSubmitting ? $t('common.loading') : $t('booking.bookNow') }}
+                  </button>
                 </div>
               </form>
             </div>
@@ -268,6 +277,7 @@ export default {
         notes: '',
         marketingOptIn: true
       },
+      isSubmitting: false,
       steps: [
         { number: 1, label: 'Services', subtitle: 'Choose' },
         { number: 2, label: 'Date & time', subtitle: 'Schedule' },
@@ -285,10 +295,10 @@ export default {
     totalDuration() {
       return this.selectedServiceDetails.reduce((sum, s) => sum + s.duration, 0)
     },
-canProceedFromServices() {
+    canProceedFromServices() {
       return this.selectedServices.length > 0
     },
-canProceedFromSchedule() {
+    canProceedFromSchedule() {
       return !!(this.selectedDate && this.selectedTime)
     },
     selectedBarberName() {
@@ -382,11 +392,39 @@ canProceedFromSchedule() {
       } catch (error) {
         console.error('Error fetching services:', error)
       }
+
+      if (backendMessageMap[message] && this.$te(backendMessageMap[message])) {
+        return this.$t(backendMessageMap[message])
+      }
+
+      if (this.$te(message)) {
+        return this.$t(message)
+      }
+
+      const namespacedKey = message.startsWith('backend.') ? message : `backend.${message}`
+      if (this.$te(namespacedKey)) {
+        return this.$t(namespacedKey)
+      }
+
+      // Fallback: humanize backend keys so users never see raw identifiers
+      const humanized = message
+        .replace(/^backend[.:]/, '')
+        .replace(/^toast[.:]/, '')
+        .replace(/[._]/g, ' ')
+      return humanized.charAt(0).toUpperCase() + humanized.slice(1)
     },
-async fetchBarbers() {
-      try {
-        const response = await axios.get(`${process.env.VUE_APP_API_URL}/barbers/public`)
-        this.barbers = response.data
+      async fetchServices() {
+        try {
+          const response = await axios.get(`${process.env.VUE_APP_API_URL}/services/public`)
+          this.services = response.data
+        } catch (error) {
+          console.error('Error fetching services:', error)
+        }
+      },
+      async fetchBarbers() {
+        try {
+          const response = await axios.get(`${process.env.VUE_APP_API_URL}/barbers/public`)
+          this.barbers = response.data
         // Auto-select Shair Ali Barber (single barber system)
         if (this.barbers.length > 0) {
           const shairAliBarber = this.barbers.find(b => b.name === 'Shair Ali Barber')
@@ -469,6 +507,9 @@ async fetchBarbers() {
         return
       }
 
+      if (this.isSubmitting) return
+      this.isSubmitting = true
+
       // Validate slot availability before booking
       try {
         const validationResponse = await axios.post(`${process.env.VUE_APP_API_URL}/appointments/validate-slot`, {
@@ -495,6 +536,7 @@ async fetchBarbers() {
         this.toast.error(this.$t('toast.slotValidationError'), {
           position: 'top-center'
         })
+        this.isSubmitting = false
         return
       }
 
@@ -555,6 +597,8 @@ async fetchBarbers() {
           timeout: 5000,
           position: 'top-center'
         })
+      } finally {
+        this.isSubmitting = false
       }
     },
     resetFlow() {
@@ -595,12 +639,21 @@ async fetchBarbers() {
   color: var(--text-primary);
 }
 
+.booking-header {
+  gap: 1rem;
+}
+
 @media (max-width: 768px) {
   .booking-page .container {
     padding-left: 1rem;
     padding-right: 1rem;
   }
-  
+
+  .booking-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+
   .booking-page h2 {
     font-size: 1.75rem;
   }

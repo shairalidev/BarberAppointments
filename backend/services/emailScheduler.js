@@ -36,6 +36,11 @@ class EmailScheduler {
 
   // Add email to queue
   async scheduleEmail(appointmentId, emailType, recipientEmail, recipientName, scheduledFor) {
+    if (!EmailService.isConfigured()) {
+      console.log(`Email service not configured - skipping queue for ${emailType}`);
+      return null;
+    }
+
     try {
       const emailQueue = new EmailQueue({
         appointmentId,
@@ -57,6 +62,11 @@ class EmailScheduler {
   // Schedule reminder email automatically when appointment is confirmed
   async scheduleReminderEmail(appointment) {
     try {
+      if (!EmailService.isConfigured()) {
+        console.log('Email service not configured - skipping reminder scheduling');
+        return null;
+      }
+
       if (!appointment.barberId?.email) {
         console.log('⚠️ Barber email not configured, skipping reminder');
         return null;
@@ -120,6 +130,14 @@ class EmailScheduler {
   // Send individual queued email
   async sendQueuedEmail(emailItem) {
     try {
+      if (!EmailService.isConfigured()) {
+        await EmailQueue.findByIdAndUpdate(emailItem._id, {
+          status: 'failed',
+          errorMessage: 'Email service not configured'
+        });
+        return;
+      }
+
       // Check if appointment still exists and is valid
       if (!emailItem.appointmentId) {
         await EmailQueue.findByIdAndUpdate(emailItem._id, {

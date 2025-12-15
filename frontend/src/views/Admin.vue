@@ -1666,10 +1666,22 @@ async setReminder(appointment) {
 
 .nav-tabs .nav-link {
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   color: var(--text-secondary);
   transition: all 0.2s ease;
   padding: 0.75rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: left;
+}
+
+.nav-tabs .nav-icon {
+  font-size: 1rem;
+}
+
+.nav-tabs .nav-text {
+  font-size: 0.9rem;
 }
 
 .nav-tabs .nav-link:hover {
@@ -1718,16 +1730,14 @@ async setReminder(appointment) {
   }
 
 .nav-badge {
-  position: absolute;
-  top: -5px;
-  right: -5px;
+  margin-left: auto;
   background: #dc2626;
   color: white;
   border-radius: 50%;
-  width: 18px;
+  min-width: 18px;
   height: 18px;
   font-size: 0.7rem;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;

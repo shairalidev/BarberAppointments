@@ -2,6 +2,8 @@ const { Resend } = require('resend');
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
+const isConfigured = !!process.env.RESEND_API_KEY;
+
 class EmailService {
   static async sendBookingReceived(appointment, barber) {
     if (!resend) {
