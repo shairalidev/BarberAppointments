@@ -82,6 +82,10 @@ jobs:
           echo "💾 Saving PM2 state..."
           pm2 save
 
+          echo "🌐 Restarting nginx..."
+          sudo systemctl restart nginx
+          sudo systemctl status nginx --no-pager
+
           echo "🚦 Deployment Complete!"
           pm2 status
 
