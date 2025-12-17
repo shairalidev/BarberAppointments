@@ -2,7 +2,7 @@ name: Deploy BarberPro Application
 
 on:
   push:
-    branches: [ main1, production ]
+    branches: [ main, production ]
   workflow_dispatch:
 
 env:
@@ -40,8 +40,8 @@ jobs:
           sudo chmod -R 755 /var/www/BarberAppointments
 
           echo "📥 Pulling latest code..."
-          git fetch origin main1
-          git reset --hard origin/main1
+          git fetch origin main
+          git reset --hard origin/main
 
           echo "📦 Backend dependencies..."
           cd backend
