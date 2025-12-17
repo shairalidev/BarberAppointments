@@ -54,13 +54,12 @@ jobs:
             sudo npm install -g pm2
           fi
 
-          # Use a tolerant check so 'set -e' / script_stop don't abort the whole SSH script
-          if pm2 pid barberapp-backend >/dev/null 2>&1; then
+          # Check if barberapp-backend exists in pm2
+          if pm2 list | grep -q "barberapp-backend"; then
             echo "barberapp-backend found in pm2 — restarting"
-            pm2 restart barberapp-backend || pm2 reload barberapp-backend || true
+            pm2 restart barberapp-backend
           else
             echo "barberapp-backend not found — starting via pm2"
-            # Start the npm start script as a daemon under pm2
             pm2 start npm --name barberapp-backend -- run start
           fi
 
