@@ -1691,19 +1691,25 @@ async setReminder(appointment) {
   border-radius: 10px;
   color: var(--text-secondary);
   transition: all 0.2s ease;
-  padding: 0.75rem 1rem;
+  padding: 0.875rem 1.25rem;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
   text-align: left;
+  min-height: 48px;
 }
 
 .nav-tabs .nav-icon {
-  font-size: 1rem;
+  font-size: 1.1rem;
+  width: 18px;
+  text-align: center;
+  flex-shrink: 0;
 }
 
 .nav-tabs .nav-text {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .nav-tabs .nav-link:hover {
@@ -1728,28 +1734,16 @@ async setReminder(appointment) {
   display: flex;
   align-items: stretch;
   justify-content: flex-start;
-  gap: 0.5rem;
+  gap: 0.25rem;
   white-space: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .mobile-nav::-webkit-scrollbar {
   display: none;
 }
-
-.mobile-nav::-webkit-scrollbar {
-  display: none;
-}
-
-  .nav-icon {
-    display: block;
-    margin-bottom: 0.25rem;
-    font-size: 1.1rem;
-  }
-
-  .nav-text {
-    display: block;
-    font-size: 0.8rem;
-  }
 
 .nav-badge {
   margin-left: auto;
@@ -1784,48 +1778,52 @@ async setReminder(appointment) {
   }
 
   .nav-tabs-wrapper {
-    padding: 0.25rem;
-    margin-bottom: 1rem;
+    padding: 0.375rem;
+    margin: 0 0.25rem 1rem 0.25rem;
   }
 
   .mobile-nav {
-    gap: 0.15rem;
-    justify-content: space-between;
+    gap: 0.25rem;
+    justify-content: flex-start;
     flex-wrap: nowrap;
   }
 
   .mobile-nav .nav-item {
-    flex: 1;
-    min-width: 0;
+    flex: 0 0 auto;
+    min-width: 90px;
   }
 
   .mobile-nav .nav-link {
-    padding: 0.4rem 0.2rem;
+    padding: 0.625rem 0.75rem;
     text-align: center;
-    font-size: 0.7rem;
+    font-size: 0.8rem;
     min-width: 0;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 0.375rem;
+    min-height: 60px;
   }
 
-  .nav-icon {
-    font-size: 0.8rem !important;
-    margin-bottom: 0.1rem;
+  .mobile-nav .nav-icon {
+    font-size: 1rem !important;
+    margin-bottom: 0;
+    width: auto;
   }
 
-  .nav-text {
-    font-size: 0.6rem !important;
-    line-height: 1;
+  .mobile-nav .nav-text {
+    font-size: 0.7rem !important;
+    line-height: 1.2;
+    font-weight: 500;
   }
 
   .nav-badge {
     position: absolute;
-    top: -2px;
-    right: -2px;
-    min-width: 14px;
-    height: 14px;
-    font-size: 0.6rem;
+    top: 8px;
+    right: 8px;
+    min-width: 16px;
+    height: 16px;
+    font-size: 0.65rem;
   }
 }
 
@@ -1939,6 +1937,29 @@ async setReminder(appointment) {
   .nav-icon {
     font-size: 1rem;
     margin-bottom: 0.2rem;
+  }
+
+  .nav-tabs-wrapper {
+    padding: 0.5rem;
+    margin: 0 0.25rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mobile-nav .nav-link {
+    padding: 0.75rem 0.5rem;
+    min-width: 85px;
+    white-space: nowrap;
+  }
+
+  .mobile-nav .nav-text {
+    font-size: 0.75rem !important;
+    font-weight: 500;
+  }
+
+  .mobile-nav .nav-icon {
+    font-size: 1.1rem !important;
+    margin-bottom: 0.25rem;
   }
 }
 

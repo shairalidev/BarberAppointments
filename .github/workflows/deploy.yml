@@ -42,10 +42,12 @@ jobs:
           echo "📥 Pulling latest code..."
           git fetch origin themetry
           git reset --hard origin/themetry
+          git clean -fd
 
           echo "📦 Backend dependencies..."
           cd backend
-          npm ci
+          rm -rf node_modules package-lock.json
+          npm install
 
           echo "🟢 PM2 backend..."
           # ensure pm2 is available
@@ -65,7 +67,8 @@ jobs:
 
           echo "📦 Frontend dependencies..."
           cd ../frontend
-          npm ci
+          rm -rf node_modules package-lock.json dist
+          npm install
 
           echo "🎨 Building frontend..."
           NODE_ENV=production npm run build

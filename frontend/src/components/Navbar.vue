@@ -86,36 +86,40 @@
           </div>
         </div>
 
-        <div class="mobile-actions d-lg-none w-100 mt-3">
-          <div class="d-flex flex-wrap align-items-center gap-2">
-            <button
-              @click="toggleLanguage"
-              class="btn btn-outline-primary btn-sm flex-grow-1"
-              :title="currentLocale === 'en' ? 'Switch to German' : 'Switch to English'"
-            >
-              <i class="fas fa-language me-2"></i>{{ currentLocale === 'en' ? 'Deutsch' : 'English' }}
-            </button>
-            <button
-              @click="toggleTheme"
-              :class="['theme-toggle', 'flex-grow-1', { active: isDark }]"
-              :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
-            >
-              <i class="fas fa-sun theme-toggle-icon sun-icon"></i>
-              <i class="fas fa-moon theme-toggle-icon moon-icon"></i>
-            </button>
-            <button
-              v-if="!isLoggedIn"
-              @click="showLogin"
-              class="btn btn-outline-primary btn-sm flex-grow-1"
-            >
-              <i class="fas fa-shield-alt me-2"></i>{{ $t('nav.admin') }}
-            </button>
-            <div v-else class="flex-grow-1">
-              <div class="btn-group w-100">
-                <router-link class="btn btn-primary btn-sm" to="/admin">
+        <div class="mobile-actions d-lg-none w-100 mt-3 pt-3 border-top">
+          <div class="row g-2">
+            <div class="col-6">
+              <button
+                @click="toggleLanguage"
+                class="btn btn-outline-primary btn-sm w-100"
+                :title="currentLocale === 'en' ? 'Switch to German' : 'Switch to English'"
+              >
+                <i class="fas fa-language me-1"></i>{{ currentLocale === 'en' ? 'DE' : 'EN' }}
+              </button>
+            </div>
+            <div class="col-6">
+              <button
+                @click="toggleTheme"
+                :class="['theme-toggle', 'w-100', { active: isDark }]"
+                :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+              >
+                <i class="fas fa-sun theme-toggle-icon sun-icon"></i>
+                <i class="fas fa-moon theme-toggle-icon moon-icon"></i>
+              </button>
+            </div>
+            <div class="col-12 mt-2">
+              <button
+                v-if="!isLoggedIn"
+                @click="showLogin"
+                class="btn btn-primary w-100"
+              >
+                <i class="fas fa-shield-alt me-2"></i>{{ $t('nav.admin') }}
+              </button>
+              <div v-else class="d-flex gap-2">
+                <router-link class="btn btn-primary flex-fill" to="/admin">
                   <i class="fas fa-cog me-2"></i>{{ $t('nav.admin') }}
                 </router-link>
-                <button @click.prevent="logout" class="btn btn-outline-danger btn-sm">
+                <button @click.prevent="logout" class="btn btn-outline-danger">
                   <i class="fas fa-sign-out-alt"></i>
                 </button>
               </div>
@@ -269,35 +273,44 @@ export default {
 /* Mobile Optimizations */
 @media (max-width: 991px) {
   .navbar-collapse {
-    margin-top: 1rem;
+    margin-top: 0.75rem;
     padding: 1rem;
     background: var(--bg-secondary);
     border-radius: 12px;
     box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
   }
   
   .nav-link {
     padding: 0.75rem 1rem !important;
-    margin: 0.25rem 0;
+    margin: 0.125rem 0;
+    border-radius: 8px;
+    text-align: center;
   }
   
-  .navbar-nav .btn {
-    width: 100%;
-    margin-top: 0.5rem;
+  .mobile-actions {
+    border-top: 1px solid var(--border-color) !important;
   }
 
   .mobile-actions .btn,
   .mobile-actions .theme-toggle {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .mobile-actions .btn-group .btn {
-    width: auto;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: 8px;
   }
   
   .nav-link.active::after {
     display: none;
+  }
+
+  .navbar-toggler {
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 8px;
+  }
+
+  .navbar-toggler:focus {
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
   }
 }
 
