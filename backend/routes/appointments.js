@@ -30,8 +30,9 @@ const buildDailyAvailability = (timeSlots, appointments, duration) => {
     const startMinutes = timeStringToMinutes(slot.startTime);
     const endMinutes = timeStringToMinutes(slot.endTime);
 
-    // Generate slots every 15 minutes
-    for (let start = startMinutes; start + duration <= endMinutes; start += 15) {
+    // Generate slots every 30 minutes, ensuring they start at :00 or :30
+    const firstSlot = Math.ceil(startMinutes / 30) * 30;
+    for (let start = firstSlot; start + duration <= endMinutes; start += 30) {
       const end = start + duration;
       
       // Check for conflicts with both pending and confirmed appointments
@@ -76,6 +77,13 @@ router.get('/availability', async (req, res) => {
     }
 
     const normalizedDate = normalizeDate(date);
+    const today = normalizeDate(new Date());
+    
+    // Prevent booking for past dates
+    if (normalizedDate < today) {
+      return res.status(400).json({ message: 'Cannot check availability for past dates' });
+    }
+
     const dayOfWeek = normalizedDate.getDay();
 
     // Get working hours for the day
@@ -139,6 +147,12 @@ router.post('/', async (req, res) => {
     }
 
     const normalizedDate = normalizeDate(date);
+    const today = normalizeDate(new Date());
+    
+    // Prevent booking for past dates
+    if (normalizedDate < today) {
+      return res.status(400).json({ message: 'Cannot book appointments for past dates' });
+    }
     const serviceDocs = await Service.find({ _id: { $in: services } });
 
     if (!serviceDocs.length || serviceDocs.length !== services.length) {
@@ -504,6 +518,15 @@ router.post('/validate-slot', async (req, res) => {
     }
 
     const normalizedDate = normalizeDate(date);
+    const today = normalizeDate(new Date());
+    
+    // Prevent validation for past dates
+    if (normalizedDate < today) {
+      return res.json({ 
+        available: false,
+        reason: 'Cannot book appointments for past dates'
+      });
+    }
     const dayOfWeek = normalizedDate.getDay();
 
     // Get working hours

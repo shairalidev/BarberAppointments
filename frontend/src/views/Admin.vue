@@ -538,38 +538,38 @@
           <div v-if="activeTab === 'profile'" class="profile-tab">
             <div class="row g-3 g-lg-4">
               <div class="col-12 col-lg-6">
-                <div class="card border-0 shadow-sm h-100">
+                <div class="card border-0 shadow-sm">
                   <div class="card-header bg-gradient-primary text-white">
                     <h5 class="mb-0"><i class="fas fa-user-tie me-2"></i>{{ $t('admin.barberProfile') }}</h5>
                     <small class="opacity-75">{{ $t('admin.manageBusinessProfile') }}</small>
                   </div>
                   <div class="card-body p-3">
                     <form @submit.prevent="updateBarberProfile">
-                      <div class="row g-3">
-                        <div class="col-12">
-                          <label class="form-label fw-medium">{{ $t('admin.barberName') }}</label>
+                      <div class="row g-2">
+                        <div class="col-12 mb-2">
+                          <label class="form-label fw-medium mb-1">{{ $t('admin.barberName') }}</label>
                           <input v-model="barberProfile.name" type="text" class="form-control" required>
                         </div>
-                        <div class="col-12">
-                          <label class="form-label fw-medium">{{ $t('admin.email') }}</label>
+                        <div class="col-12 mb-2">
+                          <label class="form-label fw-medium mb-1">{{ $t('admin.email') }}</label>
                           <input v-model="barberProfile.email" type="email" class="form-control" placeholder="barber@example.com">
                           <small class="text-muted">{{ $t('admin.emailNotificationsInfo') }}</small>
                         </div>
-                        <div class="col-12">
-                          <label class="form-label fw-medium">{{ $t('admin.specialties') }}</label>
+                        <div class="col-12 mb-2">
+                          <label class="form-label fw-medium mb-1">{{ $t('admin.specialties') }}</label>
                           <input v-model="barberProfile.specialties" type="text" class="form-control" placeholder="Haircut, Beard Trim, Styling">
                           <small class="text-muted">{{ $t('admin.specialtiesHelp') }}</small>
                         </div>
-                        <div class="col-12">
-                          <label class="form-label fw-medium">{{ $t('admin.phone') }}</label>
+                        <div class="col-12 mb-2">
+                          <label class="form-label fw-medium mb-1">{{ $t('admin.phone') }}</label>
                           <input v-model="barberProfile.phone" type="tel" class="form-control" placeholder="+1 (555) 123-4567">
                         </div>
-                        <div class="col-12">
-                          <label class="form-label fw-medium">{{ $t('admin.bio') }}</label>
+                        <div class="col-12 mb-2">
+                          <label class="form-label fw-medium mb-1">{{ $t('admin.bio') }}</label>
                           <textarea v-model="barberProfile.bio" class="form-control" rows="3" placeholder="Tell customers about yourself and your experience..."></textarea>
                         </div>
                       </div>
-                      <div class="d-grid mt-4">
+                      <div class="d-grid mt-3">
                         <button type="submit" class="btn btn-primary">
                           <i class="fas fa-save me-2"></i>{{ $t('admin.updateProfile') }}
                         </button>
@@ -579,28 +579,28 @@
                 </div>
               </div>
               <div class="col-12 col-lg-6">
-                <div class="card border-0 shadow-sm h-100">
+                <div class="card border-0 shadow-sm">
                   <div class="card-header bg-gradient-success text-white">
                     <h5 class="mb-0"><i class="fas fa-user-shield me-2"></i>{{ $t('admin.adminSettings') }}</h5>
                     <small class="opacity-75">{{ $t('admin.manageAdminAccount') }}</small>
                   </div>
                   <div class="card-body p-3">
                     <form @submit.prevent="updateAdminProfile">
-                      <div class="row g-3">
-                        <div class="col-12">
-                          <label class="form-label fw-medium">{{ $t('admin.adminName') }}</label>
+                      <div class="row g-2">
+                        <div class="col-12 mb-2">
+                          <label class="form-label fw-medium mb-1">{{ $t('admin.adminName') }}</label>
                           <input v-model="adminProfile.name" type="text" class="form-control" required>
                         </div>
-                        <div class="col-12">
-                          <label class="form-label fw-medium">{{ $t('admin.email') }}</label>
+                        <div class="col-12 mb-2">
+                          <label class="form-label fw-medium mb-1">{{ $t('admin.email') }}</label>
                           <input v-model="adminProfile.email" type="email" class="form-control" required>
                         </div>
                         <div class="col-12">
                           <div class="password-section">
-                            <h6 class="text-muted mb-3"><i class="fas fa-lock me-2"></i>{{ $t('admin.changePassword') }}</h6>
-                            <div class="row g-3">
-                              <div class="col-12">
-                                <label class="form-label fw-medium">{{ $t('admin.currentPassword') }}</label>
+                            <h6 class="text-muted mb-2"><i class="fas fa-lock me-2"></i>{{ $t('admin.changePassword') }}</h6>
+                            <div class="row g-2">
+                              <div class="col-12 mb-2">
+                                <label class="form-label fw-medium mb-1">{{ $t('admin.currentPassword') }}</label>
                                 <div class="input-group">
                                   <input v-model="adminProfile.currentPassword" :type="showCurrentPassword ? 'text' : 'password'" class="form-control" :placeholder="$t('admin.enterCurrentPassword')">
                                   <button @click="showCurrentPassword = !showCurrentPassword" type="button" class="btn btn-outline-secondary">
@@ -608,8 +608,8 @@
                                   </button>
                                 </div>
                               </div>
-                              <div class="col-12">
-                                <label class="form-label fw-medium">{{ $t('admin.newPassword') }}</label>
+                              <div class="col-12 mb-2">
+                                <label class="form-label fw-medium mb-1">{{ $t('admin.newPassword') }}</label>
                                 <div class="input-group">
                                   <input v-model="adminProfile.newPassword" :type="showNewPassword ? 'text' : 'password'" class="form-control" :placeholder="$t('admin.enterNewPassword')">
                                   <button @click="showNewPassword = !showNewPassword" type="button" class="btn btn-outline-secondary">
@@ -617,8 +617,8 @@
                                   </button>
                                 </div>
                               </div>
-                              <div class="col-12">
-                                <label class="form-label fw-medium">{{ $t('admin.confirmNewPassword') }}</label>
+                              <div class="col-12 mb-2">
+                                <label class="form-label fw-medium mb-1">{{ $t('admin.confirmNewPassword') }}</label>
                                 <div class="input-group">
                                   <input v-model="adminProfile.confirmPassword" :type="showConfirmPassword ? 'text' : 'password'" class="form-control" :placeholder="$t('admin.confirmNewPassword')">
                                   <button @click="showConfirmPassword = !showConfirmPassword" type="button" class="btn btn-outline-secondary">
@@ -630,7 +630,7 @@
                           </div>
                         </div>
                       </div>
-                      <div class="d-grid mt-4">
+                      <div class="d-grid mt-3">
                         <button type="submit" class="btn btn-success">
                           <i class="fas fa-save me-2"></i>{{ $t('admin.updateSettings') }}
                         </button>
@@ -702,7 +702,7 @@
               <div class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label">{{ $t('booking.date') }}</label>
-                  <input v-model="bookingForm.date" type="date" class="form-control" required>
+                  <input v-model="bookingForm.date" type="date" class="form-control" :min="todayDate" required>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">{{ $t('admin.service') }}</label>
@@ -850,6 +850,7 @@ export default {
         customerEmail: '',
         totalPrice: 0
       },
+      todayDate: new Date().toISOString().split('T')[0],
 availableSlots: [],
       primaryBarber: null,
       showBookingModal: false,
@@ -886,7 +887,11 @@ adminProfile: {
       return user ? JSON.parse(user) : null
     },
     pendingAppointments() {
-      return this.appointments.filter(appointment => appointment.status === 'pending')
+      const today = new Date().toISOString().split('T')[0]
+      return this.appointments.filter(appointment => {
+        const aptDate = appointment.date.split('T')[0]
+        return appointment.status === 'pending' && aptDate >= today
+      })
     },
     currentMonthYear() {
       const date = new Date(this.currentYear, this.currentMonth)
@@ -910,15 +915,16 @@ adminProfile: {
         days.push(this.createDayObject(date, true))
       }
       
-      // Limit to 35 days (5 rows × 7 days)
-      return days.slice(0, 35)
+      // Filter out past dates and limit to 35 days
+      return days.filter(day => !day.isPast).slice(0, 35)
     },
     selectedDayAppointments() {
       if (!this.selectedCalendarDate) return []
       return this.appointments.filter(apt => {
-        // Handle date comparison without timezone issues
         const aptDate = apt.date.split('T')[0]
-        return aptDate === this.selectedCalendarDate
+        const today = new Date().toISOString().split('T')[0]
+        // Only show today and future appointments
+        return aptDate === this.selectedCalendarDate && aptDate >= today
       })
     },
     formatSelectedDate() {
@@ -1053,6 +1059,17 @@ async quickBookAppointment() {
           return
         }
         
+        // Prevent booking for past dates
+        const selectedDate = new Date(this.bookingForm.date)
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        selectedDate.setHours(0, 0, 0, 0)
+        
+        if (selectedDate < today) {
+          this.showToast(this.$t('toast.cannotBookPastDate'), 'warning')
+          return
+        }
+        
         const appointmentData = {
           customerName: this.bookingForm.customerName,
           customerPhone: this.bookingForm.customerPhone,
@@ -1078,8 +1095,9 @@ async quickBookAppointment() {
       }
     },
     resetBookingForm() {
+      const today = new Date().toISOString().split('T')[0]
       this.bookingForm = {
-        date: new Date().toISOString().split('T')[0],
+        date: today,
         serviceId: '',
         time: '',
         customerName: '',
@@ -1087,6 +1105,7 @@ async quickBookAppointment() {
         customerEmail: '',
         totalPrice: 0
       }
+      this.todayDate = today
       this.availableSlots = []
     },
     updateBookingPrice() {
@@ -1191,11 +1210,17 @@ getTimeSlotsForDay(dayIndex) {
         return aptDate === dateStr
       })
       
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const dayDate = new Date(date)
+      dayDate.setHours(0, 0, 0, 0)
+      
       return {
         date: dateStr,
         dayNumber: date.getDate(),
         isCurrentMonth,
         isToday: this.isToday(date),
+        isPast: dayDate < today,
         hasBookings: bookings.length > 0,
         bookingCount: bookings.length
       }
@@ -1473,21 +1498,7 @@ async setReminder(appointment) {
     overflow-y: auto;
   }
   
-  .profile-tab .row .col-12 {
-    height: calc(100vh - 250px);
-    min-height: 600px;
-  }
-  
-  .profile-tab .card {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .profile-tab .card-body {
-    flex: 1;
-    overflow-y: auto;
-  }
+
   
   .timeslots-grid {
     display: grid;
@@ -2022,6 +2033,8 @@ async setReminder(appointment) {
   background: rgba(16, 185, 129, 0.4);
   color: white;
 }
+
+
 
 .day-number {
   font-weight: 600;

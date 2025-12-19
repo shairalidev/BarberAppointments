@@ -239,6 +239,7 @@ export default {
     timeSlotRequired: 'Bitte Start- und Endzeit ausfüllen',
     profileUpdated: 'Profil erfolgreich aktualisiert!',
     settingsUpdated: 'Einstellungen erfolgreich aktualisiert!',
-    adminNameRequired: 'Admin-Name ist erforderlich'
+    adminNameRequired: 'Admin-Name ist erforderlich',
+    cannotBookPastDate: 'Termine können nicht für vergangene Tage gebucht werden'
   }
 }

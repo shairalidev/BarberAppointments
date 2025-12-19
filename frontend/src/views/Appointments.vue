@@ -5,7 +5,11 @@
         <div>
           <p class="text-primary fw-semibold mb-1">{{ $t('booking.step') }} {{ currentStep }} {{ $t('booking.of') }} 3</p>
           <h2 class="fw-bold mb-0">{{ $t('booking.title') }}</h2>
-          <p class="text-muted">{{ $t('booking.subtitle') }}</p>
+          <p class="text-muted mb-2">{{ $t('booking.subtitle') }}</p>
+          <div class="d-flex align-items-center text-muted small">
+            <i class="fas fa-map-marker-alt me-2"></i>
+            <span>Bahnhofstraße 3, 6410 Telfs</span>
+          </div>
         </div>
         <div class="d-none d-md-flex align-items-center gap-3">
           <div v-for="step in steps" :key="step.number" class="step-indicator" :class="{ active: currentStep === step.number, completed: currentStep > step.number }">
@@ -93,17 +97,9 @@
               </div>
 
               <div class="calendar-wrapper mb-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                  <button class="btn btn-light icon-button" @click="changeWeek(-1)">
-                    <i class="fas fa-chevron-left"></i>
-                  </button>
-                  <div class="text-center">
-                    <p class="text-muted small mb-1">{{ weekRangeLabel }}</p>
-                    <h5 class="mb-0">{{ monthLabel }}</h5>
-                  </div>
-                  <button class="btn btn-light icon-button" @click="changeWeek(1)">
-                    <i class="fas fa-chevron-right"></i>
-                  </button>
+                <div class="text-center mb-3">
+                  <h5 class="mb-0">Available Dates</h5>
+                  <p class="text-muted small mb-1">Select from the next 14 days</p>
                 </div>
 
                 <div class="week-grid">
@@ -306,12 +302,13 @@ export default {
       return barber?.name
     },
     weekDays() {
-      const startValue = this.currentWeekStart || this.getStartOfWeek(new Date())
-      const start = new Date(startValue)
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const startDate = new Date(today)
 
-      return Array.from({ length: 7 }, (_, index) => {
-        const date = new Date(start)
-        date.setDate(start.getDate() + index)
+      return Array.from({ length: 14 }, (_, index) => {
+        const date = new Date(startDate)
+        date.setDate(startDate.getDate() + index)
         const value = this.formatDateValue(date)
 
         return {
@@ -319,7 +316,7 @@ export default {
           number: String(date.getDate()).padStart(2, '0'),
           value,
           isSelected: this.selectedDate === value,
-          isToday: this.isSameDay(date, new Date())
+          isToday: this.isSameDay(date, today)
         }
       })
     },
@@ -343,6 +340,10 @@ export default {
     const today = new Date()
     this.selectedDate = this.formatDateValue(today)
     this.currentWeekStart = this.getStartOfWeek(today)
+    
+    // Ensure we start with today or the first available future date
+    const firstAvailable = this.findFirstAvailableDate(new Date(this.currentWeekStart))
+    this.selectedDate = firstAvailable
   },
   
   beforeUnmount() {
@@ -412,19 +413,34 @@ export default {
       }
     },
     changeWeek(direction) {
-      const start = new Date(this.currentWeekStart || this.getStartOfWeek(new Date()))
-      start.setDate(start.getDate() + 7 * direction)
-      this.currentWeekStart = this.formatDateValue(start)
-      this.selectedDate = this.formatDateValue(start)
-      this.selectedTime = ''
+      // Navigation disabled since we show future dates only
+    },
+    
+    findFirstAvailableDate(weekStart) {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
       
-      // Debounce availability refresh
-      clearTimeout(this.availabilityTimeout)
-      this.availabilityTimeout = setTimeout(() => {
-        this.handleAvailabilityRefresh()
-      }, 300)
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(weekStart)
+        date.setDate(weekStart.getDate() + i)
+        date.setHours(0, 0, 0, 0)
+        
+        if (date >= today) {
+          return this.formatDateValue(date)
+        }
+      }
+      
+      // Fallback to today if no future date found in week
+      return this.formatDateValue(today)
     },
     selectDate(date) {
+      // Prevent selecting past dates
+      const selectedDate = new Date(date)
+      const today = new Date()
+      if (selectedDate < today && !this.isSameDay(selectedDate, today)) {
+        return
+      }
+      
       this.selectedDate = date
       this.currentWeekStart = this.getStartOfWeek(date)
       this.selectedTime = ''
@@ -754,6 +770,8 @@ export default {
   background: rgba(59, 130, 246, 0.1);
   box-shadow: 0 12px 30px rgba(37, 99, 235, 0.2);
 }
+
+
 
 .slot-grid {
   display: grid;

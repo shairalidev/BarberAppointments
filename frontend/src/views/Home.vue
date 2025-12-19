@@ -8,7 +8,11 @@
           <div class="col-lg-7 col-md-8 text-white hero-content">
             <div class="badge bg-white bg-opacity-25 text-white mb-3 px-3 py-2">💈 Premium Grooming</div>
             <h1 class="display-2 fw-bold mb-3 hero-title">{{ $t('home.title') }}</h1>
-            <p class="lead mb-4 fs-5 hero-subtitle">{{ $t('home.subtitle') }}</p>
+            <p class="lead mb-3 fs-5 hero-subtitle">{{ $t('home.subtitle') }}</p>
+            <div class="d-flex align-items-center mb-4 text-white-75">
+              <i class="fas fa-map-marker-alt me-2"></i>
+              <span>Bahnhofstraße 3, 6410 Telfs</span>
+            </div>
             <div class="d-flex flex-column flex-sm-row gap-3">
               <router-link class="btn btn-light btn-lg px-5 py-3 shadow-lg" to="/appointments">
                 <i class="fas fa-calendar-check me-2"></i>{{ $t('home.bookNow') }}
@@ -71,7 +75,7 @@
           </div>
         </div>
         <div class="text-center mt-5">
-          <router-link class="btn btn-primary btn-lg px-5" to="/appointments">
+          <router-link class="btn btn-primary btn-lg px-5 text-white" to="/appointments">
             {{ $t('home.viewAllServices') }} <i class="fas fa-arrow-right ms-2"></i>
           </router-link>
         </div>
@@ -128,7 +132,7 @@
         <div class="cta-card text-center text-white p-5">
           <h2 class="display-6 fw-bold mb-3">{{ $t('home.cta.title') }}</h2>
           <p class="lead mb-4">{{ $t('home.cta.subtitle') }}</p>
-          <router-link class="btn btn-light btn-lg px-5 py-3" to="/appointments">
+          <router-link class="btn btn-light btn-lg px-5 py-3 text-dark" to="/appointments">
             <i class="fas fa-calendar-plus me-2"></i>{{ $t('home.cta.button') }}
           </router-link>
         </div>
