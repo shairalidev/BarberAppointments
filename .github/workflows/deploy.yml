@@ -2,7 +2,7 @@ name: Deploy BarberPro Application
 
 on:
   push:
-    branches: [ themetry, production ]
+    branches:  themetry
   workflow_dispatch:
 
 env:
