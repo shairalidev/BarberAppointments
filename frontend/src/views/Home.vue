@@ -6,7 +6,7 @@
       <div class="container position-relative">
         <div class="row align-items-center min-vh-90">
           <div class="col-lg-7 col-md-8 text-white hero-content">
-            <div class="badge bg-white bg-opacity-25 text-white mb-3 px-3 py-2">
+            <div class="badge premium-badge mb-3 px-3 py-2">
               <span class="emoji-icon">💈</span> Premium Grooming
             </div>
             <h1 class="display-2 fw-bold mb-3 hero-title">{{ $t('home.title') }}</h1>
@@ -401,6 +401,21 @@ export default {
   color: #1a1a2e !important;
   background-color: white !important;
   border-color: white !important;
+}
+
+.premium-badge {
+  background: linear-gradient(135deg, #1a1a2e 0%, #2d3748 100%) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* Force dark background in both light and dark themes */
+:root .premium-badge,
+.dark-theme .premium-badge {
+  background: linear-gradient(135deg, #1a1a2e 0%, #2d3748 100%) !important;
+  color: white !important;
 }
 
 @media (max-width: 576px) {
