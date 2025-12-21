@@ -6,7 +6,9 @@
       <div class="container position-relative">
         <div class="row align-items-center min-vh-90">
           <div class="col-lg-7 col-md-8 text-white hero-content">
-            <div class="badge bg-white bg-opacity-25 text-white mb-3 px-3 py-2">💈 Premium Grooming</div>
+            <div class="badge bg-white bg-opacity-25 text-white mb-3 px-3 py-2">
+              <span class="emoji-icon">💈</span> Premium Grooming
+            </div>
             <h1 class="display-2 fw-bold mb-3 hero-title">{{ $t('home.title') }}</h1>
             <p class="lead mb-3 fs-5 hero-subtitle">{{ $t('home.subtitle') }}</p>
             <div class="d-flex align-items-center mb-4 text-white-75">
@@ -17,7 +19,7 @@
               <router-link class="btn btn-light btn-lg px-5 py-3 shadow-lg" to="/appointments">
                 <i class="fas fa-calendar-check me-2"></i>{{ $t('home.bookNow') }}
               </router-link>
-              <a href="tel:+1234567890" class="btn btn-outline-light btn-lg px-5 py-3">
+              <a href="tel:+1234567890" class="btn btn-outline-light btn-lg px-5 py-3 call-us-btn">
                 <i class="fas fa-phone me-2"></i>{{ $t('home.callUs') }}
               </a>
             </div>
@@ -380,6 +382,25 @@ export default {
   .stats-section h3 {
     font-size: 1.75rem;
   }
+}
+
+/* Emoji and Button Fixes */
+.emoji-icon {
+  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Android Emoji', sans-serif;
+  font-size: 1.1em;
+  display: inline-block;
+}
+
+.call-us-btn {
+  color: white !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.call-us-btn:hover {
+  color: #1a1a2e !important;
+  background-color: white !important;
+  border-color: white !important;
 }
 
 @media (max-width: 576px) {
