@@ -75,7 +75,10 @@ export default {
     whatTimeWorks: 'What time works best for you on',
     timesInLocalTimezone: 'Times are listed in your local time zone.',
     anythingElseToKnow: 'Anything else we should know?',
-    youAtExample: 'you@example.com'
+    youAtExample: 'you@example.com',
+    selectBarber: 'Select a barber',
+    emailUpdatesConsent: 'Yes, I want to receive appointment updates via email.',
+    minutes: 'min'
   },
   admin: {
     dashboard: 'BarberPro Dashboard',

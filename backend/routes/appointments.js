@@ -153,6 +153,7 @@ router.post('/', async (req, res) => {
     if (normalizedDate < today) {
       return res.status(400).json({ message: 'Cannot book appointments for past dates' });
     }
+
     const serviceDocs = await Service.find({ _id: { $in: services } });
 
     if (!serviceDocs.length || serviceDocs.length !== services.length) {
@@ -527,6 +528,7 @@ router.post('/validate-slot', async (req, res) => {
         reason: 'Cannot book appointments for past dates'
       });
     }
+
     const dayOfWeek = normalizedDate.getDay();
 
     // Get working hours

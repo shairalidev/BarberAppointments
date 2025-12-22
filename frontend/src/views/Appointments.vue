@@ -60,7 +60,7 @@
               </div>
               <div class="d-flex justify-content-between align-items-center mt-3">
                 <small class="text-muted">{{ $t('booking.youCanChooseMultiple') }}</small>
-                <button class="btn btn-primary" :disabled="!canProceedFromServices" @click="goToStep(2)">
+                <button class="btn btn-primary touch-friendly" :disabled="!canProceedFromServices" @click="goToStep(2)">
                   {{ $t('booking.chooseTime') }}
                 </button>
               </div>
@@ -85,10 +85,10 @@
                   <h5 class="mb-0">Choose a date and time</h5>
                   <small class="text-muted">Pick a day in the week view and then choose an available slot</small>
                 </div>
-<div class="d-flex flex-column">
-                  <label class="text-muted small mb-1">Barber</label>
+                <div class="d-flex flex-column">
+                  <label class="text-muted small mb-1">{{ $t('booking.barber') }}</label>
                   <select v-model="selectedBarber" @change="handleAvailabilityRefresh" class="form-select">
-                    <option value="">Select a barber</option>
+                    <option value="">{{ $t('booking.selectBarber') }}</option>
                     <option v-for="barber in barbers" :key="barber._id" :value="barber._id">
                       {{ barber.name }}
                     </option>
@@ -133,14 +133,14 @@
                     {{ slot }}
                   </button>
                   <div v-if="!availableTimes.length" class="text-muted small">
-                    No available slots for the selected date and services.
+                    {{ $t('booking.noAvailableSlots') }}
                   </div>
                 </div>
               </div>
 
               <div class="d-flex justify-content-between align-items-center">
-                <button class="btn btn-outline-secondary" @click="goToStep(1)">{{ $t('common.back') }}</button>
-                <button class="btn btn-primary" :disabled="!canProceedFromSchedule" @click="goToStep(3)">{{ $t('common.continue') }}</button>
+                <button class="btn btn-outline-secondary touch-friendly" @click="goToStep(1)">{{ $t('common.back') }}</button>
+                <button class="btn btn-primary touch-friendly" :disabled="!canProceedFromSchedule" @click="goToStep(3)">{{ $t('common.continue') }}</button>
               </div>
             </div>
           </div>
@@ -171,22 +171,22 @@
                   <input v-model="customer.email" type="email" class="form-control" :placeholder="$t('booking.youAtExample')">
                 </div>
                 <div class="col-12">
-                  <label class="form-label">Special requests</label>
+                  <label class="form-label">{{ $t('booking.specialRequests') }}</label>
                   <textarea v-model="customer.notes" class="form-control" rows="3" :placeholder="$t('booking.anythingElseToKnow')"></textarea>
                 </div>
                 <div class="col-12">
                   <div class="form-check">
                     <input v-model="customer.marketingOptIn" class="form-check-input" type="checkbox" id="marketingConsent">
                     <label class="form-check-label" for="marketingConsent">
-                      Yes, I want to receive appointment updates via email.
+                      {{ $t('booking.emailUpdatesConsent') }}
                     </label>
                   </div>
                 </div>
                 <div class="col-12 d-flex justify-content-between align-items-center">
-                  <button type="button" class="btn btn-outline-secondary" @click="goToStep(2)">{{ $t('common.back') }}</button>
+                  <button type="button" class="btn btn-outline-secondary touch-friendly" @click="goToStep(2)">{{ $t('common.back') }}</button>
                   <button
                     type="submit"
-                    class="btn btn-primary"
+                    class="btn btn-primary touch-friendly"
                     :disabled="isSubmitting || !canProceedFromSchedule"
                   >
                     <span v-if="isSubmitting" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
@@ -218,10 +218,10 @@
               </div>
               <hr>
               <div>
-                <p class="text-muted mb-2">Services</p>
+                <p class="text-muted mb-2">{{ $t('booking.services') }}</p>
                 <div v-if="selectedServiceDetails.length">
                   <div v-for="service in selectedServiceDetails" :key="service._id" class="d-flex justify-content-between align-items-center mb-1">
-                    <span>{{ service.name }} <small class="text-muted">({{ service.duration }} min)</small></span>
+                    <span>{{ service.name }} <small class="text-muted">({{ service.duration }} {{ $t('booking.minutes') }})</small></span>
                     <strong>{{ formatCurrency(service.price) }}</strong>
                   </div>
                 </div>
@@ -230,7 +230,7 @@
               <hr>
               <div class="d-flex justify-content-between">
                 <span>{{ $t('booking.totalDuration') }}</span>
-                <strong>{{ totalDuration }} min</strong>
+                <strong>{{ totalDuration }} {{ $t('booking.minutes') }}</strong>
               </div>
               <div class="d-flex justify-content-between">
                 <span>{{ $t('booking.totalPrice') }}</span>
@@ -403,15 +403,15 @@ export default {
         try {
           const response = await axios.get(`${process.env.VUE_APP_API_URL}/barbers/public`)
           this.barbers = response.data
-        // Auto-select Shair Ali Barber (single barber system)
-        if (this.barbers.length > 0) {
-          const shairAliBarber = this.barbers.find(b => b.name === 'Shair Ali Barber')
-          this.selectedBarber = shairAliBarber?._id || this.barbers[0]._id
+          // Auto-select Shair Ali Barber (single barber system)
+          if (this.barbers.length > 0) {
+            const shairAliBarber = this.barbers.find(b => b.name === 'Shair Ali Barber')
+            this.selectedBarber = shairAliBarber?._id || this.barbers[0]._id
+          }
+        } catch (error) {
+          console.error('Error fetching barbers:', error)
         }
-      } catch (error) {
-        console.error('Error fetching barbers:', error)
-      }
-    },
+      },
     changeWeek(direction) {
       // Navigation disabled since we show future dates only
     },
@@ -634,15 +634,17 @@ export default {
   gap: 1rem;
 }
 
+/* Enhanced mobile optimizations */
 @media (max-width: 768px) {
   .booking-page .container {
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
   }
 
   .booking-header {
     flex-direction: column;
     align-items: flex-start !important;
+    gap: 1rem;
   }
 
   .booking-page h2 {
@@ -651,6 +653,23 @@ export default {
   
   .d-none.d-md-flex {
     display: none !important;
+  }
+  
+  .touch-friendly {
+    min-height: 48px;
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+  
+  .btn {
+    min-height: 44px;
+    padding: 0.75rem 1.25rem;
+  }
+  
+  .form-control, .form-select {
+    min-height: 48px;
+    padding: 0.875rem 1rem;
+    font-size: 16px;
   }
 }
 
@@ -726,10 +745,38 @@ export default {
   gap: 12px;
 }
 
-@media (max-width: 576px) {
-  .week-grid {
-    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-    gap: 8px;
+/* iOS and Android specific optimizations */
+@supports (-webkit-touch-callout: none) {
+  .service-card, .day-card, .slot-button {
+    -webkit-tap-highlight-color: rgba(59, 130, 246, 0.1);
+  }
+  
+  input, select, textarea {
+    -webkit-appearance: none;
+    border-radius: 8px;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .service-card, .day-card, .card {
+    border-width: 0.5px;
+  }
+}
+
+/* Landscape orientation adjustments */
+@media (max-height: 500px) and (orientation: landscape) {
+  .booking-page {
+    padding-bottom: 1rem;
+  }
+  
+  .hero-content {
+    padding: 1rem 0;
+  }
+  
+  .btn {
+    min-height: 40px;
+    padding: 0.5rem 1rem;
   }
 }
 

@@ -1,27 +1,32 @@
-const { defineConfig } = require('@vue/cli-service')
-module.exports = defineConfig({
-  transpileDependencies: true,
+module.exports = {
   devServer: {
-    port: 3000
+    port: 3000,
+    host: '0.0.0.0',
+    allowedHosts: 'all'
+  },
+  css: {
+    extract: {
+      ignoreOrder: true
+    }
   },
   configureWebpack: {
     optimization: {
       splitChunks: {
-        chunks: 'all'
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            priority: 10
+          }
+        }
       }
     }
   },
   chainWebpack: config => {
-    // Ensure proper handling of emoji and special characters
-    config.module
-      .rule('vue')
-      .use('vue-loader')
-      .tap(options => {
-        options.compilerOptions = {
-          ...options.compilerOptions,
-          preserveWhitespace: false
-        }
-        return options
-      })
+    config.plugin('html').tap(args => {
+      args[0].title = 'BarberPro - Professional Appointments'
+      return args
+    })
   }
-})
+}

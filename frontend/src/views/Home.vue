@@ -16,10 +16,10 @@
               <span>Bahnhofstraße 3, 6410 Telfs</span>
             </div>
             <div class="d-flex flex-column flex-sm-row gap-3">
-              <router-link class="btn btn-light btn-lg px-5 py-3 shadow-lg" to="/appointments">
+              <router-link class="btn btn-light btn-lg px-4 py-3 shadow-lg touch-friendly" to="/appointments">
                 <i class="fas fa-calendar-check me-2"></i>{{ $t('home.bookNow') }}
               </router-link>
-              <a href="tel:+1234567890" class="btn btn-outline-light btn-lg px-5 py-3 call-us-btn">
+              <a href="tel:+1234567890" class="btn btn-outline-light btn-lg px-4 py-3 call-us-btn touch-friendly">
                 <i class="fas fa-phone me-2"></i>{{ $t('home.callUs') }}
               </a>
             </div>
@@ -77,7 +77,7 @@
           </div>
         </div>
         <div class="text-center mt-5">
-          <router-link class="btn btn-primary btn-lg px-5 text-white" to="/appointments">
+          <router-link class="btn btn-primary btn-lg px-4 py-3 text-white touch-friendly" to="/appointments">
             {{ $t('home.viewAllServices') }} <i class="fas fa-arrow-right ms-2"></i>
           </router-link>
         </div>
@@ -134,7 +134,7 @@
         <div class="cta-card text-center text-white p-5">
           <h2 class="display-6 fw-bold mb-3">{{ $t('home.cta.title') }}</h2>
           <p class="lead mb-4">{{ $t('home.cta.subtitle') }}</p>
-          <router-link class="btn btn-light btn-lg px-5 py-3 text-dark" to="/appointments">
+          <router-link class="btn btn-light btn-lg px-4 py-3 text-dark touch-friendly" to="/appointments">
             <i class="fas fa-calendar-plus me-2"></i>{{ $t('home.cta.button') }}
           </router-link>
         </div>
@@ -352,6 +352,7 @@ export default {
 @media (max-width: 768px) {
   .hero-section {
     min-height: 100vh;
+    padding: 1rem 0;
   }
   
   .hero-title {
@@ -363,16 +364,24 @@ export default {
   }
   
   .btn-lg {
-    padding: 0.75rem 2rem !important;
+    padding: 0.875rem 2rem !important;
     font-size: 1rem;
+    min-height: 48px;
+  }
+  
+  .touch-friendly {
+    min-height: 48px;
+    padding: 0.875rem 1.5rem;
   }
   
   .service-card {
     padding: 1.5rem;
+    margin-bottom: 1rem;
   }
   
   .feature-card {
     padding: 1.5rem 1rem;
+    margin-bottom: 1rem;
   }
   
   .cta-card {
@@ -381,6 +390,26 @@ export default {
   
   .stats-section h3 {
     font-size: 1.75rem;
+  }
+}
+
+/* iOS specific optimizations */
+@supports (-webkit-touch-callout: none) {
+  .btn {
+    -webkit-appearance: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .touch-friendly {
+    -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+  }
+}
+
+/* Android specific optimizations */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  .btn {
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
