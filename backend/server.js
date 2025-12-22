@@ -8,7 +8,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3000', 'https://barberappointment.duckdns.org'],
+  origin: ['https://ates-barberos.com', 'https://www.ates-barberos.com', 'http://localhost:3000'],
   credentials: true
 }));
 app.use(express.json());
