@@ -78,7 +78,10 @@ export default {
     youAtExample: 'you@example.com',
     selectBarber: 'Select a barber',
     emailUpdatesConsent: 'Yes, I want to receive appointment updates via email.',
-    minutes: 'min'
+    minutes: 'min',
+    availableDates: 'Available Dates',
+    selectFromNext14Days: 'Select from the next 14 days',
+    dateTime: 'Date & time'
   },
   admin: {
     dashboard: 'BarberPro Dashboard',

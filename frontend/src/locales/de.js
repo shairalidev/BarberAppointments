@@ -75,7 +75,13 @@ export default {
     whatTimeWorks: 'Welche Zeit passt Ihnen am besten am',
     timesInLocalTimezone: 'Zeiten werden in Ihrer lokalen Zeitzone angezeigt.',
     anythingElseToKnow: 'Gibt es noch etwas, was wir wissen sollten?',
-    youAtExample: 'sie@beispiel.com'
+    youAtExample: 'sie@beispiel.com',
+    selectBarber: 'Friseur auswählen',
+    emailUpdatesConsent: 'Ja, ich möchte Termin-Updates per E-Mail erhalten.',
+    minutes: 'min',
+    availableDates: 'Verfügbare Termine',
+    selectFromNext14Days: 'Aus den nächsten 14 Tagen auswählen',
+    dateTime: 'Datum & Uhrzeit'
   },
   admin: {
     dashboard: 'BarberPro Dashboard',

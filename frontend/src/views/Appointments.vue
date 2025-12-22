@@ -51,7 +51,7 @@
                         </div>
                         <div class="d-flex justify-content-between text-muted small">
                           <span><i class="fas fa-clock me-1"></i>{{ service.duration }} min</span>
-                          <span class="badge bg-light text-primary">Add</span>
+                          <span class="badge bg-light text-primary">{{ $t('common.add') }}</span>
                         </div>
                       </div>
                     </div>
@@ -75,15 +75,15 @@
                 <small class="text-muted">{{ $t('booking.pickDateTimeDesc') }}</small>
               </div>
               <button class="btn btn-link text-decoration-none" @click="goToStep(1)">
-                <i class="fas fa-arrow-left me-1"></i> Services
+                <i class="fas fa-arrow-left me-1"></i> {{ $t('booking.services') }}
               </button>
             </div>
             <div class="card-body">
               <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
                 <div>
-                  <p class="text-muted mb-1">Step 2 of 3</p>
-                  <h5 class="mb-0">Choose a date and time</h5>
-                  <small class="text-muted">Pick a day in the week view and then choose an available slot</small>
+                  <p class="text-muted mb-1">{{ $t('booking.step') }} 2 {{ $t('booking.of') }} 3</p>
+                  <h5 class="mb-0">{{ $t('booking.pickDateTime') }}</h5>
+                  <small class="text-muted">{{ $t('booking.pickDateTimeDesc') }}</small>
                 </div>
                 <div class="d-flex flex-column">
                   <label class="text-muted small mb-1">{{ $t('booking.barber') }}</label>
@@ -98,8 +98,8 @@
 
               <div class="calendar-wrapper mb-4">
                 <div class="text-center mb-3">
-                  <h5 class="mb-0">Available Dates</h5>
-                  <p class="text-muted small mb-1">Select from the next 14 days</p>
+                  <h5 class="mb-0">{{ $t('booking.availableDates') }}</h5>
+                  <p class="text-muted small mb-1">{{ $t('booking.selectFromNext14Days') }}</p>
                 </div>
 
                 <div class="week-grid">
@@ -118,7 +118,7 @@
               <div class="mb-3">
                 <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                   <div>
-                    <p class="mb-0 fw-semibold">Available times</p>
+                    <p class="mb-0 fw-semibold">{{ $t('booking.availableTimes') }}</p>
                     <small v-if="selectedDate" class="text-muted">{{ $t('booking.whatTimeWorks') }} {{ formatDate(selectedDate) }}?</small>
                   </div>
                   <small class="text-muted">{{ $t('booking.timesInLocalTimezone') }}</small>
@@ -153,7 +153,7 @@
                 <small class="text-muted">{{ $t('booking.detailsDesc') }}</small>
               </div>
               <button class="btn btn-link text-decoration-none" @click="goToStep(2)">
-                <i class="fas fa-arrow-left me-1"></i> Date & time
+                <i class="fas fa-arrow-left me-1"></i> {{ $t('booking.dateTime') }}
               </button>
             </div>
             <div class="card-body">
