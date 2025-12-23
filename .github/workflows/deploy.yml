@@ -57,20 +57,26 @@ jobs:
           fi
 
           # Create PM2 log directory
-          sudo mkdir -p /var/log/pm2
-          sudo chown -R ubuntu:ubuntu /var/log/pm2
+          sudo mkdir -p /var/log/pm2 || true
+          sudo chown -R ubuntu:ubuntu /var/log/pm2 || true
 
-          # Use ecosystem file for production deployment
           cd /var/www/BarberAppointments
+          
+          # Stop set -e for PM2 commands
+          set +e
           
           # Check if barberapp-backend exists in pm2
           if pm2 list | grep -q "barberapp-backend"; then
-            echo "barberapp-backend found in pm2 — restarting with production env"
-            pm2 restart barberapp-backend --env production
-          else
-            echo "barberapp-backend not found — starting with production env"
-            NODE_ENV=production pm2 start backend/server.js --name barberapp-backend
+            echo "barberapp-backend found in pm2 — restarting"
+            pm2 delete barberapp-backend
           fi
+          
+          echo "Starting barberapp-backend with production env"
+          cd /var/www/BarberAppointments/backend
+          NODE_ENV=production pm2 start server.js --name barberapp-backend
+          
+          # Resume set -e
+          set -e
 
           echo "📦 Frontend dependencies..."
           cd /var/www/BarberAppointments/frontend
