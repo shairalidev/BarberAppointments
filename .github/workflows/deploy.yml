@@ -73,7 +73,19 @@ jobs:
           
           echo "Starting barberapp-backend with production env"
           cd /var/www/BarberAppointments/backend
-          NODE_ENV=production pm2 start server.js --name barberapp-backend
+          
+          # Verify .env.production exists
+          if [ -f ".env.production" ]; then
+            echo ".env.production found"
+            head -3 .env.production
+          else
+            echo ".env.production not found!"
+            ls -la *.env* || echo "No .env files found"
+          fi
+          
+          # Start with ecosystem config from root
+          cd /var/www/BarberAppointments
+          pm2 start ecosystem.config.js --env production
           
           # Resume set -e
           set -e
