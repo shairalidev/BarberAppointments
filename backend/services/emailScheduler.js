@@ -130,7 +130,10 @@ class EmailScheduler {
         ]
       });
 
-      if (pendingEmails.length === 0) return;
+      if (pendingEmails.length === 0) {
+        console.log('No pending emails to process');
+        return;
+      }
 
       console.log(`📬 Processing ${pendingEmails.length} pending emails`);
 

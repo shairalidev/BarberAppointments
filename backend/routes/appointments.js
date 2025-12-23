@@ -251,8 +251,16 @@ router.post('/', async (req, res) => {
     await savedAppointment.populate('barberId');
     
     // 1. Send booking received email to customer
+    console.log('Email configuration check:', {
+      isConfigured: EmailService.isConfigured(),
+      customerEmail: customerEmail,
+      resendApiKey: !!process.env.RESEND_API_KEY,
+      fromEmail: process.env.FROM_EMAIL
+    });
+    
     if (customerEmail && EmailService.isConfigured()) {
       try {
+        console.log('Attempting to schedule customer booking email...');
         await emailScheduler.scheduleEmail(
           savedAppointment._id,
           'booking_received',
@@ -260,15 +268,28 @@ router.post('/', async (req, res) => {
           customerName,
           new Date() // Send immediately
         );
+        console.log('Customer booking email scheduled successfully');
       } catch (emailError) {
         console.error('Failed to schedule customer booking email:', emailError);
       }
+    } else {
+      console.log('Skipping customer email:', {
+        hasEmail: !!customerEmail,
+        isConfigured: EmailService.isConfigured()
+      });
     }
     
     // 2. Send new booking notification to barber
     if (EmailService.isConfigured()) {
       try {
+        console.log('Attempting to schedule barber notification email...');
         const barber = await require('../models/Barber').findById(barberId);
+        console.log('Barber found:', {
+          id: barber?._id,
+          name: barber?.name,
+          email: barber?.email
+        });
+        
         if (barber?.email) {
           await emailScheduler.scheduleEmail(
             savedAppointment._id,
@@ -277,10 +298,15 @@ router.post('/', async (req, res) => {
             barber.name,
             new Date() // Send immediately
           );
+          console.log('Barber notification email scheduled successfully');
+        } else {
+          console.log('Barber email not found - skipping barber notification');
         }
       } catch (emailError) {
         console.error('Failed to schedule barber notification email:', emailError);
       }
+    } else {
+      console.log('Email service not configured - skipping barber notification');
     }
     
     res.status(201).json({
@@ -698,6 +724,65 @@ router.post('/:id/reminder', async (req, res) => {
   } catch (error) {
     console.error('Error setting reminder:', error);
     res.status(500).json({ message: error.message });
+  }
+});
+
+// Test email endpoint
+router.post('/test-email', async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+    
+    console.log('Testing email configuration...');
+    console.log('Environment variables:', {
+      RESEND_API_KEY: !!process.env.RESEND_API_KEY,
+      FROM_EMAIL: process.env.FROM_EMAIL,
+      FROM_NAME: process.env.FROM_NAME
+    });
+    
+    if (!EmailService.isConfigured()) {
+      return res.status(400).json({ 
+        message: 'Email service not configured',
+        config: {
+          hasApiKey: !!process.env.RESEND_API_KEY,
+          fromEmail: process.env.FROM_EMAIL
+        }
+      });
+    }
+    
+    // Create a test appointment object
+    const testAppointment = {
+      customerName: 'Test Customer',
+      customerEmail: email,
+      date: new Date(),
+      time: '10:00',
+      totalPrice: 35,
+      services: [{ name: 'Test Service' }]
+    };
+    
+    const testBarber = {
+      name: 'Test Barber',
+      email: 'test@example.com'
+    };
+    
+    await EmailService.sendBookingReceived(testAppointment, testBarber);
+    
+    res.json({ 
+      message: 'Test email sent successfully',
+      sentTo: email,
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('Test email error:', error);
+    res.status(500).json({ 
+      message: 'Failed to send test email',
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 

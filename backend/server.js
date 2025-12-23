@@ -100,9 +100,15 @@ app.use('*', (req, res) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log('Email service configured:', !!process.env.RESEND_API_KEY);
   
   // Start email scheduler
-  emailScheduler.start();
+  try {
+    emailScheduler.start();
+    console.log('Email scheduler started successfully');
+  } catch (error) {
+    console.error('Failed to start email scheduler:', error);
+  }
 });
 
 // Graceful shutdown

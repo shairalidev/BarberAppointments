@@ -9,9 +9,15 @@ class EmailService {
 
   // 1. Customer books appointment - send to customer
   static async sendBookingReceived(appointment, barber) {
-    if (!resend) return;
+    if (!resend) {
+      console.log('Resend not configured - skipping booking received email');
+      return;
+    }
 
-    const emailHtml = `
+    try {
+      console.log('Sending booking received email to:', appointment.customerEmail);
+      
+      const emailHtml = `
     <!DOCTYPE html>
     <html>
     <head>
@@ -68,19 +74,31 @@ class EmailService {
     </body>
     </html>`;
 
-    await resend.emails.send({
-      from: `${process.env.FROM_NAME || 'Ates Barberos'} <${process.env.FROM_EMAIL || 'noreply@ates-barberos.com'}>`,
-      to: [appointment.customerEmail],
-      subject: 'Buchungsanfrage erhalten - Warten auf Bestätigung',
-      html: emailHtml,
-    });
+      await resend.emails.send({
+        from: `${process.env.FROM_NAME || 'Ates Barberos'} <${process.env.FROM_EMAIL || 'noreply@ates-barberos.com'}>`,
+        to: [appointment.customerEmail],
+        subject: 'Buchungsanfrage erhalten - Warten auf Bestätigung',
+        html: emailHtml,
+      });
+      
+      console.log('Booking received email sent successfully to:', appointment.customerEmail);
+    } catch (error) {
+      console.error('Failed to send booking received email:', error);
+      throw error;
+    }
   }
 
   // 2. Customer books appointment - send to barber
   static async sendNewBookingToBarber(appointment, barber) {
-    if (!resend || !barber.email) return;
+    if (!resend || !barber?.email) {
+      console.log('Resend not configured or barber email missing - skipping barber notification');
+      return;
+    }
 
-    const emailHtml = `
+    try {
+      console.log('Sending new booking notification to barber:', barber.email);
+      
+      const emailHtml = `
     <!DOCTYPE html>
     <html>
     <head>
@@ -144,12 +162,18 @@ class EmailService {
     </body>
     </html>`;
 
-    await resend.emails.send({
-      from: `Ates Barberos Admin <${process.env.FROM_EMAIL || 'noreply@ates-barberos.com'}>`,
-      to: [barber.email],
-      subject: 'Neue Buchungsanfrage - Aktion erforderlich',
-      html: emailHtml,
-    });
+      await resend.emails.send({
+        from: `Ates Barberos Admin <${process.env.FROM_EMAIL || 'noreply@ates-barberos.com'}>`,
+        to: [barber.email],
+        subject: 'Neue Buchungsanfrage - Aktion erforderlich',
+        html: emailHtml,
+      });
+      
+      console.log('Barber notification email sent successfully to:', barber.email);
+    } catch (error) {
+      console.error('Failed to send barber notification email:', error);
+      throw error;
+    }
   }
 
   // 3. Admin confirms booking - send to customer
