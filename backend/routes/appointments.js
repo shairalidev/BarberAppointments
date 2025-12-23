@@ -72,8 +72,21 @@ router.get('/', async (req, res) => {
 router.get('/availability', async (req, res) => {
   try {
     const { barberId, date, duration } = req.query;
+    
+    console.log('Availability request received:', {
+      barberId,
+      date,
+      duration,
+      query: req.query,
+      headers: req.headers
+    });
+    
     if (!barberId || !date || !duration) {
-      return res.status(400).json({ message: 'barberId, date, and duration are required' });
+      console.error('Missing required parameters:', { barberId, date, duration });
+      return res.status(400).json({ 
+        message: 'barberId, date, and duration are required',
+        received: { barberId, date, duration }
+      });
     }
 
     const normalizedDate = normalizeDate(date);
@@ -109,6 +122,13 @@ router.get('/availability', async (req, res) => {
 
     const availableTimes = buildDailyAvailability(timeSlots, appointments, parseInt(duration, 10));
     
+    console.log('Availability response:', {
+      availableTimes: availableTimes.length,
+      totalSlots: availableTimes.length,
+      date,
+      barberId
+    });
+    
     res.json({ 
       availableTimes,
       totalSlots: availableTimes.length,
@@ -119,8 +139,15 @@ router.get('/availability', async (req, res) => {
       bookedSlots: appointments.length
     });
   } catch (error) {
-    console.error('Availability check error:', error);
-    res.status(500).json({ message: error.message });
+    console.error('Availability check error:', {
+      error: error.message,
+      stack: error.stack,
+      query: req.query
+    });
+    res.status(500).json({ 
+      message: 'Error checking availability',
+      error: error.message
+    });
   }
 });
 
@@ -514,8 +541,21 @@ router.post('/validate-slot', async (req, res) => {
   try {
     const { barberId, date, time, duration } = req.body;
     
+    console.log('Slot validation request:', {
+      barberId,
+      date,
+      time,
+      duration,
+      body: req.body
+    });
+    
     if (!barberId || !date || !time || !duration) {
-      return res.status(400).json({ message: 'All fields are required' });
+      console.error('Missing required fields for slot validation:', { barberId, date, time, duration });
+      return res.status(400).json({ 
+        message: 'All fields are required',
+        required: ['barberId', 'date', 'time', 'duration'],
+        received: { barberId, date, time, duration }
+      });
     }
 
     const normalizedDate = normalizeDate(date);
@@ -551,14 +591,27 @@ router.post('/validate-slot', async (req, res) => {
     const availableTimes = buildDailyAvailability(timeSlots, appointments, parseInt(duration));
     const isAvailable = availableTimes.includes(time);
     
+    console.log('Slot validation result:', {
+      isAvailable,
+      requestedTime: time,
+      availableTimesCount: availableTimes.length
+    });
+    
     res.json({ 
       available: isAvailable,
       reason: isAvailable ? 'Slot is available' : 'Slot is already booked or outside working hours',
       alternativeTimes: isAvailable ? [] : availableTimes.slice(0, 5) // Suggest 5 alternatives
     });
   } catch (error) {
-    console.error('Slot validation error:', error);
-    res.status(500).json({ message: error.message });
+    console.error('Slot validation error:', {
+      error: error.message,
+      stack: error.stack,
+      body: req.body
+    });
+    res.status(500).json({ 
+      message: 'Error validating slot',
+      error: error.message
+    });
   }
 });
 

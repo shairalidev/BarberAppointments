@@ -212,7 +212,7 @@
                 <span class="text-muted">{{ $t('booking.time') }}</span>
                 <strong>{{ selectedTime || $t('booking.pickSlot') }}</strong>
               </div>
-<div class="d-flex justify-content-between mb-2">
+              <div class="d-flex justify-content-between mb-2">
                 <span class="text-muted">{{ $t('booking.barber') }}</span>
                 <strong>{{ selectedBarberName || $t('booking.professionalBarber') }}</strong>
               </div>
@@ -235,6 +235,39 @@
               <div class="d-flex justify-content-between">
                 <span>{{ $t('booking.totalPrice') }}</span>
                 <strong>{{ formatCurrency(totalPrice) }}</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Debug Panel (Development Only) -->
+      <div v-if="debugMode" class="row mt-4">
+        <div class="col-12">
+          <div class="card border-warning">
+            <div class="card-header bg-warning text-dark">
+              <h6 class="mb-0">🐛 Debug Information</h6>
+            </div>
+            <div class="card-body">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <strong>API Configuration:</strong>
+                  <pre class="small">{{ JSON.stringify({
+                    apiUrl: getApiUrl(),
+                    nodeEnv: process.env.NODE_ENV
+                  }, null, 2) }}</pre>
+                </div>
+                <div class="col-md-6">
+                  <strong>Current State:</strong>
+                  <pre class="small">{{ JSON.stringify({
+                    currentStep,
+                    selectedServices: selectedServices.length,
+                    selectedBarber,
+                    selectedDate,
+                    selectedTime,
+                    availableTimes: availableTimes.length
+                  }, null, 2) }}</pre>
+                </div>
               </div>
             </div>
           </div>
@@ -274,6 +307,7 @@ export default {
         marketingOptIn: true
       },
       isSubmitting: false,
+      debugMode: process.env.NODE_ENV === 'development',
       steps: [
         { number: 1, label: 'Services', subtitle: 'Choose' },
         { number: 2, label: 'Date & time', subtitle: 'Schedule' },
@@ -335,6 +369,8 @@ export default {
     }
   },
   async mounted() {
+    // Test API connectivity first
+    await this.testApiConnectivity()
     await Promise.all([this.fetchServices(), this.fetchBarbers()])
 
     const today = new Date()
@@ -393,7 +429,7 @@ export default {
     },
     async fetchServices() {
       try {
-        const response = await axios.get(`${process.env.VUE_APP_API_URL}/services/public`)
+        const response = await axios.get(`${this.getApiUrl()}/services/public`)
         this.services = response.data
       } catch (error) {
         console.error('Error fetching services:', error)
@@ -401,7 +437,7 @@ export default {
     },
       async fetchBarbers() {
         try {
-          const response = await axios.get(`${process.env.VUE_APP_API_URL}/barbers/public`)
+          const response = await axios.get(`${this.getApiUrl()}/barbers/public`)
           this.barbers = response.data
           // Auto-select Shair Ali Barber (single barber system)
           if (this.barbers.length > 0) {
@@ -464,14 +500,27 @@ export default {
       this.currentWeekStart = this.getStartOfWeek(this.selectedDate)
 
       try {
-        const response = await axios.get(`${process.env.VUE_APP_API_URL}/appointments/availability`, {
+        console.log('Fetching availability with params:', {
+          barberId: this.selectedBarber,
+          date: this.selectedDate,
+          duration: duration,
+          apiUrl: process.env.VUE_APP_API_URL
+        })
+        
+        const response = await axios.get(`${this.getApiUrl()}/appointments/availability`, {
           params: {
             barberId: this.selectedBarber,
             date: this.selectedDate,
             duration: duration
+          },
+          timeout: 10000,
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
           }
         })
         
+        console.log('Availability response:', response.data)
         this.availableTimes = response.data.availableTimes || []
         
         // Show additional info in console for debugging
@@ -480,9 +529,23 @@ export default {
         }
       } catch (error) {
         console.error('Error fetching availability:', error)
+        console.error('Error response:', error.response)
+        console.error('Error request:', error.request)
+        
         this.availableTimes = []
-        this.toast.error(this.$t('toast.availabilityError'), {
-          position: 'top-center'
+        
+        let errorMessage = this.$t('toast.availabilityError')
+        if (error.response) {
+          errorMessage = `API Error: ${error.response.status} - ${error.response.statusText}`
+        } else if (error.request) {
+          errorMessage = 'Network Error: Unable to reach server'
+        } else {
+          errorMessage = `Request Error: ${error.message}`
+        }
+        
+        this.toast.error(errorMessage, {
+          position: 'top-center',
+          timeout: 8000
         })
       }
     },
@@ -505,11 +568,24 @@ export default {
 
       // Validate slot availability before booking
       try {
-        const validationResponse = await axios.post(`${process.env.VUE_APP_API_URL}/appointments/validate-slot`, {
+        console.log('Validating slot with data:', {
           barberId: this.selectedBarber,
           date: this.selectedDate,
           time: this.selectedTime,
           duration: this.totalDuration || 30
+        })
+        
+        const validationResponse = await axios.post(`${this.getApiUrl()}/appointments/validate-slot`, {
+          barberId: this.selectedBarber,
+          date: this.selectedDate,
+          time: this.selectedTime,
+          duration: this.totalDuration || 30
+        }, {
+          timeout: 10000,
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
         })
 
         if (!validationResponse.data.available) {
@@ -535,7 +611,18 @@ export default {
 
       // Proceed with booking
       try {
-        const response = await axios.post(`${process.env.VUE_APP_API_URL}/appointments`, {
+        console.log('Submitting booking with data:', {
+          customerName: this.customer.name,
+          customerPhone: this.customer.phone,
+          customerEmail: this.customer.email,
+          barberId: this.selectedBarber,
+          services: this.selectedServices,
+          date: this.selectedDate,
+          time: this.selectedTime,
+          apiUrl: process.env.VUE_APP_API_URL
+        })
+        
+        const response = await axios.post(`${this.getApiUrl()}/appointments`, {
           customerName: this.customer.name,
           customerPhone: this.customer.phone,
           customerEmail: this.customer.email,
@@ -545,6 +632,12 @@ export default {
           services: this.selectedServices,
           date: this.selectedDate,
           time: this.selectedTime
+        }, {
+          timeout: 15000,
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
         })
 
         this.toast.success(this.$t('toast.bookingRequestSuccess'), {
@@ -617,6 +710,43 @@ export default {
     },
     formatDate(value) {
       return new Date(value).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
+    },
+    getApiUrl() {
+      return process.env.VUE_APP_API_URL || 'http://localhost:5000/api'
+    },
+    async testApiConnectivity() {
+      try {
+        const apiUrl = this.getApiUrl()
+        console.log('Testing API connectivity to:', apiUrl)
+        
+        if (!apiUrl || apiUrl.includes('undefined')) {
+          throw new Error('API URL is not properly configured')
+        }
+        
+        const response = await axios.get(`${this.getApiUrl()}/health`, {
+          timeout: 5000
+        })
+        console.log('API health check successful:', response.data)
+      } catch (error) {
+        console.error('API connectivity test failed:', {
+          message: error.message,
+          response: error.response,
+          request: error.request,
+          apiUrl: this.getApiUrl()
+        })
+        
+        let errorMessage = 'Unable to connect to booking system.'
+        if (error.message.includes('API URL')) {
+          errorMessage = 'Booking system configuration error. Please contact support.'
+        } else if (!error.response) {
+          errorMessage = 'Network error. Please check your internet connection.'
+        }
+        
+        this.toast.error(errorMessage, {
+          position: 'top-center',
+          timeout: 10000
+        })
+      }
     }
   }
 }

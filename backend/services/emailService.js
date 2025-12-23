@@ -75,7 +75,7 @@ class EmailService {
 
     try {
       await resend.emails.send({
-        from: 'BarberPro <noreply@barberpro.com>',
+        from: `${process.env.FROM_NAME || 'BarberPro'} <${process.env.FROM_EMAIL || 'noreply@barberpro.com'}>`,
         to: [appointment.customerEmail],
         subject: '✂️ Booking received - pending confirmation',
         html: emailHtml,
@@ -161,7 +161,7 @@ class EmailService {
 
     try {
       await resend.emails.send({
-        from: 'BarberPro <noreply@barberpro.com>',
+        from: `${process.env.FROM_NAME || 'BarberPro'} <${process.env.FROM_EMAIL || 'noreply@barberpro.com'}>`,
         to: [appointment.customerEmail],
         subject: '✂️ Appointment Confirmed - BarberPro',
         html: emailHtml,
@@ -238,7 +238,7 @@ class EmailService {
 
     try {
       await resend.emails.send({
-        from: 'BarberPro <noreply@barberpro.com>',
+        from: `${process.env.FROM_NAME || 'BarberPro'} <${process.env.FROM_EMAIL || 'noreply@barberpro.com'}>`,
         to: [appointment.customerEmail],
         subject: '✂️ Appointment Update - BarberPro',
         html: emailHtml,
@@ -329,7 +329,7 @@ class EmailService {
 
     try {
       await resend.emails.send({
-        from: 'BarberPro Reminders <reminders@barberpro.com>',
+        from: `${process.env.FROM_NAME || 'BarberPro'} Reminders <${process.env.FROM_EMAIL || 'reminders@barberpro.com'}>`,
         to: [barber.email],
         subject: '🔔 Appointment Reminder - 10 Minutes',
         html: emailHtml,
