@@ -42,10 +42,17 @@ class EmailScheduler {
     }
 
     try {
+      const sanitizedEmail = EmailService.sanitizeEmail(recipientEmail);
+      
+      if (!EmailService.isValidEmail(sanitizedEmail)) {
+        console.log(`Invalid recipient email - skipping queue for ${emailType}:`, recipientEmail);
+        return null;
+      }
+
       const emailQueue = new EmailQueue({
         appointmentId,
         emailType,
-        recipientEmail,
+        recipientEmail: sanitizedEmail,
         recipientName,
         scheduledFor
       });
@@ -161,6 +168,15 @@ class EmailScheduler {
         await EmailQueue.findByIdAndUpdate(emailItem._id, {
           status: 'cancelled',
           errorMessage: 'Appointment not found'
+        });
+        return;
+      }
+
+      const recipientEmail = EmailService.sanitizeEmail(emailItem.recipientEmail);
+      if (!EmailService.isValidEmail(recipientEmail)) {
+        await EmailQueue.findByIdAndUpdate(emailItem._id, {
+          status: 'failed',
+          errorMessage: 'Invalid recipient email'
         });
         return;
       }

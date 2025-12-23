@@ -4,7 +4,18 @@ const emailQueueSchema = new mongoose.Schema({
   appointmentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Appointment', required: true },
   emailType: {
     type: String,
-    enum: ['reminder', 'confirmation', 'rejection', 'booking_received'],
+    enum: [
+      'booking_received',
+      'new_booking_to_barber',
+      'confirmation',
+      'booking_confirmed_to_barber',
+      'customer_30min_reminder',
+      'barber_30min_reminder',
+      'completion_to_customer',
+      'completion_to_barber',
+      'rejection',
+      'reminder' // legacy support
+    ],
     required: true
   },
   recipientEmail: { type: String, required: true },
