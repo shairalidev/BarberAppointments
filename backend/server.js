@@ -1,15 +1,16 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const emailScheduler = require('./services/emailScheduler');
 const { install: installSafeConsole } = require('./utils/safeConsole');
 
-// Load environment variables based on NODE_ENV
+// Load environment variables before importing services that rely on them
 if (process.env.NODE_ENV === 'production') {
   require('dotenv').config({ path: '.env.production' });
 } else {
   require('dotenv').config();
 }
+
+const emailScheduler = require('./services/emailScheduler');
 
 // Install safe console to handle emojis
 installSafeConsole();
