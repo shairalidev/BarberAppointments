@@ -30,7 +30,7 @@ class EmailService {
     <body>
       <div class="container">
         <div class="header">
-          <h1>💈 Ates Barberos</h1>
+          <h1>Ates Barberos</h1>
           <p>Buchungsanfrage erhalten</p>
         </div>
         <div class="content">
@@ -40,19 +40,19 @@ class EmailService {
           <div class="booking-card">
             <h3>Ihre Buchungsanfrage</h3>
             <div class="detail">
-              <span><strong>📅 Datum & Uhrzeit:</strong></span>
+              <span><strong>Datum & Uhrzeit:</strong></span>
               <span>${new Date(appointment.date).toLocaleDateString('de-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} um ${appointment.time}</span>
             </div>
             <div class="detail">
-              <span><strong>✂️ Dienstleistungen:</strong></span>
+              <span><strong>Dienstleistungen:</strong></span>
               <span>${appointment.services?.map(s => s.name).join(', ')}</span>
             </div>
             <div class="detail">
-              <span><strong>👨💼 Friseur:</strong></span>
+              <span><strong>Friseur:</strong></span>
               <span>${barber?.name || 'Professioneller Friseur'}</span>
             </div>
             <div class="detail">
-              <span><strong>💰 Gesamtkosten:</strong></span>
+              <span><strong>Gesamtkosten:</strong></span>
               <span>€${appointment.totalPrice}</span>
             </div>
           </div>
@@ -71,7 +71,7 @@ class EmailService {
     await resend.emails.send({
       from: `${process.env.FROM_NAME || 'Ates Barberos'} <${process.env.FROM_EMAIL || 'noreply@ates-barberos.com'}>`,
       to: [appointment.customerEmail],
-      subject: '💈 Buchungsanfrage erhalten - Warten auf Bestätigung',
+      subject: 'Buchungsanfrage erhalten - Warten auf Bestätigung',
       html: emailHtml,
     });
   }
@@ -100,7 +100,7 @@ class EmailService {
     <body>
       <div class="container">
         <div class="header">
-          <h1>🔔 Neue Buchungsanfrage</h1>
+          <h1>Neue Buchungsanfrage</h1>
           <p>Ates Barberos Admin</p>
         </div>
         <div class="content">
@@ -110,26 +110,26 @@ class EmailService {
           <div class="booking-card">
             <h3>Buchungsdetails</h3>
             <div class="detail">
-              <span><strong>👤 Kunde:</strong></span>
+              <span><strong>Kunde:</strong></span>
               <span>${appointment.customerName}</span>
             </div>
             <div class="detail">
-              <span><strong>📞 Telefon:</strong></span>
+              <span><strong>Telefon:</strong></span>
               <span>${appointment.customerPhone}</span>
             </div>
             <div class="detail">
-              <span><strong>📅 Datum & Uhrzeit:</strong></span>
+              <span><strong>Datum & Uhrzeit:</strong></span>
               <span>${new Date(appointment.date).toLocaleDateString('de-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} um ${appointment.time}</span>
             </div>
             <div class="detail">
-              <span><strong>✂️ Dienstleistungen:</strong></span>
+              <span><strong>Dienstleistungen:</strong></span>
               <span>${appointment.services?.map(s => s.name).join(', ')}</span>
             </div>
             <div class="detail">
-              <span><strong>💰 Gesamt:</strong></span>
+              <span><strong>Gesamt:</strong></span>
               <span>€${appointment.totalPrice}</span>
             </div>
-            ${appointment.notes ? `<div class="detail"><span><strong>📝 Notizen:</strong></span><span>${appointment.notes}</span></div>` : ''}
+            ${appointment.notes ? `<div class="detail"><span><strong>Notizen:</strong></span><span>${appointment.notes}</span></div>` : ''}
           </div>
           
           <p><strong>Aktion erforderlich:</strong></p>
@@ -147,7 +147,7 @@ class EmailService {
     await resend.emails.send({
       from: `Ates Barberos Admin <${process.env.FROM_EMAIL || 'noreply@ates-barberos.com'}>`,
       to: [barber.email],
-      subject: '🔔 Neue Buchungsanfrage - Aktion erforderlich',
+      subject: 'Neue Buchungsanfrage - Aktion erforderlich',
       html: emailHtml,
     });
   }
@@ -176,34 +176,34 @@ class EmailService {
     <body>
       <div class="container">
         <div class="header">
-          <h1>✅ Buchung bestätigt!</h1>
+          <h1>Buchung bestätigt!</h1>
           <p>Ates Barberos</p>
         </div>
         <div class="content">
           <h2>Hallo ${appointment.customerName}!</h2>
-          <div class="confirmed">✨ IHRE BUCHUNG IST BESTÄTIGT ✨</div>
+          <div class="confirmed">IHRE BUCHUNG IST BESTÄTIGT</div>
           <p>Großartige Neuigkeiten! Ihr Termin bei Ates Barberos wurde bestätigt. Wir freuen uns darauf, Sie zu sehen.</p>
           
           <div class="booking-card">
             <h3>Bestätigter Termin</h3>
             <div class="detail">
-              <span><strong>📅 Datum & Uhrzeit:</strong></span>
+              <span><strong>Datum & Uhrzeit:</strong></span>
               <span>${new Date(appointment.date).toLocaleDateString('de-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} um ${appointment.time}</span>
             </div>
             <div class="detail">
-              <span><strong>✂️ Dienstleistungen:</strong></span>
+              <span><strong>Dienstleistungen:</strong></span>
               <span>${appointment.services?.map(s => s.name).join(', ')}</span>
             </div>
             <div class="detail">
-              <span><strong>👨💼 Ihr Friseur:</strong></span>
+              <span><strong>Ihr Friseur:</strong></span>
               <span>${barber?.name || 'Professioneller Friseur'}</span>
             </div>
             <div class="detail">
-              <span><strong>💰 Gesamtkosten:</strong></span>
+              <span><strong>Gesamtkosten:</strong></span>
               <span>€${appointment.totalPrice}</span>
             </div>
             <div class="detail">
-              <span><strong>📞 Ihre Telefonnummer:</strong></span>
+              <span><strong>Ihre Telefonnummer:</strong></span>
               <span>${appointment.customerPhone}</span>
             </div>
           </div>
@@ -222,7 +222,7 @@ class EmailService {
     await resend.emails.send({
       from: `${process.env.FROM_NAME || 'Ates Barberos'} <${process.env.FROM_EMAIL || 'noreply@ates-barberos.com'}>`,
       to: [appointment.customerEmail],
-      subject: '✅ Buchung bestätigt - Ates Barberos',
+      subject: 'Buchung bestätigt - Ates Barberos',
       html: emailHtml,
     });
   }
@@ -250,7 +250,7 @@ class EmailService {
     <body>
       <div class="container">
         <div class="header">
-          <h1>📅 Buchung bestätigt</h1>
+          <h1>Buchung bestätigt</h1>
           <p>Ates Barberos</p>
         </div>
         <div class="content">
@@ -260,27 +260,27 @@ class EmailService {
           <div class="booking-card">
             <h3>Bestätigter Termin</h3>
             <div class="detail">
-              <span><strong>👤 Kunde:</strong></span>
+              <span><strong>Kunde:</strong></span>
               <span>${appointment.customerName}</span>
             </div>
             <div class="detail">
-              <span><strong>📅 Datum & Uhrzeit:</strong></span>
+              <span><strong>Datum & Uhrzeit:</strong></span>
               <span>${new Date(appointment.date).toLocaleDateString('de-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} um ${appointment.time}</span>
             </div>
             <div class="detail">
-              <span><strong>✂️ Dienstleistungen:</strong></span>
+              <span><strong>Dienstleistungen:</strong></span>
               <span>${appointment.services?.map(s => s.name).join(', ')}</span>
             </div>
             <div class="detail">
-              <span><strong>⏱️ Dauer:</strong></span>
+              <span><strong>Dauer:</strong></span>
               <span>${appointment.totalDuration} Minuten</span>
             </div>
             <div class="detail">
-              <span><strong>📞 Kundentelefon:</strong></span>
+              <span><strong>Kundentelefon:</strong></span>
               <span>${appointment.customerPhone}</span>
             </div>
             <div class="detail">
-              <span><strong>💰 Gesamt:</strong></span>
+              <span><strong>Gesamt:</strong></span>
               <span>€${appointment.totalPrice}</span>
             </div>
           </div>
@@ -297,7 +297,7 @@ class EmailService {
     await resend.emails.send({
       from: `Ates Barberos Admin <${process.env.FROM_EMAIL || 'noreply@ates-barberos.com'}>`,
       to: [barber.email],
-      subject: '📅 Buchung bestätigt - Ihr Terminplan wurde aktualisiert',
+      subject: 'Buchung bestätigt - Ihr Terminplan wurde aktualisiert',
       html: emailHtml,
     });
   }
@@ -326,33 +326,33 @@ class EmailService {
     <body>
       <div class="container">
         <div class="header">
-          <h1>⏰ Terminerinnerung</h1>
+          <h1>Terminerinnerung</h1>
           <p>Ates Barberos</p>
         </div>
         <div class="content">
           <h2>Hallo ${appointment.customerName}!</h2>
-          <div class="urgent">⚠️ IHR TERMIN IST IN 30 MINUTEN ⚠️</div>
+          <div class="urgent">IHR TERMIN IST IN 30 MINUTEN</div>
           
           <div class="reminder-card">
             <h3>Termindetails</h3>
             <div class="detail">
-              <span><strong>📅 Datum & Uhrzeit:</strong></span>
+              <span><strong>Datum & Uhrzeit:</strong></span>
               <span>${new Date(appointment.date).toLocaleDateString('de-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} um ${appointment.time}</span>
             </div>
             <div class="detail">
-              <span><strong>✂️ Dienstleistungen:</strong></span>
+              <span><strong>Dienstleistungen:</strong></span>
               <span>${appointment.services?.map(s => s.name).join(', ')}</span>
             </div>
             <div class="detail">
-              <span><strong>👨💼 Ihr Friseur:</strong></span>
+              <span><strong>Ihr Friseur:</strong></span>
               <span>${barber?.name || 'Professioneller Friseur'}</span>
             </div>
             <div class="detail">
-              <span><strong>📍 Adresse:</strong></span>
+              <span><strong>Adresse:</strong></span>
               <span>Bahnhofstraße 3, 6410 Telfs</span>
             </div>
             <div class="detail">
-              <span><strong>💰 Gesamt:</strong></span>
+              <span><strong>Gesamt:</strong></span>
               <span>€${appointment.totalPrice}</span>
             </div>
           </div>
@@ -370,7 +370,7 @@ class EmailService {
     await resend.emails.send({
       from: `Ates Barberos Erinnerungen <${process.env.FROM_EMAIL || 'noreply@ates-barberos.com'}>`,
       to: [appointment.customerEmail],
-      subject: '⏰ Termin in 30 Minuten - Ates Barberos',
+      subject: 'Termin in 30 Minuten - Ates Barberos',
       html: emailHtml,
     });
   }
@@ -399,36 +399,36 @@ class EmailService {
     <body>
       <div class="container">
         <div class="header">
-          <h1>🔔 Terminerinnerung</h1>
+          <h1>Terminerinnerung</h1>
           <p>Ates Barberos</p>
         </div>
         <div class="content">
           <h2>Hallo ${barber.name}!</h2>
-          <div class="urgent">⏰ NÄCHSTER TERMIN IN 30 MINUTEN ⏰</div>
+          <div class="urgent">NÄCHSTER TERMIN IN 30 MINUTEN</div>
           
           <div class="reminder-card">
             <h3>Anstehender Termin</h3>
             <div class="detail">
-              <span><strong>👤 Kunde:</strong></span>
+              <span><strong>Kunde:</strong></span>
               <span>${appointment.customerName}</span>
             </div>
             <div class="detail">
-              <span><strong>📅 Uhrzeit:</strong></span>
+              <span><strong>Uhrzeit:</strong></span>
               <span>${appointment.time}</span>
             </div>
             <div class="detail">
-              <span><strong>✂️ Dienstleistungen:</strong></span>
+              <span><strong>Dienstleistungen:</strong></span>
               <span>${appointment.services?.map(s => s.name).join(', ')}</span>
             </div>
             <div class="detail">
-              <span><strong>⏱️ Dauer:</strong></span>
+              <span><strong>Dauer:</strong></span>
               <span>${appointment.totalDuration} Minuten</span>
             </div>
             <div class="detail">
-              <span><strong>📞 Kundentelefon:</strong></span>
+              <span><strong>Kundentelefon:</strong></span>
               <span>${appointment.customerPhone}</span>
             </div>
-            ${appointment.notes ? `<div class="detail"><span><strong>📝 Notizen:</strong></span><span>${appointment.notes}</span></div>` : ''}
+            ${appointment.notes ? `<div class="detail"><span><strong>Notizen:</strong></span><span>${appointment.notes}</span></div>` : ''}
           </div>
           
           <p>Bitte bereiten Sie Ihre Werkzeuge und den Arbeitsplatz vor. Der Kunde wurde ebenfalls benachrichtigt.</p>
@@ -443,7 +443,7 @@ class EmailService {
     await resend.emails.send({
       from: `Ates Barberos Admin <${process.env.FROM_EMAIL || 'noreply@ates-barberos.com'}>`,
       to: [barber.email],
-      subject: '🔔 Termin in 30 Minuten - Vorbereitung',
+      subject: 'Termin in 30 Minuten - Vorbereitung',
       html: emailHtml,
     });
   }
@@ -472,29 +472,29 @@ class EmailService {
     <body>
       <div class="container">
         <div class="header">
-          <h1>✨ Service abgeschlossen!</h1>
+          <h1>Service abgeschlossen!</h1>
           <p>Ates Barberos</p>
         </div>
         <div class="content">
           <h2>Hallo ${appointment.customerName}!</h2>
-          <div class="thank-you">🎉 VIELEN DANK FÜR IHREN BESUCH BEI ATES BARBEROS! 🎉</div>
+          <div class="thank-you">VIELEN DANK FÜR IHREN BESUCH BEI ATES BARBEROS!</div>
           
           <div class="completion-card">
             <h3>Abgeschlossener Service</h3>
             <div class="detail">
-              <span><strong>📅 Datum & Uhrzeit:</strong></span>
+              <span><strong>Datum & Uhrzeit:</strong></span>
               <span>${new Date(appointment.date).toLocaleDateString('de-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} um ${appointment.time}</span>
             </div>
             <div class="detail">
-              <span><strong>✂️ Dienstleistungen:</strong></span>
+              <span><strong>Dienstleistungen:</strong></span>
               <span>${appointment.services?.map(s => s.name).join(', ')}</span>
             </div>
             <div class="detail">
-              <span><strong>👨💼 Ihr Friseur:</strong></span>
+              <span><strong>Ihr Friseur:</strong></span>
               <span>${barber?.name || 'Professioneller Friseur'}</span>
             </div>
             <div class="detail">
-              <span><strong>💰 Bezahlt:</strong></span>
+              <span><strong>Bezahlt:</strong></span>
               <span>€${appointment.totalPrice}</span>
             </div>
           </div>
@@ -505,7 +505,7 @@ class EmailService {
         <div class="footer">
           <p><strong>Ates Barberos</strong> - Professionelle Friseurdienstleistungen</p>
           <p>Bahnhofstraße 3, 6410 Telfs | https://ates-barberos.com</p>
-          <p>Vielen Dank, dass Sie uns gewählt haben! 🙏</p>
+          <p>Vielen Dank, dass Sie uns gewählt haben!</p>
         </div>
       </div>
     </body>
@@ -514,7 +514,7 @@ class EmailService {
     await resend.emails.send({
       from: `${process.env.FROM_NAME || 'Ates Barberos'} <${process.env.FROM_EMAIL || 'noreply@ates-barberos.com'}>`,
       to: [appointment.customerEmail],
-      subject: '✨ Service abgeschlossen - Vielen Dank!',
+      subject: 'Service abgeschlossen - Vielen Dank!',
       html: emailHtml,
     });
   }
@@ -542,7 +542,7 @@ class EmailService {
     <body>
       <div class="container">
         <div class="header">
-          <h1>✅ Service abgeschlossen</h1>
+          <h1>Service abgeschlossen</h1>
           <p>Ates Barberos</p>
         </div>
         <div class="content">
@@ -552,19 +552,19 @@ class EmailService {
           <div class="completion-card">
             <h3>Abgeschlossener Termin</h3>
             <div class="detail">
-              <span><strong>👤 Kunde:</strong></span>
+              <span><strong>Kunde:</strong></span>
               <span>${appointment.customerName}</span>
             </div>
             <div class="detail">
-              <span><strong>📅 Datum & Uhrzeit:</strong></span>
+              <span><strong>Datum & Uhrzeit:</strong></span>
               <span>${new Date(appointment.date).toLocaleDateString('de-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} um ${appointment.time}</span>
             </div>
             <div class="detail">
-              <span><strong>✂️ Dienstleistungen:</strong></span>
+              <span><strong>Dienstleistungen:</strong></span>
               <span>${appointment.services?.map(s => s.name).join(', ')}</span>
             </div>
             <div class="detail">
-              <span><strong>💰 Umsatz:</strong></span>
+              <span><strong>Umsatz:</strong></span>
               <span>€${appointment.totalPrice}</span>
             </div>
           </div>
@@ -581,7 +581,7 @@ class EmailService {
     await resend.emails.send({
       from: `Ates Barberos Admin <${process.env.FROM_EMAIL || 'noreply@ates-barberos.com'}>`,
       to: [barber.email],
-      subject: '✅ Termin abgeschlossen - Gut gemacht!',
+      subject: 'Termin abgeschlossen - Gut gemacht!',
       html: emailHtml,
     });
   }
@@ -609,7 +609,7 @@ class EmailService {
     <body>
       <div class="container">
         <div class="header">
-          <h1>📝 Buchungsaktualisierung</h1>
+          <h1>Buchungsaktualisierung</h1>
           <p>Ates Barberos</p>
         </div>
         <div class="content">
@@ -619,11 +619,11 @@ class EmailService {
           <div class="rejection-card">
             <h3>Angefragter Termin</h3>
             <div class="detail">
-              <span><strong>📅 Datum & Uhrzeit:</strong></span>
+              <span><strong>Datum & Uhrzeit:</strong></span>
               <span>${new Date(appointment.date).toLocaleDateString('de-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} um ${appointment.time}</span>
             </div>
             <div class="detail">
-              <span><strong>✂️ Dienstleistungen:</strong></span>
+              <span><strong>Dienstleistungen:</strong></span>
               <span>${appointment.services?.map(s => s.name).join(', ')}</span>
             </div>
           </div>
@@ -643,7 +643,7 @@ class EmailService {
     await resend.emails.send({
       from: `${process.env.FROM_NAME || 'Ates Barberos'} <${process.env.FROM_EMAIL || 'noreply@ates-barberos.com'}>`,
       to: [appointment.customerEmail],
-      subject: '📝 Buchungsaktualisierung - Ates Barberos',
+      subject: 'Buchungsaktualisierung - Ates Barberos',
       html: emailHtml,
     });
   }

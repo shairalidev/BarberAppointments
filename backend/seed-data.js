@@ -56,7 +56,7 @@ async function seedData() {
     await TimeSlot.insertMany(timeSlots);
     console.log('Time slots created:', timeSlots.length);
 
-    console.log('✅ Database seeded successfully!');
+    console.log('Database seeded successfully!');
     process.exit(0);
   } catch (error) {
     console.error('Error seeding database:', error);

@@ -246,7 +246,7 @@
         <div class="col-12">
           <div class="card border-warning">
             <div class="card-header bg-warning text-dark">
-              <h6 class="mb-0">🐛 Debug Information</h6>
+              <h6 class="mb-0">Debug Information</h6>
             </div>
             <div class="card-body">
               <div class="row g-3">

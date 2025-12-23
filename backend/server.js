@@ -2,7 +2,11 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const emailScheduler = require('./services/emailScheduler');
+const { install: installSafeConsole } = require('./utils/safeConsole');
 require('dotenv').config();
+
+// Install safe console to handle emojis
+installSafeConsole();
 
 const app = express();
 

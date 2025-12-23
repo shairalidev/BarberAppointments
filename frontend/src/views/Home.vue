@@ -7,7 +7,7 @@
         <div class="row align-items-center min-vh-90">
           <div class="col-lg-7 col-md-8 text-white hero-content">
             <div class="badge premium-badge mb-3 px-3 py-2">
-              <span class="emoji-icon">💈</span> Premium Grooming
+              <span>Premium Grooming</span>
             </div>
             <h1 class="display-2 fw-bold mb-3 hero-title">{{ $t('home.title') }}</h1>
             <p class="lead mb-3 fs-5 hero-subtitle">{{ $t('home.subtitle') }}</p>
@@ -413,12 +413,7 @@ export default {
   }
 }
 
-/* Emoji and Button Fixes */
-.emoji-icon {
-  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Android Emoji', sans-serif;
-  font-size: 1.1em;
-  display: inline-block;
-}
+/* Button Fixes */
 
 .call-us-btn {
   color: white !important;

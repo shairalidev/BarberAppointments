@@ -10,19 +10,19 @@ const Appointment = require('./models/Appointment');
 async function professionalSeed() {
   try {
     await mongoose.connect(process.env.MONGODB_URI);
-    console.log('🔗 Connected to MongoDB');
+    console.log('Connected to MongoDB');
 
     // Clear all existing data
-    console.log('🧹 Cleaning database...');
+    console.log('Cleaning database...');
     await Admin.deleteMany({});
     await Barber.deleteMany({});
     await Service.deleteMany({});
     await TimeSlot.deleteMany({});
     await Appointment.deleteMany({});
-    console.log('✅ Database cleaned');
+    console.log('Database cleaned');
 
     // Create Admin User (Shair Ali Barber)
-    console.log('👤 Creating admin user...');
+    console.log('Creating admin user...');
     const hashedPassword = await bcrypt.hash('admin', 10);
     const admin = await Admin.create({
       username: 'admin',
@@ -30,10 +30,10 @@ async function professionalSeed() {
       name: 'Shair Ali Barber',
       email: 'shair.ali@barberpro.com'
     });
-    console.log('✅ Admin user created:', admin.name);
+    console.log('Admin user created:', admin.name);
 
     // Create Barber Profile (Same person as admin)
-    console.log('💈 Creating barber profile...');
+    console.log('Creating barber profile...');
     const barber = await Barber.create({
       name: 'Shair Ali Barber',
       email: 'shair.ali@barberpro.com',
@@ -50,10 +50,10 @@ async function professionalSeed() {
       ],
       available: true
     });
-    console.log('✅ Barber profile created:', barber.name);
+    console.log('Barber profile created:', barber.name);
 
     // Create Comprehensive Services
-    console.log('✂️ Creating services...');
+    console.log('Creating services...');
     const services = await Service.insertMany([
       // Hair Services
       { name: 'Classic Haircut', description: 'Traditional scissor cut with styling', duration: 30, price: 35 },
@@ -87,10 +87,10 @@ async function professionalSeed() {
       { name: 'Hair Wash & Style', description: 'Professional wash and styling only', duration: 25, price: 25 },
       { name: 'Consultation', description: 'Style consultation and recommendations', duration: 15, price: 0 }
     ]);
-    console.log('✅ Services created:', services.length);
+    console.log('Services created:', services.length);
 
     // Create Time Slots (Monday to Saturday)
-    console.log('⏰ Creating time slots...');
+    console.log('Creating time slots...');
     const timeSlots = [];
     
     // Monday to Friday: 8:00 AM - 7:00 PM
@@ -114,10 +114,10 @@ async function professionalSeed() {
     });
     
     await TimeSlot.insertMany(timeSlots);
-    console.log('✅ Time slots created:', timeSlots.length);
+    console.log('Time slots created:', timeSlots.length);
 
     // Create Sample Appointments
-    console.log('📅 Creating sample appointments...');
+    console.log('Creating sample appointments...');
     const today = new Date();
     const appointments = [];
     
@@ -201,24 +201,24 @@ async function professionalSeed() {
     }
     
     await Appointment.insertMany(appointments);
-    console.log('✅ Sample appointments created:', appointments.length);
+    console.log('Sample appointments created:', appointments.length);
 
     // Summary
-    console.log('\n🎉 Professional seed data completed successfully!');
-    console.log('📊 Summary:');
-    console.log(`   👤 Admin: ${admin.name} (username: admin, password: admin)`);
-    console.log(`   💈 Barber: ${barber.name}`);
-    console.log(`   ✂️ Services: ${services.length} professional services`);
-    console.log(`   ⏰ Time Slots: ${timeSlots.length} weekly slots`);
-    console.log(`   📅 Appointments: ${appointments.length} sample appointments`);
-    console.log('\n🔗 Access:');
-    console.log('   🌐 Customer Booking: http://localhost:3000');
-    console.log('   🔧 Admin Panel: http://localhost:3000/admin');
-    console.log('   📧 Admin Login: admin / admin');
+    console.log('\nProfessional seed data completed successfully!');
+    console.log('Summary:');
+    console.log(`   Admin: ${admin.name} (username: admin, password: admin)`);
+    console.log(`   Barber: ${barber.name}`);
+    console.log(`   Services: ${services.length} professional services`);
+    console.log(`   Time Slots: ${timeSlots.length} weekly slots`);
+    console.log(`   Appointments: ${appointments.length} sample appointments`);
+    console.log('\nAccess:');
+    console.log('   Customer Booking: http://localhost:3000');
+    console.log('   Admin Panel: http://localhost:3000/admin');
+    console.log('   Admin Login: admin / admin');
 
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error seeding database:', error);
+    console.error('Error seeding database:', error);
     process.exit(1);
   }
 }

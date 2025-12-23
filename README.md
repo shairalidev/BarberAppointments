@@ -2,7 +2,7 @@
 
 A modern, full-stack web application designed for individual barber shops with professional UI/UX, admin authentication, and streamlined appointment management.
 
-## ✨ Features
+## Features
 
 ### Customer Features
 - **Professional Booking Flow**: 3-step booking process with service selection, date/time picker, and customer details
@@ -20,13 +20,13 @@ A modern, full-stack web application designed for individual barber shops with p
 - **Mobile-Optimized**: Responsive design that works perfectly on mobile devices
 - **Quick Actions**: Book appointments directly from the admin panel
 
-## 🚀 Tech Stack
+## Tech Stack
 - **Frontend**: Vue.js 3, Vue Router, Bootstrap 5, Axios, Font Awesome
 - **Backend**: Node.js, Express.js, MongoDB, Mongoose, JWT, bcryptjs
 - **Database**: MongoDB
 - **Authentication**: JWT tokens with secure password hashing
 
-## 📁 Project Structure
+## Project Structure
 ```
 BarberAppointments/
 ├── frontend/              # Vue.js application
@@ -45,7 +45,7 @@ BarberAppointments/
 └── start-frontend.bat    # Frontend start script
 ```
 
-## 🛠️ Quick Setup
+## Quick Setup
 
 ### Prerequisites
 - Node.js (v14 or higher)
@@ -91,7 +91,7 @@ NODE_ENV=development
 VUE_APP_API_URL=http://localhost:5000/api
 ```
 
-## 🚀 Running the Application
+## Running the Application
 
 ### Option 1: Use batch files (Recommended)
 1. Setup system: `setup-single-barber.bat` (first time only)
@@ -112,19 +112,19 @@ VUE_APP_API_URL=http://localhost:5000/api
    npm run serve
    ```
 
-## 🌐 Access the Application
+## Access the Application
 - **Customer Booking**: http://localhost:3000
 - **Admin Dashboard**: http://localhost:3000/admin
 - **Backend API**: http://localhost:5000/api
 
-## 🔐 Admin Access
+## Admin Access
 **Default Admin Credentials**:
 - Username: `admin`
 - Password: `admin`
 
-⚠️ **Important**: Change these credentials immediately after first login!
+**Important**: Change these credentials immediately after first login!
 
-## 📚 API Endpoints
+## API Endpoints
 
 ### Authentication
 - `POST /api/auth/login` - Admin login
@@ -151,7 +151,7 @@ VUE_APP_API_URL=http://localhost:5000/api
 - `POST /api/timeslots` - Create new time slot
 - `DELETE /api/timeslots/:id` - Delete time slot
 
-## 🎨 UI/UX Features
+## UI/UX Features
 
 ### Professional Design Elements
 - **Gradient Backgrounds**: Modern gradient designs throughout the application
@@ -169,7 +169,7 @@ VUE_APP_API_URL=http://localhost:5000/api
 - **Status Management**: Visual status indicators with color coding
 - **Quick Actions**: Shortcut buttons for common tasks
 
-## 🔧 Development
+## Development
 
 ### Adding New Services
 ```javascript
@@ -185,7 +185,7 @@ VUE_APP_API_URL=http://localhost:5000/api
 ### Managing Your Barber Profile
 The system is designed for single-barber operation. The primary barber profile is automatically created during setup with full service capabilities.
 
-## 🛡️ Security Features
+## Security Features
 - JWT token-based authentication
 - Password hashing with bcryptjs
 - Protected admin routes
@@ -193,14 +193,14 @@ The system is designed for single-barber operation. The primary barber profile i
 - CORS configuration
 - Environment variable protection
 
-## 📱 Mobile Responsiveness
+## Mobile Responsiveness
 - Mobile-first responsive design
 - Touch-friendly interface elements
 - Optimized booking flow for mobile devices
 - Collapsible navigation menu
 - Responsive admin panel
 
-## 🚀 Future Enhancements
+## Future Enhancements
 - Email notifications for appointments
 - SMS reminders
 - Payment integration
@@ -209,16 +209,16 @@ The system is designed for single-barber operation. The primary barber profile i
 - Online reviews and ratings
 - Mobile app for customers
 
-## 🤝 Contributing
+## Contributing
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
 4. Test thoroughly
 5. Submit a pull request
 
-## 📄 License
+## License
 This project is licensed under the MIT License.
 
 ---
 
-**BarberPro** - Elevating the barber shop experience with modern technology! 💈✨
+**BarberPro** - Elevating the barber shop experience with modern technology!

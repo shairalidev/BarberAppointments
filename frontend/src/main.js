@@ -3,6 +3,8 @@ import App from './App.vue'
 import router from './router'
 import i18n from './i18n'
 import { setupAxiosInterceptors } from './utils/auth'
+import emojiSafeI18n from './utils/emojiSafeI18n'
+import safeTextDirective from './utils/safeTextDirective'
 import Toast from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
 import './assets/toast-custom.css'
@@ -16,6 +18,9 @@ setupAxiosInterceptors()
 
 const app = createApp(App)
 app.config.globalProperties.$bootstrap = bootstrap
+
+// Register emoji safety directive
+app.directive('safe-text', safeTextDirective)
 
 const toastOptions = {
   position: 'top-right',
@@ -35,4 +40,8 @@ const toastOptions = {
   newestOnTop: true
 }
 
-app.use(router).use(i18n).use(Toast, toastOptions).mount('#app')
+app.use(router)
+   .use(i18n)
+   .use(emojiSafeI18n, { replace: true, debug: process.env.NODE_ENV === 'development' })
+   .use(Toast, toastOptions)
+   .mount('#app')
