@@ -1,20 +1,52 @@
 const { Resend } = require('resend');
 
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+let resendClient = null;
 
 class EmailService {
+  static getResendClient() {
+    if (!resendClient && process.env.RESEND_API_KEY) {
+      resendClient = new Resend(process.env.RESEND_API_KEY);
+    }
+    return resendClient;
+  }
+
   static isConfigured() {
     return !!process.env.RESEND_API_KEY;
   }
 
+  static sanitizeEmail(email) {
+    return typeof email === 'string' ? email.trim().toLowerCase() : '';
+  }
+
+  static isValidEmail(email) {
+    if (!email) return false;
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  static formatRecipient(email) {
+    const sanitized = this.sanitizeEmail(email);
+    if (!this.isValidEmail(sanitized)) {
+      throw new Error('Invalid recipient email');
+    }
+    return sanitized;
+  }
+
+  static getSender(nameOverride) {
+    const senderEmail = this.sanitizeEmail(process.env.FROM_EMAIL) || 'noreply@ates-barberos.com';
+    const senderName = nameOverride || process.env.FROM_NAME || 'Ates Barberos';
+    return `${senderName} <${senderEmail}>`;
+  }
+
   // 1. Customer books appointment - send to customer
   static async sendBookingReceived(appointment, barber) {
+    const resend = this.getResendClient();
     if (!resend) {
       console.log('Resend not configured - skipping booking received email');
       return;
     }
 
     try {
+      const recipient = this.formatRecipient(appointment.customerEmail);
       console.log('Sending booking received email to:', appointment.customerEmail);
       
       const emailHtml = `
@@ -75,8 +107,8 @@ class EmailService {
     </html>`;
 
       await resend.emails.send({
-        from: `${process.env.FROM_NAME || 'Ates Barberos'} <${process.env.FROM_EMAIL || 'noreply@ates-barberos.com'}>`,
-        to: [appointment.customerEmail],
+        from: this.getSender(),
+        to: [recipient],
         subject: 'Buchungsanfrage erhalten - Warten auf Bestätigung',
         html: emailHtml,
       });
@@ -90,12 +122,14 @@ class EmailService {
 
   // 2. Customer books appointment - send to barber
   static async sendNewBookingToBarber(appointment, barber) {
+    const resend = this.getResendClient();
     if (!resend || !barber?.email) {
       console.log('Resend not configured or barber email missing - skipping barber notification');
       return;
     }
 
     try {
+      const recipient = this.formatRecipient(barber.email);
       console.log('Sending new booking notification to barber:', barber.email);
       
       const emailHtml = `
@@ -163,8 +197,8 @@ class EmailService {
     </html>`;
 
       await resend.emails.send({
-        from: `Ates Barberos Admin <${process.env.FROM_EMAIL || 'noreply@ates-barberos.com'}>`,
-        to: [barber.email],
+        from: this.getSender('Ates Barberos Admin'),
+        to: [recipient],
         subject: 'Neue Buchungsanfrage - Aktion erforderlich',
         html: emailHtml,
       });
@@ -178,7 +212,10 @@ class EmailService {
 
   // 3. Admin confirms booking - send to customer
   static async sendAppointmentConfirmation(appointment, barber) {
+    const resend = this.getResendClient();
     if (!resend) return;
+
+    const recipient = this.formatRecipient(appointment.customerEmail);
 
     const emailHtml = `
     <!DOCTYPE html>
@@ -244,8 +281,8 @@ class EmailService {
     </html>`;
 
     await resend.emails.send({
-      from: `${process.env.FROM_NAME || 'Ates Barberos'} <${process.env.FROM_EMAIL || 'noreply@ates-barberos.com'}>`,
-      to: [appointment.customerEmail],
+      from: this.getSender(),
+      to: [recipient],
       subject: 'Buchung bestätigt - Ates Barberos',
       html: emailHtml,
     });
@@ -253,7 +290,10 @@ class EmailService {
 
   // 4. Admin confirms booking - send to barber
   static async sendBookingConfirmedToBarber(appointment, barber) {
+    const resend = this.getResendClient();
     if (!resend || !barber.email) return;
+
+    const recipient = this.formatRecipient(barber.email);
 
     const emailHtml = `
     <!DOCTYPE html>
@@ -319,8 +359,8 @@ class EmailService {
     </html>`;
 
     await resend.emails.send({
-      from: `Ates Barberos Admin <${process.env.FROM_EMAIL || 'noreply@ates-barberos.com'}>`,
-      to: [barber.email],
+      from: this.getSender('Ates Barberos Admin'),
+      to: [recipient],
       subject: 'Buchung bestätigt - Ihr Terminplan wurde aktualisiert',
       html: emailHtml,
     });
@@ -328,7 +368,10 @@ class EmailService {
 
   // 5. 30-minute reminder - send to customer
   static async send30MinReminderToCustomer(appointment, barber) {
+    const resend = this.getResendClient();
     if (!resend) return;
+
+    const recipient = this.formatRecipient(appointment.customerEmail);
 
     const emailHtml = `
     <!DOCTYPE html>
@@ -392,8 +435,8 @@ class EmailService {
     </html>`;
 
     await resend.emails.send({
-      from: `Ates Barberos Erinnerungen <${process.env.FROM_EMAIL || 'noreply@ates-barberos.com'}>`,
-      to: [appointment.customerEmail],
+      from: this.getSender('Ates Barberos Erinnerungen'),
+      to: [recipient],
       subject: 'Termin in 30 Minuten - Ates Barberos',
       html: emailHtml,
     });
@@ -401,7 +444,10 @@ class EmailService {
 
   // 6. 30-minute reminder - send to barber
   static async send30MinReminderToBarber(appointment, barber) {
+    const resend = this.getResendClient();
     if (!resend || !barber.email) return;
+
+    const recipient = this.formatRecipient(barber.email);
 
     const emailHtml = `
     <!DOCTYPE html>
@@ -465,8 +511,8 @@ class EmailService {
     </html>`;
 
     await resend.emails.send({
-      from: `Ates Barberos Admin <${process.env.FROM_EMAIL || 'noreply@ates-barberos.com'}>`,
-      to: [barber.email],
+      from: this.getSender('Ates Barberos Admin'),
+      to: [recipient],
       subject: 'Termin in 30 Minuten - Vorbereitung',
       html: emailHtml,
     });
@@ -474,7 +520,10 @@ class EmailService {
 
   // 7. Appointment completed - send to customer
   static async sendCompletionToCustomer(appointment, barber) {
+    const resend = this.getResendClient();
     if (!resend) return;
+
+    const recipient = this.formatRecipient(appointment.customerEmail);
 
     const emailHtml = `
     <!DOCTYPE html>
@@ -536,8 +585,8 @@ class EmailService {
     </html>`;
 
     await resend.emails.send({
-      from: `${process.env.FROM_NAME || 'Ates Barberos'} <${process.env.FROM_EMAIL || 'noreply@ates-barberos.com'}>`,
-      to: [appointment.customerEmail],
+      from: this.getSender(),
+      to: [recipient],
       subject: 'Service abgeschlossen - Vielen Dank!',
       html: emailHtml,
     });
@@ -545,7 +594,10 @@ class EmailService {
 
   // 8. Appointment completed - send to barber
   static async sendCompletionToBarber(appointment, barber) {
+    const resend = this.getResendClient();
     if (!resend || !barber.email) return;
+
+    const recipient = this.formatRecipient(barber.email);
 
     const emailHtml = `
     <!DOCTYPE html>
@@ -603,8 +655,8 @@ class EmailService {
     </html>`;
 
     await resend.emails.send({
-      from: `Ates Barberos Admin <${process.env.FROM_EMAIL || 'noreply@ates-barberos.com'}>`,
-      to: [barber.email],
+      from: this.getSender('Ates Barberos Admin'),
+      to: [recipient],
       subject: 'Termin abgeschlossen - Gut gemacht!',
       html: emailHtml,
     });
@@ -612,7 +664,10 @@ class EmailService {
 
   // Rejection email
   static async sendAppointmentRejection(appointment, barber) {
+    const resend = this.getResendClient();
     if (!resend) return;
+
+    const recipient = this.formatRecipient(appointment.customerEmail);
 
     const emailHtml = `
     <!DOCTYPE html>
@@ -665,8 +720,8 @@ class EmailService {
     </html>`;
 
     await resend.emails.send({
-      from: `${process.env.FROM_NAME || 'Ates Barberos'} <${process.env.FROM_EMAIL || 'noreply@ates-barberos.com'}>`,
-      to: [appointment.customerEmail],
+      from: this.getSender(),
+      to: [recipient],
       subject: 'Buchungsaktualisierung - Ates Barberos',
       html: emailHtml,
     });

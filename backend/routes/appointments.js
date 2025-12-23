@@ -163,7 +163,8 @@ router.post('/', async (req, res) => {
       barberId,
       services,
       date,
-      time
+      time,
+      status: requestedStatus
     } = req.body;
 
     if (!customerName || !customerPhone || !barberId || !services?.length || !date || !time) {
@@ -230,6 +231,8 @@ router.post('/', async (req, res) => {
       });
     }
 
+    const initialStatus = requestedStatus === 'confirmed' ? 'confirmed' : 'pending';
+
     // Create appointment with immediate slot reservation
     const appointment = new Appointment({
       customerName,
@@ -243,75 +246,112 @@ router.post('/', async (req, res) => {
       date: normalizedDate,
       time,
       marketingOptIn,
-      status: 'pending' // Start as pending for admin approval
+      status: initialStatus // Pending unless an admin creates a confirmed booking
     });
 
     const savedAppointment = await appointment.save();
     await savedAppointment.populate('services');
     await savedAppointment.populate('barberId');
     
-    // 1. Send booking received email to customer
-    console.log('Email configuration check:', {
-      isConfigured: EmailService.isConfigured(),
-      customerEmail: customerEmail,
-      resendApiKey: !!process.env.RESEND_API_KEY,
-      fromEmail: process.env.FROM_EMAIL
-    });
-    
-    if (customerEmail && EmailService.isConfigured()) {
+    // Email handling
+    const emailConfigured = EmailService.isConfigured();
+
+    if (initialStatus === 'confirmed' && emailConfigured) {
       try {
-        console.log('Attempting to schedule customer booking email...');
-        await emailScheduler.scheduleEmail(
-          savedAppointment._id,
-          'booking_received',
-          customerEmail,
-          customerName,
-          new Date() // Send immediately
-        );
-        console.log('Customer booking email scheduled successfully');
-      } catch (emailError) {
-        console.error('Failed to schedule customer booking email:', emailError);
-      }
-    } else {
-      console.log('Skipping customer email:', {
-        hasEmail: !!customerEmail,
-        isConfigured: EmailService.isConfigured()
-      });
-    }
-    
-    // 2. Send new booking notification to barber
-    if (EmailService.isConfigured()) {
-      try {
-        console.log('Attempting to schedule barber notification email...');
+        // Send confirmation to customer
+        if (customerEmail) {
+          await emailScheduler.scheduleEmail(
+            savedAppointment._id,
+            'confirmation',
+            customerEmail,
+            customerName,
+            new Date()
+          );
+        }
+
+        // Notify barber of confirmed booking
         const barber = await require('../models/Barber').findById(barberId);
-        console.log('Barber found:', {
-          id: barber?._id,
-          name: barber?.name,
-          email: barber?.email
-        });
-        
         if (barber?.email) {
           await emailScheduler.scheduleEmail(
             savedAppointment._id,
-            'new_booking_to_barber',
+            'booking_confirmed_to_barber',
             barber.email,
             barber.name,
-            new Date() // Send immediately
+            new Date()
           );
-          console.log('Barber notification email scheduled successfully');
-        } else {
-          console.log('Barber email not found - skipping barber notification');
         }
+
+        // Schedule reminders for both parties
+        await emailScheduler.schedule30MinReminders(savedAppointment);
       } catch (emailError) {
-        console.error('Failed to schedule barber notification email:', emailError);
+        console.error('Failed to schedule confirmed booking emails:', emailError);
       }
     } else {
-      console.log('Email service not configured - skipping barber notification');
+      // Treat as pending flow (customer initiated)
+      console.log('Email configuration check:', {
+        isConfigured: emailConfigured,
+        customerEmail: customerEmail,
+        resendApiKey: !!process.env.RESEND_API_KEY,
+        fromEmail: process.env.FROM_EMAIL
+      });
+      
+      if (customerEmail && emailConfigured) {
+        try {
+          console.log('Attempting to schedule customer booking email...');
+          await emailScheduler.scheduleEmail(
+            savedAppointment._id,
+            'booking_received',
+            customerEmail,
+            customerName,
+            new Date() // Send immediately
+          );
+          console.log('Customer booking email scheduled successfully');
+        } catch (emailError) {
+          console.error('Failed to schedule customer booking email:', emailError);
+        }
+      } else {
+        console.log('Skipping customer email:', {
+          hasEmail: !!customerEmail,
+          isConfigured: emailConfigured
+        });
+      }
+      
+      // 2. Send new booking notification to barber
+      if (emailConfigured) {
+        try {
+          console.log('Attempting to schedule barber notification email...');
+          const barber = await require('../models/Barber').findById(barberId);
+          console.log('Barber found:', {
+            id: barber?._id,
+            name: barber?.name,
+            email: barber?.email
+          });
+          
+          if (barber?.email) {
+            await emailScheduler.scheduleEmail(
+              savedAppointment._id,
+              'new_booking_to_barber',
+              barber.email,
+              barber.name,
+              new Date() // Send immediately
+            );
+            console.log('Barber notification email scheduled successfully');
+          } else {
+            console.log('Barber email not found - skipping barber notification');
+          }
+        } catch (emailError) {
+          console.error('Failed to schedule barber notification email:', emailError);
+        }
+      } else {
+        console.log('Email service not configured - skipping barber notification');
+      }
     }
     
     res.status(201).json({
       ...savedAppointment.toObject(),
-      message: 'Appointment request submitted successfully. You will receive confirmation once approved.'
+      message: initialStatus === 'confirmed'
+        ? 'Appointment booked and confirmed successfully.'
+        : 'Appointment request submitted successfully. You will receive confirmation once approved.'
     });
   } catch (error) {
     console.error('Appointment creation error:', error);
