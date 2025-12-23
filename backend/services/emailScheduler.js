@@ -59,40 +59,55 @@ class EmailScheduler {
     }
   }
 
-  // Schedule reminder email automatically when appointment is confirmed
-  async scheduleReminderEmail(appointment) {
+  // Schedule 30-minute reminders for both customer and barber
+  async schedule30MinReminders(appointment) {
     try {
       if (!EmailService.isConfigured()) {
         console.log('Email service not configured - skipping reminder scheduling');
         return null;
       }
 
-      if (!appointment.barberId?.email) {
-        console.log('⚠️ Barber email not configured, skipping reminder');
-        return null;
-      }
-
-      // Calculate reminder time (10 minutes before appointment)
+      // Calculate reminder time (30 minutes before appointment)
       const appointmentDateTime = new Date(appointment.date);
       const [hours, minutes] = appointment.time.split(':');
       appointmentDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
       
-      const reminderTime = new Date(appointmentDateTime.getTime() - 10 * 60 * 1000);
+      const reminderTime = new Date(appointmentDateTime.getTime() - 30 * 60 * 1000);
       
       // Only schedule if reminder time is in the future
       if (reminderTime > new Date()) {
-        return await this.scheduleEmail(
-          appointment._id,
-          'reminder',
-          appointment.barberId.email,
-          appointment.barberId.name,
-          reminderTime
-        );
+        const reminders = [];
+        
+        // Schedule customer reminder
+        if (appointment.customerEmail) {
+          const customerReminder = await this.scheduleEmail(
+            appointment._id,
+            'customer_30min_reminder',
+            appointment.customerEmail,
+            appointment.customerName,
+            reminderTime
+          );
+          reminders.push(customerReminder);
+        }
+        
+        // Schedule barber reminder
+        if (appointment.barberId?.email) {
+          const barberReminder = await this.scheduleEmail(
+            appointment._id,
+            'barber_30min_reminder',
+            appointment.barberId.email,
+            appointment.barberId.name,
+            reminderTime
+          );
+          reminders.push(barberReminder);
+        }
+        
+        return reminders;
       }
       
       return null;
     } catch (error) {
-      console.error('Error scheduling reminder email:', error);
+      console.error('Error scheduling 30-minute reminders:', error);
       return null;
     }
   }
@@ -175,16 +190,51 @@ class EmailScheduler {
           }
           break;
 
-        case 'reminder':
+        case 'new_booking_to_barber':
           if (appointment.barberId?.email) {
-            await EmailService.sendBarberReminder(appointment, appointment.barberId);
+            await EmailService.sendNewBookingToBarber(appointment, appointment.barberId);
             emailSent = true;
           }
           break;
-          
+
         case 'confirmation':
           if (appointment.customerEmail) {
             await EmailService.sendAppointmentConfirmation(appointment, appointment.barberId);
+            emailSent = true;
+          }
+          break;
+
+        case 'booking_confirmed_to_barber':
+          if (appointment.barberId?.email) {
+            await EmailService.sendBookingConfirmedToBarber(appointment, appointment.barberId);
+            emailSent = true;
+          }
+          break;
+
+        case 'customer_30min_reminder':
+          if (appointment.customerEmail) {
+            await EmailService.send30MinReminderToCustomer(appointment, appointment.barberId);
+            emailSent = true;
+          }
+          break;
+
+        case 'barber_30min_reminder':
+          if (appointment.barberId?.email) {
+            await EmailService.send30MinReminderToBarber(appointment, appointment.barberId);
+            emailSent = true;
+          }
+          break;
+
+        case 'completion_to_customer':
+          if (appointment.customerEmail) {
+            await EmailService.sendCompletionToCustomer(appointment, appointment.barberId);
+            emailSent = true;
+          }
+          break;
+
+        case 'completion_to_barber':
+          if (appointment.barberId?.email) {
+            await EmailService.sendCompletionToBarber(appointment, appointment.barberId);
             emailSent = true;
           }
           break;
@@ -192,6 +242,14 @@ class EmailScheduler {
         case 'rejection':
           if (appointment.customerEmail) {
             await EmailService.sendAppointmentRejection(appointment, appointment.barberId);
+            emailSent = true;
+          }
+          break;
+
+        // Legacy support
+        case 'reminder':
+          if (appointment.barberId?.email) {
+            await EmailService.sendBarberReminder(appointment, appointment.barberId);
             emailSent = true;
           }
           break;
@@ -237,6 +295,11 @@ class EmailScheduler {
     } catch (error) {
       console.error('Error cancelling appointment emails:', error);
     }
+  }
+
+  // Legacy method for backward compatibility
+  async scheduleReminderEmail(appointment) {
+    return this.schedule30MinReminders(appointment);
   }
 
   // Get queue statistics

@@ -250,7 +250,7 @@ router.post('/', async (req, res) => {
     await savedAppointment.populate('services');
     await savedAppointment.populate('barberId');
     
-    // Schedule confirmation email if customer provided email and email service is configured
+    // 1. Send booking received email to customer
     if (customerEmail && EmailService.isConfigured()) {
       try {
         await emailScheduler.scheduleEmail(
@@ -261,8 +261,25 @@ router.post('/', async (req, res) => {
           new Date() // Send immediately
         );
       } catch (emailError) {
-        console.error('Email scheduling failed:', emailError);
-        // Don't fail the booking if email fails
+        console.error('Failed to schedule customer booking email:', emailError);
+      }
+    }
+    
+    // 2. Send new booking notification to barber
+    if (EmailService.isConfigured()) {
+      try {
+        const barber = await require('../models/Barber').findById(barberId);
+        if (barber?.email) {
+          await emailScheduler.scheduleEmail(
+            savedAppointment._id,
+            'new_booking_to_barber',
+            barber.email,
+            barber.name,
+            new Date() // Send immediately
+          );
+        }
+      } catch (emailError) {
+        console.error('Failed to schedule barber notification email:', emailError);
       }
     }
     
@@ -426,7 +443,7 @@ router.put('/:id', async (req, res) => {
     if (sendEmail && EmailService.isConfigured()) {
       try {
         if (appointment.status === 'confirmed') {
-          // Send confirmation email immediately if customer has email
+          // 3. Send confirmation email to customer
           if (appointment.customerEmail) {
             await emailScheduler.scheduleEmail(
               appointment._id,
@@ -437,11 +454,22 @@ router.put('/:id', async (req, res) => {
             );
           }
           
-          // Schedule reminder email for barber
-          await emailScheduler.scheduleReminderEmail(appointment);
+          // 4. Send booking confirmed notification to barber
+          if (appointment.barberId?.email) {
+            await emailScheduler.scheduleEmail(
+              appointment._id,
+              'booking_confirmed_to_barber',
+              appointment.barberId.email,
+              appointment.barberId.name,
+              new Date() // Send immediately
+            );
+          }
+          
+          // 5. Schedule 30-minute reminders for both customer and barber
+          await emailScheduler.schedule30MinReminders(appointment);
           
         } else if (appointment.status === 'cancelled') {
-          // Send rejection email immediately if customer has email
+          // Send rejection email to customer
           if (appointment.customerEmail) {
             await emailScheduler.scheduleEmail(
               appointment._id,
@@ -454,6 +482,28 @@ router.put('/:id', async (req, res) => {
           
           // Cancel any pending reminder emails
           await emailScheduler.cancelAppointmentEmails(appointment._id);
+          
+        } else if (appointment.status === 'completed') {
+          // 7. Send completion emails to both customer and barber
+          if (appointment.customerEmail) {
+            await emailScheduler.scheduleEmail(
+              appointment._id,
+              'completion_to_customer',
+              appointment.customerEmail,
+              appointment.customerName,
+              new Date() // Send immediately
+            );
+          }
+          
+          if (appointment.barberId?.email) {
+            await emailScheduler.scheduleEmail(
+              appointment._id,
+              'completion_to_barber',
+              appointment.barberId.email,
+              appointment.barberId.name,
+              new Date() // Send immediately
+            );
+          }
         }
       } catch (emailError) {
         console.error('Email scheduling failed:', emailError);
