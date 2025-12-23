@@ -45,7 +45,7 @@ jobs:
           git clean -fd
 
           echo "📦 Backend dependencies..."
-          cd backend
+          cd /var/www/BarberAppointments/backend
           rm -rf node_modules package-lock.json
           npm install
 
@@ -69,7 +69,7 @@ jobs:
           fi
 
           echo "📦 Frontend dependencies..."
-          cd ../frontend
+          cd /var/www/BarberAppointments/frontend
           rm -rf node_modules package-lock.json dist
           npm install
 
