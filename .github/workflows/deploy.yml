@@ -56,16 +56,20 @@ jobs:
             sudo npm install -g pm2
           fi
 
+          # Create PM2 log directory
+          sudo mkdir -p /var/log/pm2
+          sudo chown -R ubuntu:ubuntu /var/log/pm2
+
           # Use ecosystem file for production deployment
           cd /var/www/BarberAppointments
           
           # Check if barberapp-backend exists in pm2
           if pm2 list | grep -q "barberapp-backend"; then
             echo "barberapp-backend found in pm2 — restarting with production env"
-            pm2 restart ecosystem.config.js --env production
+            pm2 restart barberapp-backend --env production
           else
             echo "barberapp-backend not found — starting with production env"
-            pm2 start ecosystem.config.js --env production
+            NODE_ENV=production pm2 start backend/server.js --name barberapp-backend
           fi
 
           echo "📦 Frontend dependencies..."
