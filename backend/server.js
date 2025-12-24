@@ -71,6 +71,7 @@ app.use('/api/barbers', verifyToken, require('./routes/barbers'));
 app.use('/api/services', verifyToken, require('./routes/services'));
 app.use('/api/timeslots', verifyToken, require('./routes/timeslots'));
 app.use('/api/restrictions', verifyToken, require('./routes/restrictions'));
+app.use('/api/customers', verifyToken, require('./routes/customers'));
 
 // Global error handler - must be after all routes
 app.use((error, req, res, next) => {

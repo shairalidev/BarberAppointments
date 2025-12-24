@@ -93,6 +93,7 @@ export default {
     requests: 'Anfragen',
     services: 'Dienstleistungen',
     slots: 'Zeitslots',
+    customers: 'Kunden',
     profile: 'Profil',
     today: 'Heute',
     bookAppointment: 'Termin buchen',
@@ -119,6 +120,17 @@ export default {
     price: 'Preis',
     description: 'Beschreibung',
     actions: 'Aktionen',
+    customersFound: 'Kunde(n) gefunden',
+    searchCustomers: 'Kunden suchen',
+    addCustomer: 'Kunde hinzufügen',
+    editCustomer: 'Kunde bearbeiten',
+    noCustomersFound: 'Keine Kunden gefunden',
+    existingCustomers: 'Bestehende Kunden',
+    selectToPrefill: 'Zum Ausfüllen auswählen',
+    customerNotesPlaceholder: 'Notizen zu Vorlieben, Stil usw.',
+    totalBookings: 'Gesamtbuchungen',
+    lastVisit: 'Letzter Besuch',
+    notes: 'Notizen',
     noDescriptionAvailable: 'Keine Beschreibung verfügbar',
     noDescription: 'Keine Beschreibung',
     addService: 'Dienstleistung hinzufügen',
@@ -246,6 +258,10 @@ export default {
     profileUpdated: 'Profil erfolgreich aktualisiert!',
     settingsUpdated: 'Einstellungen erfolgreich aktualisiert!',
     adminNameRequired: 'Admin-Name ist erforderlich',
-    cannotBookPastDate: 'Termine können nicht für vergangene Tage gebucht werden'
+    cannotBookPastDate: 'Termine können nicht für vergangene Tage gebucht werden',
+    customerRequired: 'Kundenname und Telefon sind erforderlich',
+    customerCreated: 'Kunde erfolgreich gespeichert!',
+    customerUpdated: 'Kunde erfolgreich aktualisiert!',
+    customerSaveError: 'Kunde konnte nicht gespeichert werden: {message}'
   }
 }
