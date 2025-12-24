@@ -187,6 +187,9 @@ export default {
     existingCustomers: 'Existing customers',
     selectToPrefill: 'Select to pre-fill form',
     customerNotesPlaceholder: 'Notes about preferences, style, etc.',
+    marketingOptIn: 'Opt-in to receive updates about appointments and offers',
+    deleteCustomer: 'Delete Customer',
+    deleteCustomerConfirm: 'Are you sure you want to delete {name}? This action cannot be undone.',
     totalBookings: 'Total bookings',
     lastVisit: 'Last visit',
     actions: 'Actions',
@@ -263,6 +266,8 @@ export default {
     customerRequired: 'Customer name and phone are required',
     customerCreated: 'Customer saved successfully!',
     customerUpdated: 'Customer updated successfully!',
+    customerDeleted: 'Customer deleted successfully!',
+    customerDeleteError: 'Could not delete customer: {message}',
     customerSaveError: 'Could not save customer: {message}'
   }
 }
