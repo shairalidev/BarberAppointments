@@ -37,18 +37,77 @@ class EmailService {
     return `${senderName} <${senderEmail}>`;
   }
 
-  // 1. Customer books appointment - send to customer
-  static async sendBookingReceived(appointment, barber) {
+  static buildEnvelope(nameOverride) {
+    const senderEmail = this.sanitizeEmail(process.env.FROM_EMAIL) || 'noreply@ates-barberos.com';
+    const senderName = nameOverride || process.env.FROM_NAME || 'Ates Barberos';
+    const replyTo = this.sanitizeEmail(process.env.REPLY_TO_EMAIL) || senderEmail;
+    const unsubscribeEmail = this.sanitizeEmail(process.env.UNSUBSCRIBE_EMAIL) || replyTo;
+
+    const headers = unsubscribeEmail
+      ? { 'List-Unsubscribe': `<mailto:${unsubscribeEmail}>` }
+      : undefined;
+
+    return {
+      from: `${senderName} <${senderEmail}>`,
+      replyTo,
+      headers
+    };
+  }
+
+  static buildPlainText(lines = []) {
+    return lines.filter(Boolean).join('\n');
+  }
+
+  static formatDateTime(date, time) {
+    const dateText = new Date(date).toLocaleDateString('de-DE', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+    return `${dateText} um ${time}`;
+  }
+
+  static async dispatchEmail({ to, subject, html, text, nameOverride }) {
     const resend = this.getResendClient();
     if (!resend) {
-      console.log('Resend not configured - skipping booking received email');
+      console.log('Resend not configured - skipping email:', subject);
       return;
     }
 
+    const recipient = this.formatRecipient(to);
+    const envelope = this.buildEnvelope(nameOverride);
+
+    const payload = {
+      from: envelope.from,
+      to: [recipient],
+      subject,
+      html
+    };
+
+    if (text) payload.text = text;
+    if (envelope.replyTo) payload.reply_to = envelope.replyTo;
+    if (envelope.headers) payload.headers = envelope.headers;
+
+    await resend.emails.send(payload);
+  }
+
+  // 1. Customer books appointment - send to customer
+  static async sendBookingReceived(appointment, barber) {
     try {
-      const recipient = this.formatRecipient(appointment.customerEmail);
       console.log('Sending booking received email to:', appointment.customerEmail);
-      
+      const subject = 'Buchungsanfrage erhalten - Warten auf Bestätigung';
+      const text = this.buildPlainText([
+        `Hallo ${appointment.customerName}!`,
+        'Wir haben Ihre Buchung erhalten und prüfen sie gerade.',
+        `Termin: ${this.formatDateTime(appointment.date, appointment.time)}`,
+        `Dienstleistungen: ${appointment.services?.map(s => s.name).join(', ')}`,
+        `Friseur: ${barber?.name || 'Professioneller Friseur'}`,
+        `Gesamtkosten: €${appointment.totalPrice}`,
+        'Sie erhalten eine weitere E-Mail, sobald Ihre Buchung bestätigt wurde.',
+        'Adresse: Bahnhofstraße 3, 6410 Telfs'
+      ]);
+
       const emailHtml = `
     <!DOCTYPE html>
     <html>
@@ -106,11 +165,11 @@ class EmailService {
     </body>
     </html>`;
 
-      await resend.emails.send({
-        from: this.getSender(),
-        to: [recipient],
-        subject: 'Buchungsanfrage erhalten - Warten auf Bestätigung',
+      await this.dispatchEmail({
+        to: appointment.customerEmail,
+        subject,
         html: emailHtml,
+        text
       });
       
       console.log('Booking received email sent successfully to:', appointment.customerEmail);
@@ -122,15 +181,24 @@ class EmailService {
 
   // 2. Customer books appointment - send to barber
   static async sendNewBookingToBarber(appointment, barber) {
-    const resend = this.getResendClient();
-    if (!resend || !barber?.email) {
+    if (!barber?.email) {
       console.log('Resend not configured or barber email missing - skipping barber notification');
       return;
     }
 
     try {
-      const recipient = this.formatRecipient(barber.email);
       console.log('Sending new booking notification to barber:', barber.email);
+      const subject = 'Neue Buchungsanfrage - Aktion erforderlich';
+      const text = this.buildPlainText([
+        `Hallo ${barber.name}!`,
+        'Es gibt eine neue Buchungsanfrage.',
+        `Kunde: ${appointment.customerName} (${appointment.customerPhone})`,
+        `Termin: ${this.formatDateTime(appointment.date, appointment.time)}`,
+        `Dienstleistungen: ${appointment.services?.map(s => s.name).join(', ')}`,
+        appointment.notes ? `Notizen: ${appointment.notes}` : '',
+        `Gesamt: €${appointment.totalPrice}`,
+        'Bitte im Admin-Portal bestätigen oder ablehnen.'
+      ]);
       
       const emailHtml = `
     <!DOCTYPE html>
@@ -196,11 +264,12 @@ class EmailService {
     </body>
     </html>`;
 
-      await resend.emails.send({
-        from: this.getSender('Ates Barberos Admin'),
-        to: [recipient],
-        subject: 'Neue Buchungsanfrage - Aktion erforderlich',
+      await this.dispatchEmail({
+        to: barber.email,
+        subject,
         html: emailHtml,
+        text,
+        nameOverride: 'Ates Barberos Admin'
       });
       
       console.log('Barber notification email sent successfully to:', barber.email);
@@ -212,10 +281,19 @@ class EmailService {
 
   // 3. Admin confirms booking - send to customer
   static async sendAppointmentConfirmation(appointment, barber) {
-    const resend = this.getResendClient();
-    if (!resend) return;
-
-    const recipient = this.formatRecipient(appointment.customerEmail);
+    const subject = 'Buchung bestätigt - Ates Barberos';
+    const text = this.buildPlainText([
+      `Hallo ${appointment.customerName}!`,
+      'Ihre Buchung wurde bestätigt.',
+      `Termin: ${this.formatDateTime(appointment.date, appointment.time)}`,
+      `Dienstleistungen: ${appointment.services?.map(s => s.name).join(', ')}`,
+      `Friseur: ${barber?.name || 'Professioneller Friseur'}`,
+      `Gesamtkosten: €${appointment.totalPrice}`,
+      `Ihre Telefonnummer: ${appointment.customerPhone}`,
+      appointment.responseMessage ? `Nachricht vom Friseur: "${appointment.responseMessage}"` : '',
+      'Sie erhalten 30 Minuten vor Ihrem Termin eine Erinnerung.',
+      'Adresse: Bahnhofstraße 3, 6410 Telfs'
+    ]);
 
     const emailHtml = `
     <!DOCTYPE html>
@@ -280,20 +358,30 @@ class EmailService {
     </body>
     </html>`;
 
-    await resend.emails.send({
-      from: this.getSender(),
-      to: [recipient],
-      subject: 'Buchung bestätigt - Ates Barberos',
+    await this.dispatchEmail({
+      to: appointment.customerEmail,
+      subject,
       html: emailHtml,
+      text
     });
   }
 
   // 4. Admin confirms booking - send to barber
   static async sendBookingConfirmedToBarber(appointment, barber) {
-    const resend = this.getResendClient();
-    if (!resend || !barber.email) return;
+    if (!barber.email) return;
 
-    const recipient = this.formatRecipient(barber.email);
+    const subject = 'Buchung bestätigt - Ihr Terminplan wurde aktualisiert';
+    const text = this.buildPlainText([
+      `Hallo ${barber.name}!`,
+      'Sie haben einen Termin bestätigt.',
+      `Kunde: ${appointment.customerName}`,
+      `Termin: ${this.formatDateTime(appointment.date, appointment.time)}`,
+      `Dienstleistungen: ${appointment.services?.map(s => s.name).join(', ')}`,
+      `Dauer: ${appointment.totalDuration} Minuten`,
+      `Telefon des Kunden: ${appointment.customerPhone}`,
+      `Gesamt: €${appointment.totalPrice}`,
+      'Der Kunde wurde ebenfalls benachrichtigt.'
+    ]);
 
     const emailHtml = `
     <!DOCTYPE html>
@@ -358,20 +446,28 @@ class EmailService {
     </body>
     </html>`;
 
-    await resend.emails.send({
-      from: this.getSender('Ates Barberos Admin'),
-      to: [recipient],
-      subject: 'Buchung bestätigt - Ihr Terminplan wurde aktualisiert',
+    await this.dispatchEmail({
+      to: barber.email,
+      subject,
       html: emailHtml,
+      text,
+      nameOverride: 'Ates Barberos Admin'
     });
   }
 
   // 5. 30-minute reminder - send to customer
   static async send30MinReminderToCustomer(appointment, barber) {
-    const resend = this.getResendClient();
-    if (!resend) return;
-
-    const recipient = this.formatRecipient(appointment.customerEmail);
+    const subject = 'Termin in 30 Minuten - Ates Barberos';
+    const text = this.buildPlainText([
+      `Hallo ${appointment.customerName}!`,
+      'Ihr Termin beginnt in 30 Minuten.',
+      `Termin: ${this.formatDateTime(appointment.date, appointment.time)}`,
+      `Dienstleistungen: ${appointment.services?.map(s => s.name).join(', ')}`,
+      `Ihr Friseur: ${barber?.name || 'Professioneller Friseur'}`,
+      'Adresse: Bahnhofstraße 3, 6410 Telfs',
+      `Gesamt: €${appointment.totalPrice}`,
+      'Bitte kommen Sie 5 Minuten früher.'
+    ]);
 
     const emailHtml = `
     <!DOCTYPE html>
@@ -434,20 +530,31 @@ class EmailService {
     </body>
     </html>`;
 
-    await resend.emails.send({
-      from: this.getSender('Ates Barberos Erinnerungen'),
-      to: [recipient],
-      subject: 'Termin in 30 Minuten - Ates Barberos',
+    await this.dispatchEmail({
+      to: appointment.customerEmail,
+      subject,
       html: emailHtml,
+      text,
+      nameOverride: 'Ates Barberos Erinnerungen'
     });
   }
 
   // 6. 30-minute reminder - send to barber
   static async send30MinReminderToBarber(appointment, barber) {
-    const resend = this.getResendClient();
-    if (!resend || !barber.email) return;
+    if (!barber.email) return;
 
-    const recipient = this.formatRecipient(barber.email);
+    const subject = 'Termin in 30 Minuten - Vorbereitung';
+    const text = this.buildPlainText([
+      `Hallo ${barber.name}!`,
+      'Ihr nächster Termin startet in 30 Minuten.',
+      `Kunde: ${appointment.customerName}`,
+      `Uhrzeit: ${appointment.time}`,
+      `Dienstleistungen: ${appointment.services?.map(s => s.name).join(', ')}`,
+      `Dauer: ${appointment.totalDuration} Minuten`,
+      `Telefon des Kunden: ${appointment.customerPhone}`,
+      appointment.notes ? `Notizen: ${appointment.notes}` : '',
+      'Bitte bereiten Sie den Arbeitsplatz vor.'
+    ]);
 
     const emailHtml = `
     <!DOCTYPE html>
@@ -510,20 +617,27 @@ class EmailService {
     </body>
     </html>`;
 
-    await resend.emails.send({
-      from: this.getSender('Ates Barberos Admin'),
-      to: [recipient],
-      subject: 'Termin in 30 Minuten - Vorbereitung',
+    await this.dispatchEmail({
+      to: barber.email,
+      subject,
       html: emailHtml,
+      text,
+      nameOverride: 'Ates Barberos Admin'
     });
   }
 
   // 7. Appointment completed - send to customer
   static async sendCompletionToCustomer(appointment, barber) {
-    const resend = this.getResendClient();
-    if (!resend) return;
-
-    const recipient = this.formatRecipient(appointment.customerEmail);
+    const subject = 'Service abgeschlossen - Vielen Dank!';
+    const text = this.buildPlainText([
+      `Hallo ${appointment.customerName}!`,
+      'Danke für Ihren Besuch bei Ates Barberos.',
+      `Datum & Uhrzeit: ${this.formatDateTime(appointment.date, appointment.time)}`,
+      `Dienstleistungen: ${appointment.services?.map(s => s.name).join(', ')}`,
+      `Ihr Friseur: ${barber?.name || 'Professioneller Friseur'}`,
+      `Bezahlt: €${appointment.totalPrice}`,
+      'Wir freuen uns, Sie bald wiederzusehen!'
+    ]);
 
     const emailHtml = `
     <!DOCTYPE html>
@@ -584,20 +698,28 @@ class EmailService {
     </body>
     </html>`;
 
-    await resend.emails.send({
-      from: this.getSender(),
-      to: [recipient],
-      subject: 'Service abgeschlossen - Vielen Dank!',
+    await this.dispatchEmail({
+      to: appointment.customerEmail,
+      subject,
       html: emailHtml,
+      text
     });
   }
 
   // 8. Appointment completed - send to barber
   static async sendCompletionToBarber(appointment, barber) {
-    const resend = this.getResendClient();
-    if (!resend || !barber.email) return;
+    if (!barber.email) return;
 
-    const recipient = this.formatRecipient(barber.email);
+    const subject = 'Termin abgeschlossen - Gut gemacht!';
+    const text = this.buildPlainText([
+      `Hallo ${barber.name}!`,
+      'Sie haben einen Termin abgeschlossen.',
+      `Kunde: ${appointment.customerName}`,
+      `Termin: ${this.formatDateTime(appointment.date, appointment.time)}`,
+      `Dienstleistungen: ${appointment.services?.map(s => s.name).join(', ')}`,
+      `Umsatz: €${appointment.totalPrice}`,
+      'Der Kunde wurde über den Abschluss informiert.'
+    ]);
 
     const emailHtml = `
     <!DOCTYPE html>
@@ -654,20 +776,27 @@ class EmailService {
     </body>
     </html>`;
 
-    await resend.emails.send({
-      from: this.getSender('Ates Barberos Admin'),
-      to: [recipient],
-      subject: 'Termin abgeschlossen - Gut gemacht!',
+    await this.dispatchEmail({
+      to: barber.email,
+      subject,
       html: emailHtml,
+      text,
+      nameOverride: 'Ates Barberos Admin'
     });
   }
 
   // Rejection email
   static async sendAppointmentRejection(appointment, barber) {
-    const resend = this.getResendClient();
-    if (!resend) return;
-
-    const recipient = this.formatRecipient(appointment.customerEmail);
+    const subject = 'Buchungsaktualisierung - Ates Barberos';
+    const text = this.buildPlainText([
+      `Hallo ${appointment.customerName},`,
+      'leider können wir Ihre Terminanfrage zu diesem Zeitpunkt nicht erfüllen.',
+      `Angefragter Termin: ${this.formatDateTime(appointment.date, appointment.time)}`,
+      `Dienstleistungen: ${appointment.services?.map(s => s.name).join(', ')}`,
+      appointment.responseMessage ? `Nachricht vom Friseur: "${appointment.responseMessage}"` : '',
+      'Bitte buchen Sie gerne einen anderen Zeitslot.',
+      'Vielen Dank für Ihr Verständnis.'
+    ]);
 
     const emailHtml = `
     <!DOCTYPE html>
@@ -719,11 +848,11 @@ class EmailService {
     </body>
     </html>`;
 
-    await resend.emails.send({
-      from: this.getSender(),
-      to: [recipient],
-      subject: 'Buchungsaktualisierung - Ates Barberos',
+    await this.dispatchEmail({
+      to: appointment.customerEmail,
+      subject,
       html: emailHtml,
+      text
     });
   }
 
