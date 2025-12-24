@@ -240,39 +240,7 @@
           </div>
         </div>
       </div>
-      
-      <!-- Debug Panel (Development Only) -->
-      <div v-if="debugMode" class="row mt-4">
-        <div class="col-12">
-          <div class="card border-warning">
-            <div class="card-header bg-warning text-dark">
-              <h6 class="mb-0">Debug Information</h6>
-            </div>
-            <div class="card-body">
-              <div class="row g-3">
-                <div class="col-md-6">
-                  <strong>API Configuration:</strong>
-                  <pre class="small">{{ JSON.stringify({
-                    apiUrl: getApiUrl(),
-                    nodeEnv: process.env.NODE_ENV
-                  }, null, 2) }}</pre>
-                </div>
-                <div class="col-md-6">
-                  <strong>Current State:</strong>
-                  <pre class="small">{{ JSON.stringify({
-                    currentStep,
-                    selectedServices: selectedServices.length,
-                    selectedBarber,
-                    selectedDate,
-                    selectedTime,
-                    availableTimes: availableTimes.length
-                  }, null, 2) }}</pre>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+
     </div>
   </div>
 </template>
@@ -307,7 +275,7 @@ export default {
         marketingOptIn: true
       },
       isSubmitting: false,
-      debugMode: process.env.NODE_ENV === 'development',
+
       steps: [
         { number: 1, label: 'Services', subtitle: 'Choose' },
         { number: 2, label: 'Date & time', subtitle: 'Schedule' },
@@ -645,6 +613,9 @@ export default {
           position: 'top-center'
         })
 
+        // Force refresh availability to hide the booked slot immediately
+        await this.handleAvailabilityRefresh()
+        
         this.resetFlow()
       } catch (error) {
         const errorData = error.response?.data

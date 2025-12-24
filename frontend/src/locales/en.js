@@ -181,6 +181,8 @@ export default {
     complete: 'Complete',
     customersFound: 'customer(s) found',
     searchCustomers: 'Search customers',
+    searchByNamePhoneEmail: 'Search by name, phone, email, or notes',
+    bookings: 'bookings',
     addCustomer: 'Add Customer',
     editCustomer: 'Edit Customer',
     noCustomersFound: 'No customers found',

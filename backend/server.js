@@ -11,6 +11,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 const emailScheduler = require('./services/emailScheduler');
+const cleanupService = require('./services/cleanupService');
 
 // Install safe console to handle emojis
 installSafeConsole();
@@ -117,17 +118,27 @@ app.listen(PORT, () => {
   } catch (error) {
     console.error('Failed to start email scheduler:', error);
   }
+  
+  // Start cleanup service
+  try {
+    cleanupService.start();
+    console.log('Cleanup service started successfully');
+  } catch (error) {
+    console.error('Failed to start cleanup service:', error);
+  }
 });
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
   console.log('SIGTERM received, shutting down gracefully');
   emailScheduler.stop();
+  cleanupService.stop();
   process.exit(0);
 });
 
 process.on('SIGINT', () => {
   console.log('SIGINT received, shutting down gracefully');
   emailScheduler.stop();
+  cleanupService.stop();
   process.exit(0);
 });

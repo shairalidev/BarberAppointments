@@ -274,8 +274,8 @@
                     <span class="input-group-text"><i class="fas fa-search"></i></span>
                     <input v-model="customerSearch" type="search" class="form-control" :placeholder="$t('admin.searchCustomers')" />
                   </div>
-                  <button @click="startNewCustomer" class="btn btn-primary d-flex align-items-center gap-2">
-                    <i class="fas fa-user-plus"></i><span class="d-none d-sm-inline">{{ $t('admin.addCustomer') }}</span>
+                  <button @click="showCustomerModal = true" class="btn btn-primary d-flex align-items-center gap-2">
+                    <i class="fas fa-user-plus"></i><span class="d-none d-sm-inline">{{ $t('admin.addCustomerRecord') }}</span>
                   </button>
                 </div>
               </div>
@@ -323,42 +323,58 @@
                 </div>
               </div>
             </div>
+          </div>
 
-            <div class="card border-0 shadow-sm">
-              <div class="card-header py-3">
-                <h6 class="mb-0"><i class="fas fa-user-edit me-2"></i>{{ customerForm._id ? $t('admin.editCustomer') : $t('admin.addCustomer') }}</h6>
-              </div>
-              <div class="card-body">
-                <form @submit.prevent="saveCustomer">
-                  <div class="row g-3">
-                    <div class="col-md-4">
-                      <label class="form-label">{{ $t('admin.customerName') }}</label>
-                      <input v-model="customerForm.name" type="text" class="form-control" required />
+          <!-- Customer Modal -->
+          <div v-if="showCustomerModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" @click.self="showCustomerModal = false">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header bg-gradient-primary text-white">
+                  <h5 class="modal-title">
+                    <i class="fas fa-user-plus me-2"></i>
+                    {{ customerForm._id ? $t('admin.editCustomer') : $t('admin.addCustomerRecord') }}
+                  </h5>
+                  <button @click="showCustomerModal = false" class="btn-close btn-close-white"></button>
+                </div>
+                <div class="modal-body">
+                  <form @submit.prevent="saveCustomer">
+                    <div class="row g-3">
+                      <div class="col-md-6">
+                        <label class="form-label">{{ $t('admin.customerName') }}</label>
+                        <input v-model="customerForm.name" type="text" class="form-control" required />
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label">{{ $t('admin.phone') }}</label>
+                        <input v-model="customerForm.phone" type="tel" class="form-control" required />
+                      </div>
+                      <div class="col-12">
+                        <label class="form-label">{{ $t('admin.email') }}</label>
+                        <input v-model="customerForm.email" type="email" class="form-control" />
+                      </div>
+                      <div class="col-12">
+                        <label class="form-label">{{ $t('admin.notes') }}</label>
+                        <textarea v-model="customerForm.notes" class="form-control" rows="3" :placeholder="$t('admin.customerNotesPlaceholder')"></textarea>
+                      </div>
+                      <div class="col-12">
+                        <div class="form-check">
+                          <input v-model="customerForm.marketingOptIn" class="form-check-input" type="checkbox" id="marketingOptIn">
+                          <label class="form-check-label" for="marketingOptIn">
+                            {{ $t('booking.emailUpdatesConsent') }}
+                          </label>
+                        </div>
+                      </div>
                     </div>
-                    <div class="col-md-4">
-                      <label class="form-label">{{ $t('admin.phone') }}</label>
-                      <input v-model="customerForm.phone" type="tel" class="form-control" required />
-                    </div>
-                    <div class="col-md-4">
-                      <label class="form-label">{{ $t('admin.email') }}</label>
-                      <input v-model="customerForm.email" type="email" class="form-control" />
-                    </div>
-                    <div class="col-12">
-                      <label class="form-label">{{ $t('admin.notes') }}</label>
-                      <textarea v-model="customerForm.notes" class="form-control" rows="2" :placeholder="$t('admin.customerNotesPlaceholder')"></textarea>
-                    </div>
-                    <div class="col-12 d-flex justify-content-end gap-2">
-                      <button type="button" @click="resetCustomerForm" class="btn btn-outline-secondary">
-                        <i class="fas fa-undo me-1"></i>{{ $t('common.cancel') }}
-                      </button>
-                      <button type="submit" class="btn btn-success">
-                        <i class="fas fa-save me-1"></i>{{ customerForm._id ? $t('common.update') : $t('common.save') }}
-                      </button>
-                    </div>
-                  </div>
-                </form>
+                  </form>
+                </div>
+                <div class="modal-footer">
+                  <button @click="showCustomerModal = false" class="btn btn-secondary">{{ $t('common.cancel') }}</button>
+                  <button @click="saveCustomer" class="btn btn-success">
+                    <i class="fas fa-save me-1"></i>{{ customerForm._id ? $t('common.update') : $t('common.save') }}
+                  </button>
+                </div>
               </div>
             </div>
+          </div>
           </div>
 
           <!-- Booking Requests Tab -->
@@ -841,26 +857,57 @@
                     <span><i class="fas fa-users me-2"></i>{{ $t('admin.existingCustomers') }}</span>
                     <small class="text-muted">{{ $t('admin.selectToPrefill') }}</small>
                   </label>
-                  <div class="input-group mb-2">
-                    <span class="input-group-text"><i class="fas fa-search"></i></span>
-                    <input
-                      v-model="bookingCustomerSearch"
-                      type="search"
-                      class="form-control"
-                      :placeholder="$t('admin.searchCustomers')"
-                    />
-                  </div>
-                  <div class="customer-pills d-flex flex-wrap gap-2">
-                    <button
-                      v-for="customer in bookingCustomerMatches"
-                      :key="customer._id"
-                      type="button"
-                      class="btn btn-outline-secondary btn-sm customer-chip"
-                      @click="selectCustomerForBooking(customer)"
+                  <div class="customer-search-container">
+                    <div class="input-group mb-2">
+                      <span class="input-group-text"><i class="fas fa-search"></i></span>
+                      <input
+                        v-model="bookingCustomerSearch"
+                        type="search"
+                        class="form-control"
+                        :placeholder="$t('admin.searchByNamePhoneEmail')"
+                        @focus="showCustomerDropdown = true"
+                      />
+                      <button 
+                        v-if="bookingCustomerSearch"
+                        @click="clearCustomerSearch"
+                        type="button" 
+                        class="btn btn-outline-secondary"
+                      >
+                        <i class="fas fa-times"></i>
+                      </button>
+                    </div>
+                    
+                    <!-- Customer Dropdown -->
+                    <div 
+                      v-if="showCustomerDropdown && (bookingCustomerMatches.length || bookingCustomerSearch)"
+                      class="customer-dropdown"
                     >
-                      <i class="fas fa-user me-1"></i>{{ customer.name }} <small class="text-muted">({{ customer.phone }})</small>
-                    </button>
-                    <small v-if="!bookingCustomerMatches.length" class="text-muted">{{ $t('admin.noCustomersFound') }}</small>
+                      <div v-if="bookingCustomerMatches.length" class="customer-list">
+                        <div
+                          v-for="customer in bookingCustomerMatches.slice(0, 8)"
+                          :key="customer._id"
+                          class="customer-item"
+                          @click="selectCustomerForBooking(customer)"
+                        >
+                          <div class="customer-info">
+                            <div class="customer-name">
+                              <i class="fas fa-user me-2 text-primary"></i>
+                              <strong>{{ customer.name }}</strong>
+                            </div>
+                            <div class="customer-details">
+                              <span class="phone"><i class="fas fa-phone me-1"></i>{{ customer.phone }}</span>
+                              <span v-if="customer.email" class="email"><i class="fas fa-envelope me-1"></i>{{ customer.email }}</span>
+                            </div>
+                            <div v-if="customer.totalBookings" class="customer-stats">
+                              <span class="badge bg-primary">{{ customer.totalBookings }} {{ $t('admin.bookings') }}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div v-else-if="bookingCustomerSearch && !bookingCustomerMatches.length" class="no-results">
+                        <i class="fas fa-user-slash me-2"></i>{{ $t('admin.noCustomersFound') }}
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div class="col-md-6">
@@ -1026,7 +1073,8 @@ adminProfile: {
         notes: '',
         marketingOptIn: true
       },
-      bookingCustomerSearch: ''
+      bookingCustomerSearch: '',
+      showCustomerDropdown: false
     }
   },
   computed: {
@@ -1051,13 +1099,14 @@ adminProfile: {
       )
     },
     bookingCustomerMatches() {
-      const term = this.bookingCustomerSearch.toLowerCase()
-      if (!term) return this.customers.slice(0, 5)
+      const term = this.bookingCustomerSearch.toLowerCase().trim()
+      if (!term) return this.customers.slice(0, 8)
       return this.customers.filter(c =>
         c.name?.toLowerCase().includes(term) ||
         c.phone?.toLowerCase().includes(term) ||
-        c.email?.toLowerCase().includes(term)
-      )
+        c.email?.toLowerCase().includes(term) ||
+        c.notes?.toLowerCase().includes(term)
+      ).slice(0, 8)
     },
     currentMonthYear() {
       const date = new Date(this.currentYear, this.currentMonth)
@@ -1112,6 +1161,12 @@ adminProfile: {
     await this.fetchData()
     this.watchBookingFormChanges()
     this.loadAdminProfile()
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', this.handleClickOutside)
+  },
+  beforeUnmount() {
+    document.removeEventListener('click', this.handleClickOutside)
   },
   watch: {
     'bookingForm.date'() {
@@ -1303,6 +1358,7 @@ async quickBookAppointment() {
       this.todayDate = today
       this.availableSlots = []
       this.bookingCustomerSearch = ''
+      this.showCustomerDropdown = false
     },
     updateBookingPrice() {
       const service = this.services.find(s => s._id === this.bookingForm.serviceId)
@@ -1677,6 +1733,22 @@ async setReminder(appointment) {
     },
     selectCustomerForBooking(customer) {
       this.prefillBookingFromCustomer(customer)
+      this.showCustomerDropdown = false
+      this.bookingCustomerSearch = customer.name
+    },
+    clearCustomerSearch() {
+      this.bookingCustomerSearch = ''
+      this.showCustomerDropdown = false
+      this.bookingForm.customerId = ''
+      this.bookingForm.customerName = ''
+      this.bookingForm.customerPhone = ''
+      this.bookingForm.customerEmail = ''
+    },
+    handleClickOutside(event) {
+      const dropdown = event.target.closest('.customer-search-container')
+      if (!dropdown) {
+        this.showCustomerDropdown = false
+      }
     },
     getToastIcon(type) {
       const icons = {
@@ -3023,6 +3095,86 @@ async setReminder(appointment) {
 .toast-info {
   background: rgba(59, 130, 246, 0.95);
   color: white;
+}
+
+/* Customer Search Dropdown */
+.customer-search-container {
+  position: relative;
+}
+
+.customer-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.customer-list {
+  padding: 0.5rem 0;
+}
+
+.customer-item {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.customer-item:last-child {
+  border-bottom: none;
+}
+
+.customer-item:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.customer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.customer-name {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.customer-details {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.customer-stats {
+  margin-top: 0.25rem;
+}
+
+.no-results {
+  padding: 1rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .customer-dropdown {
+    max-height: 250px;
+  }
+  
+  .customer-details {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
 }
 
 .customer-pills .customer-chip {

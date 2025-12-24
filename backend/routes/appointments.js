@@ -62,10 +62,10 @@ const buildDailyAvailability = (timeSlots, appointments, duration) => {
     for (let start = firstSlot; start + duration <= endMinutes; start += 30) {
       const end = start + duration;
       
-      // Check for conflicts with both pending and confirmed appointments
+      // Check for conflicts with pending, confirmed, and completed appointments
       const overlaps = appointments.some(appt => {
-        // Include both pending and confirmed appointments in conflict detection
-        if (!['pending', 'confirmed'].includes(appt.status)) return false;
+        // Include pending, confirmed, and completed appointments in conflict detection
+        if (!['pending', 'confirmed', 'completed'].includes(appt.status)) return false;
         
         const apptStart = timeStringToMinutes(appt.time);
         const apptEnd = apptStart + (appt.totalDuration || 30);
@@ -141,11 +141,11 @@ router.get('/availability', async (req, res) => {
       });
     }
 
-    // Get all appointments for the day (including pending ones for conflict detection)
+    // Get all appointments for the day (including pending, confirmed, and completed)
     const appointments = await Appointment.find({
       barberId,
       date: normalizedDate,
-      status: { $in: ['pending', 'confirmed'] } // Include both pending and confirmed
+      status: { $in: ['pending', 'confirmed', 'completed'] } // Include pending, confirmed, and completed
     });
 
     const availableTimes = buildDailyAvailability(timeSlots, appointments, parseInt(duration, 10));
@@ -232,7 +232,7 @@ router.post('/', async (req, res) => {
     const existingAppointments = await Appointment.find({ 
       barberId, 
       date: normalizedDate,
-      status: { $in: ['pending', 'confirmed'] }
+      status: { $in: ['pending', 'confirmed', 'completed'] }
     });
     
     const validTimes = buildDailyAvailability(availableSlots, existingAppointments, totalDuration);
@@ -706,7 +706,7 @@ router.post('/reserve-slot', async (req, res) => {
     const appointments = await Appointment.find({ 
       barberId, 
       date: normalizedDate,
-      status: { $in: ['pending', 'confirmed'] }
+      status: { $in: ['pending', 'confirmed', 'completed'] }
     });
 
     const availableTimes = buildDailyAvailability(timeSlots, appointments, parseInt(duration));
@@ -782,7 +782,7 @@ router.post('/validate-slot', async (req, res) => {
     const appointments = await Appointment.find({ 
       barberId, 
       date: normalizedDate,
-      status: { $in: ['pending', 'confirmed'] }
+      status: { $in: ['pending', 'confirmed', 'completed'] }
     });
 
     const availableTimes = buildDailyAvailability(timeSlots, appointments, parseInt(duration));
