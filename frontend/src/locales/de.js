@@ -128,6 +128,9 @@ export default {
     existingCustomers: 'Bestehende Kunden',
     selectToPrefill: 'Zum Ausfüllen auswählen',
     customerNotesPlaceholder: 'Notizen zu Vorlieben, Stil usw.',
+    marketingOptIn: 'Updates zu Terminen und Angeboten erhalten',
+    deleteCustomer: 'Kunde löschen',
+    deleteCustomerConfirm: 'Möchten Sie {name} wirklich löschen? Dies kann nicht rückgängig gemacht werden.',
     totalBookings: 'Gesamtbuchungen',
     lastVisit: 'Letzter Besuch',
     notes: 'Notizen',
@@ -262,6 +265,8 @@ export default {
     customerRequired: 'Kundenname und Telefon sind erforderlich',
     customerCreated: 'Kunde erfolgreich gespeichert!',
     customerUpdated: 'Kunde erfolgreich aktualisiert!',
+    customerDeleted: 'Kunde erfolgreich gelöscht!',
+    customerDeleteError: 'Kunde konnte nicht gelöscht werden: {message}',
     customerSaveError: 'Kunde konnte nicht gespeichert werden: {message}'
   }
 }
