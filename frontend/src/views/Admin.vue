@@ -274,8 +274,8 @@
                     <span class="input-group-text"><i class="fas fa-search"></i></span>
                     <input v-model="customerSearch" type="search" class="form-control" :placeholder="$t('admin.searchCustomers')" />
                   </div>
-                  <button @click="showCustomerModal = true" class="btn btn-primary d-flex align-items-center gap-2">
-                    <i class="fas fa-user-plus"></i><span class="d-none d-sm-inline">{{ $t('admin.addCustomerRecord') }}</span>
+                  <button @click="openNewCustomerModal" class="btn btn-primary d-flex align-items-center gap-2">
+                    <i class="fas fa-user-plus"></i><span class="d-none d-sm-inline">{{ $t('admin.addCustomer') }}</span>
                   </button>
                 </div>
               </div>
@@ -303,12 +303,15 @@
                         <td><span class="badge bg-primary">{{ customer.totalBookings || 0 }}</span></td>
                         <td>{{ formatDate(customer.lastAppointmentDate) || '-' }}</td>
                         <td class="text-end">
-                          <div class="btn-group">
-                            <button @click="editCustomer(customer)" class="btn btn-sm btn-outline-primary">
-                              <i class="fas fa-pen"></i>
+                          <div class="d-flex justify-content-end gap-2 flex-wrap">
+                            <button @click="editCustomer(customer)" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1">
+                              <i class="fas fa-pen"></i><span class="d-none d-xl-inline">{{ $t('common.update') }}</span>
                             </button>
-                            <button @click="prefillBookingFromCustomer(customer)" class="btn btn-sm btn-outline-success">
-                              <i class="fas fa-calendar-plus"></i>
+                            <button @click="prefillBookingFromCustomer(customer)" class="btn btn-sm btn-outline-success d-flex align-items-center gap-1">
+                              <i class="fas fa-calendar-plus"></i><span class="d-none d-xl-inline">{{ $t('admin.bookAppointment') }}</span>
+                            </button>
+                            <button @click="confirmDeleteCustomer(customer)" class="btn btn-sm btn-outline-danger d-flex align-items-center gap-1">
+                              <i class="fas fa-trash"></i><span class="d-none d-xl-inline">{{ $t('common.delete') }}</span>
                             </button>
                           </div>
                         </td>
@@ -323,58 +326,42 @@
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Customer Modal -->
-          <div v-if="showCustomerModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" @click.self="showCustomerModal = false">
-            <div class="modal-dialog modal-dialog-centered">
-              <div class="modal-content">
-                <div class="modal-header bg-gradient-primary text-white">
-                  <h5 class="modal-title">
-                    <i class="fas fa-user-plus me-2"></i>
-                    {{ customerForm._id ? $t('admin.editCustomer') : $t('admin.addCustomerRecord') }}
-                  </h5>
-                  <button @click="showCustomerModal = false" class="btn-close btn-close-white"></button>
-                </div>
-                <div class="modal-body">
-                  <form @submit.prevent="saveCustomer">
-                    <div class="row g-3">
-                      <div class="col-md-6">
-                        <label class="form-label">{{ $t('admin.customerName') }}</label>
-                        <input v-model="customerForm.name" type="text" class="form-control" required />
-                      </div>
-                      <div class="col-md-6">
-                        <label class="form-label">{{ $t('admin.phone') }}</label>
-                        <input v-model="customerForm.phone" type="tel" class="form-control" required />
-                      </div>
-                      <div class="col-12">
-                        <label class="form-label">{{ $t('admin.email') }}</label>
-                        <input v-model="customerForm.email" type="email" class="form-control" />
-                      </div>
-                      <div class="col-12">
-                        <label class="form-label">{{ $t('admin.notes') }}</label>
-                        <textarea v-model="customerForm.notes" class="form-control" rows="3" :placeholder="$t('admin.customerNotesPlaceholder')"></textarea>
-                      </div>
-                      <div class="col-12">
-                        <div class="form-check">
-                          <input v-model="customerForm.marketingOptIn" class="form-check-input" type="checkbox" id="marketingOptIn">
-                          <label class="form-check-label" for="marketingOptIn">
-                            {{ $t('booking.emailUpdatesConsent') }}
-                          </label>
-                        </div>
-                      </div>
+            <div class="card border-0 shadow-sm">
+              <div class="card-header py-3">
+                <h6 class="mb-0"><i class="fas fa-user-edit me-2"></i>{{ customerForm._id ? $t('admin.editCustomer') : $t('admin.addCustomer') }}</h6>
+              </div>
+              <div class="card-body">
+                <form @submit.prevent="saveCustomer">
+                  <div class="row g-3">
+                    <div class="col-md-4">
+                      <label class="form-label">{{ $t('admin.customerName') }}</label>
+                      <input v-model="customerForm.name" type="text" class="form-control" required />
                     </div>
-                  </form>
-                </div>
-                <div class="modal-footer">
-                  <button @click="showCustomerModal = false" class="btn btn-secondary">{{ $t('common.cancel') }}</button>
-                  <button @click="saveCustomer" class="btn btn-success">
-                    <i class="fas fa-save me-1"></i>{{ customerForm._id ? $t('common.update') : $t('common.save') }}
-                  </button>
-                </div>
+                    <div class="col-md-4">
+                      <label class="form-label">{{ $t('admin.phone') }}</label>
+                      <input v-model="customerForm.phone" type="tel" class="form-control" required />
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label">{{ $t('admin.email') }}</label>
+                      <input v-model="customerForm.email" type="email" class="form-control" />
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label">{{ $t('admin.notes') }}</label>
+                      <textarea v-model="customerForm.notes" class="form-control" rows="2" :placeholder="$t('admin.customerNotesPlaceholder')"></textarea>
+                    </div>
+                    <div class="col-12 d-flex justify-content-end gap-2">
+                      <button type="button" @click="resetCustomerForm" class="btn btn-outline-secondary">
+                        <i class="fas fa-undo me-1"></i>{{ $t('common.cancel') }}
+                      </button>
+                      <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save me-1"></i>{{ customerForm._id ? $t('common.update') : $t('common.save') }}
+                      </button>
+                    </div>
+                  </div>
+                </form>
               </div>
             </div>
-          </div>
           </div>
 
           <!-- Booking Requests Tab -->
@@ -940,6 +927,85 @@
       </div>
     </div>
 
+    <!-- Customer Modal -->
+    <div v-if="showCustomerModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" @click.self="closeCustomerModal">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-gradient-primary text-white">
+            <h5 class="modal-title">
+              <i class="fas fa-user-edit me-2"></i>{{ customerForm._id ? $t('admin.editCustomer') : $t('admin.addCustomer') }}
+            </h5>
+            <button @click="closeCustomerModal" class="btn-close btn-close-white"></button>
+          </div>
+          <form @submit.prevent="saveCustomer">
+            <div class="modal-body">
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label">{{ $t('admin.customerName') }}</label>
+                  <input v-model="customerForm.name" type="text" class="form-control" required />
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">{{ $t('admin.phone') }}</label>
+                  <input v-model="customerForm.phone" type="tel" class="form-control" required />
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">{{ $t('admin.email') }}</label>
+                  <input v-model="customerForm.email" type="email" class="form-control" />
+                </div>
+                <div class="col-12">
+                  <label class="form-label">{{ $t('admin.notes') }}</label>
+                  <textarea v-model="customerForm.notes" class="form-control" rows="2" :placeholder="$t('admin.customerNotesPlaceholder')"></textarea>
+                </div>
+                <div class="col-12">
+                  <div class="form-check">
+                    <input v-model="customerForm.marketingOptIn" class="form-check-input" type="checkbox" id="customerMarketingOptIn">
+                    <label class="form-check-label" for="customerMarketingOptIn">
+                      {{ $t('admin.marketingOptIn') }}
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" @click="closeCustomerModal" class="btn btn-outline-secondary">
+                {{ $t('common.cancel') }}
+              </button>
+              <button type="submit" class="btn btn-success">
+                <i class="fas fa-save me-1"></i>{{ customerForm._id ? $t('common.update') : $t('common.save') }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Customer Modal -->
+    <div v-if="showDeleteCustomerModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" @click.self="closeDeleteCustomerModal">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header border-0">
+            <h5 class="modal-title">
+              <i class="fas fa-trash text-danger me-2"></i>{{ $t('admin.deleteCustomer') }}
+            </h5>
+            <button @click="closeDeleteCustomerModal" class="btn-close"></button>
+          </div>
+          <div class="modal-body">
+            <p class="mb-0">
+              {{ $t('admin.deleteCustomerConfirm', { name: customerToDelete?.name || '' }) }}
+            </p>
+          </div>
+          <div class="modal-footer border-0">
+            <button @click="closeDeleteCustomerModal" class="btn btn-outline-secondary">
+              {{ $t('common.cancel') }}
+            </button>
+            <button @click="deleteCustomer" class="btn btn-danger">
+              <i class="fas fa-trash me-1"></i>{{ $t('common.delete') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Confirmation Modal -->
     <div v-if="confirmModal.show" class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" @click.self="confirmModal.show = false">
       <div class="modal-dialog modal-dialog-centered">
@@ -1036,17 +1102,20 @@ export default {
         totalPrice: 0
       },
       todayDate: new Date().toISOString().split('T')[0],
-availableSlots: [],
+      availableSlots: [],
       primaryBarber: null,
       showBookingModal: false,
-barberProfile: {
+      showCustomerModal: false,
+      showDeleteCustomerModal: false,
+      customerToDelete: null,
+      barberProfile: {
         name: '',
         email: '',
         specialties: '',
         phone: '',
         bio: ''
       },
-adminProfile: {
+      adminProfile: {
         name: '',
         email: '',
         currentPassword: '',
@@ -1697,9 +1766,19 @@ async setReminder(appointment) {
         marketingOptIn: true
       }
     },
-    editCustomer(customer) {
-      this.customerForm = { ...customer }
+    openNewCustomerModal() {
+      this.startNewCustomer()
       this.activeTab = 'customers'
+      this.showCustomerModal = true
+    },
+    editCustomer(customer) {
+      this.customerForm = { ...customer, marketingOptIn: customer.marketingOptIn ?? true }
+      this.activeTab = 'customers'
+      this.showCustomerModal = true
+    },
+    closeCustomerModal() {
+      this.showCustomerModal = false
+      this.startNewCustomer()
     },
     async saveCustomer() {
       if (!this.customerForm.name.trim() || !this.customerForm.phone.trim()) {
@@ -1715,14 +1794,32 @@ async setReminder(appointment) {
           this.showToast(this.$t('toast.customerCreated'), 'success')
         }
         await this.fetchCustomers()
-        this.resetCustomerForm()
+        this.closeCustomerModal()
       } catch (error) {
         const message = error.response?.data?.message || error.message
         this.showToast(this.$t('toast.customerSaveError', { message }), 'error')
       }
     },
-    resetCustomerForm() {
-      this.startNewCustomer()
+    confirmDeleteCustomer(customer) {
+      this.customerToDelete = customer
+      this.showDeleteCustomerModal = true
+    },
+    closeDeleteCustomerModal() {
+      this.showDeleteCustomerModal = false
+      this.customerToDelete = null
+    },
+    async deleteCustomer() {
+      if (!this.customerToDelete) return
+      try {
+        await axios.delete(`${process.env.VUE_APP_API_URL}/customers/${this.customerToDelete._id}`)
+        this.showToast(this.$t('toast.customerDeleted'), 'success')
+        await this.fetchCustomers()
+      } catch (error) {
+        const message = error.response?.data?.message || error.message
+        this.showToast(this.$t('toast.customerDeleteError', { message }), 'error')
+      } finally {
+        this.closeDeleteCustomerModal()
+      }
     },
     prefillBookingFromCustomer(customer) {
       this.bookingForm.customerId = customer._id
