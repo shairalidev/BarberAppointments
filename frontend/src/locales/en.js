@@ -93,6 +93,7 @@ export default {
     requests: 'Requests',
     services: 'Services',
     slots: 'Slots',
+    customers: 'Customers',
     profile: 'Profile',
     today: 'Today',
     bookAppointment: 'Book Appointment',
@@ -177,7 +178,19 @@ export default {
     approveAppointmentQuestion: 'Approve Appointment?',
     markAsCompleteQuestion: 'Mark as Complete?',
     approve: 'Approve',
-    complete: 'Complete'
+    complete: 'Complete',
+    customersFound: 'customer(s) found',
+    searchCustomers: 'Search customers',
+    addCustomer: 'Add Customer',
+    editCustomer: 'Edit Customer',
+    noCustomersFound: 'No customers found',
+    existingCustomers: 'Existing customers',
+    selectToPrefill: 'Select to pre-fill form',
+    customerNotesPlaceholder: 'Notes about preferences, style, etc.',
+    totalBookings: 'Total bookings',
+    lastVisit: 'Last visit',
+    actions: 'Actions',
+    notes: 'Notes'
   },
   common: {
     loading: 'Loading...',
@@ -246,6 +259,10 @@ export default {
     profileUpdated: 'Profile updated successfully!',
     settingsUpdated: 'Settings updated successfully!',
     adminNameRequired: 'Admin name is required',
-    cannotBookPastDate: 'Cannot book appointments for past dates'
+    cannotBookPastDate: 'Cannot book appointments for past dates',
+    customerRequired: 'Customer name and phone are required',
+    customerCreated: 'Customer saved successfully!',
+    customerUpdated: 'Customer updated successfully!',
+    customerSaveError: 'Could not save customer: {message}'
   }
 }

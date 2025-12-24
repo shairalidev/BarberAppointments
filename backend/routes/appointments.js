@@ -3,6 +3,7 @@ const router = express.Router();
 const Appointment = require('../models/Appointment');
 const Service = require('../models/Service');
 const TimeSlot = require('../models/TimeSlot');
+const Customer = require('../models/Customer');
 const EmailService = require('../services/emailService');
 const emailScheduler = require('../services/emailScheduler');
 
@@ -21,6 +22,32 @@ const normalizeDate = (dateString) => {
   const date = new Date(dateString);
   date.setHours(0, 0, 0, 0);
   return date;
+};
+
+const upsertCustomerFromAppointment = async ({ name, phone, email, notes, marketingOptIn, appointmentDate }) => {
+  if (!phone || !name) return null;
+
+  const customer = await Customer.findOneAndUpdate(
+    { phone },
+    {
+      name,
+      phone,
+      email,
+      notes,
+      marketingOptIn,
+      $max: { lastAppointmentDate: appointmentDate }
+    },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  );
+
+  // Refresh booking stats based on existing appointments
+  const totalBookings = await Appointment.countDocuments({ customer: customer._id });
+  if (customer.totalBookings !== totalBookings) {
+    customer.totalBookings = totalBookings;
+    await customer.save();
+  }
+
+  return customer;
 };
 
 const buildDailyAvailability = (timeSlots, appointments, duration) => {
@@ -61,7 +88,8 @@ router.get('/', async (req, res) => {
   try {
     const appointments = await Appointment.find()
       .populate('barberId')
-      .populate('services');
+      .populate('services')
+      .populate('customer');
     res.json(appointments);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -155,6 +183,7 @@ router.get('/availability', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const {
+      customerId,
       customerName,
       customerPhone,
       customerEmail,
@@ -233,8 +262,35 @@ router.post('/', async (req, res) => {
 
     const initialStatus = requestedStatus === 'confirmed' ? 'confirmed' : 'pending';
 
+    // Ensure customer record exists
+    let customer = null;
+    if (customerId) {
+      customer = await Customer.findById(customerId);
+    }
+
+    if (!customer) {
+      customer = await upsertCustomerFromAppointment({
+        name: customerName,
+        phone: customerPhone,
+        email: customerEmail,
+        notes,
+        marketingOptIn,
+        appointmentDate: normalizedDate
+      });
+    } else {
+      // Keep customer record fresh
+      customer.name = customerName;
+      customer.phone = customerPhone;
+      customer.email = customerEmail;
+      customer.notes = notes;
+      customer.marketingOptIn = marketingOptIn ?? customer.marketingOptIn;
+      customer.lastAppointmentDate = normalizedDate;
+      await customer.save();
+    }
+
     // Create appointment with immediate slot reservation
     const appointment = new Appointment({
+      customer: customer?._id,
       customerName,
       customerPhone,
       customerEmail,
@@ -250,6 +306,14 @@ router.post('/', async (req, res) => {
     });
 
     const savedAppointment = await appointment.save();
+
+    if (customer?._id) {
+      const totalBookings = await Appointment.countDocuments({ customer: customer._id });
+      await Customer.findByIdAndUpdate(customer._id, {
+        totalBookings,
+        $max: { lastAppointmentDate: normalizedDate }
+      });
+    }
     await savedAppointment.populate('services');
     await savedAppointment.populate('barberId');
     
@@ -504,6 +568,23 @@ router.put('/:id', async (req, res) => {
     const appointment = await Appointment.findByIdAndUpdate(req.params.id, update, { new: true })
       .populate('barberId')
       .populate('services');
+
+    // Sync customer record when contact details change
+    if (appointment && (update.customerName || update.customerPhone || update.customerEmail)) {
+      const syncedCustomer = await upsertCustomerFromAppointment({
+        name: appointment.customerName,
+        phone: appointment.customerPhone,
+        email: appointment.customerEmail,
+        notes: appointment.notes,
+        marketingOptIn: appointment.marketingOptIn,
+        appointmentDate: appointment.date
+      });
+
+      if (syncedCustomer && (!appointment.customer || appointment.customer.toString() !== syncedCustomer._id.toString())) {
+        appointment.customer = syncedCustomer._id;
+        await appointment.save();
+      }
+    }
     
     // Handle email notifications and scheduling only if email service is configured
     if (sendEmail && EmailService.isConfigured()) {

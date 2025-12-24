@@ -96,6 +96,15 @@
           </li>
           <li class="nav-item">
             <button 
+              @click="activeTab = 'customers'" 
+              :class="['nav-link', 'fw-medium', activeTab === 'customers' ? 'active' : '']"
+            >
+              <i class="fas fa-users nav-icon"></i>
+              <span class="nav-text">{{ $t('admin.customers') }}</span>
+            </button>
+          </li>
+          <li class="nav-item">
+            <button 
               @click="activeTab = 'services'" 
               :class="['nav-link', 'fw-medium', activeTab === 'services' ? 'active' : '']"
             >
@@ -248,6 +257,106 @@
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Customers Tab -->
+          <div v-if="activeTab === 'customers'" class="customers-tab">
+            <div class="card border-0 shadow-sm mb-3">
+              <div class="card-header py-3 d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
+                <div>
+                  <h5 class="mb-0"><i class="fas fa-users me-2"></i>{{ $t('admin.customers') }}</h5>
+                  <small class="text-muted">{{ filteredCustomers.length }} {{ $t('admin.customersFound') }}</small>
+                </div>
+                <div class="d-flex flex-column flex-sm-row gap-2 w-100 w-lg-auto">
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input v-model="customerSearch" type="search" class="form-control" :placeholder="$t('admin.searchCustomers')" />
+                  </div>
+                  <button @click="startNewCustomer" class="btn btn-primary d-flex align-items-center gap-2">
+                    <i class="fas fa-user-plus"></i><span class="d-none d-sm-inline">{{ $t('admin.addCustomer') }}</span>
+                  </button>
+                </div>
+              </div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table align-middle mb-0">
+                    <thead class="bg-light">
+                      <tr>
+                        <th>{{ $t('admin.customer') }}</th>
+                        <th>{{ $t('admin.phone') }}</th>
+                        <th>{{ $t('admin.email') }}</th>
+                        <th>{{ $t('admin.totalBookings') }}</th>
+                        <th>{{ $t('admin.lastVisit') }}</th>
+                        <th class="text-end">{{ $t('admin.actions') }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="customer in filteredCustomers" :key="customer._id">
+                        <td>
+                          <div class="fw-bold">{{ customer.name }}</div>
+                          <small class="text-muted">{{ customer.notes }}</small>
+                        </td>
+                        <td>{{ customer.phone }}</td>
+                        <td>{{ customer.email || '-' }}</td>
+                        <td><span class="badge bg-primary">{{ customer.totalBookings || 0 }}</span></td>
+                        <td>{{ formatDate(customer.lastAppointmentDate) || '-' }}</td>
+                        <td class="text-end">
+                          <div class="btn-group">
+                            <button @click="editCustomer(customer)" class="btn btn-sm btn-outline-primary">
+                              <i class="fas fa-pen"></i>
+                            </button>
+                            <button @click="prefillBookingFromCustomer(customer)" class="btn btn-sm btn-outline-success">
+                              <i class="fas fa-calendar-plus"></i>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr v-if="!filteredCustomers.length">
+                        <td colspan="6" class="text-center py-4 text-muted">
+                          <i class="fas fa-user-slash me-2"></i>{{ $t('admin.noCustomersFound') }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+              <div class="card-header py-3">
+                <h6 class="mb-0"><i class="fas fa-user-edit me-2"></i>{{ customerForm._id ? $t('admin.editCustomer') : $t('admin.addCustomer') }}</h6>
+              </div>
+              <div class="card-body">
+                <form @submit.prevent="saveCustomer">
+                  <div class="row g-3">
+                    <div class="col-md-4">
+                      <label class="form-label">{{ $t('admin.customerName') }}</label>
+                      <input v-model="customerForm.name" type="text" class="form-control" required />
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label">{{ $t('admin.phone') }}</label>
+                      <input v-model="customerForm.phone" type="tel" class="form-control" required />
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label">{{ $t('admin.email') }}</label>
+                      <input v-model="customerForm.email" type="email" class="form-control" />
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label">{{ $t('admin.notes') }}</label>
+                      <textarea v-model="customerForm.notes" class="form-control" rows="2" :placeholder="$t('admin.customerNotesPlaceholder')"></textarea>
+                    </div>
+                    <div class="col-12 d-flex justify-content-end gap-2">
+                      <button type="button" @click="resetCustomerForm" class="btn btn-outline-secondary">
+                        <i class="fas fa-undo me-1"></i>{{ $t('common.cancel') }}
+                      </button>
+                      <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save me-1"></i>{{ customerForm._id ? $t('common.update') : $t('common.save') }}
+                      </button>
+                    </div>
+                  </div>
+                </form>
               </div>
             </div>
           </div>
@@ -727,6 +836,33 @@
                     </button>
                   </div>
                 </div>
+                <div class="col-12">
+                  <label class="form-label d-flex align-items-center justify-content-between">
+                    <span><i class="fas fa-users me-2"></i>{{ $t('admin.existingCustomers') }}</span>
+                    <small class="text-muted">{{ $t('admin.selectToPrefill') }}</small>
+                  </label>
+                  <div class="input-group mb-2">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input
+                      v-model="bookingCustomerSearch"
+                      type="search"
+                      class="form-control"
+                      :placeholder="$t('admin.searchCustomers')"
+                    />
+                  </div>
+                  <div class="customer-pills d-flex flex-wrap gap-2">
+                    <button
+                      v-for="customer in bookingCustomerMatches"
+                      :key="customer._id"
+                      type="button"
+                      class="btn btn-outline-secondary btn-sm customer-chip"
+                      @click="selectCustomerForBooking(customer)"
+                    >
+                      <i class="fas fa-user me-1"></i>{{ customer.name }} <small class="text-muted">({{ customer.phone }})</small>
+                    </button>
+                    <small v-if="!bookingCustomerMatches.length" class="text-muted">{{ $t('admin.noCustomersFound') }}</small>
+                  </div>
+                </div>
                 <div class="col-md-6">
                   <label class="form-label">{{ $t('admin.customerName') }}</label>
                   <input v-model="bookingForm.customerName" type="text" class="form-control" required>
@@ -818,6 +954,7 @@ export default {
     return {
       activeTab: 'calendar',
       appointments: [],
+      customers: [],
       barbers: [],
       services: [],
       timeSlots: [],
@@ -848,6 +985,7 @@ export default {
         customerName: '',
         customerPhone: '',
         customerEmail: '',
+        customerId: '',
         totalPrice: 0
       },
       todayDate: new Date().toISOString().split('T')[0],
@@ -878,7 +1016,17 @@ adminProfile: {
       toastId: 0,
       showCurrentPassword: false,
       showNewPassword: false,
-      showConfirmPassword: false
+      showConfirmPassword: false,
+      customerSearch: '',
+      customerForm: {
+        _id: '',
+        name: '',
+        phone: '',
+        email: '',
+        notes: '',
+        marketingOptIn: true
+      },
+      bookingCustomerSearch: ''
     }
   },
   computed: {
@@ -892,6 +1040,24 @@ adminProfile: {
         const aptDate = appointment.date.split('T')[0]
         return appointment.status === 'pending' && aptDate >= today
       })
+    },
+    filteredCustomers() {
+      const term = this.customerSearch.toLowerCase()
+      if (!term) return this.customers
+      return this.customers.filter(c =>
+        c.name?.toLowerCase().includes(term) ||
+        c.phone?.toLowerCase().includes(term) ||
+        c.email?.toLowerCase().includes(term)
+      )
+    },
+    bookingCustomerMatches() {
+      const term = this.bookingCustomerSearch.toLowerCase()
+      if (!term) return this.customers.slice(0, 5)
+      return this.customers.filter(c =>
+        c.name?.toLowerCase().includes(term) ||
+        c.phone?.toLowerCase().includes(term) ||
+        c.email?.toLowerCase().includes(term)
+      )
     },
     currentMonthYear() {
       const date = new Date(this.currentYear, this.currentMonth)
@@ -914,9 +1080,17 @@ adminProfile: {
         const date = new Date(this.currentYear, this.currentMonth, i)
         days.push(this.createDayObject(date, true))
       }
-      
-      // Filter out past dates and limit to 35 days
-      return days.filter(day => !day.isPast).slice(0, 35)
+
+      // Fill trailing days to complete the last week for proper weekday alignment
+      const totalSlots = Math.ceil(days.length / 7) * 7
+      const nextMonthStart = new Date(this.currentYear, this.currentMonth + 1, 1)
+      while (days.length < totalSlots) {
+        const date = new Date(nextMonthStart)
+        date.setDate(nextMonthStart.getDate() + (days.length - (startDay + lastDay.getDate())))
+        days.push(this.createDayObject(date, false))
+      }
+
+      return days
     },
     selectedDayAppointments() {
       if (!this.selectedCalendarDate) return []
@@ -945,6 +1119,9 @@ adminProfile: {
     },
     'bookingForm.serviceId'() {
       this.fetchAvailableSlots()
+    },
+    customerSearch() {
+      this.fetchCustomers()
     }
   },
   methods: {
@@ -953,7 +1130,8 @@ adminProfile: {
         this.fetchAppointments(),
         this.fetchBarbers(),
         this.fetchServices(),
-        this.fetchTimeSlots()
+        this.fetchTimeSlots(),
+        this.fetchCustomers()
       ])
       this.selectedCalendarDate = new Date().toISOString().split('T')[0]
       this.setPrimaryBarber()
@@ -1001,6 +1179,16 @@ adminProfile: {
         this.services = response.data
       } catch (error) {
         console.error('Error fetching services:', error)
+      }
+    },
+    async fetchCustomers() {
+      try {
+        const response = await axios.get(`${process.env.VUE_APP_API_URL}/customers`, {
+          params: this.customerSearch ? { q: this.customerSearch } : {}
+        })
+        this.customers = response.data
+      } catch (error) {
+        console.error('Error fetching customers:', error)
       }
     },
     async fetchTimeSlots() {
@@ -1058,6 +1246,11 @@ async quickBookAppointment() {
           this.showToast(this.$t('toast.noBarber'), 'warning')
           return
         }
+
+        if (!this.bookingForm.serviceId || !this.bookingForm.time) {
+          this.showToast(this.$t('toast.selectTimeSlot'), 'warning')
+          return
+        }
         
         // Prevent booking for past dates
         const selectedDate = new Date(this.bookingForm.date)
@@ -1071,6 +1264,7 @@ async quickBookAppointment() {
         }
         
         const appointmentData = {
+          customerId: this.bookingForm.customerId,
           customerName: this.bookingForm.customerName,
           customerPhone: this.bookingForm.customerPhone,
           customerEmail: this.bookingForm.customerEmail,
@@ -1103,10 +1297,12 @@ async quickBookAppointment() {
         customerName: '',
         customerPhone: '',
         customerEmail: '',
+        customerId: '',
         totalPrice: 0
       }
       this.todayDate = today
       this.availableSlots = []
+      this.bookingCustomerSearch = ''
     },
     updateBookingPrice() {
       const service = this.services.find(s => s._id === this.bookingForm.serviceId)
@@ -1251,7 +1447,10 @@ getTimeSlotsForDay(dayIndex) {
       }
     },
     formatDate(dateStr) {
-      return new Date(dateStr).toLocaleDateString('en-US', { 
+      if (!dateStr) return ''
+      const parsed = new Date(dateStr)
+      if (isNaN(parsed)) return ''
+      return parsed.toLocaleDateString('en-US', { 
         month: 'short', day: 'numeric', year: 'numeric' 
       })
     },
@@ -1431,6 +1630,53 @@ async setReminder(appointment) {
       if (index > -1) {
         this.toasts.splice(index, 1)
       }
+    },
+    startNewCustomer() {
+      this.customerForm = {
+        _id: '',
+        name: '',
+        phone: '',
+        email: '',
+        notes: '',
+        marketingOptIn: true
+      }
+    },
+    editCustomer(customer) {
+      this.customerForm = { ...customer }
+      this.activeTab = 'customers'
+    },
+    async saveCustomer() {
+      if (!this.customerForm.name.trim() || !this.customerForm.phone.trim()) {
+        this.showToast(this.$t('toast.customerRequired'), 'warning')
+        return
+      }
+      try {
+        if (this.customerForm._id) {
+          await axios.put(`${process.env.VUE_APP_API_URL}/customers/${this.customerForm._id}`, this.customerForm)
+          this.showToast(this.$t('toast.customerUpdated'), 'success')
+        } else {
+          await axios.post(`${process.env.VUE_APP_API_URL}/customers`, this.customerForm)
+          this.showToast(this.$t('toast.customerCreated'), 'success')
+        }
+        await this.fetchCustomers()
+        this.resetCustomerForm()
+      } catch (error) {
+        const message = error.response?.data?.message || error.message
+        this.showToast(this.$t('toast.customerSaveError', { message }), 'error')
+      }
+    },
+    resetCustomerForm() {
+      this.startNewCustomer()
+    },
+    prefillBookingFromCustomer(customer) {
+      this.bookingForm.customerId = customer._id
+      this.bookingForm.customerName = customer.name
+      this.bookingForm.customerPhone = customer.phone
+      this.bookingForm.customerEmail = customer.email || ''
+      this.showBookingModal = true
+    },
+    selectCustomerForBooking(customer) {
+      this.prefillBookingFromCustomer(customer)
     },
     getToastIcon(type) {
       const icons = {
@@ -2777,6 +3023,10 @@ async setReminder(appointment) {
 .toast-info {
   background: rgba(59, 130, 246, 0.95);
   color: white;
+}
+
+.customer-pills .customer-chip {
+  border-radius: 999px;
 }
 
 .toast-header {

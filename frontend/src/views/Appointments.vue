@@ -645,16 +645,6 @@ export default {
           position: 'top-center'
         })
 
-        // Show additional message if provided by backend
-        if (response.data.message) {
-          setTimeout(() => {
-            this.toast.info(this.formatBackendMessage(response.data.message), {
-              timeout: 7000,
-              position: 'top-center'
-            })
-          }, 1000)
-        }
-
         this.resetFlow()
       } catch (error) {
         const errorData = error.response?.data
