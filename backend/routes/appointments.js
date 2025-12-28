@@ -754,9 +754,9 @@ router.post('/validate-slot', async (req, res) => {
     }
 
     const normalizedDate = normalizeDate(date);
-    const today = normalizeDate(new Date());
+    const today = getGermanToday();
     
-    // Prevent validation for past dates
+    // Prevent validation for past dates (using German timezone)
     if (normalizedDate < today) {
       return res.json({ 
         available: false,
