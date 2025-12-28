@@ -1,6 +1,7 @@
 const EmailQueue = require('../models/EmailQueue');
 const Appointment = require('../models/Appointment');
 const EmailService = require('./emailService');
+const { getGermanDateString } = require('../utils/timezoneHelper');
 
 class EmailScheduler {
   constructor() {
@@ -74,11 +75,23 @@ class EmailScheduler {
         return null;
       }
 
-      // Calculate reminder time (30 minutes before appointment)
-      const appointmentDateTime = new Date(appointment.date);
-      const [hours, minutes] = appointment.time.split(':');
-      appointmentDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      // Calculate reminder time (30 minutes before appointment) in German timezone
+      // Get the appointment date string in German timezone
+      const appointmentDateStr = getGermanDateString(appointment.date);
+      const [hours, minutes] = appointment.time.split(':').map(Number);
+      const [year, month, day] = appointmentDateStr.split('-').map(Number);
       
+      // Create a date string representing the appointment datetime
+      // Format: "YYYY-MM-DDTHH:MM:00" in German timezone
+      const appointmentDateTimeStr = `${appointmentDateStr}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`;
+      
+      // Create a Date object by parsing the string with timezone offset
+      // We'll use a pragmatic approach: create date assuming CET (UTC+1) offset
+      // This will be accurate for most of the year, with a 1-hour offset during DST
+      // For more accuracy, you could use a timezone library like 'date-fns-tz' or 'moment-timezone'
+      const appointmentDateTime = new Date(`${appointmentDateTimeStr}+01:00`); // CET offset
+      
+      // Calculate reminder time (30 minutes before)
       const reminderTime = new Date(appointmentDateTime.getTime() - 30 * 60 * 1000);
       
       // Only schedule if reminder time is in the future

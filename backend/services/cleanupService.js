@@ -1,5 +1,6 @@
 const Appointment = require('../models/Appointment');
 const cron = require('node-cron');
+const { getGermanToday } = require('../utils/timezoneHelper');
 
 class CleanupService {
   constructor() {
@@ -12,7 +13,8 @@ class CleanupService {
     if (this.isRunning) return;
     
     this.isRunning = true;
-    console.log('🧹 Cleanup Service started - Daily cleanup at midnight German time');
+    console.log('🧹 Cleanup Service started - Daily cleanup at midnight German time (CET/CEST)');
+    console.log('   Will delete all appointments from previous days (regardless of status)');
     
     // Run daily at midnight German time (0 0 * * *)
     cron.schedule('0 0 * * *', () => {
@@ -24,20 +26,18 @@ class CleanupService {
 
   async cleanupOldAppointments() {
     try {
-      console.log('🧹 Starting daily cleanup of old appointments...');
+      console.log('🧹 Starting daily cleanup of old appointments at midnight German time...');
       
-      // Get yesterday's date in German timezone
-      const now = new Date();
-      const germanTime = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Berlin"}));
-      const yesterday = new Date(germanTime);
-      yesterday.setDate(yesterday.getDate() - 1);
-      yesterday.setHours(23, 59, 59, 999);
+      // Get today's date at midnight in German timezone
+      // Delete all appointments from previous days (before today)
+      const today = getGermanToday();
 
       const result = await Appointment.deleteMany({
-        date: { $lt: yesterday }
+        date: { $lt: today } // Delete all appointments before today (any status)
       });
 
-      console.log(`✅ Cleanup completed: ${result.deletedCount} old appointments deleted`);
+      console.log(`✅ Cleanup completed: ${result.deletedCount} previous day appointments deleted`);
+      console.log(`   Deleted all appointments before ${today.toISOString().split('T')[0]} (German time)`);
       this.retryAttempts = 0; // Reset retry counter on success
       
     } catch (error) {

@@ -6,6 +6,7 @@ const TimeSlot = require('../models/TimeSlot');
 const Customer = require('../models/Customer');
 const EmailService = require('../services/emailService');
 const emailScheduler = require('../services/emailScheduler');
+const { normalizeDateToGerman, getGermanToday, isBeforeToday } = require('../utils/timezoneHelper');
 
 const timeStringToMinutes = (timeStr) => {
   const [hours, minutes] = timeStr.split(':').map(Number);
@@ -18,11 +19,8 @@ const minutesToTimeString = (minutes) => {
   return `${hrs}:${mins}`;
 };
 
-const normalizeDate = (dateString) => {
-  const date = new Date(dateString);
-  date.setHours(0, 0, 0, 0);
-  return date;
-};
+// Use German timezone for all date normalization
+const normalizeDate = normalizeDateToGerman;
 
 const upsertCustomerFromAppointment = async ({ name, phone, email, notes, marketingOptIn, appointmentDate }) => {
   if (!phone || !name) return null;
@@ -118,9 +116,9 @@ router.get('/availability', async (req, res) => {
     }
 
     const normalizedDate = normalizeDate(date);
-    const today = normalizeDate(new Date());
+    const today = getGermanToday();
     
-    // Prevent booking for past dates
+    // Prevent booking for past dates (using German timezone)
     if (normalizedDate < today) {
       return res.status(400).json({ message: 'Cannot check availability for past dates' });
     }
@@ -204,9 +202,9 @@ router.post('/', async (req, res) => {
     }
 
     const normalizedDate = normalizeDate(date);
-    const today = normalizeDate(new Date());
+    const today = getGermanToday();
     
-    // Prevent booking for past dates
+    // Prevent booking for past dates (using German timezone)
     if (normalizedDate < today) {
       return res.status(400).json({ message: 'Cannot book appointments for past dates' });
     }

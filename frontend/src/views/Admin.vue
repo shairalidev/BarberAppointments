@@ -1326,7 +1326,8 @@ export default {
 async updateAppointmentStatus(appointment, newStatus) {
       try {
         await axios.put(`${process.env.VUE_APP_API_URL}/appointments/${appointment._id}`, {
-          status: newStatus
+          status: newStatus,
+          sendEmail: true // Always send emails when status changes (confirmation, completion, cancellation)
         })
         await this.fetchAppointments()
       } catch (error) {
