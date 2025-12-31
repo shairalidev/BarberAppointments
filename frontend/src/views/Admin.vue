@@ -3688,6 +3688,57 @@ async setReminder(appointment) {
   color: #1e293b;
 }
 
+/* Dark mode styles for calendar */
+.dark-theme .enhanced-date-picker {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.dark-theme .date-picker-header {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .date-picker-header h6 {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .weekday-header {
+  color: var(--text-secondary);
+}
+
+.dark-theme .calendar-day-cell {
+  background: var(--bg-tertiary);
+  border-color: var(--border-color);
+}
+
+.dark-theme .calendar-day-cell:hover:not(.past):not(.other-month) {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: var(--primary);
+}
+
+.dark-theme .calendar-day-cell.today {
+  background: rgba(59, 130, 246, 0.3);
+  border-color: var(--primary);
+}
+
+.dark-theme .calendar-day-cell.today .day-number {
+  color: var(--text-primary);
+}
+
+.dark-theme .calendar-day-cell.past {
+  background: var(--bg-primary);
+  opacity: 0.5;
+}
+
+.dark-theme .day-number {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .calendar-day-cell.other-month .day-number {
+  color: var(--text-muted);
+}
+
 .selected-date-display {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
