@@ -860,6 +860,193 @@ class EmailService {
   static async sendBarberReminder(appointment, barber) {
     return this.send30MinReminderToBarber(appointment, barber);
   }
+
+  // Time change notification to customer
+  static async sendTimeChangeToCustomer(appointment, barber, oldTime, message) {
+    if (!appointment.customerEmail) return;
+
+    const subject = 'Terminzeit geändert - Ates Barberos';
+    const text = this.buildPlainText([
+      `Hallo ${appointment.customerName}!`,
+      'Ihre Terminzeit wurde geändert.',
+      `Alte Zeit: ${oldTime}`,
+      `Neue Zeit: ${appointment.time}`,
+      `Datum: ${this.formatDateTime(appointment.date, appointment.time).split(' um ')[0]}`,
+      message ? `Nachricht: "${message}"` : '',
+      'Bitte beachten Sie die neue Zeit für Ihren Termin.',
+      'Adresse: Bahnhofstraße 3, 6410 Telfs'
+    ]);
+
+    const emailHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Terminzeit geändert - Ates Barberos</title>
+      <style>
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; background-color: #f8fafc; }
+        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 30px; text-align: center; }
+        .content { padding: 30px; }
+        .change-card { background: #eff6ff; border-radius: 12px; padding: 20px; margin: 20px 0; border-left: 4px solid #3b82f6; }
+        .detail { display: flex; justify-content: space-between; margin: 10px 0; padding: 8px 0; border-bottom: 1px solid #dbeafe; }
+        .time-change { background: #fef3c7; color: #92400e; padding: 12px; border-radius: 8px; margin: 15px 0; text-align: center; }
+        .old-time { text-decoration: line-through; color: #dc2626; }
+        .new-time { font-weight: 700; color: #059669; font-size: 1.1em; }
+        .message-box { background: #f0fdf4; border-left: 4px solid #10b981; padding: 15px; margin: 20px 0; }
+        .footer { background: #f8fafc; padding: 20px; text-align: center; color: #6b7280; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>Terminzeit geändert</h1>
+          <p>Ates Barberos</p>
+        </div>
+        <div class="content">
+          <h2>Hallo ${appointment.customerName}!</h2>
+          <p>Ihre Terminzeit wurde geändert. Bitte beachten Sie die neue Zeit für Ihren Termin.</p>
+          
+          <div class="change-card">
+            <h3>Zeitänderung</h3>
+            <div class="time-change">
+              <div style="margin-bottom: 8px;">
+                <span class="old-time">Alte Zeit: ${oldTime}</span>
+              </div>
+              <div>
+                <span class="new-time">Neue Zeit: ${appointment.time}</span>
+              </div>
+            </div>
+            <div class="detail">
+              <span><strong>Datum:</strong></span>
+              <span>${new Date(appointment.date).toLocaleDateString('de-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+            </div>
+            <div class="detail">
+              <span><strong>Dienstleistungen:</strong></span>
+              <span>${appointment.services?.map(s => s.name).join(', ')}</span>
+            </div>
+            <div class="detail">
+              <span><strong>Ihr Friseur:</strong></span>
+              <span>${barber?.name || 'Professioneller Friseur'}</span>
+            </div>
+          </div>
+          
+          ${message ? `<div class="message-box"><p style="margin: 0; color: #166534;"><strong>Nachricht:</strong> "${message}"</p></div>` : ''}
+          
+          <p><strong>Wichtig:</strong> Bitte kommen Sie zur neuen Zeit. Sie erhalten 30 Minuten vor Ihrem Termin eine Erinnerung.</p>
+        </div>
+        <div class="footer">
+          <p><strong>Ates Barberos</strong> - Professionelle Friseurdienstleistungen</p>
+          <p>Bahnhofstraße 3, 6410 Telfs | https://ates-barberos.com</p>
+        </div>
+      </div>
+    </body>
+    </html>`;
+
+    await this.dispatchEmail({
+      to: appointment.customerEmail,
+      subject,
+      html: emailHtml,
+      text
+    });
+  }
+
+  // Time change notification to barber
+  static async sendTimeChangeToBarber(appointment, barber, oldTime, message) {
+    if (!barber?.email) return;
+
+    const subject = 'Terminzeit geändert - Ihr Terminplan wurde aktualisiert';
+    const text = this.buildPlainText([
+      `Hallo ${barber.name}!`,
+      'Sie haben die Terminzeit für einen Termin geändert.',
+      `Kunde: ${appointment.customerName}`,
+      `Alte Zeit: ${oldTime}`,
+      `Neue Zeit: ${appointment.time}`,
+      `Datum: ${this.formatDateTime(appointment.date, appointment.time).split(' um ')[0]}`,
+      `Dienstleistungen: ${appointment.services?.map(s => s.name).join(', ')}`,
+      message ? `Ihre Nachricht: "${message}"` : '',
+      'Der Kunde wurde über die Änderung informiert.'
+    ]);
+
+    const emailHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Terminzeit geändert - Ates Barberos Admin</title>
+      <style>
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; background-color: #f8fafc; }
+        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 30px; text-align: center; }
+        .content { padding: 30px; }
+        .change-card { background: #eff6ff; border-radius: 12px; padding: 20px; margin: 20px 0; border-left: 4px solid #3b82f6; }
+        .detail { display: flex; justify-content: space-between; margin: 10px 0; padding: 8px 0; border-bottom: 1px solid #dbeafe; }
+        .time-change { background: #fef3c7; color: #92400e; padding: 12px; border-radius: 8px; margin: 15px 0; text-align: center; }
+        .old-time { text-decoration: line-through; color: #dc2626; }
+        .new-time { font-weight: 700; color: #059669; font-size: 1.1em; }
+        .message-box { background: #f0fdf4; border-left: 4px solid #10b981; padding: 15px; margin: 20px 0; }
+        .footer { background: #f8fafc; padding: 20px; text-align: center; color: #6b7280; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>Terminzeit geändert</h1>
+          <p>Ates Barberos Admin</p>
+        </div>
+        <div class="content">
+          <h2>Hallo ${barber.name}!</h2>
+          <p>Sie haben die Terminzeit für einen Termin geändert. Der Kunde wurde über die Änderung informiert.</p>
+          
+          <div class="change-card">
+            <h3>Zeitänderung</h3>
+            <div class="time-change">
+              <div style="margin-bottom: 8px;">
+                <span class="old-time">Alte Zeit: ${oldTime}</span>
+              </div>
+              <div>
+                <span class="new-time">Neue Zeit: ${appointment.time}</span>
+              </div>
+            </div>
+            <div class="detail">
+              <span><strong>Kunde:</strong></span>
+              <span>${appointment.customerName}</span>
+            </div>
+            <div class="detail">
+              <span><strong>Telefon:</strong></span>
+              <span>${appointment.customerPhone}</span>
+            </div>
+            <div class="detail">
+              <span><strong>Datum:</strong></span>
+              <span>${new Date(appointment.date).toLocaleDateString('de-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+            </div>
+            <div class="detail">
+              <span><strong>Dienstleistungen:</strong></span>
+              <span>${appointment.services?.map(s => s.name).join(', ')}</span>
+            </div>
+            <div class="detail">
+              <span><strong>Dauer:</strong></span>
+              <span>${appointment.totalDuration} Minuten</span>
+            </div>
+          </div>
+          
+          ${message ? `<div class="message-box"><p style="margin: 0; color: #166534;"><strong>Ihre Nachricht:</strong> "${message}"</p></div>` : ''}
+        </div>
+        <div class="footer">
+          <p><strong>Ates Barberos</strong> - Professionelle Friseurdienstleistungen</p>
+          <p>Bahnhofstraße 3, 6410 Telfs | https://ates-barberos.com</p>
+        </div>
+      </div>
+    </body>
+    </html>`;
+
+    await this.dispatchEmail({
+      to: barber.email,
+      subject,
+      html: emailHtml,
+      text
+    });
+  }
 }
 
 module.exports = EmailService;

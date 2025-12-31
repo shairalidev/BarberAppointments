@@ -1,7 +1,7 @@
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-const currentLocale = ref(localStorage.getItem('locale') || 'en')
+const currentLocale = ref(localStorage.getItem('locale') || 'de')
 
 export function useLanguage() {
   const { locale } = useI18n()
@@ -13,7 +13,7 @@ export function useLanguage() {
   }
 
   const toggleLanguage = () => {
-    const newLang = currentLocale.value === 'en' ? 'de' : 'en'
+    const newLang = currentLocale.value === 'de' ? 'en' : 'de'
     setLanguage(newLang)
   }
 

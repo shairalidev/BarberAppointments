@@ -167,8 +167,8 @@
                   <input v-model="customer.phone" type="tel" class="form-control" required>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">{{ $t('booking.email') }}</label>
-                  <input v-model="customer.email" type="email" class="form-control" :placeholder="$t('booking.youAtExample')">
+                  <label class="form-label">{{ $t('booking.email') }} *</label>
+                  <input v-model="customer.email" type="email" class="form-control" :placeholder="$t('booking.youAtExample')" required>
                 </div>
                 <div class="col-12">
                   <label class="form-label">{{ $t('booking.specialRequests') }}</label>
@@ -608,7 +608,7 @@ export default {
           }
         })
 
-        this.toast.success(this.$t('toast.bookingRequestSuccess'), {
+        this.toast.success(this.$t('toast.bookingSuccess'), {
           timeout: 5000,
           position: 'top-center'
         })
@@ -667,7 +667,7 @@ export default {
       }
     },
     formatCurrency(value) {
-      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(value)
+      return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(value)
     },
     formatDate(value) {
       return new Date(value).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })

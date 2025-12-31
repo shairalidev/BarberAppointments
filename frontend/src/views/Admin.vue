@@ -217,6 +217,9 @@
                           <div class="appointment-time-mobile">
                             <i class="fas fa-clock text-primary me-1"></i>
                             <span class="fw-bold">{{ apt.time }}</span>
+                            <button v-if="apt.status === 'confirmed' || apt.status === 'pending'" @click="openEditTimeModal(apt)" class="btn btn-sm btn-link p-0 ms-2" title="Edit time">
+                              <i class="fas fa-edit text-primary"></i>
+                            </button>
                           </div>
                           <span :class="getStatusBadgeClass(apt.status)">{{ apt.status }}</span>
                         </div>
@@ -228,7 +231,7 @@
                             <i class="fas fa-cut me-2 text-muted"></i>{{ apt.services?.map(s => s.name).join(', ') }}
                           </p>
                           <div class="appointment-meta d-flex justify-content-between mb-2">
-                            <span class="price"><i class="fas fa-dollar-sign me-1"></i>${{ apt.totalPrice }}</span>
+                            <span class="price"><i class="fas fa-euro-sign me-1"></i>{{ formatCurrency(apt.totalPrice) }}</span>
                             <span class="duration"><i class="fas fa-hourglass-half me-1"></i>{{ apt.totalDuration }}min</span>
                           </div>
                           <div v-if="apt.customerPhone" class="contact-info mb-2">
@@ -375,7 +378,7 @@
                         <div class="col-12 col-lg-4">
                           <div class="request-actions text-center text-lg-end">
                             <div class="price-display mb-3">
-                              <h4 class="text-primary mb-0">${{ apt.totalPrice }}</h4>
+                              <h4 class="text-primary mb-0">{{ formatCurrency(apt.totalPrice) }}</h4>
                               <small class="text-muted">{{ $t('admin.totalAmount') }}</small>
                             </div>
                             <div class="action-buttons d-grid gap-2">
@@ -459,7 +462,7 @@
                     <div class="card-body p-3">
                       <div class="d-flex justify-content-between align-items-start mb-2">
                         <h6 class="mb-0 fw-bold">{{ service.name }}</h6>
-                        <span class="badge bg-primary">${{ service.price }}</span>
+                        <span class="badge bg-primary">{{ formatCurrency(service.price) }}</span>
                       </div>
                       <div class="service-details mb-3">
                         <div class="d-flex justify-content-between text-muted small mb-1">
@@ -496,7 +499,7 @@
                         <tr v-for="service in services" :key="service._id">
                           <td class="fw-medium">{{ service.name }}</td>
                           <td>{{ service.duration }} {{ $t('admin.minutes') }}</td>
-                          <td class="fw-bold text-success">${{ service.price }}</td>
+                          <td class="fw-bold text-success">{{ formatCurrency(service.price) }}</td>
                           <td class="text-muted">{{ service.description || $t('admin.noDescription') }}</td>
                           <td class="text-center">
                             <div class="btn-group" role="group">
@@ -776,16 +779,75 @@
           <div class="modal-body">
             <form @submit.prevent="quickBookAppointment">
               <div class="row g-3">
-                <div class="col-md-6">
-                  <label class="form-label">{{ $t('booking.date') }}</label>
-                  <input v-model="bookingForm.date" type="date" class="form-control" :min="todayDate" required>
+                <!-- Enhanced Date Picker -->
+                <div class="col-12">
+                  <label class="form-label fw-semibold mb-3">
+                    <i class="fas fa-calendar-alt me-2 text-primary"></i>{{ $t('booking.date') }}
+                  </label>
+                  <div class="enhanced-date-picker">
+                    <!-- Month Navigation -->
+                    <div class="date-picker-header d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
+                      <button 
+                        type="button"
+                        @click="changeBookingMonth(-1)" 
+                        class="btn btn-sm btn-outline-primary"
+                        :disabled="isBookingMonthMin"
+                      >
+                        <i class="fas fa-chevron-left"></i>
+                      </button>
+                      <h6 class="mb-0 fw-bold text-primary">
+                        {{ getBookingMonthYear }}
+                      </h6>
+                      <button 
+                        type="button"
+                        @click="changeBookingMonth(1)" 
+                        class="btn btn-sm btn-outline-primary"
+                      >
+                        <i class="fas fa-chevron-right"></i>
+                      </button>
+                    </div>
+                    
+                    <!-- Calendar Grid -->
+                    <div class="calendar-grid-enhanced">
+                      <div class="calendar-weekdays">
+                        <div v-for="day in ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']" :key="day" class="weekday-header">
+                          {{ day }}
+                        </div>
+                      </div>
+                      <div class="calendar-days">
+                        <div 
+                          v-for="day in bookingCalendarDays" 
+                          :key="day.date"
+                          @click="selectBookingDate(day.date)"
+                          :class="['calendar-day-cell', {
+                            'other-month': !day.isCurrentMonth,
+                            'today': day.isToday,
+                            'selected': day.date === bookingForm.date,
+                            'past': day.isPast
+                          }]"
+                        >
+                          <span class="day-number">{{ day.dayNumber }}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Selected Date Display -->
+                    <div v-if="bookingForm.date" class="selected-date-display mt-3 p-3 bg-primary text-white rounded text-center">
+                      <i class="fas fa-check-circle me-2"></i>
+                      <strong>{{ formatBookingSelectedDate }}</strong>
+                    </div>
+                  </div>
                 </div>
-                <div class="col-md-6">
-                  <label class="form-label">{{ $t('admin.service') }}</label>
-                  <select v-model="bookingForm.serviceId" @change="updateBookingPrice" class="form-select" required>
+                
+                <!-- Service Selection -->
+                <div class="col-12">
+                  <label class="form-label fw-semibold">
+                    <i class="fas fa-cut me-2 text-primary"></i>{{ $t('admin.service') }}
+                  </label>
+                  <select v-model="bookingForm.serviceId" @change="updateBookingPrice" class="form-select form-select-lg" required>
                     <option value="">{{ $t('admin.selectService') }}</option>
                     <option v-for="service in services" :key="service._id" :value="service._id">
-                      {{ service.name }} - ${{ service.price }}
+                      {{ service.name }} - {{ formatCurrency(service.price) }}
                     </option>
                   </select>
                 </div>
@@ -870,12 +932,12 @@
                   <input v-model="bookingForm.customerPhone" type="tel" class="form-control" required>
                 </div>
                 <div class="col-12">
-                  <label class="form-label">{{ $t('admin.emailOptional') }}</label>
-                  <input v-model="bookingForm.customerEmail" type="email" class="form-control">
+                  <label class="form-label">{{ $t('admin.email') }} *</label>
+                  <input v-model="bookingForm.customerEmail" type="email" class="form-control" required>
                 </div>
                 <div class="col-12" v-if="bookingForm.totalPrice">
                   <div class="alert alert-success">
-                    <strong><i class="fas fa-dollar-sign me-1"></i>{{ $t('admin.totalAmount') }}: ${{ bookingForm.totalPrice }}</strong>
+                    <strong><i class="fas fa-euro-sign me-1"></i>{{ $t('admin.totalAmount') }}: {{ formatCurrency(bookingForm.totalPrice) }}</strong>
                   </div>
                 </div>
               </div>
@@ -1002,6 +1064,60 @@
         </div>
       </div>
     </div>
+
+    <!-- Edit Time Modal -->
+    <div v-if="editTimeModal.show" class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" @click.self="closeEditTimeModal">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-gradient-primary text-white">
+            <h5 class="modal-title">
+              <i class="fas fa-clock me-2"></i>Edit Appointment Time
+            </h5>
+            <button @click="closeEditTimeModal" class="btn-close btn-close-white"></button>
+          </div>
+          <div class="modal-body">
+            <div v-if="editTimeModal.appointment" class="mb-3">
+              <p class="mb-1"><strong>Customer:</strong> {{ editTimeModal.appointment.customerName }}</p>
+              <p class="mb-1"><strong>Current Time:</strong> {{ editTimeModal.appointment.time }}</p>
+              <p class="mb-0"><strong>Date:</strong> {{ new Date(editTimeModal.appointment.date).toLocaleDateString() }}</p>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Select New Time</label>
+              <div v-if="editTimeModal.availableTimes.length" class="time-slots-grid">
+                <button 
+                  v-for="slot in editTimeModal.availableTimes" 
+                  :key="slot"
+                  type="button"
+                  @click="editTimeModal.newTime = slot"
+                  :class="['btn', 'btn-sm', editTimeModal.newTime === slot ? 'btn-primary' : 'btn-outline-primary']"
+                >
+                  {{ slot }}
+                </button>
+              </div>
+              <div v-else class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>Loading available time slots...
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Message (Optional)</label>
+              <textarea 
+                v-model="editTimeModal.message" 
+                class="form-control" 
+                rows="3" 
+                placeholder="Add a note about the time change (this will be included in the email notification)"
+              ></textarea>
+              <small class="text-muted">This message will be sent to both the customer and barber via email.</small>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button @click="closeEditTimeModal" class="btn btn-secondary">{{ $t('common.cancel') }}</button>
+            <button @click="updateAppointmentTime" class="btn btn-primary" :disabled="!editTimeModal.newTime">
+              <i class="fas fa-save me-2"></i>Update Time
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -1107,7 +1223,16 @@ export default {
         marketingOptIn: true
       },
       bookingCustomerSearch: '',
-      showCustomerDropdown: false
+      showCustomerDropdown: false,
+      editTimeModal: {
+        show: false,
+        appointment: null,
+        newTime: '',
+        availableTimes: [],
+        message: ''
+      },
+      bookingCalendarMonth: new Date().getMonth(),
+      bookingCalendarYear: new Date().getFullYear()
     }
   },
   computed: {
@@ -1181,6 +1306,76 @@ export default {
         const today = new Date().toISOString().split('T')[0]
         // Only show today and future appointments
         return aptDate === this.selectedCalendarDate && aptDate >= today
+      })
+    },
+    getBookingMonthYear() {
+      const date = new Date(this.bookingCalendarYear, this.bookingCalendarMonth)
+      return date.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })
+    },
+    isBookingMonthMin() {
+      const today = new Date()
+      return this.bookingCalendarYear === today.getFullYear() && this.bookingCalendarMonth === today.getMonth()
+    },
+    bookingCalendarDays() {
+      const firstDay = new Date(this.bookingCalendarYear, this.bookingCalendarMonth, 1)
+      const lastDay = new Date(this.bookingCalendarYear, this.bookingCalendarMonth + 1, 0)
+      const prevLastDay = new Date(this.bookingCalendarYear, this.bookingCalendarMonth, 0)
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      
+      const days = []
+      const startDay = firstDay.getDay()
+      const adjustedStartDay = startDay === 0 ? 6 : startDay - 1 // Monday = 0
+      
+      // Previous month days
+      for (let i = adjustedStartDay - 1; i >= 0; i--) {
+        const date = new Date(this.bookingCalendarYear, this.bookingCalendarMonth - 1, prevLastDay.getDate() - i)
+        days.push({
+          date: date.toISOString().split('T')[0],
+          dayNumber: date.getDate(),
+          isCurrentMonth: false,
+          isToday: this.isSameDay(date, today),
+          isPast: date < today
+        })
+      }
+      
+      // Current month days
+      for (let i = 1; i <= lastDay.getDate(); i++) {
+        const date = new Date(this.bookingCalendarYear, this.bookingCalendarMonth, i)
+        days.push({
+          date: date.toISOString().split('T')[0],
+          dayNumber: i,
+          isCurrentMonth: true,
+          isToday: this.isSameDay(date, today),
+          isPast: date < today
+        })
+      }
+      
+      // Next month days to fill the grid
+      const totalSlots = Math.ceil(days.length / 7) * 7
+      const nextMonthStart = new Date(this.bookingCalendarYear, this.bookingCalendarMonth + 1, 1)
+      while (days.length < totalSlots) {
+        const date = new Date(nextMonthStart)
+        date.setDate(nextMonthStart.getDate() + (days.length - (adjustedStartDay + lastDay.getDate())))
+        days.push({
+          date: date.toISOString().split('T')[0],
+          dayNumber: date.getDate(),
+          isCurrentMonth: false,
+          isToday: this.isSameDay(date, today),
+          isPast: date < today
+        })
+      }
+      
+      return days
+    },
+    formatBookingSelectedDate() {
+      if (!this.bookingForm.date) return ''
+      const date = new Date(this.bookingForm.date)
+      return date.toLocaleDateString('de-DE', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
       })
     },
     formatSelectedDate() {
@@ -1341,6 +1536,11 @@ async quickBookAppointment() {
           return
         }
         
+        if (!this.bookingForm.customerEmail) {
+          this.showToast(this.$t('toast.emailRequired'), 'warning')
+          return
+        }
+        
         // Prevent booking for past dates
         const selectedDate = new Date(this.bookingForm.date)
         const today = new Date()
@@ -1378,9 +1578,10 @@ async quickBookAppointment() {
       }
     },
     resetBookingForm() {
-      const today = new Date().toISOString().split('T')[0]
+      const today = new Date()
+      const todayStr = today.toISOString().split('T')[0]
       this.bookingForm = {
-        date: today,
+        date: todayStr,
         serviceId: '',
         time: '',
         customerName: '',
@@ -1389,7 +1590,9 @@ async quickBookAppointment() {
         customerId: '',
         totalPrice: 0
       }
-      this.todayDate = today
+      this.bookingCalendarMonth = today.getMonth()
+      this.bookingCalendarYear = today.getFullYear()
+      this.todayDate = todayStr
       this.availableSlots = []
       this.bookingCustomerSearch = ''
       this.showCustomerDropdown = false
@@ -1397,6 +1600,9 @@ async quickBookAppointment() {
     updateBookingPrice() {
       const service = this.services.find(s => s._id === this.bookingForm.serviceId)
       this.bookingForm.totalPrice = service ? service.price : 0
+    },
+    formatCurrency(value) {
+      return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(value)
     },
     async fetchAvailableSlots() {
       if (!this.bookingForm.date || !this.bookingForm.serviceId || !this.primaryBarber) {
@@ -1427,6 +1633,106 @@ async quickBookAppointment() {
         this.updateBookingPrice()
         this.fetchAvailableSlots()
       })
+    },
+    async openEditTimeModal(appointment) {
+      this.editTimeModal.appointment = appointment
+      this.editTimeModal.newTime = appointment.time
+      this.editTimeModal.message = ''
+      this.editTimeModal.show = true
+      this.editTimeModal.availableTimes = []
+      
+      // Fetch available time slots for this appointment
+      try {
+        const appointmentDate = appointment.date.split('T')[0]
+        const barberId = appointment.barberId?._id || appointment.barberId
+        const duration = appointment.totalDuration || 30
+        
+        const response = await axios.get(`${process.env.VUE_APP_API_URL}/appointments/availability`, {
+          params: {
+            barberId: barberId,
+            date: appointmentDate,
+            duration: duration
+          }
+        })
+        
+        this.editTimeModal.availableTimes = response.data.availableTimes || []
+        // Include current time if not in available times (for editing same appointment)
+        if (!this.editTimeModal.availableTimes.includes(appointment.time)) {
+          this.editTimeModal.availableTimes.push(appointment.time)
+          this.editTimeModal.availableTimes.sort()
+        }
+      } catch (error) {
+        console.error('Error fetching available slots:', error)
+        this.showToast('Error loading available time slots', 'error')
+      }
+    },
+    closeEditTimeModal() {
+      this.editTimeModal.show = false
+      this.editTimeModal.appointment = null
+      this.editTimeModal.newTime = ''
+      this.editTimeModal.message = ''
+      this.editTimeModal.availableTimes = []
+    },
+    async updateAppointmentTime() {
+      if (!this.editTimeModal.appointment || !this.editTimeModal.newTime) {
+        return
+      }
+      
+      // Don't update if time hasn't changed
+      if (this.editTimeModal.newTime === this.editTimeModal.appointment.time) {
+        this.closeEditTimeModal()
+        return
+      }
+      
+      try {
+        await axios.put(`${process.env.VUE_APP_API_URL}/appointments/${this.editTimeModal.appointment._id}`, {
+          time: this.editTimeModal.newTime,
+          timeChangeMessage: this.editTimeModal.message,
+          sendEmail: true
+        })
+        
+        await this.fetchAppointments()
+        this.closeEditTimeModal()
+        this.showToast('Appointment time updated successfully', 'success')
+      } catch (error) {
+        console.error('Error updating appointment time:', error)
+        const errorMessage = error.response?.data?.message || 'Failed to update appointment time'
+        this.showToast(errorMessage, 'error')
+        
+        // If there are available times in the error, update the modal
+        if (error.response?.data?.availableTimes) {
+          this.editTimeModal.availableTimes = error.response.data.availableTimes
+        }
+      }
+    },
+    changeBookingMonth(direction) {
+      this.bookingCalendarMonth += direction
+      if (this.bookingCalendarMonth < 0) {
+        this.bookingCalendarMonth = 11
+        this.bookingCalendarYear--
+      } else if (this.bookingCalendarMonth > 11) {
+        this.bookingCalendarMonth = 0
+        this.bookingCalendarYear++
+      }
+    },
+    selectBookingDate(date) {
+      const selectedDate = new Date(date)
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      selectedDate.setHours(0, 0, 0, 0)
+      
+      // Don't allow past dates
+      if (selectedDate < today) {
+        return
+      }
+      
+      this.bookingForm.date = date
+      this.fetchAvailableSlots()
+    },
+    isSameDay(date1, date2) {
+      return date1.getFullYear() === date2.getFullYear() &&
+             date1.getMonth() === date2.getMonth() &&
+             date1.getDate() === date2.getDate()
     },
 async addTimeSlot(dayIndex) {
       if (!this.primaryBarber || !this.newSlot[dayIndex].startTime || !this.newSlot[dayIndex].endTime) {
@@ -3272,6 +3578,153 @@ async setReminder(appointment) {
   to {
     transform: translateX(0);
     opacity: 1;
+  }
+}
+
+/* Enhanced Date Picker Styles */
+.enhanced-date-picker {
+  background: white;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.date-picker-header {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
+  border: 1px solid #e2e8f0;
+}
+
+.calendar-grid-enhanced {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 1rem;
+}
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.weekday-header {
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #64748b;
+  padding: 8px 4px;
+  text-transform: uppercase;
+}
+
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendar-day-cell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+  background: #f8fafc;
+  position: relative;
+}
+
+.calendar-day-cell:hover:not(.past):not(.other-month) {
+  background: #e0f2fe;
+  border-color: #0ea5e9;
+  transform: scale(1.05);
+}
+
+.calendar-day-cell.today {
+  background: #dbeafe;
+  border-color: #3b82f6;
+  font-weight: 700;
+}
+
+.calendar-day-cell.today .day-number {
+  color: #1e40af;
+}
+
+.calendar-day-cell.selected {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border-color: #1e40af;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  transform: scale(1.1);
+  z-index: 1;
+}
+
+.calendar-day-cell.selected .day-number {
+  color: white;
+  font-weight: 700;
+}
+
+.calendar-day-cell.other-month {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.calendar-day-cell.past {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: #f1f5f9;
+}
+
+.calendar-day-cell.past:hover {
+  transform: none;
+  background: #f1f5f9;
+}
+
+.day-number {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.selected-date-display {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .calendar-day-cell {
+    font-size: 0.8rem;
+  }
+  
+  .weekday-header {
+    font-size: 0.75rem;
+    padding: 6px 2px;
+  }
+  
+  .day-number {
+    font-size: 0.85rem;
+  }
+  
+  .date-picker-header {
+    padding: 0.75rem !important;
+  }
+  
+  .date-picker-header h6 {
+    font-size: 0.9rem;
   }
 }
 

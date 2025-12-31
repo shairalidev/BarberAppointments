@@ -194,10 +194,10 @@ router.post('/', async (req, res) => {
       status: requestedStatus
     } = req.body;
 
-    if (!customerName || !customerPhone || !barberId || !services?.length || !date || !time) {
+    if (!customerName || !customerPhone || !customerEmail || !barberId || !services?.length || !date || !time) {
       return res.status(400).json({ 
         message: 'Missing required fields',
-        required: ['customerName', 'customerPhone', 'barberId', 'services', 'date', 'time']
+        required: ['customerName', 'customerPhone', 'customerEmail', 'barberId', 'services', 'date', 'time']
       });
     }
 
@@ -258,7 +258,9 @@ router.post('/', async (req, res) => {
       });
     }
 
-    const initialStatus = requestedStatus === 'confirmed' ? 'confirmed' : 'pending';
+    // Automatically confirm appointments when slot is free
+    // Only use pending if explicitly requested (for admin override scenarios)
+    const initialStatus = requestedStatus === 'pending' ? 'pending' : 'confirmed';
 
     // Ensure customer record exists
     let customer = null;
@@ -432,7 +434,15 @@ router.put('/:id', async (req, res) => {
   console.log('Timestamp:', new Date().toISOString());
   
   try {
-    const { sendEmail, responseMessage, ...update } = req.body;
+    const { sendEmail, responseMessage, timeChangeMessage, ...update } = req.body;
+    
+    // Validate email if it's being updated
+    if (update.customerEmail !== undefined && !update.customerEmail) {
+      return res.status(400).json({ 
+        message: 'Email is required',
+        required: ['customerEmail']
+      });
+    }
     
     // Get the current appointment
     const currentAppointment = await Appointment.findById(req.params.id)
@@ -558,6 +568,44 @@ router.put('/:id', async (req, res) => {
       update.date = normalizeDate(update.date);
     }
 
+    // Validate time update if time is being changed
+    let oldTime = null;
+    if (update.time && update.time !== currentAppointment.time) {
+      oldTime = currentAppointment.time;
+      const appointmentDate = update.date ? normalizeDate(update.date) : currentAppointment.date;
+      const dayOfWeek = appointmentDate.getDay();
+      
+      // Get working hours for the day
+      const timeSlots = await TimeSlot.find({
+        barberId: currentAppointment.barberId._id || currentAppointment.barberId,
+        dayOfWeek,
+        isAvailable: true
+      });
+
+      if (!timeSlots.length) {
+        return res.status(400).json({ message: 'No working hours configured for this day' });
+      }
+
+      // Get all appointments for the day, excluding the current appointment
+      const existingAppointments = await Appointment.find({
+        _id: { $ne: req.params.id }, // Exclude current appointment
+        barberId: currentAppointment.barberId._id || currentAppointment.barberId,
+        date: appointmentDate,
+        status: { $in: ['pending', 'confirmed', 'completed'] }
+      });
+
+      // Check if new time is available
+      const availableTimes = buildDailyAvailability(timeSlots, existingAppointments, currentAppointment.totalDuration);
+      
+      if (!availableTimes.includes(update.time)) {
+        return res.status(409).json({ 
+          message: 'Selected time slot is not available',
+          availableTimes,
+          requestedTime: update.time
+        });
+      }
+    }
+
     // Add response message if provided
     if (responseMessage) {
       update.responseMessage = responseMessage;
@@ -581,6 +629,34 @@ router.put('/:id', async (req, res) => {
       if (syncedCustomer && (!appointment.customer || appointment.customer.toString() !== syncedCustomer._id.toString())) {
         appointment.customer = syncedCustomer._id;
         await appointment.save();
+      }
+    }
+
+    // Send time change emails if time was changed
+    if (oldTime && sendEmail && EmailService.isConfigured()) {
+      try {
+        // Send to customer
+        if (appointment.customerEmail) {
+          await EmailService.sendTimeChangeToCustomer(
+            appointment,
+            appointment.barberId,
+            oldTime,
+            timeChangeMessage || ''
+          );
+        }
+
+        // Send to barber
+        if (appointment.barberId?.email) {
+          await EmailService.sendTimeChangeToBarber(
+            appointment,
+            appointment.barberId,
+            oldTime,
+            timeChangeMessage || ''
+          );
+        }
+      } catch (emailError) {
+        console.error('Failed to send time change emails:', emailError);
+        // Don't fail the update if email fails
       }
     }
     
