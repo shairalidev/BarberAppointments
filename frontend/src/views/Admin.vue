@@ -779,62 +779,71 @@
           <div class="modal-body">
             <form @submit.prevent="quickBookAppointment">
               <div class="row g-3">
-                <!-- Enhanced Date Picker -->
+                <!-- Professional Date Picker -->
                 <div class="col-12">
-                  <label class="form-label fw-semibold mb-3">
-                    <i class="fas fa-calendar-alt me-2 text-primary"></i>{{ $t('booking.date') }}
+                  <label class="form-label fw-semibold mb-3 d-flex align-items-center">
+                    <i class="fas fa-calendar-alt me-2 text-primary"></i>
+                    <span>{{ $t('booking.date') }}</span>
                   </label>
-                  <div class="enhanced-date-picker">
+                  <div class="professional-date-picker">
                     <!-- Month Navigation -->
-                    <div class="date-picker-header d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
+                    <div class="date-picker-header-pro">
                       <button 
                         type="button"
                         @click="changeBookingMonth(-1)" 
-                        class="btn btn-sm btn-outline-primary"
+                        class="month-nav-btn"
                         :disabled="isBookingMonthMin"
+                        :class="{ 'disabled': isBookingMonthMin }"
                       >
                         <i class="fas fa-chevron-left"></i>
                       </button>
-                      <h6 class="mb-0 fw-bold text-primary">
-                        {{ getBookingMonthYear }}
-                      </h6>
+                      <div class="month-year-display">
+                        <div class="month-name">{{ getBookingMonthYear }}</div>
+                        <div class="year-badge">{{ bookingCalendarYear }}</div>
+                      </div>
                       <button 
                         type="button"
                         @click="changeBookingMonth(1)" 
-                        class="btn btn-sm btn-outline-primary"
+                        class="month-nav-btn"
                       >
                         <i class="fas fa-chevron-right"></i>
                       </button>
                     </div>
                     
                     <!-- Calendar Grid -->
-                    <div class="calendar-grid-enhanced">
-                      <div class="calendar-weekdays">
-                        <div v-for="day in ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']" :key="day" class="weekday-header">
+                    <div class="calendar-container-pro">
+                      <div class="weekdays-row">
+                        <div v-for="day in ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']" :key="day" class="weekday-cell-pro">
                           {{ day }}
                         </div>
                       </div>
-                      <div class="calendar-days">
+                      <div class="calendar-grid-pro">
                         <div 
                           v-for="day in bookingCalendarDays" 
                           :key="day.date"
                           @click="selectBookingDate(day.date)"
-                          :class="['calendar-day-cell', {
+                          :class="['day-cell-pro', {
                             'other-month': !day.isCurrentMonth,
                             'today': day.isToday,
                             'selected': day.date === bookingForm.date,
                             'past': day.isPast
                           }]"
                         >
-                          <span class="day-number">{{ day.dayNumber }}</span>
+                          <span class="day-number-pro">{{ day.dayNumber }}</span>
+                          <span v-if="day.isToday && !day.isSelected" class="today-indicator"></span>
                         </div>
                       </div>
                     </div>
                     
                     <!-- Selected Date Display -->
-                    <div v-if="bookingForm.date" class="selected-date-display mt-3 p-3 bg-primary text-white rounded text-center">
-                      <i class="fas fa-check-circle me-2"></i>
-                      <strong>{{ formatBookingSelectedDate }}</strong>
+                    <div v-if="bookingForm.date" class="selected-date-pro">
+                      <div class="selected-date-icon">
+                        <i class="fas fa-check-circle"></i>
+                      </div>
+                      <div class="selected-date-info">
+                        <div class="selected-date-label">Selected Date</div>
+                        <div class="selected-date-value">{{ formatBookingSelectedDate }}</div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -3581,168 +3590,315 @@ async setReminder(appointment) {
   }
 }
 
-/* Enhanced Date Picker Styles */
-.enhanced-date-picker {
+/* Professional Date Picker Styles */
+.professional-date-picker {
   background: white;
-  border-radius: 12px;
-  padding: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.date-picker-header {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
+  border-radius: 16px;
+  padding: 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
   border: 1px solid #e2e8f0;
 }
 
-.calendar-grid-enhanced {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  margin-bottom: 1rem;
-}
-
-.calendar-weekdays {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  margin-bottom: 8px;
-}
-
-.weekday-header {
-  text-align: center;
-  font-weight: 600;
-  font-size: 0.85rem;
-  color: #64748b;
-  padding: 8px 4px;
-  text-transform: uppercase;
-}
-
-.calendar-days {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-}
-
-.calendar-day-cell {
-  aspect-ratio: 1;
+.date-picker-header-pro {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: 2px solid transparent;
-  background: #f8fafc;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
   position: relative;
 }
 
-.calendar-day-cell:hover:not(.past):not(.other-month) {
-  background: #e0f2fe;
-  border-color: #0ea5e9;
-  transform: scale(1.05);
+.month-nav-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
 }
 
-.calendar-day-cell.today {
-  background: #dbeafe;
+.month-nav-btn:hover:not(.disabled) {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.month-nav-btn.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.month-year-display {
+  text-align: center;
+  flex: 1;
+}
+
+.month-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.year-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.25);
+  padding: 4px 12px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.calendar-container-pro {
+  padding: 1.5rem;
+}
+
+.weekdays-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.weekday-cell-pro {
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: #64748b;
+  padding: 10px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.calendar-grid-pro {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.day-cell-pro {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid transparent;
+  background: #f8fafc;
+  position: relative;
+  min-height: 48px;
+}
+
+.day-cell-pro:hover:not(.past):not(.other-month):not(.selected) {
+  background: #e0f2fe;
+  border-color: #3b82f6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.day-cell-pro.today:not(.selected) {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
   border-color: #3b82f6;
   font-weight: 700;
 }
 
-.calendar-day-cell.today .day-number {
+.day-cell-pro.today:not(.selected) .day-number-pro {
   color: #1e40af;
 }
 
-.calendar-day-cell.selected {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+.day-cell-pro.selected {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  border-color: #1e40af;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-  transform: scale(1.1);
-  z-index: 1;
+  border-color: #5a67d8;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+  transform: scale(1.08);
+  z-index: 2;
 }
 
-.calendar-day-cell.selected .day-number {
+.day-cell-pro.selected .day-number-pro {
   color: white;
   font-weight: 700;
+  font-size: 1.1rem;
 }
 
-.calendar-day-cell.other-month {
-  opacity: 0.3;
+.day-cell-pro.other-month {
+  opacity: 0.25;
   cursor: not-allowed;
+  background: transparent;
 }
 
-.calendar-day-cell.past {
-  opacity: 0.4;
+.day-cell-pro.past {
+  opacity: 0.35;
   cursor: not-allowed;
   background: #f1f5f9;
 }
 
-.calendar-day-cell.past:hover {
+.day-cell-pro.past:hover {
   transform: none;
   background: #f1f5f9;
+  box-shadow: none;
 }
 
-.day-number {
-  font-size: 0.9rem;
-  font-weight: 500;
+.day-number-pro {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1e293b;
+  transition: all 0.3s ease;
+}
+
+.today-indicator {
+  position: absolute;
+  bottom: 4px;
+  width: 4px;
+  height: 4px;
+  background: #3b82f6;
+  border-radius: 50%;
+}
+
+.selected-date-pro {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-top: 2px solid #3b82f6;
+  margin-top: 0;
+}
+
+.selected-date-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.25rem;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.selected-date-info {
+  flex: 1;
+}
+
+.selected-date-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.selected-date-value {
+  font-size: 1rem;
+  font-weight: 700;
   color: #1e293b;
 }
 
-/* Dark mode styles for calendar */
-.dark-theme .enhanced-date-picker {
+/* Dark mode styles for professional calendar */
+.dark-theme .professional-date-picker {
   background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
+  border-color: var(--border-color);
 }
 
-.dark-theme .date-picker-header {
-  background: var(--bg-tertiary) !important;
-  border-color: var(--border-color) !important;
+.dark-theme .date-picker-header-pro {
+  background: linear-gradient(135deg, #4c51bf 0%, #553c9a 100%);
 }
 
-.dark-theme .date-picker-header h6 {
-  color: var(--text-primary) !important;
-}
-
-.dark-theme .weekday-header {
+.dark-theme .weekday-cell-pro {
   color: var(--text-secondary);
 }
 
-.dark-theme .calendar-day-cell {
+.dark-theme .day-cell-pro {
   background: var(--bg-tertiary);
   border-color: var(--border-color);
 }
 
-.dark-theme .calendar-day-cell:hover:not(.past):not(.other-month) {
-  background: rgba(59, 130, 246, 0.2);
-  border-color: var(--primary);
+.dark-theme .day-cell-pro:hover:not(.past):not(.other-month):not(.selected) {
+  background: rgba(102, 126, 234, 0.2);
+  border-color: #667eea;
 }
 
-.dark-theme .calendar-day-cell.today {
-  background: rgba(59, 130, 246, 0.3);
-  border-color: var(--primary);
+.dark-theme .day-cell-pro.today:not(.selected) {
+  background: rgba(102, 126, 234, 0.25);
+  border-color: #667eea;
 }
 
-.dark-theme .calendar-day-cell.today .day-number {
+.dark-theme .day-cell-pro.today:not(.selected) .day-number-pro {
   color: var(--text-primary);
 }
 
-.dark-theme .calendar-day-cell.past {
+.dark-theme .day-cell-pro.past {
   background: var(--bg-primary);
-  opacity: 0.5;
+  opacity: 0.4;
 }
 
-.dark-theme .day-number {
+.dark-theme .day-number-pro {
   color: var(--text-primary) !important;
 }
 
-.dark-theme .calendar-day-cell.other-month .day-number {
+.dark-theme .day-cell-pro.other-month .day-number-pro {
   color: var(--text-muted);
 }
 
-.selected-date-display {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-  animation: fadeIn 0.3s ease;
+.dark-theme .selected-date-pro {
+  background: rgba(102, 126, 234, 0.1);
+  border-top-color: #667eea;
+}
+
+.dark-theme .selected-date-value {
+  color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+  .date-picker-header-pro {
+    padding: 1rem;
+  }
+  
+  .month-name {
+    font-size: 1.1rem;
+  }
+  
+  .calendar-container-pro {
+    padding: 1rem;
+  }
+  
+  .day-cell-pro {
+    min-height: 44px;
+  }
+  
+  .day-number-pro {
+    font-size: 0.85rem;
+  }
+  
+  .weekday-cell-pro {
+    font-size: 0.7rem;
+    padding: 8px 0;
+  }
+  
+  .selected-date-pro {
+    padding: 1rem;
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .selected-date-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
 }
 
 @keyframes fadeIn {
