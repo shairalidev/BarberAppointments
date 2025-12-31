@@ -3817,6 +3817,10 @@ async setReminder(appointment) {
   background: linear-gradient(135deg, #4c51bf 0%, #553c9a 100%);
 }
 
+.dark-theme .calendar-container-pro {
+  background: var(--bg-secondary);
+}
+
 .dark-theme .weekday-cell-pro {
   color: var(--text-secondary);
 }
@@ -3837,7 +3841,7 @@ async setReminder(appointment) {
 }
 
 .dark-theme .day-cell-pro.today:not(.selected) .day-number-pro {
-  color: var(--text-primary);
+  color: #ffffff !important;
 }
 
 .dark-theme .day-cell-pro.past {
@@ -3845,12 +3849,16 @@ async setReminder(appointment) {
   opacity: 0.4;
 }
 
+.dark-theme .day-cell-pro.past .day-number-pro {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
 .dark-theme .day-number-pro {
-  color: var(--text-primary) !important;
+  color: #ffffff !important;
 }
 
 .dark-theme .day-cell-pro.other-month .day-number-pro {
-  color: var(--text-muted);
+  color: rgba(255, 255, 255, 0.3) !important;
 }
 
 .dark-theme .selected-date-pro {
@@ -3859,7 +3867,11 @@ async setReminder(appointment) {
 }
 
 .dark-theme .selected-date-value {
-  color: var(--text-primary);
+  color: #ffffff !important;
+}
+
+.dark-theme .selected-date-label {
+  color: rgba(255, 255, 255, 0.7) !important;
 }
 
 @media (max-width: 768px) {
