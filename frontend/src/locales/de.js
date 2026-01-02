@@ -84,7 +84,7 @@ export default {
     dateTime: 'Datum & Uhrzeit'
   },
   admin: {
-    dashboard: 'This is demo update',
+    dashboard: 'this is a demo',
     manageBookings: 'Termine & Buchungen verwalten',
     welcomeBack: 'Willkommen zurück,',
     adminAccount: 'Admin-Konto',
