@@ -84,7 +84,7 @@ export default {
     dateTime: 'Date & time'
   },
   admin: {
-    dashboard: 'BarberPro Dashboard',
+    dashboard: 'this is demo update',
     manageBookings: 'Manage appointments & bookings',
     welcomeBack: 'Welcome back,',
     adminAccount: 'Admin Account',
