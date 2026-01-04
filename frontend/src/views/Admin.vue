@@ -182,7 +182,8 @@
                           'other-month': !day.isCurrentMonth,
                           'today': day.isToday,
                           'selected': day.date === selectedCalendarDate,
-                          'has-bookings': day.hasBookings
+                          'has-bookings': day.hasBookings,
+                          'off-date': day.isOffDate
                         }]"
                       >
                         <span class="day-number">{{ day.dayNumber }}</span>
@@ -742,7 +743,8 @@
                             'other-month': !day.isCurrentMonth,
                             'today': day.isToday,
                             'selected': day.date === bookingForm.date,
-                            'past': day.isPast
+                            'past': day.isPast,
+                            'off-date': day.isOffDate
                           }]"
                         >
                           <span class="day-number-pro">{{ day.dayNumber }}</span>
@@ -1062,6 +1064,96 @@
         </div>
       </div>
     </div>
+
+    <!-- Date Detail Modal -->
+    <div v-if="dateDetailModal.show" class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" @click.self="closeDateDetailModal">
+      <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width: 95%;">
+        <div class="modal-content">
+          <div class="modal-header bg-gradient-primary text-white">
+            <div class="d-flex align-items-center justify-content-between w-100">
+              <div>
+                <h5 class="modal-title mb-0">
+                  <i class="fas fa-calendar-day me-2"></i>{{ formatDateDetailHeader }}
+                </h5>
+                <small class="opacity-75">{{ dateDetailModal.appointments.length }} {{ $t('admin.appointments') }}</small>
+              </div>
+              <div class="d-flex align-items-center gap-3">
+                <div class="form-check form-switch">
+                  <input 
+                    class="form-check-input" 
+                    type="checkbox" 
+                    id="offDateToggle"
+                    :checked="dateDetailModal.isRestricted"
+                    @change="toggleOffDate"
+                    style="width: 3rem; height: 1.5rem; cursor: pointer;"
+                  >
+                  <label class="form-check-label text-white fw-semibold" for="offDateToggle" style="cursor: pointer;">
+                    <i class="fas fa-ban me-1"></i>{{ dateDetailModal.isRestricted ? 'Off Date' : 'Mark as Off Date' }}
+                  </label>
+                </div>
+                <button @click="closeDateDetailModal" class="btn-close btn-close-white"></button>
+              </div>
+            </div>
+          </div>
+          <div class="modal-body p-0" style="max-height: 70vh; overflow-y: auto;">
+            <div v-if="dateDetailModal.loading" class="text-center p-5">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+            <div v-else-if="dateDetailModal.isRestricted" class="text-center p-5">
+              <div class="alert alert-warning mb-0">
+                <i class="fas fa-ban fa-3x mb-3"></i>
+                <h5>This date is marked as an off date</h5>
+                <p class="mb-0">No appointments can be booked for this date.</p>
+              </div>
+            </div>
+            <div v-else class="date-time-schedule">
+              <div class="schedule-header">
+                <div class="time-column-header">Time</div>
+                <div class="slots-column-header">
+                  <div class="half-hour-slot-header">00</div>
+                  <div class="half-hour-slot-header">30</div>
+                </div>
+              </div>
+              <div class="schedule-body">
+                <div 
+                  v-for="hour in timeSlots" 
+                  :key="hour"
+                  class="schedule-row"
+                >
+                  <div class="time-column">
+                    <span class="time-label">{{ hour }}</span>
+                  </div>
+                  <div class="slots-column">
+                    <div 
+                      v-for="(slot, index) in getHalfHourSlots(hour)" 
+                      :key="`${hour}-${index}`"
+                      class="half-hour-slot"
+                      :class="{ 'has-appointment': slot.appointment }"
+                    >
+                      <div v-if="slot.appointment" class="appointment-block" :class="getAppointmentBlockClass(slot.appointment)">
+                        <div class="appointment-content">
+                          <div class="appointment-customer">{{ slot.appointment.customerName }}</div>
+                          <div class="appointment-service">{{ getServiceNames(slot.appointment) }}</div>
+                          <div class="appointment-time">{{ slot.appointment.time }}</div>
+                        </div>
+                      </div>
+                      <div v-else class="empty-slot"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button @click="closeDateDetailModal" class="btn btn-secondary">
+              <i class="fas fa-times me-2"></i>{{ $t('common.close') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -1162,6 +1254,16 @@ export default {
       },
       bookingCustomerSearch: '',
       showCustomerDropdown: false,
+      dateDetailModal: {
+        show: false,
+        date: null,
+        dateString: '',
+        appointments: [],
+        isRestricted: false,
+        restriction: null,
+        loading: false
+      },
+      restrictions: [],
       editTimeModal: {
         show: false,
         appointment: null,
@@ -1279,27 +1381,39 @@ export default {
       const startDay = firstDay.getDay()
       const adjustedStartDay = startDay === 0 ? 6 : startDay - 1 // Monday = 0
       
+      // Helper to check if date is off date
+      const isOffDate = (dateStr) => {
+        return this.restrictions.some(restriction => {
+          const restrictionDate = new Date(restriction.date).toISOString().split('T')[0]
+          return restrictionDate === dateStr
+        })
+      }
+      
       // Previous month days
       for (let i = adjustedStartDay - 1; i >= 0; i--) {
         const date = new Date(this.bookingCalendarYear, this.bookingCalendarMonth - 1, prevLastDay.getDate() - i)
+        const dateStr = formatDateString(date)
         days.push({
-          date: formatDateString(date),
+          date: dateStr,
           dayNumber: date.getDate(),
           isCurrentMonth: false,
           isToday: this.isSameDay(date, today),
-          isPast: date < today
+          isPast: date < today,
+          isOffDate: isOffDate(dateStr)
         })
       }
       
       // Current month days
       for (let i = 1; i <= lastDay.getDate(); i++) {
         const date = new Date(this.bookingCalendarYear, this.bookingCalendarMonth, i)
+        const dateStr = formatDateString(date)
         days.push({
-          date: formatDateString(date),
+          date: dateStr,
           dayNumber: i,
           isCurrentMonth: true,
           isToday: this.isSameDay(date, today),
-          isPast: date < today
+          isPast: date < today,
+          isOffDate: isOffDate(dateStr)
         })
       }
       
@@ -1309,12 +1423,14 @@ export default {
       while (days.length < totalSlots) {
         const date = new Date(nextMonthStart)
         date.setDate(nextMonthStart.getDate() + (days.length - (adjustedStartDay + lastDay.getDate())))
+        const dateStr = formatDateString(date)
         days.push({
-          date: formatDateString(date),
+          date: dateStr,
           dayNumber: date.getDate(),
           isCurrentMonth: false,
           isToday: this.isSameDay(date, today),
-          isPast: date < today
+          isPast: date < today,
+          isOffDate: isOffDate(dateStr)
         })
       }
       
@@ -1335,10 +1451,28 @@ export default {
       return new Date(this.selectedCalendarDate).toLocaleDateString('en-US', { 
         weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' 
       })
+    },
+    formatDateDetailHeader() {
+      if (!this.dateDetailModal.dateString) return ''
+      const date = new Date(this.dateDetailModal.dateString + 'T00:00:00')
+      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+      const dayName = dayNames[date.getDay()]
+      const monthName = monthNames[date.getMonth()]
+      return `${dayName}, ${monthName} ${date.getDate()}, ${date.getFullYear()}`
+    },
+    timeSlots() {
+      // Generate time slots from 9:00 to 17:00 (9 AM to 5 PM)
+      const slots = []
+      for (let hour = 9; hour <= 17; hour++) {
+        slots.push(`${hour.toString().padStart(2, '0')}:00`)
+      }
+      return slots
     }
   },
   async mounted() {
     await this.fetchData()
+    await this.fetchRestrictions()
     this.watchBookingFormChanges()
     this.loadAdminProfile()
     
@@ -1721,6 +1855,17 @@ async quickBookAppointment() {
         return
       }
       
+      // Check if date is off date
+      const isOffDate = this.restrictions.some(restriction => {
+        const restrictionDate = new Date(restriction.date).toISOString().split('T')[0]
+        return restrictionDate === date
+      })
+      
+      if (isOffDate) {
+        this.showToast('This date is not available for bookings (off date)', 'warning')
+        return
+      }
+      
       this.bookingForm.date = date
       this.fetchAvailableSlots()
     },
@@ -1802,6 +1947,12 @@ getTimeSlotsForDay(dayIndex) {
       const dayDate = new Date(date)
       dayDate.setHours(0, 0, 0, 0)
       
+      // Check if this date is restricted (off date)
+      const isOffDate = this.restrictions.some(restriction => {
+        const restrictionDate = new Date(restriction.date).toISOString().split('T')[0]
+        return restrictionDate === dateStr
+      })
+      
       return {
         date: dateStr,
         dayNumber: date.getDate(),
@@ -1809,7 +1960,8 @@ getTimeSlotsForDay(dayIndex) {
         isToday: this.isToday(date),
         isPast: dayDate < today,
         hasBookings: bookings.length > 0,
-        bookingCount: bookings.length
+        bookingCount: bookings.length,
+        isOffDate: isOffDate
       }
     },
     isToday(date) {
@@ -1835,6 +1987,137 @@ getTimeSlotsForDay(dayIndex) {
     selectCalendarDate(day) {
       if (day.isCurrentMonth) {
         this.selectedCalendarDate = day.date
+        this.openDateDetailModal(day.date)
+      }
+    },
+    async openDateDetailModal(date) {
+      this.dateDetailModal.show = true
+      this.dateDetailModal.date = date
+      this.dateDetailModal.dateString = date
+      this.dateDetailModal.loading = true
+      
+      try {
+        // Check if date is restricted
+        const restrictionCheck = await axios.get(`${process.env.VUE_APP_API_URL}/restrictions/check/${date}`)
+        this.dateDetailModal.isRestricted = restrictionCheck.data.isRestricted
+        this.dateDetailModal.restriction = restrictionCheck.data.restriction
+        
+        // Fetch appointments for this date
+        if (!this.dateDetailModal.isRestricted) {
+          const dateAppointments = this.appointments.filter(apt => {
+            const aptDate = apt.date.split('T')[0]
+            return aptDate === date
+          })
+          this.dateDetailModal.appointments = dateAppointments.sort((a, b) => {
+            return a.time.localeCompare(b.time)
+          })
+        } else {
+          this.dateDetailModal.appointments = []
+        }
+      } catch (error) {
+        console.error('Error loading date details:', error)
+        this.showToast('Error loading date details', 'error')
+      } finally {
+        this.dateDetailModal.loading = false
+      }
+    },
+    closeDateDetailModal() {
+      this.dateDetailModal.show = false
+      this.dateDetailModal.date = null
+      this.dateDetailModal.dateString = ''
+      this.dateDetailModal.appointments = []
+      this.dateDetailModal.isRestricted = false
+      this.dateDetailModal.restriction = null
+    },
+    async toggleOffDate(event) {
+      const isRestricted = event.target.checked
+      const date = this.dateDetailModal.dateString
+      
+      try {
+        if (isRestricted) {
+          // Mark as off date
+          await axios.post(`${process.env.VUE_APP_API_URL}/restrictions`, {
+            date: date,
+            reason: 'Off Date'
+          })
+          this.dateDetailModal.isRestricted = true
+          this.showToast('Date marked as off date', 'success')
+          
+          // Refresh restrictions list
+          await this.fetchRestrictions()
+          
+          // Refresh appointments to update calendar
+          await this.fetchAppointments()
+        } else {
+          // Remove off date
+          await axios.delete(`${process.env.VUE_APP_API_URL}/restrictions/date/${date}`)
+          this.dateDetailModal.isRestricted = false
+          this.dateDetailModal.restriction = null
+          this.showToast('Off date removed', 'success')
+          
+          // Refresh restrictions list
+          await this.fetchRestrictions()
+          
+          // Reload appointments for this date
+          const dateAppointments = this.appointments.filter(apt => {
+            const aptDate = apt.date.split('T')[0]
+            return aptDate === date
+          })
+          this.dateDetailModal.appointments = dateAppointments.sort((a, b) => {
+            return a.time.localeCompare(b.time)
+          })
+        }
+      } catch (error) {
+        console.error('Error toggling off date:', error)
+        this.showToast(error.response?.data?.message || 'Error updating off date', 'error')
+        // Revert checkbox
+        event.target.checked = !isRestricted
+      }
+    },
+    async fetchRestrictions() {
+      try {
+        const response = await axios.get(`${process.env.VUE_APP_API_URL}/restrictions`)
+        this.restrictions = response.data
+      } catch (error) {
+        console.error('Error fetching restrictions:', error)
+      }
+    },
+    getHalfHourSlots(hour) {
+      // Return two half-hour slots: :00 and :30
+      const slots = [
+        { time: `${hour}:00`, appointment: null },
+        { time: `${hour}:30`, appointment: null }
+      ]
+      
+      // Find appointments that match these time slots
+      this.dateDetailModal.appointments.forEach(apt => {
+        const aptTime = apt.time
+        if (aptTime === `${hour}:00`) {
+          slots[0].appointment = apt
+        } else if (aptTime === `${hour}:30`) {
+          slots[1].appointment = apt
+        }
+      })
+      
+      return slots
+    },
+    getServiceNames(appointment) {
+      if (!appointment.services || !appointment.services.length) {
+        return 'No service'
+      }
+      if (Array.isArray(appointment.services)) {
+        return appointment.services.map(s => s.name || s).join(', ')
+      }
+      return appointment.services
+    },
+    getAppointmentBlockClass(appointment) {
+      // Return different classes based on appointment status
+      const status = appointment.status || 'confirmed'
+      return {
+        'appointment-confirmed': status === 'confirmed',
+        'appointment-pending': status === 'pending',
+        'appointment-completed': status === 'completed',
+        'appointment-cancelled': status === 'cancelled'
       }
     },
     formatDate(dateStr) {
@@ -4002,4 +4285,229 @@ async setReminder(appointment) {
 .input-group .form-control:focus + .btn {
   border-color: #3b82f6;
 }
+/* Date Detail Modal Styles */
+.date-time-schedule {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.schedule-header {
+  display: flex;
+  background: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.time-column-header {
+  width: 80px;
+  padding: 12px;
+  font-weight: 600;
+  color: #495057;
+  text-align: center;
+  border-right: 1px solid #dee2e6;
+}
+
+.slots-column-header {
+  flex: 1;
+  display: flex;
+  border-right: 1px solid #dee2e6;
+}
+
+.half-hour-slot-header {
+  flex: 1;
+  padding: 12px;
+  font-weight: 600;
+  color: #495057;
+  text-align: center;
+  border-right: 1px solid #e9ecef;
+}
+
+.half-hour-slot-header:last-child {
+  border-right: none;
+}
+
+.schedule-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.schedule-row {
+  display: flex;
+  border-bottom: 1px solid #e9ecef;
+  min-height: 80px;
+}
+
+.schedule-row:hover {
+  background-color: #f8f9fa;
+}
+
+.time-column {
+  width: 80px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid #dee2e6;
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #495057;
+}
+
+.time-label {
+  font-size: 0.95rem;
+}
+
+.slots-column {
+  flex: 1;
+  display: flex;
+}
+
+.half-hour-slot {
+  flex: 1;
+  padding: 8px;
+  border-right: 1px solid #e9ecef;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.half-hour-slot:last-child {
+  border-right: none;
+}
+
+.half-hour-slot.has-appointment {
+  padding: 4px;
+}
+
+.empty-slot {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: 1px dashed #e9ecef;
+  border-radius: 4px;
+}
+
+.appointment-block {
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.appointment-block:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.appointment-confirmed {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.appointment-pending {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.appointment-completed {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+}
+
+.appointment-cancelled {
+  background: #e9ecef;
+  color: #6c757d;
+  opacity: 0.7;
+}
+
+.appointment-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.appointment-customer {
+  font-weight: 600;
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+.appointment-service {
+  font-size: 0.75rem;
+  opacity: 0.9;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.appointment-time {
+  font-size: 0.7rem;
+  opacity: 0.8;
+  margin-top: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .time-column {
+    width: 60px;
+    padding: 8px;
+  }
+  
+  .time-column-header {
+    width: 60px;
+    padding: 8px;
+  }
+  
+  .half-hour-slot {
+    padding: 4px;
+    min-height: 60px;
+  }
+  
+  .appointment-block {
+    padding: 6px;
+  }
+  
+  .appointment-customer {
+    font-size: 0.8rem;
+  }
+  
+  .appointment-service {
+    font-size: 0.7rem;
+  }
+  
+  .appointment-time {
+    font-size: 0.65rem;
+  }
+}
+
+/* Off date indicator in calendar */
+.calendar-day.off-date {
+  background-color: #fff3cd;
+  border: 2px solid #ffc107;
+}
+
+.calendar-day.off-date .day-number {
+  color: #856404;
+  font-weight: 600;
+}
+
+.calendar-day.off-date::after {
+  content: '🚫';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 0.7rem;
+}
+
 </style>

@@ -4,6 +4,7 @@ const Appointment = require('../models/Appointment');
 const Service = require('../models/Service');
 const TimeSlot = require('../models/TimeSlot');
 const Customer = require('../models/Customer');
+const Restriction = require('../models/Restriction');
 const EmailService = require('../services/emailService');
 const emailScheduler = require('../services/emailScheduler');
 const { normalizeDateToGerman, getGermanToday, isBeforeToday } = require('../utils/timezoneHelper');
@@ -123,6 +124,16 @@ router.get('/availability', async (req, res) => {
       return res.status(400).json({ message: 'Cannot check availability for past dates' });
     }
 
+    // Check if date is restricted (off date)
+    const restriction = await Restriction.findOne({ date: normalizedDate });
+    if (restriction) {
+      return res.json({ 
+        availableTimes: [],
+        message: 'This date is not available for bookings',
+        isRestricted: true
+      });
+    }
+
     const dayOfWeek = normalizedDate.getDay();
 
     // Get working hours for the day
@@ -207,6 +218,12 @@ router.post('/', async (req, res) => {
     // Prevent booking for past dates (using German timezone)
     if (normalizedDate < today) {
       return res.status(400).json({ message: 'Cannot book appointments for past dates' });
+    }
+
+    // Check if date is restricted (off date)
+    const restriction = await Restriction.findOne({ date: normalizedDate });
+    if (restriction) {
+      return res.status(400).json({ message: 'This date is not available for bookings (off date)' });
     }
 
     const serviceDocs = await Service.find({ _id: { $in: services } });
