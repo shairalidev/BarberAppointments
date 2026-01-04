@@ -10,7 +10,7 @@ export default {
     bookNow: 'Book Now',
     callUs: 'Call Us',
     services: 'Our Services',
-    servicesSubtitle: 'Premium Grooming Services',
+    servicesSubtitle: 'Modern Barber Culture Services',
     servicesDescription: 'Tailored services for the modern gentleman',
     viewAllServices: 'View All Services',
     features: {

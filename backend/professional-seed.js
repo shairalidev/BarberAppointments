@@ -38,7 +38,7 @@ async function professionalSeed() {
       name: 'Shair Ali Barber',
       email: 'shair.ali@barberpro.com',
       phone: '+1-555-0123',
-      bio: 'Master barber with 15+ years of experience. Specializing in modern cuts, classic styles, and premium grooming services.',
+      bio: 'Master barber with 15+ years of experience. Specializing in modern cuts, classic styles, and Modern Barber Culture services.',
       specialties: [
         'Classic Haircuts',
         'Modern Styling',

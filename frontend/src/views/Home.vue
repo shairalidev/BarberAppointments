@@ -7,7 +7,7 @@
         <div class="row align-items-center min-vh-90">
           <div class="col-lg-7 col-md-8 text-white hero-content">
             <div class="badge premium-badge mb-3 px-3 py-2">
-              <span>Premium Grooming</span>
+              <span>Modern Barber Culture</span>
             </div>
             <h1 class="display-2 fw-bold mb-3 hero-title">{{ $t('home.title') }}</h1>
             <p class="lead mb-3 fs-5 hero-subtitle">{{ $t('home.subtitle') }}</p>

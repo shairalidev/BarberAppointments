@@ -5,21 +5,21 @@ export default {
     admin: 'Admin'
   },
   home: {
-    title: 'Ihr Stil, Unsere Expertise',
-    subtitle: 'Erleben Sie luxuriöse Pflege mit Meisterfriseuren. Online buchen und Exzellenz erleben.',
+    title: 'This is Barberos.',
+    subtitle: 'Termin buchen. Zurücklehnen. Gut aussehen.',
     bookNow: 'Jetzt buchen',
     callUs: 'Anrufen',
     services: 'Unsere Dienstleistungen',
-    servicesSubtitle: 'Premium Pflege-Dienstleistungen',
+    servicesSubtitle: 'Dein Barber Service.',
     servicesDescription: 'Maßgeschneiderte Dienstleistungen für den modernen Gentleman',
     viewAllServices: 'Alle Dienstleistungen anzeigen',
     features: {
       easyBooking: 'Einfache Buchung',
-      easyBookingDesc: 'Online buchen 24/7 in Sekunden',
+      easyBookingDesc: 'Jederzeit online',
       expertBarbers: 'Experten-Friseure',
       expertBarbersDesc: 'Zertifizierte Profis',
       premiumQuality: 'Premium-Qualität',
-      premiumQualityDesc: 'Erstklassige Produkte verwendet',
+      premiumQualityDesc: 'Erstklassige Produkte',
       hygieneFirst: 'Hygiene zuerst',
       hygieneFirstDesc: 'Desinfizierte Ausrüstung'
     },
@@ -33,8 +33,8 @@ export default {
     galleryDescription: 'Sehen Sie unsere neuesten Arbeiten und Transformationen'
   },
   booking: {
-    title: 'Planen Sie Ihren Besuch',
-    subtitle: 'Wählen Sie Dienstleistungen, wählen Sie eine verfügbare Zeit und teilen Sie Ihre Daten zur Bestätigung mit.',
+    title: 'Buche deinen Termin',
+    subtitle: 'Wähle deine Services, die passende Zeit und bestätige deinen Termin mit deinen Daten.',
     step: 'Schritt',
     of: 'von',
     step1: 'Dienstleistungen wählen',
