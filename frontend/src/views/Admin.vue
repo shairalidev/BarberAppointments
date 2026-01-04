@@ -1267,6 +1267,14 @@ export default {
       const today = new Date()
       today.setHours(0, 0, 0, 0)
       
+      // Helper function to format date string using local date components (avoid UTC conversion)
+      const formatDateString = (date) => {
+        const year = date.getFullYear()
+        const month = String(date.getMonth() + 1).padStart(2, '0')
+        const day = String(date.getDate()).padStart(2, '0')
+        return `${year}-${month}-${day}`
+      }
+      
       const days = []
       const startDay = firstDay.getDay()
       const adjustedStartDay = startDay === 0 ? 6 : startDay - 1 // Monday = 0
@@ -1275,7 +1283,7 @@ export default {
       for (let i = adjustedStartDay - 1; i >= 0; i--) {
         const date = new Date(this.bookingCalendarYear, this.bookingCalendarMonth - 1, prevLastDay.getDate() - i)
         days.push({
-          date: date.toISOString().split('T')[0],
+          date: formatDateString(date),
           dayNumber: date.getDate(),
           isCurrentMonth: false,
           isToday: this.isSameDay(date, today),
@@ -1287,7 +1295,7 @@ export default {
       for (let i = 1; i <= lastDay.getDate(); i++) {
         const date = new Date(this.bookingCalendarYear, this.bookingCalendarMonth, i)
         days.push({
-          date: date.toISOString().split('T')[0],
+          date: formatDateString(date),
           dayNumber: i,
           isCurrentMonth: true,
           isToday: this.isSameDay(date, today),
@@ -1302,7 +1310,7 @@ export default {
         const date = new Date(nextMonthStart)
         date.setDate(nextMonthStart.getDate() + (days.length - (adjustedStartDay + lastDay.getDate())))
         days.push({
-          date: date.toISOString().split('T')[0],
+          date: formatDateString(date),
           dayNumber: date.getDate(),
           isCurrentMonth: false,
           isToday: this.isSameDay(date, today),
