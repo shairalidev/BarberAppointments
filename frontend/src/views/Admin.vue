@@ -5,7 +5,7 @@
       <div class="container-fluid">
         <div class="row align-items-start justify-content-between">
           <div class="col">
-            <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center admin-logo-container">
               <img src="/logo.png" alt="Logo" class="admin-logo" />
             </div>
           </div>
@@ -2621,11 +2621,21 @@ async setReminder(appointment) {
   background-color: var(--bg-secondary) !important;
 }
 
+.admin-logo-container {
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  display: inline-block;
+}
+
 .admin-logo {
-  height: 50px;
+  height: 150px;
   width: auto;
   object-fit: contain;
-  max-width: 220px;
+  max-width: 400px;
+  display: block;
 }
 
 .action-toolbar {
@@ -3525,9 +3535,13 @@ async setReminder(appointment) {
     font-size: 1.2rem;
   }
 
+  .admin-logo-container {
+    padding: 6px 10px;
+  }
+  
   .admin-header .admin-logo {
-    height: 35px;
-    max-width: 160px;
+    height: 120px;
+    max-width: 320px;
   }
 
   .admin-header p {

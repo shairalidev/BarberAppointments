@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
     <div class="container">
-      <router-link class="navbar-brand fw-bold text-primary d-flex align-items-center" to="/">
+      <router-link class="navbar-brand fw-bold text-primary d-flex align-items-center logo-container" to="/">
         <img src="/logo.png" alt="Logo" class="brand-logo" />
       </router-link>
       
@@ -171,11 +171,26 @@ export default {
   gap: 0.25rem;
 }
 
+.logo-container {
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.logo-container:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
 .brand-logo {
-  height: 50px;
+  height: 150px;
   width: auto;
   object-fit: contain;
-  max-width: 220px;
+  max-width: 400px;
+  display: block;
 }
 
 
@@ -257,6 +272,15 @@ export default {
 
 /* Mobile Optimizations */
 @media (max-width: 991px) {
+  .logo-container {
+    padding: 6px 10px;
+  }
+  
+  .brand-logo {
+    height: 120px;
+    max-width: 320px;
+  }
+  
   .navbar-collapse {
     margin-top: 0.75rem;
     padding: 1rem;
@@ -300,9 +324,13 @@ export default {
 }
 
 @media (max-width: 576px) {
+  .logo-container {
+    padding: 4px 8px;
+  }
+  
   .brand-logo {
-    height: 40px;
-    max-width: 180px;
+    height: 80px;
+    max-width: 240px;
   }
 }
 </style>
