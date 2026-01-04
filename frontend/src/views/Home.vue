@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <!-- Hero Section -->
-    <section class="hero-section" :style="heroSectionStyle">
+    <section class="hero-section">
       <div class="hero-overlay"></div>
       <div class="container position-relative">
         <div class="row align-items-center min-vh-90">
@@ -154,14 +154,7 @@ export default {
   },
   computed: {
     heroSectionStyle() {
-      if (this.galleryImages.length > 0) {
-        return {
-          backgroundImage: `linear-gradient(135deg, rgba(26, 26, 46, 0.85) 0%, rgba(22, 33, 62, 0.85) 50%, rgba(15, 52, 96, 0.85) 100%), url(${this.galleryImages[0]})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }
-      }
+      // Background handled by hero-overlay CSS, no inline style needed
       return {}
     }
   },
@@ -244,15 +237,8 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: 
-    radial-gradient(circle at 20% 50%, rgba(37, 99, 235, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
-  animation: pulse 15s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  background: linear-gradient(135deg, rgba(26, 26, 46, 0.6) 0%, rgba(22, 33, 62, 0.6) 50%, rgba(15, 52, 96, 0.6) 100%);
+  z-index: 1;
 }
 
 .hero-overlay {
@@ -261,7 +247,11 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+  background-image: url('/img1.jpeg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 0;
 }
 
 .hero-shape {
@@ -282,6 +272,18 @@ export default {
 
 .hero-content {
   animation: fadeInUp 1s ease-out;
+  position: relative;
+  z-index: 2;
+}
+
+.container.position-relative {
+  position: relative;
+  z-index: 2;
+}
+
+.hero-shape {
+  position: relative;
+  z-index: 1;
 }
 
 @keyframes fadeInUp {
