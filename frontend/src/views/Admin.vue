@@ -1109,6 +1109,27 @@
               </div>
             </div>
             <div v-else class="date-time-schedule">
+              <!-- Week Navigation Row -->
+              <div class="week-navigation-row">
+                <div 
+                  v-for="day in weekDays" 
+                  :key="day.date"
+                  @click="navigateToDate(day.date)"
+                  class="week-day-cell"
+                  :class="{ 
+                    'active': day.date === dateDetailModal.dateString,
+                    'today': day.isToday
+                  }"
+                >
+                  <div class="week-day-name">{{ day.dayName }}</div>
+                  <div class="week-day-number">{{ day.dayNumber }}</div>
+                </div>
+                <div class="calendar-week-cell">
+                  <div class="calendar-week-label">KW</div>
+                  <div class="calendar-week-number">{{ calendarWeek }}</div>
+                </div>
+              </div>
+              
               <div class="schedule-header">
                 <div class="time-column-header">Time</div>
                 <div class="slots-column-header">
@@ -1118,9 +1139,10 @@
               </div>
               <div class="schedule-body">
                 <div 
-                  v-for="hour in timeSlots" 
+                  v-for="(hour, hourIndex) in timeSlots" 
                   :key="hour"
                   class="schedule-row"
+                  :class="{ 'row-pink': hourIndex % 2 === 0, 'row-green': hourIndex % 2 === 1 }"
                 >
                   <div class="time-column">
                     <span class="time-label">{{ hour }}</span>
@@ -1136,7 +1158,7 @@
                         <div class="appointment-content">
                           <div class="appointment-customer">{{ slot.appointment.customerName }}</div>
                           <div class="appointment-service">{{ getServiceNames(slot.appointment) }}</div>
-                          <div class="appointment-time">{{ slot.appointment.time }}</div>
+                          <div class="appointment-time" v-if="slot.showTime">{{ formatAppointmentTime(slot.appointment) }}</div>
                         </div>
                       </div>
                       <div v-else class="empty-slot"></div>
@@ -1468,6 +1490,46 @@ export default {
         slots.push(`${hour.toString().padStart(2, '0')}:00`)
       }
       return slots
+    },
+    weekDays() {
+      if (!this.dateDetailModal.dateString) return []
+      
+      const selectedDate = new Date(this.dateDetailModal.dateString + 'T00:00:00')
+      const dayOfWeek = selectedDate.getDay()
+      // Get Monday of the week (day 0 = Sunday, so we adjust)
+      const monday = new Date(selectedDate)
+      const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek // If Sunday, go back 6 days, otherwise go to Monday
+      monday.setDate(selectedDate.getDate() + diff)
+      
+      const days = []
+      const dayNames = ['MO.', 'DI.', 'MI.', 'DO.', 'FR.', 'SA.', 'SO.']
+      
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(monday)
+        date.setDate(monday.getDate() + i)
+        const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+        const today = new Date()
+        const isToday = date.toDateString() === today.toDateString()
+        
+        days.push({
+          date: dateStr,
+          dayName: dayNames[i],
+          dayNumber: date.getDate(),
+          isToday: isToday
+        })
+      }
+      
+      return days
+    },
+    calendarWeek() {
+      if (!this.dateDetailModal.dateString) return ''
+      
+      const date = new Date(this.dateDetailModal.dateString + 'T00:00:00')
+      const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+      const dayNum = d.getUTCDay() || 7
+      d.setUTCDate(d.getUTCDate() + 4 - dayNum)
+      const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
+      return Math.ceil((((d - yearStart) / 86400000) + 1) / 7)
     }
   },
   async mounted() {
@@ -2004,13 +2066,23 @@ getTimeSlotsForDay(dayIndex) {
         
         // Fetch appointments for this date
         if (!this.dateDetailModal.isRestricted) {
+          // Refresh appointments first to ensure we have latest data
+          await this.fetchAppointments()
+          
+          // Filter appointments for this date
           const dateAppointments = this.appointments.filter(apt => {
-            const aptDate = apt.date.split('T')[0]
-            return aptDate === date
+            if (!apt.date) return false
+            const aptDate = typeof apt.date === 'string' ? apt.date.split('T')[0] : new Date(apt.date).toISOString().split('T')[0]
+            return aptDate === date && apt.status !== 'cancelled'
           })
+          
+          // Sort by time
           this.dateDetailModal.appointments = dateAppointments.sort((a, b) => {
+            if (!a.time || !b.time) return 0
             return a.time.localeCompare(b.time)
           })
+          
+          console.log('Loaded appointments for date:', date, 'Count:', this.dateDetailModal.appointments.length, this.dateDetailModal.appointments)
         } else {
           this.dateDetailModal.appointments = []
         }
@@ -2085,30 +2157,75 @@ getTimeSlotsForDay(dayIndex) {
     getHalfHourSlots(hour) {
       // Return two half-hour slots: :00 and :30
       const slots = [
-        { time: `${hour}:00`, appointment: null },
-        { time: `${hour}:30`, appointment: null }
+        { time: `${hour}:00`, appointment: null, showTime: false },
+        { time: `${hour}:30`, appointment: null, showTime: false }
       ]
       
       // Find appointments that match these time slots
       this.dateDetailModal.appointments.forEach(apt => {
-        const aptTime = apt.time
-        if (aptTime === `${hour}:00`) {
-          slots[0].appointment = apt
-        } else if (aptTime === `${hour}:30`) {
-          slots[1].appointment = apt
+        const aptTime = apt.time || ''
+        const aptHour = parseInt(aptTime.split(':')[0])
+        const aptMinute = parseInt(aptTime.split(':')[1]) || 0
+        const duration = apt.totalDuration || 30
+        
+        // Check if appointment starts at :00 or :30 of this hour
+        if (aptHour === parseInt(hour.split(':')[0])) {
+          if (aptMinute === 0) {
+            slots[0].appointment = apt
+            slots[0].showTime = true
+          } else if (aptMinute === 30) {
+            slots[1].appointment = apt
+            slots[1].showTime = true
+          }
         }
       })
       
       return slots
     },
+    formatAppointmentTime(appointment) {
+      if (!appointment.time) return ''
+      const startTime = appointment.time
+      const duration = appointment.totalDuration || 30
+      
+      // Calculate end time
+      const [hours, minutes] = startTime.split(':').map(Number)
+      const totalMinutes = hours * 60 + minutes + duration
+      const endHours = Math.floor(totalMinutes / 60)
+      const endMinutes = totalMinutes % 60
+      const endTime = `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`
+      
+      return `${startTime} - ${endTime}`
+    },
+    navigateToDate(date) {
+      this.openDateDetailModal(date)
+    },
     getServiceNames(appointment) {
-      if (!appointment.services || !appointment.services.length) {
+      if (!appointment.services) {
         return 'No service'
       }
+      
+      // Handle different service formats
       if (Array.isArray(appointment.services)) {
-        return appointment.services.map(s => s.name || s).join(', ')
+        if (appointment.services.length === 0) {
+          return 'No service'
+        }
+        // Check if services are objects with name property or just strings/IDs
+        const serviceNames = appointment.services.map(s => {
+          if (typeof s === 'object' && s !== null) {
+            return s.name || s.title || 'Service'
+          }
+          return s
+        }).filter(name => name && name !== 'No service')
+        
+        return serviceNames.length > 0 ? serviceNames.join(', ') : 'No service'
       }
-      return appointment.services
+      
+      // If it's a single service object
+      if (typeof appointment.services === 'object' && appointment.services !== null) {
+        return appointment.services.name || appointment.services.title || 'Service'
+      }
+      
+      return appointment.services.toString()
     },
     getAppointmentBlockClass(appointment) {
       // Return different classes based on appointment status
@@ -4292,6 +4409,82 @@ async setReminder(appointment) {
   width: 100%;
 }
 
+/* Week Navigation Row */
+.week-navigation-row {
+  display: flex;
+  background: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+  padding: 12px 8px;
+  gap: 4px;
+}
+
+.week-day-cell {
+  flex: 1;
+  text-align: center;
+  padding: 8px 4px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.week-day-cell:hover {
+  background: #e9ecef;
+  transform: translateY(-2px);
+}
+
+.week-day-cell.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: 600;
+}
+
+.week-day-cell.active .week-day-name,
+.week-day-cell.active .week-day-number {
+  color: white;
+}
+
+.week-day-cell.today:not(.active) {
+  border: 2px solid #28a745;
+}
+
+.week-day-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6c757d;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.week-day-number {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #212529;
+}
+
+.calendar-week-cell {
+  min-width: 60px;
+  text-align: center;
+  padding: 8px 4px;
+  margin-left: 8px;
+  background: white;
+  border-radius: 6px;
+}
+
+.calendar-week-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #6c757d;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.calendar-week-number {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #212529;
+}
+
 .schedule-header {
   display: flex;
   background: #f8f9fa;
@@ -4340,8 +4533,16 @@ async setReminder(appointment) {
   min-height: 80px;
 }
 
+.schedule-row.row-pink {
+  background-color: #fff5f5;
+}
+
+.schedule-row.row-green {
+  background-color: #f0fff4;
+}
+
 .schedule-row:hover {
-  background-color: #f8f9fa;
+  opacity: 0.9;
 }
 
 .time-column {
@@ -4410,17 +4611,20 @@ async setReminder(appointment) {
 }
 
 .appointment-confirmed {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #ff69b4;
+  background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
   color: white;
 }
 
 .appointment-pending {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: #ff69b4;
+  background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
   color: white;
 }
 
 .appointment-completed {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  background: #90ee90;
+  background: linear-gradient(135deg, #a8e063 0%, #56ab2f 100%);
   color: white;
 }
 
