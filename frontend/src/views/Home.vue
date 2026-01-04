@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <!-- Hero Section -->
-    <section class="hero-section">
+    <section class="hero-section" :style="heroSectionStyle">
       <div class="hero-overlay"></div>
       <div class="container position-relative">
         <div class="row align-items-center min-vh-90">
@@ -152,6 +152,19 @@ export default {
       this.loadGalleryImages()
     ])
   },
+  computed: {
+    heroSectionStyle() {
+      if (this.galleryImages.length > 0) {
+        return {
+          backgroundImage: `linear-gradient(135deg, rgba(26, 26, 46, 0.85) 0%, rgba(22, 33, 62, 0.85) 50%, rgba(15, 52, 96, 0.85) 100%), url(${this.galleryImages[0]})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }
+      }
+      return {}
+    }
+  },
   methods: {
     async fetchServices() {
       try {
@@ -218,6 +231,9 @@ export default {
   position: relative;
   min-height: 100vh;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   overflow: hidden;
 }
 
