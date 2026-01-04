@@ -271,6 +271,19 @@ export default {
     customerUpdated: 'Customer updated successfully!',
     customerDeleted: 'Customer deleted successfully!',
     customerDeleteError: 'Could not delete customer: {message}',
-    customerSaveError: 'Could not save customer: {message}'
+    customerSaveError: 'Could not save customer: {message}',
+    editAppointment: 'Edit Appointment',
+    currentDate: 'Current Date',
+    currentTime: 'Current Time',
+    selectNewDate: 'Select New Date',
+    selectNewTime: 'Select New Time',
+    messageOptional: 'Message (Optional)',
+    addNoteAboutChange: 'Add a note about the change (this will be included in the email notification)',
+    messageWillBeSent: 'This message will be sent to both the customer and barber via email.',
+    loadingAvailableSlots: 'Loading available time slots...',
+    updateAppointment: 'Update Appointment',
+    appointmentDateUpdated: 'Appointment date updated successfully',
+    appointmentTimeUpdated: 'Appointment time updated successfully',
+    appointmentDateAndTimeUpdated: 'Appointment date and time updated successfully'
   }
 }

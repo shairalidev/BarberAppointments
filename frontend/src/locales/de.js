@@ -268,6 +268,19 @@ export default {
     customerUpdated: 'Kunde erfolgreich aktualisiert!',
     customerDeleted: 'Kunde erfolgreich gelöscht!',
     customerDeleteError: 'Kunde konnte nicht gelöscht werden: {message}',
-    customerSaveError: 'Kunde konnte nicht gespeichert werden: {message}'
+    customerSaveError: 'Kunde konnte nicht gespeichert werden: {message}',
+    editAppointment: 'Termin bearbeiten',
+    currentDate: 'Aktuelles Datum',
+    currentTime: 'Aktuelle Zeit',
+    selectNewDate: 'Neues Datum auswählen',
+    selectNewTime: 'Neue Zeit auswählen',
+    messageOptional: 'Nachricht (Optional)',
+    addNoteAboutChange: 'Fügen Sie eine Notiz zur Änderung hinzu (dies wird in der E-Mail-Benachrichtigung enthalten sein)',
+    messageWillBeSent: 'Diese Nachricht wird sowohl dem Kunden als auch dem Friseur per E-Mail gesendet.',
+    loadingAvailableSlots: 'Verfügbare Zeitslots werden geladen...',
+    updateAppointment: 'Termin aktualisieren',
+    appointmentDateUpdated: 'Termindatum erfolgreich aktualisiert',
+    appointmentTimeUpdated: 'Terminzeit erfolgreich aktualisiert',
+    appointmentDateAndTimeUpdated: 'Termindatum und -zeit erfolgreich aktualisiert'
   }
 }

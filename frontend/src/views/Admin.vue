@@ -1007,18 +1007,28 @@
         <div class="modal-content">
           <div class="modal-header bg-gradient-primary text-white">
             <h5 class="modal-title">
-              <i class="fas fa-edit me-2"></i>{{ $t('common.edit') }} Appointment
+              <i class="fas fa-edit me-2"></i>{{ $t('admin.editAppointment') }}
             </h5>
             <button @click="closeEditTimeModal" class="btn-close btn-close-white"></button>
           </div>
           <div class="modal-body">
             <div v-if="editTimeModal.appointment" class="mb-3">
-              <p class="mb-1"><strong>Customer:</strong> {{ editTimeModal.appointment.customerName }}</p>
-              <p class="mb-1"><strong>Current Time:</strong> {{ editTimeModal.appointment.time }}</p>
-              <p class="mb-0"><strong>Date:</strong> {{ new Date(editTimeModal.appointment.date).toLocaleDateString() }}</p>
+              <p class="mb-1"><strong>{{ $t('admin.customer') }}:</strong> {{ editTimeModal.appointment.customerName }}</p>
+              <p class="mb-1"><strong>{{ $t('admin.currentDate') }}:</strong> {{ new Date(editTimeModal.appointment.date).toLocaleDateString() }}</p>
+              <p class="mb-0"><strong>{{ $t('admin.currentTime') }}:</strong> {{ editTimeModal.appointment.time }}</p>
             </div>
             <div class="mb-3">
-              <label class="form-label">Select New Time</label>
+              <label class="form-label">{{ $t('admin.selectNewDate') }}</label>
+              <input 
+                v-model="editTimeModal.newDate" 
+                type="date" 
+                class="form-control"
+                :min="todayDate"
+                @change="onEditDateChange"
+              />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ $t('admin.selectNewTime') }}</label>
               <div v-if="editTimeModal.availableTimes.length" class="time-slots-grid">
                 <button 
                   v-for="slot in editTimeModal.availableTimes" 
@@ -1031,27 +1041,24 @@
                 </button>
               </div>
               <div v-else class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i>Loading available time slots...
+                <i class="fas fa-info-circle me-2"></i>{{ $t('admin.loadingAvailableSlots') }}
               </div>
             </div>
             <div class="mb-3">
-              <label class="form-label">Message (Optional)</label>
+              <label class="form-label">{{ $t('admin.messageOptional') }}</label>
               <textarea 
                 v-model="editTimeModal.message" 
                 class="form-control" 
                 rows="3" 
-                placeholder="Add a note about the change (this will be included in the email notification)"
+                :placeholder="$t('admin.addNoteAboutChange')"
               ></textarea>
-              <small class="text-muted">This message will be sent to both the customer and barber via email.</small>
+              <small class="text-muted">{{ $t('admin.messageWillBeSent') }}</small>
             </div>
           </div>
           <div class="modal-footer">
             <button @click="closeEditTimeModal" class="btn btn-secondary">{{ $t('common.cancel') }}</button>
-            <button @click="cancelAppointmentFromEdit" class="btn btn-danger">
-              <i class="fas fa-times me-2"></i>{{ $t('admin.reject') }} Appointment
-            </button>
-            <button @click="updateAppointmentTime" class="btn btn-primary" :disabled="!editTimeModal.newTime">
-              <i class="fas fa-save me-2"></i>{{ $t('common.update') }} Time
+            <button @click="updateAppointmentTime" class="btn btn-primary" :disabled="!editTimeModal.newTime || !editTimeModal.newDate">
+              <i class="fas fa-save me-2"></i>{{ $t('admin.updateAppointment') }}
             </button>
           </div>
         </div>
@@ -1160,6 +1167,7 @@ export default {
       editTimeModal: {
         show: false,
         appointment: null,
+        newDate: '',
         newTime: '',
         availableTimes: [],
         message: ''
@@ -1574,67 +1582,110 @@ async quickBookAppointment() {
     },
     async openEditTimeModal(appointment) {
       this.editTimeModal.appointment = appointment
+      const appointmentDate = appointment.date.split('T')[0]
+      this.editTimeModal.newDate = appointmentDate
       this.editTimeModal.newTime = appointment.time
       this.editTimeModal.message = ''
       this.editTimeModal.show = true
       this.editTimeModal.availableTimes = []
       
       // Fetch available time slots for this appointment
+      await this.fetchEditModalAvailableTimes()
+    },
+    async fetchEditModalAvailableTimes() {
+      if (!this.editTimeModal.appointment || !this.editTimeModal.newDate) {
+        return
+      }
+      
       try {
-        const appointmentDate = appointment.date.split('T')[0]
-        const barberId = appointment.barberId?._id || appointment.barberId
-        const duration = appointment.totalDuration || 30
+        const barberId = this.editTimeModal.appointment.barberId?._id || this.editTimeModal.appointment.barberId
+        const duration = this.editTimeModal.appointment.totalDuration || 30
         
         const response = await axios.get(`${process.env.VUE_APP_API_URL}/appointments/availability`, {
           params: {
             barberId: barberId,
-            date: appointmentDate,
+            date: this.editTimeModal.newDate,
             duration: duration
           }
         })
         
         this.editTimeModal.availableTimes = response.data.availableTimes || []
-        // Include current time if not in available times (for editing same appointment)
-        if (!this.editTimeModal.availableTimes.includes(appointment.time)) {
-          this.editTimeModal.availableTimes.push(appointment.time)
+        
+        // If date hasn't changed, include current time if not in available times (for editing same appointment)
+        const originalDate = this.editTimeModal.appointment.date.split('T')[0]
+        if (this.editTimeModal.newDate === originalDate && !this.editTimeModal.availableTimes.includes(this.editTimeModal.appointment.time)) {
+          this.editTimeModal.availableTimes.push(this.editTimeModal.appointment.time)
           this.editTimeModal.availableTimes.sort()
+        }
+        
+        // Reset selected time if it's not available for the new date
+        if (this.editTimeModal.availableTimes.length > 0 && !this.editTimeModal.availableTimes.includes(this.editTimeModal.newTime)) {
+          this.editTimeModal.newTime = ''
         }
       } catch (error) {
         console.error('Error fetching available slots:', error)
         this.showToast('Error loading available time slots', 'error')
+        this.editTimeModal.availableTimes = []
       }
+    },
+    async onEditDateChange() {
+      // Reset time selection when date changes
+      this.editTimeModal.newTime = ''
+      await this.fetchEditModalAvailableTimes()
     },
     closeEditTimeModal() {
       this.editTimeModal.show = false
       this.editTimeModal.appointment = null
+      this.editTimeModal.newDate = ''
       this.editTimeModal.newTime = ''
       this.editTimeModal.message = ''
       this.editTimeModal.availableTimes = []
     },
     async updateAppointmentTime() {
-      if (!this.editTimeModal.appointment || !this.editTimeModal.newTime) {
+      if (!this.editTimeModal.appointment || !this.editTimeModal.newTime || !this.editTimeModal.newDate) {
         return
       }
       
-      // Don't update if time hasn't changed
-      if (this.editTimeModal.newTime === this.editTimeModal.appointment.time) {
+      const originalDate = this.editTimeModal.appointment.date.split('T')[0]
+      const dateChanged = this.editTimeModal.newDate !== originalDate
+      const timeChanged = this.editTimeModal.newTime !== this.editTimeModal.appointment.time
+      
+      // Don't update if neither date nor time has changed
+      if (!dateChanged && !timeChanged) {
         this.closeEditTimeModal()
         return
       }
       
       try {
-        await axios.put(`${process.env.VUE_APP_API_URL}/appointments/${this.editTimeModal.appointment._id}`, {
-          time: this.editTimeModal.newTime,
+        const updateData = {
           timeChangeMessage: this.editTimeModal.message,
           sendEmail: true
-        })
+        }
+        
+        // Only include date if it changed
+        if (dateChanged) {
+          updateData.date = this.editTimeModal.newDate
+        }
+        
+        // Only include time if it changed
+        if (timeChanged) {
+          updateData.time = this.editTimeModal.newTime
+        }
+        
+        await axios.put(`${process.env.VUE_APP_API_URL}/appointments/${this.editTimeModal.appointment._id}`, updateData)
         
         await this.fetchAppointments()
         this.closeEditTimeModal()
-        this.showToast('Appointment time updated successfully', 'success')
+        
+        const changeMessage = dateChanged && timeChanged 
+          ? this.$t('admin.appointmentDateAndTimeUpdated')
+          : dateChanged 
+            ? this.$t('admin.appointmentDateUpdated')
+            : this.$t('admin.appointmentTimeUpdated')
+        this.showToast(changeMessage, 'success')
       } catch (error) {
-        console.error('Error updating appointment time:', error)
-        const errorMessage = error.response?.data?.message || 'Failed to update appointment time'
+        console.error('Error updating appointment:', error)
+        const errorMessage = error.response?.data?.message || 'Failed to update appointment'
         this.showToast(errorMessage, 'error')
         
         // If there are available times in the error, update the modal
@@ -1872,31 +1923,6 @@ async setReminder(appointment) {
         await this.fetchAppointments()
         this.closeCancelModal()
         this.showToast('Appointment cancelled successfully. Customer has been notified.', 'success')
-      } catch (error) {
-        console.error('Error cancelling appointment:', error)
-        const errorMessage = error.response?.data?.message || 'Failed to cancel appointment'
-        this.showToast(errorMessage, 'error')
-      }
-    },
-    async cancelAppointmentFromEdit() {
-      if (!this.editTimeModal.appointment) {
-        return
-      }
-      
-      if (!confirm('Are you sure you want to cancel this appointment? This action cannot be undone.')) {
-        return
-      }
-      
-      try {
-        await axios.put(`${process.env.VUE_APP_API_URL}/appointments/${this.editTimeModal.appointment._id}`, {
-          status: 'cancelled',
-          responseMessage: this.editTimeModal.message || 'Appointment has been cancelled.',
-          sendEmail: true
-        })
-        
-        await this.fetchAppointments()
-        this.closeEditTimeModal()
-        this.showToast('Appointment cancelled successfully', 'success')
       } catch (error) {
         console.error('Error cancelling appointment:', error)
         const errorMessage = error.response?.data?.message || 'Failed to cancel appointment'
