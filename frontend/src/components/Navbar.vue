@@ -2,10 +2,7 @@
   <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
     <div class="container">
       <router-link class="navbar-brand fw-bold text-primary d-flex align-items-center" to="/">
-        <div class="brand-icon me-2">
-          <i class="fas fa-cut"></i>
-        </div>
-        <span class="brand-text">BarberPro</span>
+        <img src="/logo.png" alt="Logo" class="brand-logo" />
       </router-link>
       
       <button 
@@ -174,25 +171,13 @@ export default {
   gap: 0.25rem;
 }
 
-.brand-icon {
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 1.2rem;
+.brand-logo {
+  height: 50px;
+  width: auto;
+  object-fit: contain;
+  max-width: 220px;
 }
 
-.brand-text {
-  font-size: 1.5rem;
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
 
 .nav-link {
   color: var(--text-secondary) !important;
@@ -315,14 +300,9 @@ export default {
 }
 
 @media (max-width: 576px) {
-  .brand-text {
-    font-size: 1.25rem;
-  }
-  
-  .brand-icon {
-    width: 35px;
-    height: 35px;
-    font-size: 1rem;
+  .brand-logo {
+    height: 40px;
+    max-width: 180px;
   }
 }
 </style>

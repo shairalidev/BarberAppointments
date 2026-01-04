@@ -5,10 +5,9 @@
       <div class="container-fluid">
         <div class="row align-items-start justify-content-between">
           <div class="col">
-            <h2 class="mb-0 fw-bold text-primary">
-              <i class="fas fa-cut me-2"></i>{{ $t('admin.dashboard') }}
-            </h2>
-            <p class="text-muted mb-0 d-none d-md-block">{{ $t('admin.manageBookings') }}</p>
+            <div class="d-flex align-items-center">
+              <img src="/logo.png" alt="Logo" class="admin-logo" />
+            </div>
           </div>
           <div class="col-auto">
             <div class="d-flex align-items-center justify-content-end gap-2 gap-md-3 action-toolbar">
@@ -1066,7 +1065,7 @@
     </div>
 
     <!-- Date Detail Modal -->
-    <div v-if="dateDetailModal.show" class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" @click.self="closeDateDetailModal">
+    <div v-if="dateDetailModal.show" class="modal fade show d-block date-detail-modal" style="background: rgba(0,0,0,0.5);" @click.self="closeDateDetailModal">
       <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width: 95%;">
         <div class="modal-content">
           <div class="modal-header bg-gradient-primary text-white">
@@ -1078,17 +1077,31 @@
                 <small class="opacity-75">{{ dateDetailModal.appointments.length }} {{ $t('admin.appointments') }}</small>
               </div>
               <div class="d-flex align-items-center gap-3">
-                <div class="form-check form-switch">
-                  <input 
-                    class="form-check-input" 
-                    type="checkbox" 
-                    id="offDateToggle"
-                    :checked="dateDetailModal.isRestricted"
-                    @change="toggleOffDate"
-                    style="width: 3rem; height: 1.5rem; cursor: pointer;"
-                  >
-                  <label class="form-check-label text-white fw-semibold" for="offDateToggle" style="cursor: pointer;">
-                    <i class="fas fa-ban me-1"></i>{{ dateDetailModal.isRestricted ? 'Off Date' : 'Mark as Off Date' }}
+                <div class="off-date-toggle-wrapper">
+                  <label class="off-date-toggle-label" for="offDateToggle">
+                    <div class="toggle-switch-container">
+                      <input 
+                        class="off-date-toggle-input" 
+                        type="checkbox" 
+                        id="offDateToggle"
+                        :checked="dateDetailModal.isRestricted"
+                        @change="toggleOffDate"
+                      >
+                      <span class="toggle-slider" :class="{ 'active': dateDetailModal.isRestricted }">
+                        <span class="toggle-icon">
+                          <i v-if="dateDetailModal.isRestricted" class="fas fa-ban"></i>
+                          <i v-else class="fas fa-calendar-check"></i>
+                        </span>
+                      </span>
+                    </div>
+                    <span class="toggle-label-text">
+                      <span v-if="dateDetailModal.isRestricted" class="text-warning">
+                        <i class="fas fa-ban me-1"></i>Off Date
+                      </span>
+                      <span v-else class="text-white-50">
+                        <i class="fas fa-calendar-check me-1"></i>Mark as Off Date
+                      </span>
+                    </span>
                   </label>
                 </div>
                 <button @click="closeDateDetailModal" class="btn-close btn-close-white"></button>
@@ -2608,6 +2621,13 @@ async setReminder(appointment) {
   background-color: var(--bg-secondary) !important;
 }
 
+.admin-logo {
+  height: 50px;
+  width: auto;
+  object-fit: contain;
+  max-width: 220px;
+}
+
 .action-toolbar {
   min-width: 260px;
 }
@@ -3503,6 +3523,11 @@ async setReminder(appointment) {
 
   .admin-header h2 {
     font-size: 1.2rem;
+  }
+
+  .admin-header .admin-logo {
+    height: 35px;
+    max-width: 160px;
   }
 
   .admin-header p {
@@ -4712,6 +4737,234 @@ async setReminder(appointment) {
   top: 2px;
   right: 2px;
   font-size: 0.7rem;
+}
+
+/* Enhanced Off Date Toggle Switch */
+.off-date-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Date Detail Modal Header Responsive */
+.date-detail-modal .modal-header {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.date-detail-modal .modal-header > div {
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+  .date-detail-modal .modal-header {
+    padding: 1rem;
+  }
+  
+  .date-detail-modal .modal-header .d-flex {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 12px;
+  }
+  
+  .date-detail-modal .modal-header .col-auto {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .date-detail-modal .modal-title {
+    font-size: 1rem;
+  }
+  
+  .date-detail-modal .modal-title small {
+    font-size: 0.75rem;
+  }
+}
+
+.off-date-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+  padding: 8px 12px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.off-date-toggle-label:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.toggle-switch-container {
+  position: relative;
+  display: inline-block;
+}
+
+.off-date-toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: relative;
+  display: inline-block;
+  width: 56px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 28px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  height: 20px;
+  width: 20px;
+  left: 4px;
+  bottom: 2px;
+  background: white;
+  border-radius: 50%;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-slider.active {
+  background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 20px rgba(255, 193, 7, 0.4);
+}
+
+.toggle-slider.active::before {
+  transform: translateX(28px);
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.toggle-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.7rem;
+  color: white;
+  transition: all 0.3s ease;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.toggle-slider.active .toggle-icon {
+  color: white;
+  animation: pulse 0.3s ease;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+}
+
+.toggle-label-text {
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.toggle-label-text .text-warning {
+  color: #ffc107 !important;
+  text-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+}
+
+.toggle-label-text .text-white-50 {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Responsive adjustments for toggle */
+@media (max-width: 768px) {
+  .off-date-toggle-label {
+    padding: 6px 10px;
+    gap: 8px;
+  }
+  
+  .toggle-slider {
+    width: 48px;
+    height: 24px;
+  }
+  
+  .toggle-slider::before {
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 2px;
+  }
+  
+  .toggle-slider.active::before {
+    transform: translateX(24px);
+  }
+  
+  .toggle-icon {
+    font-size: 0.6rem;
+  }
+  
+  .toggle-label-text {
+    font-size: 0.75rem;
+  }
+  
+  .toggle-label-text span {
+    display: inline-flex;
+    align-items: center;
+  }
+  
+  .toggle-label-text .me-1 {
+    margin-right: 0.25rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .off-date-toggle-wrapper {
+    margin-right: 8px;
+  }
+  
+  .off-date-toggle-label {
+    padding: 4px 8px;
+    gap: 6px;
+  }
+  
+  .toggle-slider {
+    width: 44px;
+    height: 22px;
+  }
+  
+  .toggle-slider::before {
+    height: 14px;
+    width: 14px;
+  }
+  
+  .toggle-slider.active::before {
+    transform: translateX(22px);
+  }
 }
 
 </style>
