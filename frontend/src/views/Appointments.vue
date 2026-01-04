@@ -168,7 +168,7 @@
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">{{ $t('booking.email') }} *</label>
-                  <input v-model="customer.email" type="email" class="form-control" :placeholder="$t('booking.youAtExample')" required>
+                  <input v-model="customer.email" type="email" class="form-control" required>
                 </div>
                 <div class="col-12">
                   <label class="form-label">{{ $t('booking.specialRequests') }}</label>
