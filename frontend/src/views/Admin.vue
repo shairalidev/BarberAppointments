@@ -207,9 +207,7 @@
                           <div class="appointment-time-mobile">
                             <i class="fas fa-clock text-primary me-1"></i>
                             <span class="fw-bold">{{ apt.time }}</span>
-                            <button v-if="apt.status === 'confirmed' || apt.status === 'pending'" @click="openEditTimeModal(apt)" class="btn btn-sm btn-link p-0 ms-2" title="Edit time">
-                              <i class="fas fa-edit text-primary"></i>
-                            </button>
+                           
                           </div>
                           <span :class="getStatusBadgeClass(apt.status)">{{ apt.status }}</span>
                         </div>
