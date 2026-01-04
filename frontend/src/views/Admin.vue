@@ -377,10 +377,15 @@
 
                 <!-- Services List - Mobile Cards -->
                 <div class="d-lg-none">
-                  <div v-for="service in services" :key="service._id" class="service-card card mb-3">
+                  <div v-for="service in services" :key="service._id" class="service-card card mb-3" :class="{ 'opacity-50': !service.active }">
                     <div class="card-body p-3">
                       <div class="d-flex justify-content-between align-items-start mb-2">
-                        <h6 class="mb-0 fw-bold">{{ service.name }}</h6>
+                        <div>
+                          <h6 class="mb-0 fw-bold">
+                            <span v-if="!service.active" class="badge bg-secondary me-2">{{ $t('admin.inactive') }}</span>
+                            {{ service.name }}
+                          </h6>
+                        </div>
                         <span class="badge bg-primary">{{ formatCurrency(service.price) }}</span>
                       </div>
                       <div class="service-details mb-3">
@@ -390,6 +395,12 @@
                         <p class="text-muted small mb-0">{{ service.description || $t('admin.noDescriptionAvailable') }}</p>
                       </div>
                       <div class="service-actions d-flex gap-2">
+                        <button @click="toggleServiceStatus(service)" 
+                          :class="['btn', 'btn-sm', 'flex-fill', service.active ? 'btn-outline-warning' : 'btn-outline-success']"
+                          :title="service.active ? $t('admin.deactivateService') : $t('admin.activateService')">
+                          <i :class="service.active ? 'fas fa-eye-slash me-1' : 'fas fa-eye me-1'"></i>
+                          {{ service.active ? $t('admin.deactivate') : $t('admin.activate') }}
+                        </button>
                         <button @click="editService(service)" class="btn btn-sm btn-outline-primary flex-fill">
                           <i class="fas fa-edit me-1"></i>{{ $t('common.edit') }}
                         </button>
@@ -415,13 +426,21 @@
                         </tr>
                       </thead>
                       <tbody>
-                        <tr v-for="service in services" :key="service._id">
-                          <td class="fw-medium">{{ service.name }}</td>
+                        <tr v-for="service in services" :key="service._id" :class="{ 'table-secondary': !service.active }">
+                          <td class="fw-medium">
+                            <span v-if="!service.active" class="badge bg-secondary me-2">{{ $t('admin.inactive') }}</span>
+                            {{ service.name }}
+                          </td>
                           <td>{{ service.duration }} {{ $t('admin.minutes') }}</td>
                           <td class="fw-bold text-success">{{ formatCurrency(service.price) }}</td>
                           <td class="text-muted">{{ service.description || $t('admin.noDescription') }}</td>
                           <td class="text-center">
                             <div class="btn-group" role="group">
+                              <button @click="toggleServiceStatus(service)" 
+                                :class="['btn', 'btn-sm', service.active ? 'btn-outline-warning' : 'btn-outline-success']"
+                                :title="service.active ? $t('admin.deactivateService') : $t('admin.activateService')">
+                                <i :class="service.active ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                              </button>
                               <button @click="editService(service)" class="btn btn-sm btn-outline-primary">
                                 <i class="fas fa-edit"></i>
                               </button>
@@ -1229,7 +1248,8 @@ export default {
         name: '',
         duration: '',
         price: '',
-        description: ''
+        description: '',
+        active: true
       },
       daysOfWeek: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
       newSlot: Array(7).fill().map(() => ({ startTime: '', endTime: '' })),
@@ -1671,19 +1691,40 @@ async updateAppointmentStatus(appointment, newStatus) {
       this.serviceForm = { ...service }
       this.showServiceForm = true
     },
+    async toggleServiceStatus(service) {
+      try {
+        const newStatus = !service.active
+        await axios.put(`${process.env.VUE_APP_API_URL}/services/${service._id}`, {
+          ...service,
+          active: newStatus
+        })
+        await this.fetchServices()
+        this.showToast(
+          newStatus 
+            ? this.$t('toast.serviceActivated', { name: service.name }) || `Service "${service.name}" activated`
+            : this.$t('toast.serviceDeactivated', { name: service.name }) || `Service "${service.name}" deactivated`,
+          'success'
+        )
+      } catch (error) {
+        console.error('Error toggling service status:', error)
+        this.showToast('Error updating service status', 'error')
+      }
+    },
     async deleteService(id) {
       if (confirm('Are you sure you want to delete this service?')) {
         try {
           await axios.delete(`${process.env.VUE_APP_API_URL}/services/${id}`)
           await this.fetchServices()
+          this.showToast('Service deleted successfully', 'success')
         } catch (error) {
           console.error('Error deleting service:', error)
+          this.showToast('Error deleting service', 'error')
         }
       }
     },
     cancelServiceForm() {
       this.showServiceForm = false
-      this.serviceForm = { name: '', duration: '', price: '', description: '' }
+      this.serviceForm = { name: '', duration: '', price: '', description: '', active: true }
     },
 async quickBookAppointment() {
       try {

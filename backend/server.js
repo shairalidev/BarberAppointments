@@ -47,7 +47,8 @@ app.get('/api/health', (req, res) => {
 app.get('/api/services/public', async (req, res) => {
   try {
     const Service = require('./models/Service');
-    const services = await Service.find();
+    // Only return active services for public booking
+    const services = await Service.find({ active: true });
     res.json(services);
   } catch (error) {
     res.status(500).json({ message: error.message });

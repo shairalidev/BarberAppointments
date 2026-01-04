@@ -2,10 +2,10 @@ const express = require('express');
 const router = express.Router();
 const Service = require('../models/Service');
 
-// Get all services
+// Get all services (admin can see both active and inactive)
 router.get('/', async (req, res) => {
   try {
-    const services = await Service.find({ active: true });
+    const services = await Service.find().sort({ createdAt: -1 });
     res.json(services);
   } catch (error) {
     res.status(500).json({ message: error.message });
