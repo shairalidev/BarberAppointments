@@ -172,24 +172,24 @@ export default {
 }
 
 .logo-container {
-  padding: 12px 20px;
+  padding: 8px 16px;
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
   border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .logo-container:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
   transform: translateY(-1px);
 }
 
 .brand-logo {
-  height: 150px;
+  height: 65px;
   width: auto;
   object-fit: contain;
-  max-width: 400px;
+  max-width: 250px;
   display: block;
 }
 
@@ -273,12 +273,12 @@ export default {
 /* Mobile Optimizations */
 @media (max-width: 991px) {
   .logo-container {
-    padding: 6px 10px;
+    padding: 6px 12px;
   }
   
   .brand-logo {
-    height: 120px;
-    max-width: 320px;
+    height: 55px;
+    max-width: 220px;
   }
   
   .navbar-collapse {
@@ -325,12 +325,12 @@ export default {
 
 @media (max-width: 576px) {
   .logo-container {
-    padding: 4px 8px;
+    padding: 5px 10px;
   }
   
   .brand-logo {
-    height: 80px;
-    max-width: 240px;
+    height: 45px;
+    max-width: 180px;
   }
 }
 </style>

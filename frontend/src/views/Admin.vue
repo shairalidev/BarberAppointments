@@ -2622,19 +2622,19 @@ async setReminder(appointment) {
 }
 
 .admin-logo-container {
-  padding: 12px 20px;
+  padding: 8px 16px;
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(0, 0, 0, 0.05);
   display: inline-block;
 }
 
 .admin-logo {
-  height: 150px;
+  height: 65px;
   width: auto;
   object-fit: contain;
-  max-width: 400px;
+  max-width: 250px;
   display: block;
 }
 
@@ -3536,12 +3536,12 @@ async setReminder(appointment) {
   }
 
   .admin-logo-container {
-    padding: 6px 10px;
+    padding: 5px 10px;
   }
   
   .admin-header .admin-logo {
-    height: 120px;
-    max-width: 320px;
+    height: 45px;
+    max-width: 180px;
   }
 
   .admin-header p {
