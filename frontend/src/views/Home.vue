@@ -1,8 +1,8 @@
 <template>
   <div class="home">
     <!-- Hero Section -->
-    <section class="hero-section">
-      <div class="hero-overlay"></div>
+    <section class="hero-section" :style="heroBackgroundStyle">
+      <div class="hero-overlay" :style="heroOverlayStyle"></div>
       <div class="container position-relative">
         <div class="row align-items-center min-vh-90">
           <div class="col-lg-7 col-md-8 text-white hero-content">
@@ -153,9 +153,25 @@ export default {
     ])
   },
   computed: {
-    heroSectionStyle() {
-      // Background handled by hero-overlay CSS, no inline style needed
-      return {}
+    heroBackgroundStyle() {
+      // Use process.env.BASE_URL or just / for public folder files
+      const imgPath = '/img1.jpeg'
+      return {
+        backgroundImage: `linear-gradient(135deg, rgba(26, 26, 46, 0.6) 0%, rgba(22, 33, 62, 0.6) 50%, rgba(15, 52, 96, 0.6) 100%), url(${imgPath})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }
+    },
+    heroOverlayStyle() {
+      const imgPath = '/img1.jpeg'
+      return {
+        backgroundImage: `url(${imgPath})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        opacity: '0.4'
+      }
     }
   },
   methods: {
@@ -247,10 +263,6 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url('/img1.jpeg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
   z-index: 0;
 }
 
