@@ -238,6 +238,9 @@
                             <button v-if="apt.status === 'confirmed'" @click="openEditTimeModal(apt)" class="btn btn-sm btn-primary flex-fill">
                               <i class="fas fa-edit me-1"></i>{{ $t('common.edit') }}
                             </button>
+                            <button v-if="apt.status === 'confirmed'" @click="openCancelModal(apt)" class="btn btn-sm btn-danger flex-fill">
+                              <i class="fas fa-times me-1"></i>{{ $t('admin.reject') }}
+                            </button>
                           <button v-if="apt.status === 'confirmed'" @click="setReminder(apt)" class="btn btn-sm btn-warning">
                             <i class="fas fa-bell"></i>
                           </button>
@@ -957,6 +960,47 @@
     </div>
 
 
+    <!-- Cancel Appointment Modal -->
+    <div v-if="cancelModal.show" class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" @click.self="closeCancelModal">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title">
+              <i class="fas fa-times-circle me-2"></i>{{ $t('admin.reject') }} Appointment
+            </h5>
+            <button @click="closeCancelModal" class="btn-close btn-close-white"></button>
+          </div>
+          <div class="modal-body">
+            <div v-if="cancelModal.appointment" class="mb-3">
+              <p class="mb-1"><strong>Customer:</strong> {{ cancelModal.appointment.customerName }}</p>
+              <p class="mb-1"><strong>Date & Time:</strong> {{ formatDate(cancelModal.appointment.date) }} at {{ cancelModal.appointment.time }}</p>
+              <p class="mb-0"><strong>Services:</strong> {{ cancelModal.appointment.services?.map(s => s.name).join(', ') }}</p>
+            </div>
+            <div class="alert alert-warning">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              Are you sure you want to cancel this appointment? This action cannot be undone and an email will be sent to the customer.
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Cancellation Note (Optional)</label>
+              <textarea 
+                v-model="cancelModal.message" 
+                class="form-control" 
+                rows="4" 
+                placeholder="Add a note explaining the cancellation reason (this will be included in the email notification to the customer)"
+              ></textarea>
+              <small class="text-muted">This message will be sent to the customer via email.</small>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button @click="closeCancelModal" class="btn btn-secondary">{{ $t('common.cancel') }}</button>
+            <button @click="confirmCancelAppointment" class="btn btn-danger">
+              <i class="fas fa-times me-2"></i>{{ $t('admin.reject') }} Appointment
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Edit Appointment Modal -->
     <div v-if="editTimeModal.show" class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" @click.self="closeEditTimeModal">
       <div class="modal-dialog modal-dialog-centered">
@@ -1118,6 +1162,11 @@ export default {
         appointment: null,
         newTime: '',
         availableTimes: [],
+        message: ''
+      },
+      cancelModal: {
+        show: false,
+        appointment: null,
         message: ''
       },
       bookingCalendarMonth: new Date().getMonth(),
@@ -1794,6 +1843,39 @@ async setReminder(appointment) {
           this.$t('toast.reminderError', { message: error.response?.data?.message || error.message }),
           'error'
         )
+      }
+    },
+    openCancelModal(appointment) {
+      this.cancelModal = {
+        show: true,
+        appointment,
+        message: ''
+      }
+    },
+    closeCancelModal() {
+      this.cancelModal.show = false
+      this.cancelModal.appointment = null
+      this.cancelModal.message = ''
+    },
+    async confirmCancelAppointment() {
+      if (!this.cancelModal.appointment) {
+        return
+      }
+      
+      try {
+        await axios.put(`${process.env.VUE_APP_API_URL}/appointments/${this.cancelModal.appointment._id}`, {
+          status: 'cancelled',
+          responseMessage: this.cancelModal.message || 'Appointment has been cancelled.',
+          sendEmail: true
+        })
+        
+        await this.fetchAppointments()
+        this.closeCancelModal()
+        this.showToast('Appointment cancelled successfully. Customer has been notified.', 'success')
+      } catch (error) {
+        console.error('Error cancelling appointment:', error)
+        const errorMessage = error.response?.data?.message || 'Failed to cancel appointment'
+        this.showToast(errorMessage, 'error')
       }
     },
     async cancelAppointmentFromEdit() {
