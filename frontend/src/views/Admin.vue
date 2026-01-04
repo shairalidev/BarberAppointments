@@ -231,7 +231,7 @@
                             <i class="fas fa-cut me-2 text-muted"></i>{{ apt.services?.map(s => s.name).join(', ') }}
                           </p>
                           <div class="appointment-meta d-flex justify-content-between mb-2">
-                            <span class="price"><i class="fas fa-euro-sign me-1"></i>{{ formatCurrency(apt.totalPrice) }}</span>
+                            <span class="price">{{ formatCurrency(apt.totalPrice) }}</span>
                             <span class="duration"><i class="fas fa-hourglass-half me-1"></i>{{ apt.totalDuration }}min</span>
                           </div>
                           <div v-if="apt.customerPhone" class="contact-info mb-2">
@@ -537,9 +537,6 @@
                   <div>
                     <h5 class="mb-0"><i class="fas fa-clock me-2"></i>{{ $t('admin.weeklyTimeSlots') }}</h5>
                     <small class="text-muted">{{ $t('admin.manageWorkingHours') }}</small>
-                  </div>
-                  <div v-if="primaryBarber" class="d-none d-lg-block">
-                    <span class="badge bg-info">{{ timeSlots.length }} {{ $t('admin.totalSlots') }}</span>
                   </div>
                 </div>
               </div>
@@ -946,7 +943,7 @@
                 </div>
                 <div class="col-12" v-if="bookingForm.totalPrice">
                   <div class="alert alert-success">
-                    <strong><i class="fas fa-euro-sign me-1"></i>{{ $t('admin.totalAmount') }}: {{ formatCurrency(bookingForm.totalPrice) }}</strong>
+                    <strong>{{ $t('admin.totalAmount') }}: {{ formatCurrency(bookingForm.totalPrice) }}</strong>
                   </div>
                 </div>
               </div>
