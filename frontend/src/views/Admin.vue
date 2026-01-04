@@ -86,16 +86,6 @@
           </li>
           <li class="nav-item">
             <button 
-              @click="activeTab = 'requests'" 
-              :class="['nav-link', 'fw-medium', 'position-relative', activeTab === 'requests' ? 'active' : '']"
-            >
-              <i class="fas fa-inbox nav-icon"></i>
-              <span class="nav-text">{{ $t('admin.requests') }}</span>
-              <span v-if="pendingAppointments.length" class="nav-badge">{{ pendingAppointments.length }}</span>
-            </button>
-          </li>
-          <li class="nav-item">
-            <button 
               @click="activeTab = 'customers'" 
               :class="['nav-link', 'fw-medium', activeTab === 'customers' ? 'active' : '']"
             >
@@ -245,8 +235,8 @@
                             <button v-if="apt.status === 'pending'" @click="openResponseModal(apt, 'cancelled')" class="btn btn-sm btn-outline-danger flex-fill">
                               <i class="fas fa-times me-1"></i>{{ $t('admin.reject') }}
                             </button>
-                            <button v-if="apt.status === 'confirmed'" @click="confirmAction(apt, 'completed')" class="btn btn-sm btn-primary flex-fill">
-                              <i class="fas fa-flag-checkered me-1"></i>{{ $t('admin.complete') }}
+                            <button v-if="apt.status === 'confirmed'" @click="openEditTimeModal(apt)" class="btn btn-sm btn-primary flex-fill">
+                              <i class="fas fa-edit me-1"></i>{{ $t('common.edit') }}
                             </button>
                           <button v-if="apt.status === 'confirmed'" @click="setReminder(apt)" class="btn btn-sm btn-warning">
                             <i class="fas fa-bell"></i>
@@ -331,78 +321,6 @@
             </div>
           </div>
 
-          <!-- Booking Requests Tab -->
-          <div v-if="activeTab === 'requests'" class="requests-tab">
-            <div class="card border-0 shadow-sm">
-              <div class="card-header py-3">
-                <h5 class="mb-0"><i class="fas fa-inbox me-2"></i>{{ $t('admin.bookingRequests') }}</h5>
-                <small class="text-muted">{{ pendingAppointments.length }} pending request(s)</small>
-              </div>
-              <div class="card-body p-2 p-lg-3">
-                <div v-if="pendingAppointments.length" class="requests-list">
-                  <div v-for="apt in pendingAppointments" :key="apt._id" class="request-card card mb-3">
-                    <div class="card-body p-3">
-                      <div class="row g-3">
-                        <div class="col-12 col-lg-8">
-                          <div class="request-header d-flex justify-content-between align-items-start mb-2">
-                            <h6 class="mb-0 fw-bold">{{ apt.customerName }}</h6>
-                            <span class="badge bg-warning text-dark d-lg-none">{{ $t('admin.pending') }}</span>
-                          </div>
-                          <div class="request-details">
-                            <div class="detail-item mb-1">
-                              <i class="fas fa-calendar me-2 text-primary"></i>
-                              <span class="fw-medium">{{ formatDate(apt.date) }} at {{ apt.time }}</span>
-                            </div>
-                            <div class="detail-item mb-1">
-                              <i class="fas fa-cut me-2 text-success"></i>
-                              <span>{{ apt.services?.map(s => s.name).join(', ') }}</span>
-                            </div>
-                            <div class="detail-item mb-1">
-                              <i class="fas fa-user-tie me-2 text-info"></i>
-                              <span>{{ apt.barberId?.name }}</span>
-                            </div>
-                            <div class="detail-item mb-1">
-                              <i class="fas fa-phone me-2 text-secondary"></i>
-                              <span>{{ apt.customerPhone }}</span>
-                            </div>
-                            <div v-if="apt.customerEmail" class="detail-item mb-1">
-                              <i class="fas fa-envelope me-2 text-secondary"></i>
-                              <span>{{ apt.customerEmail }}</span>
-                            </div>
-                            <div v-if="apt.notes" class="detail-item">
-                              <i class="fas fa-note-sticky me-2 text-muted"></i>
-                              <span class="text-muted">{{ apt.notes }}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="col-12 col-lg-4">
-                          <div class="request-actions text-center text-lg-end">
-                            <div class="price-display mb-3">
-                              <h4 class="text-primary mb-0">{{ formatCurrency(apt.totalPrice) }}</h4>
-                              <small class="text-muted">{{ $t('admin.totalAmount') }}</small>
-                            </div>
-                            <div class="action-buttons d-grid gap-2">
-                              <button @click="openResponseModal(apt, 'confirmed')" class="btn btn-success">
-                                <i class="fas fa-check me-2"></i>{{ $t('admin.acceptRequest') }}
-                              </button>
-                              <button @click="openResponseModal(apt, 'cancelled')" class="btn btn-outline-danger">
-                                <i class="fas fa-times me-2"></i>{{ $t('admin.rejectRequest') }}
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div v-else class="empty-state text-center py-5">
-                  <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                  <h5 class="text-muted">{{ $t('admin.noPendingRequests') }}</h5>
-                  <p class="text-muted mb-0">{{ $t('admin.allRequestsProcessed') }}</p>
-                </div>
-              </div>
-            </div>
-          </div>
 
           <!-- Services Tab -->
           <div v-if="activeTab === 'services'" class="services-tab">
@@ -1038,46 +956,14 @@
       </div>
     </div>
 
-    <!-- Confirmation Modal -->
-    <div v-if="confirmModal.show" class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" @click.self="confirmModal.show = false">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content confirmation-modal">
-          <div class="modal-header border-0 pb-0">
-            <div class="confirmation-icon">
-              <i :class="confirmModal.action === 'confirmed' ? 'fas fa-check-circle text-success' : 'fas fa-flag-checkered text-primary'"></i>
-            </div>
-            <button @click="confirmModal.show = false" class="btn-close"></button>
-          </div>
-          <div class="modal-body text-center">
-            <h5 class="mb-3">{{ confirmModal.action === 'confirmed' ? $t('admin.approveAppointmentQuestion') : $t('admin.markAsCompleteQuestion') }}</h5>
-            <p class="text-muted mb-4">{{ confirmModal.message }}</p>
-            <div class="appointment-preview">
-              <div class="preview-item">
-                <i class="fas fa-user me-2"></i>{{ confirmModal.appointment?.customerName }}
-              </div>
-              <div class="preview-item">
-                <i class="fas fa-calendar me-2"></i>{{ formatDate(confirmModal.appointment?.date) }} {{ $t('common.at') }} {{ confirmModal.appointment?.time }}
-              </div>
-            </div>
-          </div>
-          <div class="modal-footer border-0 pt-0">
-            <button @click="confirmModal.show = false" class="btn btn-light">{{ $t('common.cancel') }}</button>
-            <button @click="executeAction" :class="confirmModal.action === 'confirmed' ? 'btn btn-success' : 'btn btn-primary'">
-              <i :class="confirmModal.action === 'confirmed' ? 'fas fa-check me-2' : 'fas fa-flag-checkered me-2'"></i>
-              {{ confirmModal.action === 'confirmed' ? $t('admin.approve') : $t('admin.complete') }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Edit Time Modal -->
+    <!-- Edit Appointment Modal -->
     <div v-if="editTimeModal.show" class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" @click.self="closeEditTimeModal">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header bg-gradient-primary text-white">
             <h5 class="modal-title">
-              <i class="fas fa-clock me-2"></i>Edit Appointment Time
+              <i class="fas fa-edit me-2"></i>{{ $t('common.edit') }} Appointment
             </h5>
             <button @click="closeEditTimeModal" class="btn-close btn-close-white"></button>
           </div>
@@ -1110,15 +996,18 @@
                 v-model="editTimeModal.message" 
                 class="form-control" 
                 rows="3" 
-                placeholder="Add a note about the time change (this will be included in the email notification)"
+                placeholder="Add a note about the change (this will be included in the email notification)"
               ></textarea>
               <small class="text-muted">This message will be sent to both the customer and barber via email.</small>
             </div>
           </div>
           <div class="modal-footer">
             <button @click="closeEditTimeModal" class="btn btn-secondary">{{ $t('common.cancel') }}</button>
+            <button @click="cancelAppointmentFromEdit" class="btn btn-danger">
+              <i class="fas fa-times me-2"></i>{{ $t('admin.reject') }} Appointment
+            </button>
             <button @click="updateAppointmentTime" class="btn btn-primary" :disabled="!editTimeModal.newTime">
-              <i class="fas fa-save me-2"></i>Update Time
+              <i class="fas fa-save me-2"></i>{{ $t('common.update') }} Time
             </button>
           </div>
         </div>
@@ -1207,12 +1096,6 @@ export default {
         currentPassword: '',
         newPassword: '',
         confirmPassword: ''
-      },
-      confirmModal: {
-        show: false,
-        appointment: null,
-        action: '',
-        message: ''
       },
       toasts: [],
       toastId: 0,
@@ -1913,22 +1796,29 @@ async setReminder(appointment) {
         )
       }
     },
-    confirmAction(appointment, action) {
-      this.confirmModal = {
-        show: true,
-        appointment,
-        action,
-        message: action === 'confirmed' 
-          ? 'This will approve the appointment and notify the customer.'
-          : 'This will mark the appointment as completed.'
+    async cancelAppointmentFromEdit() {
+      if (!this.editTimeModal.appointment) {
+        return
       }
-    },
-    async executeAction() {
+      
+      if (!confirm('Are you sure you want to cancel this appointment? This action cannot be undone.')) {
+        return
+      }
+      
       try {
-        await this.updateAppointmentStatus(this.confirmModal.appointment, this.confirmModal.action)
-        this.confirmModal.show = false
+        await axios.put(`${process.env.VUE_APP_API_URL}/appointments/${this.editTimeModal.appointment._id}`, {
+          status: 'cancelled',
+          responseMessage: this.editTimeModal.message || 'Appointment has been cancelled.',
+          sendEmail: true
+        })
+        
+        await this.fetchAppointments()
+        this.closeEditTimeModal()
+        this.showToast('Appointment cancelled successfully', 'success')
       } catch (error) {
-        console.error('Error executing action:', error)
+        console.error('Error cancelling appointment:', error)
+        const errorMessage = error.response?.data?.message || 'Failed to cancel appointment'
+        this.showToast(errorMessage, 'error')
       }
     },
     async updateBarberProfile() {
