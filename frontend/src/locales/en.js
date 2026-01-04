@@ -27,7 +27,10 @@ export default {
       title: 'Ready for a Fresh Look?',
       subtitle: 'Book your appointment today and experience the difference',
       button: 'Schedule Appointment'
-    }
+    },
+    gallery: 'Gallery',
+    galleryTitle: 'Our Work',
+    galleryDescription: 'See our latest work and transformations'
   },
   booking: {
     title: 'Schedule your visit',

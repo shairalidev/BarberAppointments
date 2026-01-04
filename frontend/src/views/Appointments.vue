@@ -97,9 +97,24 @@
               </div>
 
               <div class="calendar-wrapper mb-4">
-                <div class="text-center mb-3">
-                  <h5 class="mb-0">{{ $t('booking.availableDates') }}</h5>
-                  <p class="text-muted small mb-1">{{ $t('booking.selectFromNext14Days') }}</p>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <button 
+                    class="btn btn-sm btn-outline-secondary calendar-nav-btn" 
+                    @click="navigateCalendar(-1)"
+                    :disabled="dateOffset === 0"
+                    title="Previous dates">
+                    <i class="fas fa-chevron-left"></i>
+                  </button>
+                  <div class="text-center flex-grow-1">
+                    <h5 class="mb-0">{{ $t('booking.availableDates') }}</h5>
+                    <p class="text-muted small mb-0">{{ calendarRangeLabel }}</p>
+                  </div>
+                  <button 
+                    class="btn btn-sm btn-outline-secondary calendar-nav-btn" 
+                    @click="navigateCalendar(1)"
+                    title="Next dates">
+                    <i class="fas fa-chevron-right"></i>
+                  </button>
                 </div>
 
                 <div class="week-grid">
@@ -267,6 +282,7 @@ export default {
       availableTimes: [],
       currentStep: 1,
       availabilityTimeout: null,
+      dateOffset: 0, // Offset for calendar navigation (0 = today, 1 = next 14 days, etc.)
       customer: {
         name: '',
         phone: '',
@@ -307,6 +323,8 @@ export default {
       const today = new Date()
       today.setHours(0, 0, 0, 0)
       const startDate = new Date(today)
+      // Calculate start date based on offset (each offset shows 14 days)
+      startDate.setDate(today.getDate() + (this.dateOffset * 14))
 
       return Array.from({ length: 14 }, (_, index) => {
         const date = new Date(startDate)
@@ -321,6 +339,20 @@ export default {
           isToday: this.isSameDay(date, today)
         }
       })
+    },
+    calendarRangeLabel() {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const startDate = new Date(today)
+      startDate.setDate(today.getDate() + (this.dateOffset * 14))
+      
+      const endDate = new Date(startDate)
+      endDate.setDate(startDate.getDate() + 13)
+      
+      const startLabel = startDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+      const endLabel = endDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+      
+      return `${startLabel} - ${endLabel}`
     },
     monthLabel() {
       const referenceDate = this.selectedDate || this.currentWeekStart || this.formatDateValue(new Date())
@@ -436,6 +468,32 @@ export default {
       
       // Fallback to today if no future date found in week
       return this.formatDateValue(today)
+    },
+    navigateCalendar(direction) {
+      // Navigate forward or backward by 14 days
+      const newOffset = this.dateOffset + direction
+      // Don't allow going back before today (offset 0)
+      if (newOffset < 0) {
+        return
+      }
+      this.dateOffset = newOffset
+      // Clear selected time when navigating
+      this.selectedTime = ''
+      // If selected date is not in current range, clear it
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const startDate = new Date(today)
+      startDate.setDate(today.getDate() + (this.dateOffset * 14))
+      const endDate = new Date(startDate)
+      endDate.setDate(startDate.getDate() + 13)
+      
+      if (this.selectedDate) {
+        const selected = new Date(this.selectedDate)
+        if (selected < startDate || selected > endDate) {
+          this.selectedDate = ''
+          this.availableTimes = []
+        }
+      }
     },
     selectDate(date) {
       // Prevent selecting past dates
@@ -654,6 +712,7 @@ export default {
       this.selectedTime = ''
       this.currentStep = 1
       this.availableTimes = []
+      this.dateOffset = 0 // Reset to first page
       
       // Clear any pending availability refresh
       clearTimeout(this.availabilityTimeout)
@@ -809,6 +868,27 @@ export default {
 .btn-outline-primary.active {
   background: #2563eb;
   color: #fff;
+}
+
+.calendar-nav-btn {
+  min-width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.calendar-nav-btn:hover:not(:disabled) {
+  background-color: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.calendar-nav-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .calendar-wrapper {

@@ -19,9 +19,7 @@
               <router-link class="btn btn-light btn-lg px-4 py-3 shadow-lg touch-friendly" to="/appointments">
                 <i class="fas fa-calendar-check me-2"></i>{{ $t('home.bookNow') }}
               </router-link>
-              <a href="tel:+1234567890" class="btn btn-outline-light btn-lg px-4 py-3 call-us-btn touch-friendly">
-                <i class="fas fa-phone me-2"></i>{{ $t('home.callUs') }}
-              </a>
+             
             </div>
           </div>
         </div>
@@ -30,29 +28,7 @@
     </section>
 
     <!-- Stats Section -->
-    <section class="stats-section py-4 bg-dark text-white">
-      <div class="container">
-        <div class="row text-center g-4">
-          <div class="col-6 col-md-3">
-            <h3 class="fw-bold mb-1">500+</h3>
-            <small class="text-white-50">Happy Clients</small>
-          </div>
-          <div class="col-6 col-md-3">
-            <h3 class="fw-bold mb-1">15+</h3>
-            <small class="text-white-50">Years Experience</small>
-          </div>
-          <div class="col-6 col-md-3">
-            <h3 class="fw-bold mb-1">5</h3>
-            <small class="text-white-50">Expert Barbers</small>
-          </div>
-          <div class="col-6 col-md-3">
-            <h3 class="fw-bold mb-1">4.9★</h3>
-            <small class="text-white-50">Customer Rating</small>
-          </div>
-        </div>
-      </div>
-    </section>
-
+  
     <!-- Services Section -->
     <section class="services-section py-5">
       <div class="container py-4">
@@ -70,7 +46,7 @@
               <h5 class="fw-bold mb-2">{{ service.name }}</h5>
               <p class="text-muted small mb-3">{{ service.description || 'Professional service with attention to detail' }}</p>
               <div class="d-flex justify-content-between align-items-center">
-                <span class="price">${{ service.price }}</span>
+                <span class="price">{{ formatCurrency(service.price) }}</span>
                 <span class="duration"><i class="fas fa-clock me-1"></i>{{ service.duration }}min</span>
               </div>
             </div>
@@ -80,6 +56,30 @@
           <router-link class="btn btn-primary btn-lg px-4 py-3 text-white touch-friendly" to="/appointments">
             {{ $t('home.viewAllServices') }} <i class="fas fa-arrow-right ms-2"></i>
           </router-link>
+        </div>
+      </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section class="gallery-section py-5" v-if="galleryImages.length > 0">
+      <div class="container py-4">
+        <div class="text-center mb-5">
+          <span class="badge bg-primary bg-opacity-10 text-primary mb-3 px-3 py-2">{{ $t('home.gallery') }}</span>
+          <h2 class="display-5 fw-bold mb-3">{{ $t('home.galleryTitle') }}</h2>
+          <p class="text-muted fs-6">{{ $t('home.galleryDescription') }}</p>
+        </div>
+        <div class="row g-3">
+          <div class="col-lg-4 col-md-6" v-for="(image, index) in galleryImages" :key="index">
+            <div class="gallery-item">
+              <img 
+                :src="image" 
+                :alt="`Gallery image ${index + 1}`"
+                @error="handleImageError(index)"
+                loading="lazy"
+                class="gallery-image"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -95,15 +95,6 @@
               </div>
               <h6 class="fw-bold mb-2">{{ $t('home.features.easyBooking') }}</h6>
               <p class="text-muted small mb-0">{{ $t('home.features.easyBookingDesc') }}</p>
-            </div>
-          </div>
-          <div class="col-lg-3 col-md-6">
-            <div class="feature-card text-center">
-              <div class="feature-icon mb-3">
-                <i class="fas fa-user-tie"></i>
-              </div>
-              <h6 class="fw-bold mb-2">{{ $t('home.features.expertBarbers') }}</h6>
-              <p class="text-muted small mb-0">{{ $t('home.features.expertBarbersDesc') }}</p>
             </div>
           </div>
           <div class="col-lg-3 col-md-6">
@@ -150,20 +141,68 @@ export default {
   name: 'Home',
   data() {
     return {
-      services: []
+      services: [],
+      galleryImages: [],
+      maxGalleryImages: 20 // Maximum number of images to check
     }
   },
   async mounted() {
-    await this.fetchServices()
+    await Promise.all([
+      this.fetchServices(),
+      this.loadGalleryImages()
+    ])
   },
   methods: {
     async fetchServices() {
       try {
         const response = await axios.get(`${process.env.VUE_APP_API_URL}/services/public`)
-        this.services = response.data.slice(0, 3) // Show only first 3 services
+        // Show first 3 services from available services
+        this.services = response.data.slice(0, 3)
       } catch (error) {
         console.error('Error fetching services:', error)
+        this.services = []
       }
+    },
+    formatCurrency(value) {
+      return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(value)
+    },
+    async loadGalleryImages() {
+      const images = []
+      let imageIndex = 1
+      let consecutiveErrors = 0
+      const maxConsecutiveErrors = 3 // Stop after 3 consecutive missing images
+      
+      // Load images sequentially, stopping after 3 consecutive errors
+      while (imageIndex <= this.maxGalleryImages && consecutiveErrors < maxConsecutiveErrors) {
+        const imagePath = `/img${imageIndex}.jpeg`
+        
+        const imageExists = await this.checkImageExists(imagePath)
+        
+        if (imageExists) {
+          images.push(imagePath)
+          consecutiveErrors = 0 // Reset error counter on success
+        } else {
+          consecutiveErrors++
+        }
+        
+        imageIndex++
+      }
+      
+      this.galleryImages = images
+    },
+    checkImageExists(imagePath) {
+      return new Promise((resolve) => {
+        const img = new Image()
+        img.onload = () => resolve(true)
+        img.onerror = () => resolve(false)
+        img.src = imagePath
+        // Timeout after 2 seconds to prevent hanging
+        setTimeout(() => resolve(false), 2000)
+      })
+    },
+    handleImageError(index) {
+      // Remove failed image from gallery
+      this.galleryImages = this.galleryImages.filter((_, i) => i !== index)
     }
   }
 }
@@ -265,6 +304,38 @@ export default {
 /* Services Section */
 .services-section {
   background: var(--bg-primary);
+}
+
+/* Gallery Section */
+.gallery-section {
+  background: var(--bg-tertiary);
+}
+
+.gallery-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  aspect-ratio: 1;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.gallery-item:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+}
+
+.gallery-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.gallery-item:hover .gallery-image {
+  transform: scale(1.05);
 }
 
 .service-card {

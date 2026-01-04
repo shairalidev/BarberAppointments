@@ -27,7 +27,10 @@ export default {
       title: 'Bereit für einen neuen Look?',
       subtitle: 'Buchen Sie heute Ihren Termin und erleben Sie den Unterschied',
       button: 'Termin vereinbaren'
-    }
+    },
+    gallery: 'Galerie',
+    galleryTitle: 'Unsere Arbeiten',
+    galleryDescription: 'Sehen Sie unsere neuesten Arbeiten und Transformationen'
   },
   booking: {
     title: 'Planen Sie Ihren Besuch',
