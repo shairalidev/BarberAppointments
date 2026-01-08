@@ -99,7 +99,7 @@ jobs:
           # Nginx
           pm2 save
           sudo rm -rf /var/cache/nginx/* 2>/dev/null || true
-          sudo nginx -t && sudo systemctl reload nginx || sudo systemctl restart nginx
+          sudo systemctl reload nginx
 
           DEPLOY_DURATION=$(($(date +%s) - DEPLOY_START))
           echo "✅ Deployment Complete! (${DEPLOY_DURATION}s)"
