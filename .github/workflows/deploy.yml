@@ -35,7 +35,18 @@ jobs:
           echo "🚀 Starting BarberAppointments Deployment..."
           echo "📅 Started at: $(date)"
 
-          cd /var/www/BarberAppointments
+          echo "📍 Current directory: $(pwd)"
+          echo "📍 Checking deployment directory..."
+          if [ ! -d "/var/www/BarberAppointments" ]; then
+            echo "❌ ERROR: /var/www/BarberAppointments does not exist!"
+            exit 1
+          fi
+          
+          cd /var/www/BarberAppointments || {
+            echo "❌ ERROR: Failed to change to /var/www/BarberAppointments"
+            exit 1
+          }
+          echo "✓ Changed to: $(pwd)"
 
           echo "🔧 Fixing ownership..."
           sudo chown -R ubuntu:ubuntu /var/www/BarberAppointments
@@ -70,21 +81,54 @@ jobs:
           fi
 
           echo "🔧 Backend dependencies..."
+          set +e  # Temporarily disable exit on error for directory checks
+          echo "   Checking backend directory..."
+          if [ ! -d "/var/www/BarberAppointments/backend" ]; then
+            echo "   ❌ ERROR: Backend directory does not exist!"
+            set -e
+            exit 1
+          fi
           cd /var/www/BarberAppointments/backend
+          CD_EXIT_CODE=$?
+          set -e  # Re-enable exit on error
+          
+          if [ $CD_EXIT_CODE -ne 0 ]; then
+            echo "   ❌ ERROR: Failed to change to backend directory! Exit code: $CD_EXIT_CODE"
+            exit 1
+          fi
+          echo "   ✓ Backend directory found: $(pwd)"
+          
           if [ "$BACKEND_DEPS_CHANGED" = true ] || [ ! -d "node_modules" ]; then
             echo "   Installing backend packages (dependencies changed or missing)..."
             echo "   Checking files..."
             ls -la package*.json 2>/dev/null || echo "   ⚠️  No package files found!"
+            
+            set +e  # Temporarily disable exit on error for npm commands
             if [ -f "package-lock.json" ]; then
               echo "   ✓ package-lock.json found, using npm ci..."
-              npm ci --no-audit || {
-                echo "   ⚠️  npm ci failed, trying npm install..."
+              npm ci --no-audit
+              NPM_EXIT=$?
+              if [ $NPM_EXIT -ne 0 ]; then
+                echo "   ⚠️  npm ci failed (exit code: $NPM_EXIT), trying npm install..."
                 npm install --no-audit
-              }
+                NPM_EXIT=$?
+                if [ $NPM_EXIT -ne 0 ]; then
+                  echo "   ❌ ERROR: npm install also failed! Exit code: $NPM_EXIT"
+                  set -e
+                  exit 1
+                fi
+              fi
             else
               echo "   ⚠️  No package-lock.json, using npm install..."
               npm install --no-audit
+              NPM_EXIT=$?
+              if [ $NPM_EXIT -ne 0 ]; then
+                echo "   ❌ ERROR: npm install failed! Exit code: $NPM_EXIT"
+                set -e
+                exit 1
+              fi
             fi
+            set -e  # Re-enable exit on error
             echo "   ✓ Backend dependencies installed"
           else
             echo "   ✓ Skipping backend npm install (no dependency changes)"
@@ -124,7 +168,17 @@ jobs:
           set -e
 
           echo "🎨 Frontend dependencies..."
-          cd /var/www/BarberAppointments/frontend
+          echo "   Checking frontend directory..."
+          if [ ! -d "/var/www/BarberAppointments/frontend" ]; then
+            echo "   ❌ ERROR: Frontend directory does not exist!"
+            exit 1
+          fi
+          cd /var/www/BarberAppointments/frontend || {
+            echo "   ❌ ERROR: Failed to change to frontend directory!"
+            exit 1
+          }
+          echo "   ✓ Frontend directory found: $(pwd)"
+          
           if [ "$FRONTEND_DEPS_CHANGED" = true ] || [ ! -d "node_modules" ]; then
             echo "   Installing frontend packages (dependencies changed or missing)..."
             echo "   Checking files..."
@@ -133,11 +187,17 @@ jobs:
               echo "   ✓ package-lock.json found, using npm ci..."
               npm ci --no-audit || {
                 echo "   ⚠️  npm ci failed, trying npm install..."
-                npm install --no-audit
+                npm install --no-audit || {
+                  echo "   ❌ ERROR: npm install failed!"
+                  exit 1
+                }
               }
             else
               echo "   ⚠️  No package-lock.json, using npm install..."
-              npm install --no-audit
+              npm install --no-audit || {
+                echo "   ❌ ERROR: npm install failed!"
+                exit 1
+              }
             fi
             echo "   ✓ Frontend dependencies installed"
           else
