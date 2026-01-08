@@ -54,8 +54,8 @@ jobs:
           BACKEND_NEED_INSTALL=false
           FRONTEND_NEED_INSTALL=false
           if [ -n "$OLD_COMMIT" ]; then
-            git diff "$OLD_COMMIT" HEAD --name-only | grep -qE "backend/(package\.json|package-lock\.json)" && BACKEND_NEED_INSTALL=true
-            git diff "$OLD_COMMIT" HEAD --name-only | grep -qE "frontend/(package\.json|package-lock\.json)" && FRONTEND_NEED_INSTALL=true
+            git diff "$OLD_COMMIT" HEAD --name-only | grep -qE "backend/(package\.json|package-lock\.json)" && BACKEND_NEED_INSTALL=true || true
+            git diff "$OLD_COMMIT" HEAD --name-only | grep -qE "frontend/(package\.json|package-lock\.json)" && FRONTEND_NEED_INSTALL=true || true
           else
             BACKEND_NEED_INSTALL=true
             FRONTEND_NEED_INSTALL=true
