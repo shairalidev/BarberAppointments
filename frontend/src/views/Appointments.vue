@@ -117,7 +117,7 @@
                 </div>
 
                 <div class="calendar-grid-month">
-                  <div class="calendar-header" v-for="day in ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']" :key="day">
+                  <div class="calendar-header" v-for="day in calendarDayNames" :key="day">
                     {{ day }}
                   </div>
                   <button
@@ -327,6 +327,17 @@ export default {
     selectedBarberName() {
       const barber = this.barbers.find(b => b._id === this.selectedBarber)
       return barber?.name
+    },
+    calendarDayNames() {
+      return [
+        this.$t('booking.dayNames.sun'),
+        this.$t('booking.dayNames.mon'),
+        this.$t('booking.dayNames.tue'),
+        this.$t('booking.dayNames.wed'),
+        this.$t('booking.dayNames.thu'),
+        this.$t('booking.dayNames.fri'),
+        this.$t('booking.dayNames.sat')
+      ]
     },
     monthDays() {
       const today = new Date()

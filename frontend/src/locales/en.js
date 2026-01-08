@@ -84,7 +84,16 @@ export default {
     minutes: 'min',
     availableDates: 'Available Dates',
     selectFromNext14Days: 'Select from the next 14 days',
-    dateTime: 'Date & time'
+    dateTime: 'Date & time',
+    dayNames: {
+      sun: 'Sun',
+      mon: 'Mon',
+      tue: 'Tue',
+      wed: 'Wed',
+      thu: 'Thu',
+      fri: 'Fri',
+      sat: 'Sat'
+    }
   },
   admin: {
     dashboard: 'this is a demo',
