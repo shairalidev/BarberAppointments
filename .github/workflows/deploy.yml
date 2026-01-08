@@ -73,7 +73,7 @@ jobs:
           cd /var/www/BarberAppointments/backend
           if [ "$BACKEND_DEPS_CHANGED" = true ] || [ ! -d "node_modules" ]; then
             echo "   Installing backend packages (dependencies changed or missing)..."
-            npm ci --prefer-offline --no-audit --production=false
+            npm ci --prefer-offline --no-audit
           else
             echo "   ✓ Skipping backend npm install (no dependency changes)"
           fi
