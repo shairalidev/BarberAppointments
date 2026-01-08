@@ -154,7 +154,7 @@
                   <div class="card-header py-3 d-none d-lg-block">
                     <div class="d-flex justify-content-between align-items-center">
                       <h5 class="mb-0">
-                        <i :class="calendarViewMode === 'calendar' ? 'fas fa-calendar-alt' : 'fas fa-calendar-day' me-2"></i>
+                        <i :class="[calendarViewMode === 'calendar' ? 'fas fa-calendar-alt' : 'fas fa-calendar-day', 'me-2']"></i>
                         {{ calendarViewMode === 'calendar' ? $t('admin.calendar') : $t('admin.dayView') }}
                       </h5>
                       <div class="d-flex gap-2">
@@ -163,7 +163,7 @@
                         </button>
                         <!-- Toggle Button -->
                         <button @click="toggleCalendarView" class="btn btn-sm" :class="calendarViewMode === 'calendar' ? 'btn-outline-secondary' : 'btn-secondary'">
-                          <i :class="calendarViewMode === 'calendar' ? 'fas fa-calendar-day' : 'fas fa-calendar-alt' me-1"></i>
+                          <i :class="[calendarViewMode === 'calendar' ? 'fas fa-calendar-day' : 'fas fa-calendar-alt', 'me-1']"></i>
                           {{ calendarViewMode === 'calendar' ? $t('admin.dayView') : $t('admin.calendar') }}
                         </button>
                         <!-- Calendar View Controls -->
