@@ -131,19 +131,37 @@
             <!-- Mobile Calendar Controls -->
             <div class="mobile-calendar-controls d-lg-none mb-3">
               <div class="d-flex justify-content-between align-items-center mb-2">
-                <button @click="changeMonth(-1)" class="btn btn-outline-primary btn-sm">
-                  <i class="fas fa-chevron-left"></i>
-                </button>
-                <h6 class="mb-0 fw-bold">{{ currentMonthYear }}</h6>
-                <button @click="changeMonth(1)" class="btn btn-outline-primary btn-sm">
-                  <i class="fas fa-chevron-right"></i>
-                </button>
+                <!-- Calendar View Navigation -->
+                <template v-if="calendarViewMode === 'calendar'">
+                  <button @click="changeMonth(-1)" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-chevron-left"></i>
+                  </button>
+                  <h6 class="mb-0 fw-bold">{{ currentMonthYear }}</h6>
+                  <button @click="changeMonth(1)" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-chevron-right"></i>
+                  </button>
+                </template>
+                <!-- Day View Navigation -->
+                <template v-else>
+                  <button @click="navigateDayView(-1)" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-chevron-left"></i>
+                  </button>
+                  <h6 class="mb-0 fw-bold">{{ formatDayViewDate }}</h6>
+                  <button @click="navigateDayView(1)" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-chevron-right"></i>
+                  </button>
+                </template>
               </div>
               <div class="d-flex gap-2 justify-content-center">
-                <button @click="goToToday" class="btn btn-primary btn-sm">{{ $t('admin.today') }}</button>
-                  <button @click="showBookingModal = true" class="btn btn-success btn-sm">
-                    <i class="fas fa-plus me-1"></i>{{ $t('admin.bookAppointment') }}
-                  </button>
+                <button @click="calendarViewMode === 'calendar' ? goToToday() : goToTodayDayView()" class="btn btn-primary btn-sm">{{ $t('admin.today') }}</button>
+                <button @click="showBookingModal = true" class="btn btn-success btn-sm">
+                  <i class="fas fa-plus me-1"></i>{{ $t('admin.bookAppointment') }}
+                </button>
+                <!-- Toggle Button for Mobile -->
+                <button @click="toggleCalendarView" class="btn btn-sm" :class="calendarViewMode === 'calendar' ? 'btn-outline-secondary' : 'btn-secondary'">
+                  <i :class="[calendarViewMode === 'calendar' ? 'fas fa-calendar-day' : 'fas fa-calendar-alt', 'me-1']"></i>
+                  {{ calendarViewMode === 'calendar' ? $t('admin.dayView') : $t('admin.calendar') }}
+                </button>
               </div>
             </div>
 
@@ -189,7 +207,36 @@
                       </div>
                     </div>
                     <h6 v-if="calendarViewMode === 'calendar'" class="text-center mt-3 mb-0">{{ currentMonthYear }}</h6>
-                    <h6 v-else class="text-center mt-3 mb-0">{{ formatDayViewDate }}</h6>
+                    <div v-else class="d-flex justify-content-between align-items-center mt-3">
+                      <h6 class="mb-0">{{ formatDayViewDate }}</h6>
+                      <div class="off-date-toggle-wrapper">
+                        <label class="off-date-toggle-label" for="dayViewOffDateToggle">
+                          <div class="toggle-switch-container">
+                            <input 
+                              class="off-date-toggle-input" 
+                              type="checkbox" 
+                              id="dayViewOffDateToggle"
+                              :checked="dayViewData.isRestricted"
+                              @change="toggleDayViewOffDate"
+                            >
+                            <span class="toggle-slider" :class="{ 'active': dayViewData.isRestricted }">
+                              <span class="toggle-icon">
+                                <i v-if="dayViewData.isRestricted" class="fas fa-ban"></i>
+                                <i v-else class="fas fa-calendar-check"></i>
+                              </span>
+                            </span>
+                          </div>
+                          <span class="toggle-label-text">
+                            <span v-if="dayViewData.isRestricted" class="text-warning">
+                              <i class="fas fa-ban me-1"></i>Off Date
+                            </span>
+                            <span v-else class="text-muted">
+                              <i class="fas fa-calendar-check me-1"></i>Mark as Off Date
+                            </span>
+                          </span>
+                        </label>
+                      </div>
+                    </div>
                   </div>
                   <div class="card-body p-2 p-lg-3">
                     <!-- Calendar Grid View -->
@@ -1735,6 +1782,15 @@ export default {
       const monthName = monthNames[date.getMonth()]
       return `${dayName}, ${monthName} ${date.getDate()}, ${date.getFullYear()}`
     },
+    formatDayViewDate() {
+      if (!this.dayViewDate) return ''
+      const date = new Date(this.dayViewDate + 'T00:00:00')
+      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+      const dayName = dayNames[date.getDay()]
+      const monthName = monthNames[date.getMonth()]
+      return `${dayName}, ${monthName} ${date.getDate()}, ${date.getFullYear()}`
+    },
     dayViewHalfHourSlots() {
       return (hour) => {
         // Return two half-hour slots: :00 and :30
@@ -2303,7 +2359,7 @@ getTimeSlotsForDay(dayIndex) {
     selectCalendarDate(day) {
       if (day.isCurrentMonth) {
         this.selectedCalendarDate = day.date
-        this.openDateDetailModal(day.date)
+        // Just select the date, don't open modal
       }
     },
     async openDateDetailModal(date) {
@@ -2519,6 +2575,51 @@ getTimeSlotsForDay(dayIndex) {
     },
     navigateToDayViewDate(date) {
       this.loadDayViewData(date)
+    },
+    async toggleDayViewOffDate(event) {
+      const isRestricted = event.target.checked
+      const date = this.dayViewDate
+      
+      try {
+        if (isRestricted) {
+          // Mark as off date
+          await axios.post(`${process.env.VUE_APP_API_URL}/restrictions`, {
+            date: date,
+            reason: 'Off Date'
+          })
+          this.dayViewData.isRestricted = true
+          this.showToast('Date marked as off date', 'success')
+          
+          // Refresh restrictions list
+          await this.fetchRestrictions()
+          
+          // Refresh appointments to update calendar
+          await this.fetchAppointments()
+          
+          // Reload day view data
+          await this.loadDayViewData(date)
+        } else {
+          // Remove off date
+          await axios.delete(`${process.env.VUE_APP_API_URL}/restrictions/date/${date}`)
+          this.dayViewData.isRestricted = false
+          this.dayViewData.restriction = null
+          this.showToast('Off date removed', 'success')
+          
+          // Refresh restrictions list
+          await this.fetchRestrictions()
+          
+          // Refresh appointments to update calendar
+          await this.fetchAppointments()
+          
+          // Reload day view data
+          await this.loadDayViewData(date)
+        }
+      } catch (error) {
+        console.error('Error toggling off date:', error)
+        this.showToast(error.response?.data?.message || 'Error updating off date', 'error')
+        // Revert checkbox
+        event.target.checked = !isRestricted
+      }
     },
     getDayViewHalfHourSlots(hour) {
       // Return two half-hour slots: :00 and :30
