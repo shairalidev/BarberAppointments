@@ -2454,6 +2454,101 @@ getTimeSlotsForDay(dayIndex) {
     navigateToDate(date) {
       this.openDateDetailModal(date)
     },
+    toggleCalendarView() {
+      if (this.calendarViewMode === 'calendar') {
+        // Switch to day view
+        this.calendarViewMode = 'day'
+        // Initialize day view with today's date if not set
+        if (!this.dayViewDate) {
+          this.dayViewDate = new Date().toISOString().split('T')[0]
+        }
+        // Load day view data
+        this.loadDayViewData(this.dayViewDate)
+      } else {
+        // Switch back to calendar view
+        this.calendarViewMode = 'calendar'
+      }
+    },
+    async loadDayViewData(date) {
+      if (!date) return
+      
+      this.dayViewData.loading = true
+      this.dayViewDate = date
+      
+      try {
+        // Check if date is restricted
+        const restrictionCheck = await axios.get(`${process.env.VUE_APP_API_URL}/restrictions/check/${date}`)
+        this.dayViewData.isRestricted = restrictionCheck.data.isRestricted
+        this.dayViewData.restriction = restrictionCheck.data.restriction
+        
+        // Fetch appointments for this date
+        if (!this.dayViewData.isRestricted) {
+          // Refresh appointments first to ensure we have latest data
+          await this.fetchAppointments()
+          
+          // Filter appointments for this date
+          const dateAppointments = this.appointments.filter(apt => {
+            if (!apt.date) return false
+            const aptDate = typeof apt.date === 'string' ? apt.date.split('T')[0] : new Date(apt.date).toISOString().split('T')[0]
+            return aptDate === date && apt.status !== 'cancelled'
+          })
+          
+          // Sort by time
+          this.dayViewData.appointments = dateAppointments.sort((a, b) => {
+            if (!a.time || !b.time) return 0
+            return a.time.localeCompare(b.time)
+          })
+        } else {
+          this.dayViewData.appointments = []
+        }
+      } catch (error) {
+        console.error('Error loading day view data:', error)
+        this.showToast('Error loading day view data', 'error')
+      } finally {
+        this.dayViewData.loading = false
+      }
+    },
+    navigateDayView(direction) {
+      const currentDate = new Date(this.dayViewDate + 'T00:00:00')
+      currentDate.setDate(currentDate.getDate() + direction)
+      const newDate = currentDate.toISOString().split('T')[0]
+      this.loadDayViewData(newDate)
+    },
+    goToTodayDayView() {
+      const today = new Date().toISOString().split('T')[0]
+      this.loadDayViewData(today)
+    },
+    navigateToDayViewDate(date) {
+      this.loadDayViewData(date)
+    },
+    getDayViewHalfHourSlots(hour) {
+      // Return two half-hour slots: :00 and :30
+      const slots = [
+        { time: `${hour}:00`, appointment: null, showTime: false },
+        { time: `${hour}:30`, appointment: null, showTime: false }
+      ]
+      
+      // Find appointments that match these time slots
+      this.dayViewData.appointments.forEach(apt => {
+        const aptTime = apt.time || ''
+        const aptHour = parseInt(aptTime.split(':')[0])
+        const aptMinute = parseInt(aptTime.split(':')[1]) || 0
+        const duration = apt.totalDuration || 30
+        
+        // Check if appointment starts at :00 or :30 of this hour
+        if (aptHour === parseInt(hour.split(':')[0])) {
+          if (aptMinute === 0) {
+            slots[0].appointment = apt
+            slots[0].showTime = true
+          } else if (aptMinute === 30) {
+            slots[1].appointment = apt
+            slots[1].showTime = true
+          }
+        }
+      })
+      
+      return slots
+    },
     getServiceNames(appointment) {
       if (!appointment.services) {
         return 'No service'

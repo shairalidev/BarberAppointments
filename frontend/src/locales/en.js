@@ -93,6 +93,7 @@ export default {
     adminAccount: 'Admin Account',
     logout: 'Logout',
     calendar: 'Calendar',
+    dayView: 'Day View',
     requests: 'Requests',
     services: 'Services',
     slots: 'Slots',
