@@ -212,7 +212,11 @@ export default {
     updateAppointment: 'Update Appointment',
     appointmentDateUpdated: 'Appointment date updated successfully',
     appointmentTimeUpdated: 'Appointment time updated successfully',
-    appointmentDateAndTimeUpdated: 'Appointment date and time updated successfully'
+    appointmentDateAndTimeUpdated: 'Appointment date and time updated successfully',
+    offDate: 'Off Date',
+    markAsOffDate: 'Mark as Off Date',
+    dateMarkedAsOffDate: 'This date is marked as an off date',
+    noAppointmentsOnOffDate: 'No appointments can be booked for this date.'
   },
   common: {
     loading: 'Loading...',

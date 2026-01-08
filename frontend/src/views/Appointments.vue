@@ -45,7 +45,6 @@
                         <div class="d-flex justify-content-between align-items-start mb-1">
                           <div>
                             <h6 class="mb-1">{{ service.name }}</h6>
-                            <small class="text-muted">{{ service.description || 'Professional service' }}</small>
                           </div>
                           <span class="text-primary fw-semibold">{{ formatCurrency(service.price) }}</span>
                         </div>
@@ -101,30 +100,39 @@
                   <button 
                     class="btn btn-sm btn-outline-secondary calendar-nav-btn" 
                     @click="navigateCalendar(-1)"
-                    :disabled="dateOffset === 0"
-                    title="Previous dates">
+                    :disabled="isCurrentMonth"
+                    title="Previous month">
                     <i class="fas fa-chevron-left"></i>
                   </button>
                   <div class="text-center flex-grow-1">
-                    <h5 class="mb-0">{{ $t('booking.availableDates') }}</h5>
-                    <p class="text-muted small mb-0">{{ calendarRangeLabel }}</p>
+                    <h5 class="mb-0">{{ monthYearLabel }}</h5>
+                    <p class="text-muted small mb-0">{{ $t('booking.availableDates') }}</p>
                   </div>
                   <button 
                     class="btn btn-sm btn-outline-secondary calendar-nav-btn" 
                     @click="navigateCalendar(1)"
-                    title="Next dates">
+                    title="Next month">
                     <i class="fas fa-chevron-right"></i>
                   </button>
                 </div>
 
-                <div class="week-grid">
+                <div class="calendar-grid-month">
+                  <div class="calendar-header" v-for="day in ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']" :key="day">
+                    {{ day }}
+                  </div>
                   <button
-                    v-for="day in weekDays"
+                    v-for="day in monthDays"
                     :key="day.value"
-                    class="day-card"
-                    :class="{ active: day.isSelected, today: day.isToday }"
+                    class="calendar-day"
+                    :class="{ 
+                      active: day.isSelected, 
+                      today: day.isToday,
+                      'other-month': !day.isCurrentMonth,
+                      'past-date': day.isPast,
+                      disabled: day.isPast
+                    }"
+                    :disabled="day.isPast"
                     @click="selectDate(day.value)">
-                    <span class="weekday">{{ day.label }}</span>
                     <span class="day-number">{{ day.number }}</span>
                   </button>
                 </div>
@@ -282,7 +290,8 @@ export default {
       availableTimes: [],
       currentStep: 1,
       availabilityTimeout: null,
-      dateOffset: 0, // Offset for calendar navigation (0 = today, 1 = next 14 days, etc.)
+      currentMonth: new Date().getMonth(),
+      currentYear: new Date().getFullYear(),
       customer: {
         name: '',
         phone: '',
@@ -319,40 +328,77 @@ export default {
       const barber = this.barbers.find(b => b._id === this.selectedBarber)
       return barber?.name
     },
-    weekDays() {
+    monthDays() {
       const today = new Date()
       today.setHours(0, 0, 0, 0)
-      const startDate = new Date(today)
-      // Calculate start date based on offset (each offset shows 14 days)
-      startDate.setDate(today.getDate() + (this.dateOffset * 14))
-
-      return Array.from({ length: 14 }, (_, index) => {
-        const date = new Date(startDate)
-        date.setDate(startDate.getDate() + index)
+      
+      const firstDay = new Date(this.currentYear, this.currentMonth, 1)
+      const lastDay = new Date(this.currentYear, this.currentMonth + 1, 0)
+      const prevLastDay = new Date(this.currentYear, this.currentMonth, 0)
+      
+      const days = []
+      const startDay = firstDay.getDay()
+      
+      // Previous month days
+      for (let i = startDay - 1; i >= 0; i--) {
+        const date = new Date(this.currentYear, this.currentMonth - 1, prevLastDay.getDate() - i)
         const value = this.formatDateValue(date)
-
-        return {
-          label: date.toLocaleDateString(undefined, { weekday: 'short' }),
+        const isPast = date < today && !this.isSameDay(date, today)
+        
+        days.push({
           number: String(date.getDate()).padStart(2, '0'),
           value,
           isSelected: this.selectedDate === value,
-          isToday: this.isSameDay(date, today)
-        }
-      })
+          isToday: this.isSameDay(date, today),
+          isCurrentMonth: false,
+          isPast
+        })
+      }
+      
+      // Current month days
+      for (let i = 1; i <= lastDay.getDate(); i++) {
+        const date = new Date(this.currentYear, this.currentMonth, i)
+        const value = this.formatDateValue(date)
+        const isPast = date < today && !this.isSameDay(date, today)
+        
+        days.push({
+          number: String(i).padStart(2, '0'),
+          value,
+          isSelected: this.selectedDate === value,
+          isToday: this.isSameDay(date, today),
+          isCurrentMonth: true,
+          isPast
+        })
+      }
+      
+      // Next month days to complete the grid
+      const totalSlots = Math.ceil(days.length / 7) * 7
+      const nextMonthStart = new Date(this.currentYear, this.currentMonth + 1, 1)
+      while (days.length < totalSlots) {
+        const date = new Date(nextMonthStart)
+        date.setDate(nextMonthStart.getDate() + (days.length - (startDay + lastDay.getDate())))
+        const value = this.formatDateValue(date)
+        const isPast = date < today && !this.isSameDay(date, today)
+        
+        days.push({
+          number: String(date.getDate()).padStart(2, '0'),
+          value,
+          isSelected: this.selectedDate === value,
+          isToday: this.isSameDay(date, today),
+          isCurrentMonth: false,
+          isPast
+        })
+      }
+      
+      return days
     },
-    calendarRangeLabel() {
+    monthYearLabel() {
+      const date = new Date(this.currentYear, this.currentMonth)
+      return date.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
+    },
+    isCurrentMonth() {
       const today = new Date()
-      today.setHours(0, 0, 0, 0)
-      const startDate = new Date(today)
-      startDate.setDate(today.getDate() + (this.dateOffset * 14))
-      
-      const endDate = new Date(startDate)
-      endDate.setDate(startDate.getDate() + 13)
-      
-      const startLabel = startDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-      const endLabel = endDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
-      
-      return `${startLabel} - ${endLabel}`
+      return this.currentYear === today.getFullYear() && this.currentMonth === today.getMonth()
     },
     monthLabel() {
       const referenceDate = this.selectedDate || this.currentWeekStart || this.formatDateValue(new Date())
@@ -470,26 +516,41 @@ export default {
       return this.formatDateValue(today)
     },
     navigateCalendar(direction) {
-      // Navigate forward or backward by 14 days
-      const newOffset = this.dateOffset + direction
-      // Don't allow going back before today (offset 0)
-      if (newOffset < 0) {
+      // Navigate forward or backward by month
+      if (direction === -1 && this.isCurrentMonth) {
+        return // Don't allow going back before current month
+      }
+      
+      let newMonth = this.currentMonth + direction
+      let newYear = this.currentYear
+      
+      if (newMonth < 0) {
+        newMonth = 11
+        newYear--
+      } else if (newMonth > 11) {
+        newMonth = 0
+        newYear++
+      }
+      
+      // Don't allow going back before current month
+      const today = new Date()
+      const todayMonth = today.getMonth()
+      const todayYear = today.getFullYear()
+      
+      if (newYear < todayYear || (newYear === todayYear && newMonth < todayMonth)) {
         return
       }
-      this.dateOffset = newOffset
+      
+      this.currentMonth = newMonth
+      this.currentYear = newYear
+      
       // Clear selected time when navigating
       this.selectedTime = ''
-      // If selected date is not in current range, clear it
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-      const startDate = new Date(today)
-      startDate.setDate(today.getDate() + (this.dateOffset * 14))
-      const endDate = new Date(startDate)
-      endDate.setDate(startDate.getDate() + 13)
       
+      // If selected date is not in current month, clear it
       if (this.selectedDate) {
         const selected = new Date(this.selectedDate)
-        if (selected < startDate || selected > endDate) {
+        if (selected.getMonth() !== this.currentMonth || selected.getFullYear() !== this.currentYear) {
           this.selectedDate = ''
           this.availableTimes = []
         }
@@ -498,8 +559,11 @@ export default {
     selectDate(date) {
       // Prevent selecting past dates
       const selectedDate = new Date(date)
+      selectedDate.setHours(0, 0, 0, 0)
       const today = new Date()
-      if (selectedDate < today && !this.isSameDay(selectedDate, today)) {
+      today.setHours(0, 0, 0, 0)
+      
+      if (selectedDate < today) {
         return
       }
       
@@ -916,6 +980,84 @@ export default {
   gap: 12px;
 }
 
+.calendar-grid-month {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.calendar-header {
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  padding: 8px 4px;
+  text-transform: uppercase;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 0;
+  min-height: 45px;
+}
+
+.calendar-day:hover:not(.disabled):not(.past-date) {
+  border-color: var(--primary);
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.calendar-day.today {
+  border-color: var(--primary);
+  background: rgba(59, 130, 246, 0.1);
+  font-weight: 700;
+}
+
+.calendar-day.active {
+  border-color: var(--primary);
+  background: rgba(59, 130, 246, 0.2);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  font-weight: 700;
+}
+
+.calendar-day.other-month {
+  opacity: 0.4;
+  color: var(--text-muted);
+}
+
+.calendar-day.past-date,
+.calendar-day.disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+}
+
+.calendar-day.past-date:hover,
+.calendar-day.disabled:hover {
+  border-color: var(--border-color);
+  background: var(--bg-tertiary);
+}
+
+.calendar-day .day-number {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.calendar-day.today .day-number,
+.calendar-day.active .day-number {
+  font-weight: 700;
+}
+
 /* iOS and Android specific optimizations */
 @supports (-webkit-touch-callout: none) {
   .service-card, .day-card, .slot-button {
@@ -924,6 +1066,7 @@ export default {
   
   input, select, textarea {
     -webkit-appearance: none;
+    appearance: none;
     border-radius: 8px;
   }
 }
@@ -1052,6 +1195,24 @@ export default {
   .icon-button {
     width: 36px;
     height: 36px;
+  }
+  
+  .calendar-grid-month {
+    gap: 6px;
+  }
+  
+  .calendar-header {
+    font-size: 0.75rem;
+    padding: 6px 2px;
+  }
+  
+  .calendar-day {
+    min-height: 40px;
+    border-radius: 6px;
+  }
+  
+  .calendar-day .day-number {
+    font-size: 0.85rem;
   }
 }
 </style>

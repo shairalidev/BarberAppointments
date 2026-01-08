@@ -174,15 +174,12 @@ export default {
 
 .logo-container {
   padding: 8px 16px;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  background: transparent;
   border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
-  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .logo-container:hover {
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
   transform: translateY(-1px);
 }
 

@@ -209,7 +209,11 @@ export default {
     updateAppointment: 'Termin aktualisieren',
     appointmentDateUpdated: 'Termindatum erfolgreich aktualisiert',
     appointmentTimeUpdated: 'Terminzeit erfolgreich aktualisiert',
-    appointmentDateAndTimeUpdated: 'Termindatum und -zeit erfolgreich aktualisiert'
+    appointmentDateAndTimeUpdated: 'Termindatum und -zeit erfolgreich aktualisiert',
+    offDate: 'Ruhetag',
+    markAsOffDate: 'Als Ruhetag markieren',
+    dateMarkedAsOffDate: 'Dieses Datum ist als Ruhetag markiert',
+    noAppointmentsOnOffDate: 'Für dieses Datum können keine Termine gebucht werden.'
   },
   common: {
     loading: 'Laden...',

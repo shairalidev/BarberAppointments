@@ -228,10 +228,10 @@
                           </div>
                           <span class="toggle-label-text">
                             <span v-if="dayViewData.isRestricted" class="text-warning">
-                              <i class="fas fa-ban me-1"></i>Off Date
+                              <i class="fas fa-ban me-1"></i>{{ $t('admin.offDate') }}
                             </span>
                             <span v-else class="text-muted">
-                              <i class="fas fa-calendar-check me-1"></i>Mark as Off Date
+                              <i class="fas fa-calendar-check me-1"></i>{{ $t('admin.markAsOffDate') }}
                             </span>
                           </span>
                         </label>
@@ -270,8 +270,8 @@
                       <div v-else-if="dayViewData.isRestricted" class="text-center p-5">
                         <div class="alert alert-warning mb-0">
                           <i class="fas fa-ban fa-3x mb-3"></i>
-                          <h5>This date is marked as an off date</h5>
-                          <p class="mb-0">No appointments can be booked for this date.</p>
+                          <h5>{{ $t('admin.dateMarkedAsOffDate') }}</h5>
+                          <p class="mb-0">{{ $t('admin.noAppointmentsOnOffDate') }}</p>
                         </div>
                       </div>
                       <div v-else class="date-time-schedule">
@@ -1259,10 +1259,10 @@
                     </div>
                     <span class="toggle-label-text">
                       <span v-if="dateDetailModal.isRestricted" class="text-warning">
-                        <i class="fas fa-ban me-1"></i>Off Date
+                        <i class="fas fa-ban me-1"></i>{{ $t('admin.offDate') }}
                       </span>
                       <span v-else class="text-white-50">
-                        <i class="fas fa-calendar-check me-1"></i>Mark as Off Date
+                        <i class="fas fa-calendar-check me-1"></i>{{ $t('admin.markAsOffDate') }}
                       </span>
                     </span>
                   </label>
@@ -1280,8 +1280,8 @@
             <div v-else-if="dateDetailModal.isRestricted" class="text-center p-5">
               <div class="alert alert-warning mb-0">
                 <i class="fas fa-ban fa-3x mb-3"></i>
-                <h5>This date is marked as an off date</h5>
-                <p class="mb-0">No appointments can be booked for this date.</p>
+                <h5>{{ $t('admin.dateMarkedAsOffDate') }}</h5>
+                <p class="mb-0">{{ $t('admin.noAppointmentsOnOffDate') }}</p>
               </div>
             </div>
             <div v-else class="date-time-schedule">
