@@ -86,8 +86,8 @@
 
     <!-- Features Section -->
     <section class="features-section py-5">
-      <div class="container py-4">
-        <div class="row g-4">
+      <div class="container py-3">
+        <div class="row g-3">
           <div class="col-lg-3 col-md-6">
             <div class="feature-card text-center">
               <div class="feature-icon mb-3">
