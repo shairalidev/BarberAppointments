@@ -98,11 +98,13 @@
             <div class="col-6">
               <button
                 @click="toggleTheme"
-                :class="['theme-toggle', 'w-100', { active: isDark }]"
+                class="btn btn-outline-secondary theme-toggle-mobile w-100"
+                :class="{ 'active': isDark }"
                 :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
               >
-                <i class="fas fa-sun theme-toggle-icon sun-icon"></i>
-                <i class="fas fa-moon theme-toggle-icon moon-icon"></i>
+                <i class="fas fa-sun me-1" v-if="!isDark"></i>
+                <i class="fas fa-moon me-1" v-else></i>
+                <span class="d-none d-sm-inline">{{ isDark ? 'Dark' : 'Light' }}</span>
               </button>
             </div>
             <div class="col-12 mt-2">
@@ -314,17 +316,96 @@ export default {
     margin: 0.125rem 0;
     border-radius: 8px;
     text-align: center;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
   .mobile-actions {
     border-top: 1px solid var(--border-color) !important;
+    margin-top: 1rem;
+    padding-top: 1rem;
   }
 
-  .mobile-actions .btn,
-  .mobile-actions .theme-toggle {
-    padding: 0.5rem 0.75rem;
+  .mobile-actions .row {
+    margin: 0;
+  }
+
+  .mobile-actions .row.g-2 {
+    --bs-gutter-y: 0.5rem;
+    --bs-gutter-x: 0.5rem;
+  }
+
+  .mobile-actions .btn {
+    padding: 0.625rem 1rem;
     font-size: 0.875rem;
     border-radius: 8px;
+    min-height: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    width: 100%;
+  }
+
+  .mobile-actions .btn i {
+    font-size: 0.875rem;
+  }
+
+  .mobile-actions .theme-toggle-mobile {
+    min-height: 44px;
+    height: 44px;
+    padding: 0.625rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: 2px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+  }
+
+  .mobile-actions .theme-toggle-mobile:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  .mobile-actions .theme-toggle-mobile.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+  }
+
+  .mobile-actions .theme-toggle-mobile i {
+    font-size: 1rem;
+  }
+
+  .mobile-actions .col-6 {
+    padding: 0 0.5rem;
+  }
+
+  .mobile-actions .col-12 {
+    padding: 0;
+  }
+
+  .mobile-actions .col-12 .d-flex {
+    gap: 0.5rem;
+  }
+
+  .mobile-actions .col-12 .btn {
+    min-height: 44px;
+    height: 44px;
+  }
+
+  .mobile-actions .col-12 .btn-outline-danger {
+    min-width: 50px;
+    padding: 0.625rem;
   }
   
   .nav-link.active::after {
