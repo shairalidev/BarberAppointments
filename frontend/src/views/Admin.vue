@@ -1,13 +1,13 @@
 <template>
   <div class="admin-panel min-vh-100">
     <!-- Admin Header -->
-    <div class="admin-header shadow-sm py-3 mb-4">
+    <div class="admin-header shadow-sm py-3 py-md-3 mb-4">
       <div class="container-fluid">
         <div class="row align-items-start justify-content-between">
           <div class="col">
             <div class="d-flex align-items-center admin-logo-container">
               <img src="/logo.png" alt="ATES BARBEROS Logo" class="admin-logo" />
-              <span class="admin-brand-text">ATES BARBEROS</span>
+              <span class="admin-brand-text d-none d-sm-inline">ATES BARBEROS</span>
             </div>
           </div>
           <div class="col-auto">
@@ -31,19 +31,17 @@
               </div>
               <div class="dropdown">
               <button class="btn btn-link text-decoration-none p-0 d-flex align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <div class="d-flex flex-column gap-1 d-md-none me-2">
+                <div class="d-flex flex-column gap-1 d-md-none me-1">
                   <button
                     @click.stop="toggleLanguage"
-                    class="btn btn-outline-primary btn-sm px-2"
-                    style="font-size: 0.6rem; padding: 0.2rem 0.4rem;"
+                    class="btn btn-outline-primary btn-sm px-2 mobile-action-btn"
                     :title="currentLocale === 'en' ? 'Switch to German' : 'Switch to English'"
                   >
                     {{ currentLocale === 'en' ? 'DE' : 'EN' }}
                   </button>
                   <button
                     @click.stop="toggleTheme"
-                    :class="['theme-toggle', { active: isDark }]"
-                    style="font-size: 0.7rem; padding: 0.2rem 0.4rem;"
+                    :class="['theme-toggle', 'mobile-action-btn', { active: isDark }]"
                     :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
                   >
                     <i class="fas fa-sun theme-toggle-icon sun-icon"></i>
@@ -320,7 +318,12 @@
                                 class="half-hour-slot"
                                 :class="{ 'has-appointment': slot.appointment }"
                               >
-                                <div v-if="slot.appointment" class="appointment-block" :class="getAppointmentBlockClass(slot.appointment)">
+                                <div 
+                                  v-if="slot.appointment" 
+                                  class="appointment-block" 
+                                  :class="getAppointmentBlockClass(slot.appointment)"
+                                  @click="slot.appointment.status === 'confirmed' ? openEditTimeModal(slot.appointment) : null"
+                                >
                                   <div class="appointment-content">
                                     <div class="appointment-customer">{{ slot.appointment.customerName }}</div>
                                     <div class="appointment-service">{{ getServiceNames(slot.appointment) }}</div>
@@ -3376,19 +3379,102 @@ async setReminder(appointment) {
 @media (max-width: 991px) {
   .action-toolbar {
     width: 100%;
+    gap: 0.5rem !important;
   }
 
   .admin-header {
-    padding: 0.5rem 0 !important;
+    padding: 0.375rem 0 !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .admin-header.py-3 {
+    padding-top: 0.375rem !important;
+    padding-bottom: 0.375rem !important;
+  }
+
+  .admin-header.mb-4 {
+    margin-bottom: 0.75rem !important;
+  }
+
+  .admin-header .container-fluid {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
   }
 
   .admin-header .row {
     align-items: center;
+    margin: 0;
   }
 
   .admin-header .action-toolbar {
     justify-content: flex-end;
     min-width: auto;
+  }
+
+  .admin-logo-container {
+    padding: 4px 8px !important;
+    gap: 6px !important;
+  }
+
+  .admin-logo {
+    height: 40px !important;
+    max-width: 140px !important;
+  }
+
+  .admin-brand-text {
+    font-size: 1rem !important;
+    margin-left: 6px !important;
+    letter-spacing: 0.3px;
+  }
+
+  .admin-avatar {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 0.9rem !important;
+    border-radius: 8px;
+  }
+
+  .action-toolbar .btn-sm {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.7rem !important;
+  }
+
+  .action-toolbar .theme-toggle {
+    width: 32px !important;
+    height: 32px !important;
+    padding: 0.25rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  .action-toolbar .theme-toggle-icon {
+    font-size: 0.75rem !important;
+  }
+
+  .action-toolbar .dropdown .d-flex.flex-column {
+    gap: 0.25rem !important;
+  }
+
+  .action-toolbar .dropdown .btn-sm {
+    font-size: 0.55rem !important;
+    padding: 0.15rem 0.3rem !important;
+  }
+
+  .mobile-action-btn {
+    font-size: 0.6rem !important;
+    padding: 0.2rem 0.4rem !important;
+    min-width: auto;
+    line-height: 1.2;
+  }
+
+  .admin-header .col {
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+  }
+
+  .admin-header .col-auto {
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+    flex-shrink: 0;
   }
 
   .nav-tabs-wrapper {
@@ -4041,27 +4127,105 @@ async setReminder(appointment) {
     padding: 0 0.25rem;
   }
 
+  .admin-header {
+    padding: 0.25rem 0 !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .admin-header.py-3 {
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+  }
+
+  .admin-header.mb-4 {
+    margin-bottom: 0.5rem !important;
+  }
+
+  .admin-header .container-fluid {
+    padding-left: 0.375rem;
+    padding-right: 0.375rem;
+  }
+
   .admin-header h2 {
-    font-size: 1.2rem;
+    font-size: 1rem;
   }
 
   .admin-logo-container {
-    padding: 5px 10px;
+    padding: 2px 6px !important;
+    gap: 4px !important;
   }
   
   .admin-header .admin-logo {
-    height: 45px;
-    max-width: 180px;
+    height: 32px !important;
+    max-width: 110px !important;
+  }
+
+  .admin-brand-text {
+    font-size: 0.85rem !important;
+    margin-left: 4px !important;
+    letter-spacing: 0.2px;
   }
 
   .admin-header p {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
   }
 
   .admin-avatar {
-    width: 60px;
-    height: 60px;
-    font-size: 1rem;
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 0.8rem !important;
+    border-radius: 6px;
+  }
+
+  .action-toolbar {
+    gap: 0.375rem !important;
+  }
+
+  .action-toolbar .btn-sm {
+    padding: 0.2rem 0.4rem !important;
+    font-size: 0.65rem !important;
+  }
+
+  .action-toolbar .theme-toggle {
+    width: 28px !important;
+    height: 28px !important;
+    padding: 0.2rem !important;
+    font-size: 0.7rem !important;
+  }
+
+  .action-toolbar .theme-toggle-icon {
+    font-size: 0.7rem !important;
+  }
+
+  .action-toolbar .dropdown .d-flex.flex-column {
+    gap: 0.2rem !important;
+  }
+
+  .action-toolbar .dropdown .btn-sm {
+    font-size: 0.5rem !important;
+    padding: 0.1rem 0.25rem !important;
+  }
+
+  .mobile-action-btn {
+    font-size: 0.55rem !important;
+    padding: 0.15rem 0.3rem !important;
+    min-width: auto;
+    line-height: 1.1;
+  }
+
+  .admin-header .col {
+    padding-left: 0.125rem;
+    padding-right: 0.125rem;
+  }
+
+  .admin-header .col-auto {
+    padding-left: 0.125rem;
+    padding-right: 0.125rem;
+    flex-shrink: 0;
+  }
+
+  .admin-brand-text {
+    display: none !important;
   }
 
   .admin-info {
@@ -5163,6 +5327,14 @@ async setReminder(appointment) {
   background: #ff69b4;
   background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
   color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.appointment-confirmed:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(196, 69, 105, 0.4);
+  opacity: 0.9;
 }
 
 .appointment-pending {
