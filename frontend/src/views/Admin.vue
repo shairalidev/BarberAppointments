@@ -298,14 +298,13 @@
                     <h6 class="mb-0"><i class="fas fa-calendar-day me-2"></i><span class="d-none d-lg-inline">{{ formatSelectedDate }}</span><span class="d-lg-none">{{ formatSelectedDate }}</span></h6>
                       <small class="opacity-75">{{ selectedDayAppointments.length }} {{ $t('admin.appointments') }}</small>
                   </div>
-                  <div class="card-body p-0">
+                  <div class="card-body p-0 appointments-card-body">
                     <div v-if="selectedDayAppointments.length" class="appointments-list">
                       <div v-for="apt in selectedDayAppointments" :key="apt._id" class="appointment-card">
-                        <div class="appointment-header d-flex justify-content-between align-items-start mb-2">
+                        <div class="appointment-header d-flex justify-content-between align-items-start mb-1">
                           <div class="appointment-time-mobile">
                             <i class="fas fa-clock text-primary me-1"></i>
                             <span class="fw-bold">{{ apt.time }}</span>
-                           
                           </div>
                           <span :class="getStatusBadgeClass(apt.status)">{{ apt.status }}</span>
                         </div>
@@ -316,15 +315,15 @@
                           <p class="services mb-1">
                             <i class="fas fa-cut me-2 text-muted"></i>{{ apt.services?.map(s => s.name).join(', ') }}
                           </p>
-                          <div class="appointment-meta d-flex justify-content-between mb-2">
+                          <div class="appointment-meta d-flex justify-content-between mb-1">
                             <span class="price">{{ formatCurrency(apt.totalPrice) }}</span>
                             <span class="duration"><i class="fas fa-hourglass-half me-1"></i>{{ apt.totalDuration }}min</span>
                           </div>
-                          <div v-if="apt.customerPhone" class="contact-info mb-2">
+                          <div v-if="apt.customerPhone" class="contact-info mb-1">
                             <small class="text-muted"><i class="fas fa-phone me-1"></i>{{ apt.customerPhone }}</small>
                           </div>
                         </div>
-                        <div class="appointment-actions d-flex gap-2 justify-content-center">
+                        <div class="appointment-actions d-flex gap-2 justify-content-center mt-2">
                             <button v-if="apt.status === 'pending'" @click="openResponseModal(apt, 'confirmed')" class="btn btn-sm btn-success flex-fill">
                               <i class="fas fa-check me-1"></i>{{ $t('admin.accept') }}
                             </button>
@@ -343,7 +342,7 @@
                         </div>
                       </div>
                     </div>
-                    <div v-else class="empty-state text-center py-4">
+                    <div v-else class="empty-state text-center">
                       <i class="fas fa-calendar-times fa-2x text-muted mb-2"></i>
                       <p class="text-muted mb-0">{{ $t('admin.noAppointmentsScheduled') }}</p>
                     </div>
@@ -2937,11 +2936,36 @@ async setReminder(appointment) {
   .appointments-card .card-body {
     flex: 1;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
   }
   
   .appointments-list {
-    height: 100%;
+    flex: 1;
     overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 100%;
+    padding: 0.5rem 0;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  }
+  
+  .appointments-list::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .appointments-list::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .appointments-list::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+  }
+  
+  .appointments-list::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.3);
   }
   
 
@@ -3591,7 +3615,7 @@ async setReminder(appointment) {
 
 .appointment-card {
   position: relative;
-  padding: 1rem;
+  padding: 0.75rem 1rem;
   border-bottom: 1px solid var(--border-color);
   transition: background-color 0.2s;
   color: var(--text-primary);
