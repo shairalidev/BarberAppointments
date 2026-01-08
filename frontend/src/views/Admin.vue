@@ -3341,8 +3341,24 @@ async setReminder(appointment) {
   animation: fadeInScale 0.4s ease-out;
 }
 
-.btn:active {
-  animation: pulse 0.2s ease-in-out;
+/* Remove unwanted button animations and shadows */
+.btn:active,
+.btn:focus,
+.btn:focus-visible {
+  animation: none !important;
+  transform: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Specifically for buttons in card-header */
+.card-header .btn:active,
+.card-header .btn:focus,
+.card-header .btn:focus-visible {
+  animation: none !important;
+  transform: none !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
 
 /* Confirmation Modal */
