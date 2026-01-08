@@ -342,7 +342,7 @@
                         </div>
                       </div>
                     </div>
-                    <div v-else class="empty-state text-center">
+                    <div v-else class="empty-state text-center d-flex flex-column justify-content-center align-items-center">
                       <i class="fas fa-calendar-times fa-2x text-muted mb-2"></i>
                       <p class="text-muted mb-0">{{ $t('admin.noAppointmentsScheduled') }}</p>
                     </div>
@@ -2939,13 +2939,22 @@ async setReminder(appointment) {
     display: flex;
     flex-direction: column;
     min-height: 0;
+    height: 100%;
+  }
+  
+  .appointments-card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
   }
   
   .appointments-list {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    max-height: 100%;
+    min-height: 0;
     padding: 0.5rem 0;
     scrollbar-width: thin;
     scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
@@ -2984,10 +2993,6 @@ async setReminder(appointment) {
 
 .admin-logo-container {
   padding: 8px 16px;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.05);
   display: inline-block;
 }
 
@@ -3710,6 +3715,12 @@ async setReminder(appointment) {
 .empty-state {
   text-align: center;
   padding: 3rem 1rem;
+  flex: 1;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 /* Mobile Responsive Styles */
