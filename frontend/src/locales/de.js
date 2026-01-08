@@ -29,8 +29,8 @@ export default {
       button: 'Termin vereinbaren'
     },
     gallery: 'Galerie',
-    galleryTitle: 'Unsere Arbeiten',
-    galleryDescription: 'Sehen Sie unsere neuesten Arbeiten und Transformationen'
+    galleryTitle: 'Looks',
+    galleryDescription: 'Barberos Visuals'
   },
   booking: {
     title: 'Buche deinen Termin',
