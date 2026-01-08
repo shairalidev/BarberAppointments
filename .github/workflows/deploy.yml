@@ -73,7 +73,19 @@ jobs:
           cd /var/www/BarberAppointments/backend
           if [ "$BACKEND_DEPS_CHANGED" = true ] || [ ! -d "node_modules" ]; then
             echo "   Installing backend packages (dependencies changed or missing)..."
-            npm ci --prefer-offline --no-audit
+            echo "   Checking files..."
+            ls -la package*.json 2>/dev/null || echo "   ⚠️  No package files found!"
+            if [ -f "package-lock.json" ]; then
+              echo "   ✓ package-lock.json found, using npm ci..."
+              npm ci --no-audit || {
+                echo "   ⚠️  npm ci failed, trying npm install..."
+                npm install --no-audit
+              }
+            else
+              echo "   ⚠️  No package-lock.json, using npm install..."
+              npm install --no-audit
+            fi
+            echo "   ✓ Backend dependencies installed"
           else
             echo "   ✓ Skipping backend npm install (no dependency changes)"
           fi
@@ -115,7 +127,19 @@ jobs:
           cd /var/www/BarberAppointments/frontend
           if [ "$FRONTEND_DEPS_CHANGED" = true ] || [ ! -d "node_modules" ]; then
             echo "   Installing frontend packages (dependencies changed or missing)..."
-            npm ci --prefer-offline --no-audit
+            echo "   Checking files..."
+            ls -la package*.json 2>/dev/null || echo "   ⚠️  No package files found!"
+            if [ -f "package-lock.json" ]; then
+              echo "   ✓ package-lock.json found, using npm ci..."
+              npm ci --no-audit || {
+                echo "   ⚠️  npm ci failed, trying npm install..."
+                npm install --no-audit
+              }
+            else
+              echo "   ⚠️  No package-lock.json, using npm install..."
+              npm install --no-audit
+            fi
+            echo "   ✓ Frontend dependencies installed"
           else
             echo "   ✓ Skipping frontend npm install (no dependency changes)"
           fi
