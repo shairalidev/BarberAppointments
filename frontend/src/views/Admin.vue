@@ -127,7 +127,7 @@
           <!-- Calendar & Booking Tab -->
           <div v-if="activeTab === 'calendar'" class="calendar-tab">
             <!-- Mobile Calendar Controls -->
-            <div class="mobile-calendar-controls d-lg-none mb-3">
+            <div class="mobile-calendar-controls d-lg-none">
               <div class="d-flex justify-content-between align-items-center mb-2">
                 <!-- Calendar View Navigation -->
                 <template v-if="calendarViewMode === 'calendar'">
@@ -3478,52 +3478,61 @@ async setReminder(appointment) {
   }
 
   .nav-tabs-wrapper {
-    padding: 0.375rem;
-    margin: 0 0.25rem 1rem 0.25rem;
+    padding: 0.25rem !important;
+    margin: 0 0.125rem 0.5rem 0.125rem !important;
+    border-radius: 8px !important;
+    box-shadow: var(--shadow-sm) !important;
+  }
+
+  .nav-tabs-wrapper::-webkit-scrollbar {
+    height: 3px;
   }
 
   .mobile-nav {
-    gap: 0.25rem;
+    gap: 0.125rem !important;
     justify-content: flex-start;
     flex-wrap: nowrap;
+    padding: 0;
   }
 
   .mobile-nav .nav-item {
     flex: 0 0 auto;
-    min-width: 90px;
+    min-width: 70px;
+    max-width: 80px;
   }
 
   .mobile-nav .nav-link {
-    padding: 0.625rem 0.75rem;
+    padding: 0.4rem 0.5rem !important;
     text-align: center;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     min-width: 0;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.375rem;
-    min-height: 60px;
+    gap: 0.25rem !important;
+    min-height: 50px !important;
+    border-radius: 6px;
   }
 
   .mobile-nav .nav-icon {
-    font-size: 1rem !important;
+    font-size: 0.85rem !important;
     margin-bottom: 0;
     width: auto;
   }
 
   .mobile-nav .nav-text {
-    font-size: 0.7rem !important;
-    line-height: 1.2;
+    font-size: 0.65rem !important;
+    line-height: 1.1;
     font-weight: 500;
   }
 
   .nav-badge {
     position: absolute;
-    top: 8px;
-    right: 8px;
-    min-width: 16px;
-    height: 16px;
-    font-size: 0.65rem;
+    top: 4px;
+    right: 4px;
+    min-width: 14px;
+    height: 14px;
+    font-size: 0.6rem;
   }
 }
 
@@ -3656,26 +3665,52 @@ async setReminder(appointment) {
   }
 
   .nav-tabs-wrapper {
-    padding: 0.5rem;
-    margin: 0 0.25rem;
+    padding: 0.2rem !important;
+    margin: 0 0.125rem 0.375rem 0.125rem !important;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    border-radius: 6px !important;
+    box-shadow: var(--shadow-sm) !important;
+  }
+
+  .nav-tabs-wrapper::-webkit-scrollbar {
+    height: 2px;
+  }
+
+  .mobile-nav {
+    gap: 0.1rem !important;
+  }
+
+  .mobile-nav .nav-item {
+    min-width: 65px;
+    max-width: 75px;
   }
 
   .mobile-nav .nav-link {
-    padding: 0.75rem 0.5rem;
-    min-width: 85px;
+    padding: 0.35rem 0.4rem !important;
+    min-width: 65px;
     white-space: nowrap;
+    min-height: 45px !important;
+    gap: 0.2rem !important;
   }
 
   .mobile-nav .nav-text {
-    font-size: 0.75rem !important;
+    font-size: 0.6rem !important;
     font-weight: 500;
+    line-height: 1;
   }
 
   .mobile-nav .nav-icon {
-    font-size: 1.1rem !important;
-    margin-bottom: 0.25rem;
+    font-size: 0.8rem !important;
+    margin-bottom: 0;
+  }
+
+  .nav-badge {
+    top: 3px;
+    right: 3px;
+    min-width: 12px;
+    height: 12px;
+    font-size: 0.55rem;
   }
 }
 
@@ -3933,10 +3968,56 @@ async setReminder(appointment) {
   /* Mobile Calendar */
   .mobile-calendar-controls {
     background: var(--bg-secondary);
-    border-radius: 12px;
-    padding: 1rem;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    padding: 0.75rem 0.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     border: 1px solid var(--border-color);
+    margin-bottom: 0.75rem !important;
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .mobile-calendar-controls .d-flex.justify-content-between {
+    margin-bottom: 0.75rem;
+  }
+  
+  .mobile-calendar-controls h6 {
+    font-size: 0.9rem;
+    padding: 0 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: calc(100% - 100px);
+  }
+  
+  .mobile-calendar-controls .btn-sm {
+    min-width: 36px;
+    height: 36px;
+    padding: 0.375rem 0.5rem;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .mobile-calendar-controls .btn-sm i {
+    font-size: 0.75rem;
+  }
+  
+  .mobile-calendar-controls .d-flex.gap-2 {
+    gap: 0.5rem !important;
+    flex-wrap: wrap;
+  }
+  
+  .mobile-calendar-controls .d-flex.gap-2 .btn-sm {
+    flex: 1;
+    min-width: auto;
+    font-size: 0.75rem;
+    padding: 0.4rem 0.5rem;
+  }
+  
+  .mobile-calendar-controls .d-flex.gap-2 .btn-sm i {
+    margin-right: 0.25rem;
   }
   
   .calendar-day {
@@ -4233,11 +4314,40 @@ async setReminder(appointment) {
   }
 
   .nav-tabs-wrapper {
-    padding: 0.2rem;
+    padding: 0.15rem !important;
+    margin: 0 0.1rem 0.25rem 0.1rem !important;
+    border-radius: 4px !important;
+    box-shadow: var(--shadow-sm) !important;
+  }
+
+  .nav-tabs-wrapper::-webkit-scrollbar {
+    height: 2px;
+  }
+
+  .mobile-nav {
+    gap: 0.075rem !important;
+  }
+
+  .mobile-nav .nav-item {
+    min-width: 55px;
+    max-width: 65px;
   }
 
   .mobile-nav .nav-link {
-    padding: 0.3rem 0.1rem;
+    padding: 0.25rem 0.3rem !important;
+    min-width: 55px;
+    min-height: 40px !important;
+    gap: 0.15rem !important;
+  }
+
+  .mobile-nav .nav-icon {
+    font-size: 0.7rem !important;
+    margin-bottom: 0;
+  }
+
+  .mobile-nav .nav-text {
+    font-size: 0.55rem !important;
+    line-height: 1;
   }
 
   .nav-icon {
@@ -4246,6 +4356,14 @@ async setReminder(appointment) {
 
   .nav-text {
     font-size: 0.55rem !important;
+  }
+
+  .nav-badge {
+    top: 2px;
+    right: 2px;
+    min-width: 10px;
+    height: 10px;
+    font-size: 0.5rem;
   }
   
   .calendar-day {
@@ -4278,7 +4396,46 @@ async setReminder(appointment) {
   }
   
   .mobile-calendar-controls {
-    padding: 0.75rem;
+    padding: 0.5rem 0.375rem;
+    border-radius: 8px;
+    margin-bottom: 0.5rem !important;
+  }
+  
+  .mobile-calendar-controls .d-flex.justify-content-between {
+    margin-bottom: 0.5rem;
+  }
+  
+  .mobile-calendar-controls h6 {
+    font-size: 0.8rem;
+    padding: 0 0.25rem;
+    max-width: calc(100% - 80px);
+  }
+  
+  .mobile-calendar-controls .btn-sm {
+    min-width: 32px;
+    height: 32px;
+    padding: 0.25rem 0.375rem;
+    font-size: 0.7rem;
+  }
+  
+  .mobile-calendar-controls .btn-sm i {
+    font-size: 0.65rem;
+  }
+  
+  .mobile-calendar-controls .d-flex.gap-2 {
+    gap: 0.375rem !important;
+  }
+  
+  .mobile-calendar-controls .d-flex.gap-2 .btn-sm {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.4rem;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  
+  .mobile-calendar-controls .d-flex.gap-2 .btn-sm i {
+    margin-right: 0.2rem;
+    font-size: 0.65rem;
   }
   
   .appointment-card {
