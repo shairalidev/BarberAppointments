@@ -86,9 +86,9 @@
 
     <!-- Features Section -->
     <section class="features-section py-5">
-      <div class="container py-3">
-        <div class="row g-3">
-          <div class="col-lg-3 col-md-6">
+      <div class="container py-4">
+        <div class="row g-4 justify-content-center">
+          <div class="col-lg-4 col-md-6">
             <div class="feature-card text-center">
               <div class="feature-icon mb-3">
                 <i class="fas fa-calendar-check"></i>
@@ -97,7 +97,7 @@
               <p class="text-muted small mb-0">{{ $t('home.features.easyBookingDesc') }}</p>
             </div>
           </div>
-          <div class="col-lg-3 col-md-6">
+          <div class="col-lg-4 col-md-6">
             <div class="feature-card text-center">
               <div class="feature-icon mb-3">
                 <i class="fas fa-star"></i>
@@ -106,7 +106,7 @@
               <p class="text-muted small mb-0">{{ $t('home.features.premiumQualityDesc') }}</p>
             </div>
           </div>
-          <div class="col-lg-3 col-md-6">
+          <div class="col-lg-4 col-md-6">
             <div class="feature-card text-center">
               <div class="feature-icon mb-3">
                 <i class="fas fa-shield-alt"></i>
@@ -498,6 +498,7 @@ export default {
 @supports (-webkit-touch-callout: none) {
   .btn {
     -webkit-appearance: none;
+    appearance: none;
     -webkit-tap-highlight-color: transparent;
   }
   
