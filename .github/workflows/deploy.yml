@@ -97,11 +97,24 @@ jobs:
             exit 1
           fi
           echo "   ✓ Backend directory found: $(pwd)"
+          echo "   Checking if install needed (BACKEND_DEPS_CHANGED=$BACKEND_DEPS_CHANGED, node_modules exists: $([ -d "node_modules" ] && echo "yes" || echo "no"))"
           
-          if [ "$BACKEND_DEPS_CHANGED" = true ] || [ ! -d "node_modules" ]; then
+          set +e  # Disable exit on error for conditional checks
+          NEED_INSTALL=false
+          if [ "$BACKEND_DEPS_CHANGED" = "true" ]; then
+            NEED_INSTALL=true
+          fi
+          if [ ! -d "node_modules" ]; then
+            NEED_INSTALL=true
+          fi
+          set -e  # Re-enable
+          
+          if [ "$NEED_INSTALL" = "true" ]; then
             echo "   Installing backend packages (dependencies changed or missing)..."
             echo "   Checking files..."
+            set +e  # Disable exit on error for file checks
             ls -la package*.json 2>/dev/null || echo "   ⚠️  No package files found!"
+            set -e  # Re-enable
             
             set +e  # Temporarily disable exit on error for npm commands
             if [ -f "package-lock.json" ]; then
@@ -178,8 +191,19 @@ jobs:
             exit 1
           }
           echo "   ✓ Frontend directory found: $(pwd)"
+          echo "   Checking if install needed (FRONTEND_DEPS_CHANGED=$FRONTEND_DEPS_CHANGED, node_modules exists: $([ -d "node_modules" ] && echo "yes" || echo "no"))"
           
-          if [ "$FRONTEND_DEPS_CHANGED" = true ] || [ ! -d "node_modules" ]; then
+          set +e  # Disable exit on error for conditional checks
+          NEED_INSTALL=false
+          if [ "$FRONTEND_DEPS_CHANGED" = "true" ]; then
+            NEED_INSTALL=true
+          fi
+          if [ ! -d "node_modules" ]; then
+            NEED_INSTALL=true
+          fi
+          set -e  # Re-enable
+          
+          if [ "$NEED_INSTALL" = "true" ]; then
             echo "   Installing frontend packages (dependencies changed or missing)..."
             echo "   Checking files..."
             ls -la package*.json 2>/dev/null || echo "   ⚠️  No package files found!"
