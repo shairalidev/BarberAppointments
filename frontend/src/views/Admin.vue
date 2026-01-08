@@ -2564,9 +2564,19 @@ getTimeSlotsForDay(dayIndex) {
       }
     },
     navigateDayView(direction) {
-      const currentDate = new Date(this.dayViewDate + 'T00:00:00')
+      if (!this.dayViewDate) return
+      
+      // Parse date string safely (YYYY-MM-DD format)
+      const [year, month, day] = this.dayViewDate.split('-').map(Number)
+      const currentDate = new Date(year, month - 1, day)
       currentDate.setDate(currentDate.getDate() + direction)
-      const newDate = currentDate.toISOString().split('T')[0]
+      
+      // Format back to YYYY-MM-DD
+      const newYear = currentDate.getFullYear()
+      const newMonth = String(currentDate.getMonth() + 1).padStart(2, '0')
+      const newDay = String(currentDate.getDate()).padStart(2, '0')
+      const newDate = `${newYear}-${newMonth}-${newDay}`
+      
       this.loadDayViewData(newDate)
     },
     goToTodayDayView() {
