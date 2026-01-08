@@ -25,7 +25,7 @@ module.exports = {
   },
   chainWebpack: config => {
     config.plugin('html').tap(args => {
-      args[0].title = 'BarberPro - Professional Appointments'
+      args[0].title = 'ATES BARBEROS'
       return args
     })
   }
