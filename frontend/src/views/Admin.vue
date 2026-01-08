@@ -152,24 +152,47 @@
                 <div class="card border-0 shadow-sm calendar-card">
                   <div class="card-header py-3 d-none d-lg-block">
                     <div class="d-flex justify-content-between align-items-center">
-                      <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>{{ $t('admin.calendar') }}</h5>
+                      <h5 class="mb-0">
+                        <i :class="calendarViewMode === 'calendar' ? 'fas fa-calendar-alt' : 'fas fa-calendar-day' me-2"></i>
+                        {{ calendarViewMode === 'calendar' ? $t('admin.calendar') : $t('admin.dayView') }}
+                      </h5>
                       <div class="d-flex gap-2">
                         <button @click="showBookingModal = true" class="btn btn-sm btn-success">
                           <i class="fas fa-plus me-1"></i>{{ $t('admin.bookAppointment') }}
                         </button>
-                        <button @click="changeMonth(-1)" class="btn btn-sm btn-outline-primary">
-                          <i class="fas fa-chevron-left"></i>
+                        <!-- Toggle Button -->
+                        <button @click="toggleCalendarView" class="btn btn-sm" :class="calendarViewMode === 'calendar' ? 'btn-outline-secondary' : 'btn-secondary'">
+                          <i :class="calendarViewMode === 'calendar' ? 'fas fa-calendar-day' : 'fas fa-calendar-alt' me-1"></i>
+                          {{ calendarViewMode === 'calendar' ? $t('admin.dayView') : $t('admin.calendar') }}
                         </button>
-                        <button @click="goToToday" class="btn btn-sm btn-primary">{{ $t('admin.today') }}</button>
-                        <button @click="changeMonth(1)" class="btn btn-sm btn-outline-primary">
-                          <i class="fas fa-chevron-right"></i>
-                        </button>
+                        <!-- Calendar View Controls -->
+                        <template v-if="calendarViewMode === 'calendar'">
+                          <button @click="changeMonth(-1)" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-chevron-left"></i>
+                          </button>
+                          <button @click="goToToday" class="btn btn-sm btn-primary">{{ $t('admin.today') }}</button>
+                          <button @click="changeMonth(1)" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-chevron-right"></i>
+                          </button>
+                        </template>
+                        <!-- Day View Controls -->
+                        <template v-else>
+                          <button @click="navigateDayView(-1)" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-chevron-left"></i>
+                          </button>
+                          <button @click="goToTodayDayView" class="btn btn-sm btn-primary">{{ $t('admin.today') }}</button>
+                          <button @click="navigateDayView(1)" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-chevron-right"></i>
+                          </button>
+                        </template>
                       </div>
                     </div>
-                    <h6 class="text-center mt-3 mb-0">{{ currentMonthYear }}</h6>
+                    <h6 v-if="calendarViewMode === 'calendar'" class="text-center mt-3 mb-0">{{ currentMonthYear }}</h6>
+                    <h6 v-else class="text-center mt-3 mb-0">{{ formatDayViewDate }}</h6>
                   </div>
                   <div class="card-body p-2 p-lg-3">
-                    <div class="calendar-grid">
+                    <!-- Calendar Grid View -->
+                    <div v-if="calendarViewMode === 'calendar'" class="calendar-grid">
                       <div class="calendar-header" v-for="day in ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']" :key="day">
                         {{ day }}
                       </div>
@@ -187,6 +210,80 @@
                       >
                         <span class="day-number">{{ day.dayNumber }}</span>
                         <span v-if="day.bookingCount" class="booking-badge">{{ day.bookingCount }}</span>
+                      </div>
+                    </div>
+                    <!-- Day View -->
+                    <div v-else class="day-view-container">
+                      <div v-if="dayViewData.loading" class="text-center p-5">
+                        <div class="spinner-border text-primary" role="status">
+                          <span class="visually-hidden">Loading...</span>
+                        </div>
+                      </div>
+                      <div v-else-if="dayViewData.isRestricted" class="text-center p-5">
+                        <div class="alert alert-warning mb-0">
+                          <i class="fas fa-ban fa-3x mb-3"></i>
+                          <h5>This date is marked as an off date</h5>
+                          <p class="mb-0">No appointments can be booked for this date.</p>
+                        </div>
+                      </div>
+                      <div v-else class="date-time-schedule">
+                        <!-- Week Navigation Row -->
+                        <div class="week-navigation-row">
+                          <div 
+                            v-for="day in dayViewWeekDays" 
+                            :key="day.date"
+                            @click="navigateToDayViewDate(day.date)"
+                            class="week-day-cell"
+                            :class="{ 
+                              'active': day.date === dayViewDate,
+                              'today': day.isToday
+                            }"
+                          >
+                            <div class="week-day-name">{{ day.dayName }}</div>
+                            <div class="week-day-number">{{ day.dayNumber }}</div>
+                          </div>
+                          <div class="calendar-week-cell">
+                            <div class="calendar-week-label">KW</div>
+                            <div class="calendar-week-number">{{ dayViewCalendarWeek }}</div>
+                          </div>
+                        </div>
+                        
+                        <div class="schedule-header">
+                          <div class="time-column-header">Time</div>
+                          <div class="slots-column-header">
+                            <div class="half-hour-slot-header">00</div>
+                            <div class="half-hour-slot-header">30</div>
+                          </div>
+                        </div>
+                        <div class="schedule-body">
+                          <div 
+                            v-for="(hour, hourIndex) in timeSlots" 
+                            :key="hour"
+                            class="schedule-row"
+                            :class="{ 'row-pink': hourIndex % 2 === 0, 'row-green': hourIndex % 2 === 1 }"
+                          >
+                            <div class="time-column">
+                              <span class="time-label">{{ hour }}</span>
+                            </div>
+                            <div class="slots-column">
+                              <div 
+                                v-for="(slot, index) in getDayViewHalfHourSlots(hour)" 
+                                :key="`${hour}-${index}`"
+                                class="half-hour-slot"
+                                :class="{ 'has-appointment': slot.appointment }"
+                              >
+                                <div v-if="slot.appointment" class="appointment-block" :class="getAppointmentBlockClass(slot.appointment)">
+                                  <div class="appointment-content">
+                                    <div class="appointment-customer">{{ slot.appointment.customerName }}</div>
+                                    <div class="appointment-service">{{ getServiceNames(slot.appointment) }}</div>
+                                    <div class="appointment-time" v-if="slot.showTime">{{ formatAppointmentTime(slot.appointment) }}</div>
+                                  </div>
+                                </div>
+                                <div v-else class="empty-slot"></div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1333,7 +1430,17 @@ export default {
         message: ''
       },
       bookingCalendarMonth: new Date().getMonth(),
-      bookingCalendarYear: new Date().getFullYear()
+      bookingCalendarYear: new Date().getFullYear(),
+      calendarViewMode: 'calendar', // 'calendar' or 'day'
+      dayViewDate: new Date().toISOString().split('T')[0],
+      dayViewData: {
+        date: null,
+        dateString: '',
+        appointments: [],
+        isRestricted: false,
+        restriction: null,
+        loading: false
+      }
     }
   },
   computed: {
@@ -1563,6 +1670,99 @@ export default {
       d.setUTCDate(d.getUTCDate() + 4 - dayNum)
       const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
       return Math.ceil((((d - yearStart) / 86400000) + 1) / 7)
+    },
+    // Day view computed properties
+    dayViewWeekDays() {
+      if (!this.dayViewDate) return []
+      
+      const selectedDate = new Date(this.dayViewDate + 'T00:00:00')
+      const dayOfWeek = selectedDate.getDay()
+      // Get Monday of the week (day 0 = Sunday, so we adjust)
+      const monday = new Date(selectedDate)
+      const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek // If Sunday, go back 6 days, otherwise go to Monday
+      monday.setDate(selectedDate.getDate() + diff)
+      
+      const days = []
+      const dayNames = ['MO.', 'DI.', 'MI.', 'DO.', 'FR.', 'SA.', 'SO.']
+      
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(monday)
+        date.setDate(monday.getDate() + i)
+        const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+        const today = new Date()
+        const isToday = date.toDateString() === today.toDateString()
+        
+        days.push({
+          date: dateStr,
+          dayName: dayNames[i],
+          dayNumber: date.getDate(),
+          isToday: isToday
+        })
+      }
+      
+      return days
+    },
+    dayViewCalendarWeek() {
+      if (!this.dayViewDate) return ''
+      
+      const date = new Date(this.dayViewDate + 'T00:00:00')
+      const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+      const dayNum = d.getUTCDay() || 7
+      d.setUTCDate(d.getUTCDate() + 4 - dayNum)
+      const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
+      return Math.ceil((((d - yearStart) / 86400000) + 1) / 7)
+    },
+    dayViewAppointments() {
+      if (!this.dayViewDate) return []
+      
+      const dateAppointments = this.appointments.filter(apt => {
+        if (!apt.date) return false
+        const aptDate = typeof apt.date === 'string' ? apt.date.split('T')[0] : new Date(apt.date).toISOString().split('T')[0]
+        return aptDate === this.dayViewDate && apt.status !== 'cancelled'
+      })
+      
+      return dateAppointments.sort((a, b) => {
+        if (!a.time || !b.time) return 0
+        return a.time.localeCompare(b.time)
+      })
+    },
+    dayViewFormatHeader() {
+      if (!this.dayViewDate) return ''
+      const date = new Date(this.dayViewDate + 'T00:00:00')
+      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+      const dayName = dayNames[date.getDay()]
+      const monthName = monthNames[date.getMonth()]
+      return `${dayName}, ${monthName} ${date.getDate()}, ${date.getFullYear()}`
+    },
+    dayViewHalfHourSlots() {
+      return (hour) => {
+        // Return two half-hour slots: :00 and :30
+        const slots = [
+          { time: `${hour}:00`, appointment: null, showTime: false },
+          { time: `${hour}:30`, appointment: null, showTime: false }
+        ]
+        
+        // Find appointments that match these time slots
+        this.dayViewAppointments.forEach(apt => {
+          const aptTime = apt.time || ''
+          const aptHour = parseInt(aptTime.split(':')[0])
+          const aptMinute = parseInt(aptTime.split(':')[1]) || 0
+          
+          // Check if appointment starts at :00 or :30 of this hour
+          if (aptHour === parseInt(hour.split(':')[0])) {
+            if (aptMinute === 0) {
+              slots[0].appointment = apt
+              slots[0].showTime = true
+            } else if (aptMinute === 30) {
+              slots[1].appointment = apt
+              slots[1].showTime = true
+            }
+          }
+        })
+        
+        return slots
+      }
     }
   },
   async mounted() {
