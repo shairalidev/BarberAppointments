@@ -6,7 +6,8 @@
         <div class="row align-items-start justify-content-between">
           <div class="col">
             <div class="d-flex align-items-center admin-logo-container">
-              <img src="/logo.png" alt="Logo" class="admin-logo" />
+              <img src="/logo.png" alt="ATES BARBEROS Logo" class="admin-logo" />
+              <span class="admin-brand-text">ATES BARBEROS</span>
             </div>
           </div>
           <div class="col-auto">
@@ -2877,6 +2878,17 @@ async setReminder(appointment) {
   object-fit: contain;
   max-width: 250px;
   display: block;
+  flex-shrink: 0;
+}
+
+.admin-brand-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-left: 12px;
+  color: var(--text-primary);
+  white-space: nowrap;
+  transition: color 0.3s ease;
 }
 
 .action-toolbar {

@@ -2,7 +2,8 @@
   <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
     <div class="container">
       <router-link class="navbar-brand fw-bold text-primary d-flex align-items-center logo-container" to="/">
-        <img src="/logo.png" alt="Logo" class="brand-logo" />
+        <img src="/logo.png" alt="ATES BARBEROS Logo" class="brand-logo" />
+        <span class="brand-text">ATES BARBEROS</span>
       </router-link>
       
       <button 
@@ -191,6 +192,21 @@ export default {
   object-fit: contain;
   max-width: 250px;
   display: block;
+  flex-shrink: 0;
+}
+
+.brand-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-left: 12px;
+  color: var(--text-primary);
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+
+.logo-container:hover .brand-text {
+  color: var(--primary);
 }
 
 
@@ -281,6 +297,12 @@ export default {
     max-width: 220px;
   }
   
+  .brand-text {
+    font-size: 1.25rem;
+    margin-left: 10px;
+    letter-spacing: 0.3px;
+  }
+  
   .navbar-collapse {
     margin-top: 0.75rem;
     padding: 1rem;
@@ -331,6 +353,24 @@ export default {
   .brand-logo {
     height: 45px;
     max-width: 180px;
+  }
+  
+  .brand-text {
+    font-size: 1rem;
+    margin-left: 8px;
+    letter-spacing: 0.2px;
+  }
+}
+
+@media (max-width: 400px) {
+  .brand-text {
+    font-size: 0.875rem;
+    margin-left: 6px;
+  }
+  
+  .brand-logo {
+    height: 40px;
+    max-width: 150px;
   }
 }
 </style>
