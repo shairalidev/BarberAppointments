@@ -54,9 +54,22 @@
                     title="Previous month">
                     <i class="fas fa-chevron-left"></i>
                   </button>
-                  <div class="text-center flex-grow-1">
-                    <h5 class="mb-0">{{ monthYearLabel }}</h5>
-                    <p class="text-muted small mb-0">{{ $t('booking.availableDates') }}</p>
+                  <div class="text-center flex-grow-1 position-relative">
+                    <div class="month-selector" @click="toggleMonthDropdown">
+                      <span class="month-label">{{ monthYearLabel }}</span>
+                      <i class="fas fa-chevron-down ms-1"></i>
+                    </div>
+                    <div v-if="showMonthDropdown" class="month-dropdown">
+                      <div 
+                        v-for="(month, index) in monthsList" 
+                        :key="index"
+                        class="month-option"
+                        :class="{ active: currentMonth === index && currentYear === selectedYear }"
+                        @click="selectMonth(index)"
+                      >
+                        {{ month }}
+                      </div>
+                    </div>
                   </div>
                   <button 
                     class="btn btn-sm btn-outline-secondary calendar-nav-btn" 
@@ -233,6 +246,8 @@ export default {
       availabilityTimeout: null,
       currentMonth: new Date().getMonth(),
       currentYear: new Date().getFullYear(),
+      showMonthDropdown: false,
+      selectedYear: new Date().getFullYear(),
       customer: {
         name: '',
         phone: '',
@@ -348,6 +363,18 @@ export default {
       const date = new Date(this.currentYear, this.currentMonth)
       return date.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
     },
+    monthsList() {
+      const months = []
+      const today = new Date()
+      for (let i = 0; i < 12; i++) {
+        const date = new Date(this.currentYear, i)
+        // Only show current month and future months for current year
+        if (this.currentYear > today.getFullYear() || i >= today.getMonth()) {
+          months[i] = date.toLocaleDateString(undefined, { month: 'long' })
+        }
+      }
+      return months
+    },
     isCurrentMonth() {
       const today = new Date()
       return this.currentYear === today.getFullYear() && this.currentMonth === today.getMonth()
@@ -377,12 +404,16 @@ export default {
     
     // Ensure we start with today or the first available future date
     const firstAvailable = this.findFirstAvailableDate(new Date(this.currentWeekStart))
+    
+    // Close month dropdown when clicking outside
+    document.addEventListener('click', this.closeMonthDropdown)
     this.selectedDate = firstAvailable
   },
   
   beforeUnmount() {
     // Clean up timeout when component is destroyed
     clearTimeout(this.availabilityTimeout)
+    document.removeEventListener('click', this.closeMonthDropdown)
   },
   methods: {
     formatDateValue(date) {
@@ -466,6 +497,27 @@ export default {
       
       // Fallback to today if no future date found in week
       return this.formatDateValue(today)
+    },
+    toggleMonthDropdown(event) {
+      event.stopPropagation()
+      this.showMonthDropdown = !this.showMonthDropdown
+    },
+    closeMonthDropdown(event) {
+      if (!event.target.closest('.month-selector') && !event.target.closest('.month-dropdown')) {
+        this.showMonthDropdown = false
+      }
+    },
+    selectMonth(monthIndex) {
+      const today = new Date()
+      // Don't allow selecting past months
+      if (this.currentYear === today.getFullYear() && monthIndex < today.getMonth()) {
+        return
+      }
+      this.currentMonth = monthIndex
+      this.showMonthDropdown = false
+      this.selectedDate = ''
+      this.selectedTime = ''
+      this.availableTimes = []
     },
     navigateCalendar(direction) {
       // Navigate forward or backward by month
@@ -1052,6 +1104,73 @@ export default {
   font-size: 0.6rem !important;
 }
 
+/* Month Selector Dropdown */
+.month-selector {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+}
+
+.month-selector:hover {
+  background: rgba(107, 114, 128, 0.1);
+}
+
+.month-selector i {
+  font-size: 0.6rem;
+  transition: transform 0.2s ease;
+}
+
+.month-label {
+  font-size: 0.8rem;
+}
+
+.month-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  z-index: 100;
+  min-width: 120px;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 4px;
+}
+
+.month-option {
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text-primary);
+}
+
+.month-option:hover {
+  background: rgba(107, 114, 128, 0.1);
+}
+
+.month-option.active {
+  background: var(--primary);
+  color: white;
+}
+
+.month-option:first-child {
+  border-radius: 8px 8px 0 0;
+}
+
+.month-option:last-child {
+  border-radius: 0 0 8px 8px;
+}
+
 .icon-button {
   width: 42px;
   height: 42px;
@@ -1086,7 +1205,6 @@ export default {
 }
 
 .calendar-day {
-  aspect-ratio: 1;
   border: 1px solid var(--border-color);
   border-radius: 6px;
   background: var(--bg-secondary);
@@ -1098,7 +1216,8 @@ export default {
   color: var(--text-primary);
   cursor: pointer;
   padding: 4px;
-  min-height: 34px;
+  height: 36px;
+  width: 100%;
 }
 
 .calendar-day:hover:not(.disabled):not(.past-date) {
