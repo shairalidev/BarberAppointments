@@ -1073,7 +1073,7 @@ export default {
 .calendar-grid-month {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
+  gap: 6px;
 }
 
 .calendar-header {
@@ -1088,7 +1088,7 @@ export default {
 .calendar-day {
   aspect-ratio: 1;
   border: 1px solid var(--border-color);
-  border-radius: 4px;
+  border-radius: 6px;
   background: var(--bg-secondary);
   text-align: center;
   display: flex;
@@ -1097,9 +1097,8 @@ export default {
   transition: all 0.2s ease;
   color: var(--text-primary);
   cursor: pointer;
-  padding: 0;
-  min-height: 28px;
-  max-height: 32px;
+  padding: 4px;
+  min-height: 34px;
 }
 
 .calendar-day:hover:not(.disabled):not(.past-date) {
@@ -1140,7 +1139,7 @@ export default {
 }
 
 .calendar-day .day-number {
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   font-weight: 500;
 }
 
@@ -1361,26 +1360,26 @@ export default {
   }
   
   .calendar-grid-month {
-    gap: 2px;
+    gap: 4px;
   }
   
   .calendar-header {
-    font-size: 0.5rem;
-    padding: 2px 0;
+    font-size: 0.55rem;
+    padding: 3px 0;
   }
   
   .calendar-day {
-    min-height: 26px;
-    max-height: 28px;
-    border-radius: 3px;
+    min-height: 32px;
+    border-radius: 5px;
+    padding: 3px;
   }
   
   .calendar-day .day-number {
-    font-size: 0.6rem;
+    font-size: 0.7rem;
   }
   
   .calendar-wrapper {
-    padding: 6px;
+    padding: 8px;
   }
   
   .calendar-wrapper h5 {

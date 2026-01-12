@@ -288,20 +288,21 @@ export default {
   }
   
   .navbar-collapse {
-    margin-top: 0.75rem;
-    padding: 1rem;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
     background: var(--bg-secondary);
-    border-radius: 12px;
+    border-radius: 8px;
     box-shadow: var(--shadow-md);
     border: 1px solid var(--border-color);
   }
   
   .nav-link {
-    padding: 0.75rem 1rem !important;
-    margin: 0.125rem 0;
-    border-radius: 8px;
+    padding: 0.4rem 0.75rem !important;
+    margin: 0.1rem 0;
+    border-radius: 6px;
     text-align: center;
-    min-height: 44px;
+    min-height: 32px;
+    font-size: 0.75rem !important;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -309,8 +310,8 @@ export default {
   
   .mobile-actions {
     border-top: 1px solid var(--border-color) !important;
-    margin-top: 1rem;
-    padding-top: 1rem;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
   }
 
   .mobile-actions .row {
@@ -318,16 +319,16 @@ export default {
   }
 
   .mobile-actions .row.g-2 {
-    --bs-gutter-y: 0.5rem;
-    --bs-gutter-x: 0.5rem;
+    --bs-gutter-y: 0.25rem;
+    --bs-gutter-x: 0.25rem;
   }
 
   .mobile-actions .btn {
-    padding: 0.625rem 1rem;
-    font-size: 0.875rem;
-    border-radius: 8px;
-    min-height: 44px;
-    height: 44px;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.7rem;
+    border-radius: 6px;
+    min-height: 30px;
+    height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -336,20 +337,20 @@ export default {
   }
 
   .mobile-actions .btn i {
-    font-size: 0.875rem;
+    font-size: 0.7rem;
   }
 
   .mobile-actions .theme-toggle-mobile {
-    min-height: 44px;
-    height: 44px;
-    padding: 0.625rem 1rem;
+    min-height: 30px;
+    height: 30px;
+    padding: 0.35rem 0.6rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    font-size: 0.875rem;
+    gap: 0.3rem;
+    font-size: 0.7rem;
     font-weight: 500;
-    border: 2px solid var(--border-color);
+    border: 1px solid var(--border-color);
     background: var(--bg-secondary);
     color: var(--text-primary);
     transition: all 0.2s ease;
@@ -368,11 +369,11 @@ export default {
   }
 
   .mobile-actions .theme-toggle-mobile i {
-    font-size: 1rem;
+    font-size: 0.75rem;
   }
 
   .mobile-actions .col-6 {
-    padding: 0 0.5rem;
+    padding: 0 0.25rem;
   }
 
   .mobile-actions .col-12 {
@@ -380,17 +381,17 @@ export default {
   }
 
   .mobile-actions .col-12 .d-flex {
-    gap: 0.5rem;
+    gap: 0.25rem;
   }
 
   .mobile-actions .col-12 .btn {
-    min-height: 44px;
-    height: 44px;
+    min-height: 30px;
+    height: 30px;
   }
 
   .mobile-actions .col-12 .btn-outline-danger {
-    min-width: 50px;
-    padding: 0.625rem;
+    min-width: 36px;
+    padding: 0.35rem;
   }
   
   .nav-link.active::after {
