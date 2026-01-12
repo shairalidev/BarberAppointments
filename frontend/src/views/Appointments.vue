@@ -45,8 +45,8 @@
           <div v-if="currentStep === 2" class="card border-0 shadow-sm mb-4">
             <div class="card-body">
 
-              <div class="calendar-wrapper mb-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
+              <div class="calendar-wrapper mb-2">
+                <div class="d-flex justify-content-between align-items-center mb-2">
                   <button 
                     class="btn btn-sm btn-outline-secondary calendar-nav-btn" 
                     @click="navigateCalendar(-1)"
@@ -88,14 +88,8 @@
                 </div>
               </div>
 
-              <div class="mb-3">
-                <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
-                  <div>
-                    <p class="mb-0 fw-semibold">{{ $t('booking.availableTimes') }}</p>
-                    <small v-if="selectedDate" class="text-muted">{{ $t('booking.whatTimeWorks') }} {{ formatDate(selectedDate) }}?</small>
-                  </div>
-                  <small class="text-muted">{{ $t('booking.timesInLocalTimezone') }}</small>
-                </div>
+              <div class="mb-2">
+                <p class="mb-1 fw-semibold small">{{ $t('booking.availableTimes') }}</p>
                 <div class="slot-grid">
                   <button
                     v-for="slot in availableTimes"
@@ -1021,13 +1015,14 @@ export default {
 }
 
 .calendar-nav-btn {
-  min-width: 40px;
-  height: 40px;
+  min-width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: 6px;
   transition: all 0.2s ease;
+  font-size: 0.7rem;
 }
 
 .calendar-nav-btn:hover:not(:disabled) {
@@ -1043,18 +1038,18 @@ export default {
 
 .calendar-wrapper {
   border: 1px solid var(--border-color);
-  border-radius: 10px;
-  padding: 12px;
+  border-radius: 8px;
+  padding: 8px;
   background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
 }
 
 .calendar-wrapper h5 {
-  font-size: 0.85rem !important;
+  font-size: 0.75rem !important;
   margin-bottom: 0 !important;
 }
 
 .calendar-wrapper p {
-  font-size: 0.65rem !important;
+  font-size: 0.6rem !important;
 }
 
 .icon-button {
@@ -1078,22 +1073,22 @@ export default {
 .calendar-grid-month {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
+  gap: 4px;
 }
 
 .calendar-header {
   text-align: center;
   font-weight: 600;
-  font-size: 0.65rem;
+  font-size: 0.55rem;
   color: var(--text-secondary);
-  padding: 4px 2px;
+  padding: 2px 1px;
   text-transform: uppercase;
 }
 
 .calendar-day {
   aspect-ratio: 1;
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: 4px;
   background: var(--bg-secondary);
   text-align: center;
   display: flex;
@@ -1103,7 +1098,8 @@ export default {
   color: var(--text-primary);
   cursor: pointer;
   padding: 0;
-  min-height: 36px;
+  min-height: 28px;
+  max-height: 32px;
 }
 
 .calendar-day:hover:not(.disabled):not(.past-date) {
@@ -1144,7 +1140,7 @@ export default {
 }
 
 .calendar-day .day-number {
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   font-weight: 500;
 }
 
@@ -1231,28 +1227,30 @@ export default {
 
 .slot-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+  gap: 6px;
 }
 
 @media (max-width: 576px) {
   .slot-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
   }
 }
 
 .slot-button {
   border-width: 1px;
-  border-radius: 8px;
-  padding: 6px 8px;
-  font-size: 0.75rem;
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: 0.7rem;
+  min-height: 28px;
 }
 
 @media (max-width: 576px) {
   .slot-button {
-    padding: 5px 6px;
-    font-size: 0.7rem;
+    padding: 3px 4px;
+    font-size: 0.65rem;
+    min-height: 26px;
   }
 }
 
@@ -1265,7 +1263,13 @@ export default {
 }
 
 .card-body {
-  padding: 12px !important;
+  padding: 10px !important;
+}
+
+@media (max-width: 576px) {
+  .card-body {
+    padding: 8px !important;
+  }
 }
 
 .card-body span,
@@ -1357,29 +1361,30 @@ export default {
   }
   
   .calendar-grid-month {
-    gap: 4px;
+    gap: 2px;
   }
   
   .calendar-header {
-    font-size: 0.55rem;
-    padding: 3px 1px;
+    font-size: 0.5rem;
+    padding: 2px 0;
   }
   
   .calendar-day {
-    min-height: 32px;
-    border-radius: 4px;
+    min-height: 26px;
+    max-height: 28px;
+    border-radius: 3px;
   }
   
   .calendar-day .day-number {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
   }
   
   .calendar-wrapper {
-    padding: 8px;
+    padding: 6px;
   }
   
   .calendar-wrapper h5 {
-    font-size: 0.75rem !important;
+    font-size: 0.7rem !important;
   }
 }
 </style>
