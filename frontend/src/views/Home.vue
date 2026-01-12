@@ -145,7 +145,7 @@ export default {
       // Use process.env.BASE_URL or just / for public folder files
       const imgPath = '/img1.jpeg'
       return {
-        backgroundImage: `linear-gradient(135deg, rgba(26, 26, 46, 0.6) 0%, rgba(22, 33, 62, 0.6) 50%, rgba(15, 52, 96, 0.6) 100%), url(${imgPath})`,
+        backgroundImage: `linear-gradient(135deg, rgba(55, 55, 55, 0.7) 0%, rgba(45, 45, 45, 0.7) 50%, rgba(35, 35, 35, 0.7) 100%), url(${imgPath})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat'
@@ -158,7 +158,7 @@ export default {
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-        opacity: '0.4'
+        opacity: '0.3'
       }
     }
   },
@@ -227,7 +227,7 @@ export default {
 .hero-section {
   position: relative;
   min-height: 100vh;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  background: linear-gradient(135deg, #373737 0%, #2d2d2d 50%, #232323 100%);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -241,7 +241,7 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(26, 26, 46, 0.6) 0%, rgba(22, 33, 62, 0.6) 50%, rgba(15, 52, 96, 0.6) 100%);
+  background: linear-gradient(135deg, rgba(55, 55, 55, 0.7) 0%, rgba(45, 45, 45, 0.7) 50%, rgba(35, 35, 35, 0.7) 100%);
   z-index: 1;
 }
 
@@ -417,7 +417,7 @@ export default {
 .feature-icon {
   width: 40px;
   height: 40px;
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(107, 114, 128, 0.1);
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
@@ -432,9 +432,9 @@ export default {
 }
 
 .cta-card {
-  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #4b5563 0%, #6b7280 100%);
   border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 10px 30px rgba(107, 114, 128, 0.3);
 }
 
 /* Mobile Optimizations */

@@ -1,8 +1,7 @@
 <template>
   <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
     <div class="container">
-      <router-link class="navbar-brand fw-bold text-primary d-flex align-items-center logo-container" to="/">
-        <img src="/logo.png" alt="ATES BARBEROS Logo" class="brand-logo" />
+      <router-link class="navbar-brand fw-bold d-flex align-items-center logo-container" to="/">
         <span class="brand-text">ATES BARBEROS</span>
       </router-link>
       
@@ -185,20 +184,10 @@ export default {
   transform: translateY(-1px);
 }
 
-.brand-logo {
-  height: 45px;
-  width: auto;
-  object-fit: contain;
-  max-width: 180px;
-  display: block;
-  flex-shrink: 0;
-}
-
 .brand-text {
   font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.3px;
-  margin-left: 8px;
   color: var(--text-primary);
   white-space: nowrap;
   transition: color 0.3s ease;
@@ -220,12 +209,12 @@ export default {
 
 .nav-link:hover {
   color: var(--primary) !important;
-  background-color: rgba(59, 130, 246, 0.1);
+  background-color: rgba(107, 114, 128, 0.1);
 }
 
 .nav-link.active {
   color: var(--primary) !important;
-  background-color: rgba(59, 130, 246, 0.1);
+  background-color: rgba(107, 114, 128, 0.1);
 }
 
 .nav-link.active::after {
@@ -268,7 +257,7 @@ export default {
 }
 
 .dropdown-item:hover {
-  background-color: rgba(59, 130, 246, 0.1);
+  background-color: rgba(107, 114, 128, 0.1);
   color: var(--primary);
 }
 
@@ -284,7 +273,7 @@ export default {
   background: var(--primary);
   border-color: var(--primary);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
 }
 
 /* Mobile Optimizations */
@@ -293,14 +282,8 @@ export default {
     padding: 4px 8px;
   }
   
-  .brand-logo {
-    height: 40px;
-    max-width: 160px;
-  }
-  
   .brand-text {
     font-size: 0.9rem;
-    margin-left: 6px;
     letter-spacing: 0.2px;
   }
   
@@ -421,7 +404,7 @@ export default {
   }
 
   .navbar-toggler:focus {
-    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+    box-shadow: 0 0 0 0.2rem rgba(107, 114, 128, 0.25);
   }
 }
 
@@ -430,14 +413,8 @@ export default {
     padding: 3px 6px;
   }
   
-  .brand-logo {
-    height: 35px;
-    max-width: 140px;
-  }
-  
   .brand-text {
     font-size: 0.8rem;
-    margin-left: 5px;
     letter-spacing: 0.1px;
   }
 }
@@ -445,12 +422,6 @@ export default {
 @media (max-width: 400px) {
   .brand-text {
     font-size: 0.75rem;
-    margin-left: 4px;
-  }
-  
-  .brand-logo {
-    height: 32px;
-    max-width: 120px;
   }
 }
 </style>

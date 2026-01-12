@@ -3146,7 +3146,7 @@ async setReminder(appointment) {
 }
 
 .bg-gradient-primary {
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%) !important;
   color: white !important;
 }
 
@@ -3172,14 +3172,14 @@ async setReminder(appointment) {
 }
 
 .list-group-item:hover {
-  background-color: rgba(59, 130, 246, 0.05);
-  border-left-color: #3b82f6;
+  background-color: rgba(107, 114, 128, 0.05);
+  border-left-color: #6b7280;
 }
 
 .list-group-item.active {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(29, 78, 216, 0.1) 100%);
-  border-left-color: #3b82f6;
-  color: #3b82f6;
+  background: linear-gradient(135deg, rgba(107, 114, 128, 0.1) 0%, rgba(75, 85, 99, 0.1) 100%);
+  border-left-color: #6b7280;
+  color: #6b7280;
   font-weight: 600;
 }
 
@@ -3225,7 +3225,7 @@ async setReminder(appointment) {
 }
 
 .table-hover tbody tr:hover {
-  background-color: rgba(59, 130, 246, 0.05);
+  background-color: rgba(107, 114, 128, 0.05);
 }
 
 .btn {
@@ -3248,8 +3248,8 @@ async setReminder(appointment) {
 }
 
 .form-control:focus, .form-select:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+  border-color: #6b7280;
+  box-shadow: 0 0 0 0.2rem rgba(107, 114, 128, 0.25);
 }
 
 .badge {
@@ -3330,14 +3330,14 @@ async setReminder(appointment) {
 }
 
 .nav-tabs .nav-link:hover {
-  background-color: rgba(59, 130, 246, 0.1);
+  background-color: rgba(107, 114, 128, 0.1);
   color: var(--primary);
 }
 
 .nav-tabs .nav-link.active {
   background: var(--primary) !important;
   color: white !important;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
   transform: translateY(-2px);
 }
 
@@ -3775,14 +3775,14 @@ async setReminder(appointment) {
 }
 
 .calendar-day.today {
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(107, 114, 128, 0.1);
   border: 2px solid var(--primary);
 }
 
 .calendar-day.selected {
-  background: rgba(59, 130, 246, 0.2);
+  background: rgba(107, 114, 128, 0.2);
   border: 2px solid var(--primary);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
 }
 
 .calendar-day.has-bookings {
@@ -4579,7 +4579,7 @@ async setReminder(appointment) {
 
 .time-input:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.1);
   outline: none;
 }
 
@@ -4726,22 +4726,22 @@ async setReminder(appointment) {
 }
 
 .toast-success {
-  background: rgba(59, 130, 246, 0.95);
+  background: rgba(107, 114, 128, 0.95);
   color: white;
 }
 
 .toast-error {
-  background: rgba(59, 130, 246, 0.95);
+  background: rgba(107, 114, 128, 0.95);
   color: white;
 }
 
 .toast-warning {
-  background: rgba(59, 130, 246, 0.95);
+  background: rgba(107, 114, 128, 0.95);
   color: white;
 }
 
 .toast-info {
-  background: rgba(59, 130, 246, 0.95);
+  background: rgba(107, 114, 128, 0.95);
   color: white;
 }
 
@@ -4972,14 +4972,14 @@ async setReminder(appointment) {
 
 .day-cell-pro:hover:not(.past):not(.other-month):not(.selected) {
   background: #e0f2fe;
-  border-color: #3b82f6;
+  border-color: #6b7280;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.15);
 }
 
 .day-cell-pro.today:not(.selected) {
   background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-  border-color: #3b82f6;
+  border-color: #6b7280;
   font-weight: 700;
 }
 
@@ -5032,7 +5032,7 @@ async setReminder(appointment) {
   bottom: 4px;
   width: 4px;
   height: 4px;
-  background: #3b82f6;
+  background: #6b7280;
   border-radius: 50%;
 }
 
@@ -5042,7 +5042,7 @@ async setReminder(appointment) {
   gap: 1rem;
   padding: 1.25rem 1.5rem;
   background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  border-top: 2px solid #3b82f6;
+  border-top: 2px solid #6b7280;
   margin-top: 0;
 }
 
@@ -5264,13 +5264,13 @@ async setReminder(appointment) {
 }
 
 .input-group .form-control:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+  border-color: #6b7280;
+  box-shadow: 0 0 0 0.2rem rgba(107, 114, 128, 0.25);
   z-index: 3;
 }
 
 .input-group .form-control:focus + .btn {
-  border-color: #3b82f6;
+  border-color: #6b7280;
 }
 /* Date Detail Modal Styles */
 .date-time-schedule {

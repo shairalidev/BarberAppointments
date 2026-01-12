@@ -145,7 +145,7 @@ export default {
 }
 
 .form-control:focus {
-  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+  box-shadow: 0 0 0 0.2rem rgba(107, 114, 128, 0.25);
   border-color: var(--primary);
   background-color: var(--bg-secondary);
   color: var(--text-primary);
@@ -161,6 +161,6 @@ export default {
 .btn-primary:hover {
   background: var(--primary-hover);
   transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 8px 20px rgba(107, 114, 128, 0.3);
 }
 </style>

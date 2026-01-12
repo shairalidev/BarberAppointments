@@ -839,7 +839,7 @@ export default {
 }
 
 .step-item.active {
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(107, 114, 128, 0.1);
   border-color: var(--primary);
 }
 
@@ -968,12 +968,12 @@ export default {
 
 .service-card-new:hover {
   border-color: var(--primary);
-  background: rgba(59, 130, 246, 0.02);
+  background: rgba(107, 114, 128, 0.02);
 }
 
 .service-card-new.selected {
   border-color: var(--primary);
-  background: rgba(59, 130, 246, 0.05);
+  background: rgba(107, 114, 128, 0.05);
 }
 
 .service-info {
@@ -1016,7 +1016,7 @@ export default {
 }
 
 .btn-outline-primary.active {
-  background: #2563eb;
+  background: #4b5563;
   color: #fff;
 }
 
@@ -1108,19 +1108,19 @@ export default {
 
 .calendar-day:hover:not(.disabled):not(.past-date) {
   border-color: var(--primary);
-  background: rgba(59, 130, 246, 0.05);
+  background: rgba(107, 114, 128, 0.05);
 }
 
 .calendar-day.today {
   border-color: var(--primary);
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(107, 114, 128, 0.1);
   font-weight: 700;
 }
 
 .calendar-day.active {
   border-color: var(--primary);
-  background: rgba(59, 130, 246, 0.2);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  background: rgba(107, 114, 128, 0.2);
+  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
   font-weight: 700;
 }
 
@@ -1156,7 +1156,7 @@ export default {
 /* iOS and Android specific optimizations */
 @supports (-webkit-touch-callout: none) {
   .service-card, .day-card, .slot-button {
-    -webkit-tap-highlight-color: rgba(59, 130, 246, 0.1);
+    -webkit-tap-highlight-color: rgba(107, 114, 128, 0.1);
   }
   
   input, select, textarea {
@@ -1223,8 +1223,8 @@ export default {
 
 .day-card.active {
   border-color: var(--primary);
-  background: rgba(59, 130, 246, 0.1);
-  box-shadow: 0 12px 30px rgba(37, 99, 235, 0.2);
+  background: rgba(107, 114, 128, 0.1);
+  box-shadow: 0 12px 30px rgba(107, 114, 128, 0.2);
 }
 
 
