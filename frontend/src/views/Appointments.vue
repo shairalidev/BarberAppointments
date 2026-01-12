@@ -1,24 +1,16 @@
 <template>
   <div class="booking-page">
     <div class="container py-5">
-      <div class="d-flex justify-content-between align-items-center mb-4 booking-header">
-        <div>
-          <p class="text-primary fw-semibold mb-1">{{ $t('booking.step') }} {{ currentStep }} {{ $t('booking.of') }} 3</p>
-          <h2 class="fw-bold mb-0">{{ $t('booking.title') }}</h2>
-          <p class="text-muted mb-2">{{ $t('booking.subtitle') }}</p>
-          <div class="d-flex align-items-center text-muted small">
-            <i class="fas fa-map-marker-alt me-2"></i>
-            <span>Bahnhofstraße 3, 6410 Telfs</span>
-          </div>
-        </div>
-        <div class="d-none d-md-flex align-items-center gap-3">
-          <div v-for="step in steps" :key="step.number" class="step-indicator" :class="{ active: currentStep === step.number, completed: currentStep > step.number }">
-            <span class="badge rounded-circle me-2" :class="currentStep >= step.number ? 'bg-primary' : 'bg-light text-muted'">{{ step.number }}</span>
-            <div class="d-flex flex-column">
-              <small class="text-muted">{{ $t(`booking.stepSubtitle${step.number}`) }}</small>
-              <strong>{{ $t(`booking.step${step.number}`) }}</strong>
+      <!-- Steps Indicator -->
+      <div class="steps-header mb-3">
+        <div class="steps-row">
+          <template v-for="(step, index) in steps" :key="step.number">
+            <div class="step-item" :class="{ active: currentStep === step.number, completed: currentStep > step.number }">
+              <span class="step-badge" :class="currentStep >= step.number ? 'active' : ''">{{ step.number }}</span>
+              <span class="step-label">{{ $t(`booking.step${step.number}`) }}</span>
             </div>
-          </div>
+            <div v-if="index < steps.length - 1" class="step-connector" :class="{ completed: currentStep > step.number }"></div>
+          </template>
         </div>
       </div>
 
@@ -26,41 +18,24 @@
         <div class="col-lg-8">
           <!-- Step 1: Services -->
           <div v-if="currentStep === 1" class="card border-0 shadow-sm mb-4">
-            <div class="card-header py-3">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <h5 class="mb-0">{{ $t('booking.step1') }}</h5>
-                  <small class="text-muted">{{ $t('booking.chooseServices') }}</small>
-                </div>
-
-              </div>
-            </div>
             <div class="card-body">
-              <div class="row g-3">
+              <div class="row g-2">
                 <div class="col-md-6" v-for="service in services" :key="service._id">
-                  <label class="service-card w-100" :class="{ selected: selectedServices.includes(service._id) }">
-                    <div class="d-flex align-items-start">
-                      <input type="checkbox" class="form-check-input me-3" :value="service._id" v-model="selectedServices" @change="handleAvailabilityRefresh">
-                      <div class="flex-grow-1">
-                        <div class="d-flex justify-content-between align-items-start mb-1">
-                          <div>
-                            <h6 class="mb-1">{{ service.name }}</h6>
-                          </div>
-                          <span class="text-primary fw-semibold">{{ formatCurrency(service.price) }}</span>
-                        </div>
-                        <div class="d-flex justify-content-between text-muted small">
-                          <span><i class="fas fa-clock me-1"></i>{{ service.duration }} min</span>
-                          <span class="badge bg-light text-primary">{{ $t('common.add') }}</span>
-                        </div>
+                  <label class="service-card-new" :class="{ selected: selectedServices.includes(service._id) }">
+                    <div class="service-info">
+                      <span class="service-name">{{ service.name }}</span>
+                      <div class="service-meta">
+                        <span class="service-duration">{{ service.duration }} Min.</span>
+                        <span class="service-price">{{ formatCurrency(service.price) }}</span>
                       </div>
                     </div>
+                    <input type="checkbox" class="service-checkbox" :value="service._id" v-model="selectedServices" @change="handleAvailabilityRefresh">
                   </label>
                 </div>
               </div>
-              <div class="d-flex justify-content-between align-items-center mt-3">
-                <small class="text-muted">{{ $t('booking.youCanChooseMultiple') }}</small>
-                <button class="btn btn-primary touch-friendly" :disabled="!canProceedFromServices" @click="goToStep(2)">
-                  {{ $t('booking.chooseTime') }}
+              <div class="d-flex justify-content-end mt-3">
+                <button class="btn btn-sm btn-primary" :disabled="!canProceedFromServices" @click="goToStep(2)">
+                  {{ $t('common.continue') }} <i class="fas fa-arrow-right ms-1"></i>
                 </button>
               </div>
             </div>
@@ -68,32 +43,7 @@
 
           <!-- Step 2: Date and Time -->
           <div v-if="currentStep === 2" class="card border-0 shadow-sm mb-4">
-            <div class="card-header py-3 d-flex justify-content-between align-items-center">
-              <div>
-                <h5 class="mb-0">{{ $t('booking.pickDateTime') }}</h5>
-                <small class="text-muted">{{ $t('booking.pickDateTimeDesc') }}</small>
-              </div>
-              <button class="btn btn-link text-decoration-none" @click="goToStep(1)">
-                <i class="fas fa-arrow-left me-1"></i> {{ $t('booking.services') }}
-              </button>
-            </div>
             <div class="card-body">
-              <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-                <div>
-                  <p class="text-muted mb-1">{{ $t('booking.step') }} 2 {{ $t('booking.of') }} 3</p>
-                  <h5 class="mb-0">{{ $t('booking.pickDateTime') }}</h5>
-                  <small class="text-muted">{{ $t('booking.pickDateTimeDesc') }}</small>
-                </div>
-                <div class="d-flex flex-column">
-                  <label class="text-muted small mb-1">{{ $t('booking.barber') }}</label>
-                  <select v-model="selectedBarber" @change="handleAvailabilityRefresh" class="form-select">
-                    <option value="">{{ $t('booking.selectBarber') }}</option>
-                    <option v-for="barber in barbers" :key="barber._id" :value="barber._id">
-                      {{ barber.name }}
-                    </option>
-                  </select>
-                </div>
-              </div>
 
               <div class="calendar-wrapper mb-4">
                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -161,24 +111,19 @@
                 </div>
               </div>
 
-              <div class="d-flex justify-content-between align-items-center">
-                <button class="btn btn-outline-secondary touch-friendly" @click="goToStep(1)">{{ $t('common.back') }}</button>
-                <button class="btn btn-primary touch-friendly" :disabled="!canProceedFromSchedule" @click="goToStep(3)">{{ $t('common.continue') }}</button>
+              <div class="d-flex justify-content-between align-items-center mt-3">
+                <button class="btn btn-sm btn-outline-secondary" @click="goToStep(1)">
+                  <i class="fas fa-arrow-left me-1"></i>{{ $t('booking.services') }}
+                </button>
+                <button class="btn btn-sm btn-primary" :disabled="!canProceedFromSchedule" @click="goToStep(3)">
+                  {{ $t('common.continue') }} <i class="fas fa-arrow-right ms-1"></i>
+                </button>
               </div>
             </div>
           </div>
 
           <!-- Step 3: Contact details -->
           <div v-if="currentStep === 3" class="card border-0 shadow-sm mb-4">
-            <div class="card-header py-3 d-flex justify-content-between align-items-center">
-              <div>
-                <h5 class="mb-0">{{ $t('booking.yourDetails') }}</h5>
-                <small class="text-muted">{{ $t('booking.detailsDesc') }}</small>
-              </div>
-              <button class="btn btn-link text-decoration-none" @click="goToStep(2)">
-                <i class="fas fa-arrow-left me-1"></i> {{ $t('booking.dateTime') }}
-              </button>
-            </div>
             <div class="card-body">
               <form @submit.prevent="submitBooking" class="row g-3">
                 <div class="col-md-6">
@@ -205,14 +150,16 @@
                     </label>
                   </div>
                 </div>
-                <div class="col-12 d-flex justify-content-between align-items-center">
-                  <button type="button" class="btn btn-outline-secondary touch-friendly" @click="goToStep(2)">{{ $t('common.back') }}</button>
+                <div class="col-12 d-flex justify-content-between align-items-center mt-2">
+                  <button type="button" class="btn btn-sm btn-outline-secondary" @click="goToStep(2)">
+                    <i class="fas fa-arrow-left me-1"></i>{{ $t('common.back') }}
+                  </button>
                   <button
                     type="submit"
-                    class="btn btn-primary touch-friendly"
+                    class="btn btn-sm btn-primary"
                     :disabled="isSubmitting || !canProceedFromSchedule"
                   >
-                    <span v-if="isSubmitting" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span v-if="isSubmitting" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
                     {{ isSubmitting ? $t('common.loading') : $t('booking.bookNow') }}
                   </button>
                 </div>
@@ -851,12 +798,123 @@ export default {
 .booking-page {
   background: var(--bg-primary);
   min-height: 100vh;
-  padding-bottom: 2rem;
+  padding-bottom: 1rem;
   color: var(--text-primary);
 }
 
-.booking-header {
-  gap: 1rem;
+.booking-page .container {
+  padding-top: 1rem !important;
+  padding-bottom: 1rem !important;
+}
+
+@media (max-width: 576px) {
+  .booking-page .container {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+    padding-top: 0.5rem !important;
+  }
+}
+
+/* Steps Header */
+.steps-header {
+  padding: 0.5rem 0;
+}
+
+.steps-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.step-item.active {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: var(--primary);
+}
+
+.step-item.completed {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: var(--success);
+}
+
+.step-badge {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 600;
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+}
+
+.step-badge.active {
+  background: var(--primary);
+  color: white;
+}
+
+.step-item.completed .step-badge {
+  background: var(--success);
+  color: white;
+}
+
+.step-label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.step-item.active .step-label {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.step-item.completed .step-label {
+  color: var(--success);
+}
+
+.step-connector {
+  width: 14px;
+  height: 2px;
+  background: var(--border-color);
+  border-radius: 1px;
+}
+
+.step-connector.completed {
+  background: var(--success);
+}
+
+@media (max-width: 576px) {
+  .step-item {
+    padding: 0.2rem 0.4rem;
+  }
+  
+  .step-badge {
+    width: 16px;
+    height: 16px;
+    font-size: 0.6rem;
+  }
+  
+  .step-label {
+    font-size: 0.6rem;
+  }
+  
+  .step-connector {
+    width: 10px;
+  }
 }
 
 /* Enhanced mobile optimizations */
@@ -866,11 +924,6 @@ export default {
     padding-right: 0.75rem;
   }
 
-  .booking-header {
-    flex-direction: column;
-    align-items: flex-start !important;
-    gap: 1rem;
-  }
 
   .booking-page h2 {
     font-size: 1.75rem;
@@ -898,46 +951,68 @@ export default {
   }
 }
 
-.step-indicator {
+
+/* New Service Card Design */
+.service-card-new {
   display: flex;
   align-items: center;
-  padding: 0.5rem 0.75rem;
-  border-radius: 12px;
-  transition: all 0.2s ease;
-  color: var(--text-muted);
-}
-
-.step-indicator.active {
-  background: rgba(59, 130, 246, 0.1);
-  color: var(--primary);
-}
-
-.step-indicator.completed {
-  color: var(--success);
-}
-
-.service-card {
+  justify-content: space-between;
   border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 14px;
+  border-radius: 8px;
+  padding: 10px 12px;
   cursor: pointer;
   transition: all 0.2s ease;
   background: var(--bg-secondary);
+  width: 100%;
+}
+
+.service-card-new:hover {
+  border-color: var(--primary);
+  background: rgba(59, 130, 246, 0.02);
+}
+
+.service-card-new.selected {
+  border-color: var(--primary);
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.service-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.service-name {
+  font-size: 0.8rem;
+  font-weight: 500;
   color: var(--text-primary);
 }
 
-.service-card:hover {
-  border-color: var(--text-muted);
-  box-shadow: var(--shadow-lg);
+.service-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.service-card.selected {
+.service-duration,
+.service-price {
+  font-size: 0.7rem;
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.service-checkbox {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  accent-color: var(--primary);
+  flex-shrink: 0;
+}
+
+.service-card-new.selected .service-checkbox {
   border-color: var(--primary);
-  box-shadow: 0 12px 25px rgba(37, 99, 235, 0.15);
-}
-
-.service-card .form-check-input {
-  margin-top: 6px;
 }
 
 .btn-outline-primary.active {
@@ -968,9 +1043,18 @@ export default {
 
 .calendar-wrapper {
   border: 1px solid var(--border-color);
-  border-radius: 14px;
-  padding: 16px;
+  border-radius: 10px;
+  padding: 12px;
   background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+}
+
+.calendar-wrapper h5 {
+  font-size: 0.85rem !important;
+  margin-bottom: 0 !important;
+}
+
+.calendar-wrapper p {
+  font-size: 0.65rem !important;
 }
 
 .icon-button {
@@ -1000,16 +1084,16 @@ export default {
 .calendar-header {
   text-align: center;
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.65rem;
   color: var(--text-secondary);
-  padding: 8px 4px;
+  padding: 4px 2px;
   text-transform: uppercase;
 }
 
 .calendar-day {
   aspect-ratio: 1;
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--bg-secondary);
   text-align: center;
   display: flex;
@@ -1019,7 +1103,7 @@ export default {
   color: var(--text-primary);
   cursor: pointer;
   padding: 0;
-  min-height: 45px;
+  min-height: 36px;
 }
 
 .calendar-day:hover:not(.disabled):not(.past-date) {
@@ -1060,7 +1144,7 @@ export default {
 }
 
 .calendar-day .day-number {
-  font-size: 0.95rem;
+  font-size: 0.75rem;
   font-weight: 500;
 }
 
@@ -1159,24 +1243,74 @@ export default {
 }
 
 .slot-button {
-  border-width: 1.5px;
-  border-radius: 12px;
-  padding: 10px 12px;
+  border-width: 1px;
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 0.75rem;
 }
 
 @media (max-width: 576px) {
   .slot-button {
-    padding: 8px 10px;
-    font-size: 0.9rem;
+    padding: 5px 6px;
+    font-size: 0.7rem;
   }
 }
 
 .card {
-  border-radius: 16px;
+  border-radius: 10px;
 }
 
 .card-header {
-  border-radius: 16px 16px 0 0 !important;
+  border-radius: 10px 10px 0 0 !important;
+}
+
+.card-body {
+  padding: 12px !important;
+}
+
+.card-body span,
+.card-body p {
+  font-size: 0.7rem !important;
+}
+
+.card-body strong {
+  font-size: 0.7rem !important;
+}
+
+.card-body small {
+  font-size: 0.6rem !important;
+}
+
+.card-body hr {
+  margin: 0.5rem 0 !important;
+}
+
+.card h6 {
+  font-size: 0.75rem !important;
+}
+
+.card-header {
+  padding: 0.5rem 0.75rem !important;
+}
+
+.form-label {
+  font-size: 0.7rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.form-control, .form-select {
+  font-size: 0.75rem !important;
+  padding: 0.4rem 0.6rem !important;
+  min-height: 34px !important;
+}
+
+.form-check-label {
+  font-size: 0.7rem !important;
+}
+
+.btn-sm {
+  font-size: 0.7rem !important;
+  padding: 0.35rem 0.7rem !important;
 }
 
 @media (max-width: 992px) {
@@ -1187,8 +1321,22 @@ export default {
 }
 
 @media (max-width: 768px) {
-  .service-card {
-    padding: 12px;
+  .service-card-new {
+    padding: 8px 10px;
+  }
+  
+  .service-name {
+    font-size: 0.75rem;
+  }
+  
+  .service-duration,
+  .service-price {
+    font-size: 0.65rem;
+  }
+  
+  .service-checkbox {
+    width: 16px;
+    height: 16px;
   }
   
   .day-card {
@@ -1209,21 +1357,29 @@ export default {
   }
   
   .calendar-grid-month {
-    gap: 6px;
+    gap: 4px;
   }
   
   .calendar-header {
-    font-size: 0.75rem;
-    padding: 6px 2px;
+    font-size: 0.55rem;
+    padding: 3px 1px;
   }
   
   .calendar-day {
-    min-height: 40px;
-    border-radius: 6px;
+    min-height: 32px;
+    border-radius: 4px;
   }
   
   .calendar-day .day-number {
-    font-size: 0.85rem;
+    font-size: 0.65rem;
+  }
+  
+  .calendar-wrapper {
+    padding: 8px;
+  }
+  
+  .calendar-wrapper h5 {
+    font-size: 0.75rem !important;
   }
 }
 </style>

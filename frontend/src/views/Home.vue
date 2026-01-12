@@ -4,23 +4,11 @@
     <section class="hero-section" :style="heroBackgroundStyle">
       <div class="hero-overlay" :style="heroOverlayStyle"></div>
       <div class="container position-relative">
-        <div class="row align-items-center min-vh-90">
-          <div class="col-lg-7 col-md-8 text-white hero-content">
-            <div class="badge premium-badge mb-3 px-3 py-2">
-              <span>Modern Barber Culture</span>
-            </div>
-            <h1 class="display-2 fw-bold mb-3 hero-title">{{ $t('home.title') }}</h1>
-            <p class="lead mb-3 fs-5 hero-subtitle">{{ $t('home.subtitle') }}</p>
-            <div class="d-flex align-items-center mb-4 text-white-75">
-              <i class="fas fa-map-marker-alt me-2"></i>
-              <span>Bahnhofstraße 3, 6410 Telfs</span>
-            </div>
-            <div class="d-flex flex-column flex-sm-row gap-3">
-              <router-link class="btn btn-light btn-lg px-4 py-3 shadow-lg touch-friendly" to="/appointments">
-                <i class="fas fa-calendar-check me-2"></i>{{ $t('home.bookNow') }}
-              </router-link>
-             
-            </div>
+        <div class="row align-items-center justify-content-center min-vh-90">
+          <div class="col-auto text-white hero-content text-center">
+            <router-link class="btn btn-light btn-lg px-4 py-3 shadow-lg touch-friendly" to="/appointments">
+              <i class="fas fa-calendar-check me-2"></i>{{ $t('home.bookNow') }}
+            </router-link>
           </div>
         </div>
       </div>
@@ -30,21 +18,21 @@
     <!-- Stats Section -->
   
     <!-- Services Section -->
-    <section class="services-section py-5">
-      <div class="container py-4">
-        <div class="text-center mb-5">
-          <span class="badge bg-primary bg-opacity-10 text-primary mb-3 px-3 py-2">{{ $t('home.services') }}</span>
-          <h2 class="display-5 fw-bold mb-3">{{ $t('home.servicesSubtitle') }}</h2>
-          <p class="text-muted fs-6">{{ $t('home.servicesDescription') }}</p>
+    <section class="services-section py-3">
+      <div class="container py-2">
+        <div class="text-center mb-3">
+          <span class="badge bg-primary bg-opacity-10 text-primary mb-2 px-2 py-1 small">{{ $t('home.services') }}</span>
+          <h2 class="fs-5 fw-bold mb-2">{{ $t('home.servicesSubtitle') }}</h2>
+          <p class="text-muted small mb-0">{{ $t('home.servicesDescription') }}</p>
         </div>
-        <div class="row g-4">
+        <div class="row g-2">
           <div class="col-lg-4 col-md-6" v-for="service in services" :key="service._id">
             <div class="service-card h-100">
               <div class="service-icon">
                 <i class="fas fa-cut"></i>
               </div>
-              <h5 class="fw-bold mb-2">{{ service.name }}</h5>
-              <p class="text-muted small mb-3">{{ service.description || 'Professional service with attention to detail' }}</p>
+              <h6 class="fw-bold mb-1">{{ service.name }}</h6>
+              <p class="text-muted small mb-2" style="font-size: 0.7rem;">{{ service.description || 'Professional service' }}</p>
               <div class="d-flex justify-content-between align-items-center">
                 <span class="price">{{ formatCurrency(service.price) }}</span>
                 <span class="duration"><i class="fas fa-clock me-1"></i>{{ service.duration }}min</span>
@@ -52,24 +40,24 @@
             </div>
           </div>
         </div>
-        <div class="text-center mt-5">
-          <router-link class="btn btn-primary btn-lg px-4 py-3 text-white touch-friendly" to="/appointments">
-            {{ $t('home.viewAllServices') }} <i class="fas fa-arrow-right ms-2"></i>
+        <div class="text-center mt-3">
+          <router-link class="btn btn-primary btn-sm px-3 py-2 text-white" to="/appointments">
+            {{ $t('home.viewAllServices') }} <i class="fas fa-arrow-right ms-1"></i>
           </router-link>
         </div>
       </div>
     </section>
 
     <!-- Gallery Section -->
-    <section class="gallery-section py-5" v-if="galleryImages.length > 0">
-      <div class="container py-4">
-        <div class="text-center mb-5">
-          <span class="badge bg-primary bg-opacity-10 text-primary mb-3 px-3 py-2">{{ $t('home.gallery') }}</span>
-          <h2 class="display-5 fw-bold mb-3">{{ $t('home.galleryTitle') }}</h2>
-          <p class="text-muted fs-6">{{ $t('home.galleryDescription') }}</p>
+    <section class="gallery-section py-3" v-if="galleryImages.length > 0">
+      <div class="container py-2">
+        <div class="text-center mb-3">
+          <span class="badge bg-primary bg-opacity-10 text-primary mb-2 px-2 py-1 small">{{ $t('home.gallery') }}</span>
+          <h2 class="fs-5 fw-bold mb-2">{{ $t('home.galleryTitle') }}</h2>
+          <p class="text-muted small mb-0">{{ $t('home.galleryDescription') }}</p>
         </div>
-        <div class="row g-3">
-          <div class="col-lg-4 col-md-6" v-for="(image, index) in galleryImages" :key="index">
+        <div class="row g-2">
+          <div class="col-lg-4 col-md-6 col-6" v-for="(image, index) in galleryImages" :key="index">
             <div class="gallery-item">
               <img 
                 :src="image" 
@@ -85,34 +73,34 @@
     </section>
 
     <!-- Features Section -->
-    <section class="features-section py-5">
-      <div class="container py-4">
-        <div class="row g-4 justify-content-center">
-          <div class="col-lg-4 col-md-6">
+    <section class="features-section py-3">
+      <div class="container py-2">
+        <div class="row g-2 justify-content-center">
+          <div class="col-lg-4 col-md-6 col-4">
             <div class="feature-card text-center">
-              <div class="feature-icon mb-3">
+              <div class="feature-icon mb-2">
                 <i class="fas fa-calendar-check"></i>
               </div>
-              <h6 class="fw-bold mb-2">{{ $t('home.features.easyBooking') }}</h6>
-              <p class="text-muted small mb-0">{{ $t('home.features.easyBookingDesc') }}</p>
+              <p class="fw-bold mb-1 small">{{ $t('home.features.easyBooking') }}</p>
+              <p class="text-muted mb-0" style="font-size: 0.65rem;">{{ $t('home.features.easyBookingDesc') }}</p>
             </div>
           </div>
-          <div class="col-lg-4 col-md-6">
+          <div class="col-lg-4 col-md-6 col-4">
             <div class="feature-card text-center">
-              <div class="feature-icon mb-3">
+              <div class="feature-icon mb-2">
                 <i class="fas fa-star"></i>
               </div>
-              <h6 class="fw-bold mb-2">{{ $t('home.features.premiumQuality') }}</h6>
-              <p class="text-muted small mb-0">{{ $t('home.features.premiumQualityDesc') }}</p>
+              <p class="fw-bold mb-1 small">{{ $t('home.features.premiumQuality') }}</p>
+              <p class="text-muted mb-0" style="font-size: 0.65rem;">{{ $t('home.features.premiumQualityDesc') }}</p>
             </div>
           </div>
-          <div class="col-lg-4 col-md-6">
+          <div class="col-lg-4 col-md-6 col-4">
             <div class="feature-card text-center">
-              <div class="feature-icon mb-3">
+              <div class="feature-icon mb-2">
                 <i class="fas fa-shield-alt"></i>
               </div>
-              <h6 class="fw-bold mb-2">{{ $t('home.features.hygieneFirst') }}</h6>
-              <p class="text-muted small mb-0">{{ $t('home.features.hygieneFirstDesc') }}</p>
+              <p class="fw-bold mb-1 small">{{ $t('home.features.hygieneFirst') }}</p>
+              <p class="text-muted mb-0" style="font-size: 0.65rem;">{{ $t('home.features.hygieneFirstDesc') }}</p>
             </div>
           </div>
         </div>
@@ -120,13 +108,13 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="cta-section py-5">
-      <div class="container py-4">
-        <div class="cta-card text-center text-white p-5">
-          <h2 class="display-6 fw-bold mb-3">{{ $t('home.cta.title') }}</h2>
-          <p class="lead mb-4">{{ $t('home.cta.subtitle') }}</p>
-          <router-link class="btn btn-light btn-lg px-4 py-3 text-dark touch-friendly" to="/appointments">
-            <i class="fas fa-calendar-plus me-2"></i>{{ $t('home.cta.button') }}
+    <section class="cta-section py-3">
+      <div class="container py-2">
+        <div class="cta-card text-center text-white p-3">
+          <h2 class="fs-5 fw-bold mb-2">{{ $t('home.cta.title') }}</h2>
+          <p class="small mb-3">{{ $t('home.cta.subtitle') }}</p>
+          <router-link class="btn btn-light btn-sm px-3 py-2 text-dark" to="/appointments">
+            <i class="fas fa-calendar-plus me-1"></i>{{ $t('home.cta.button') }}
           </router-link>
         </div>
       </div>
@@ -344,7 +332,7 @@ export default {
 .gallery-item {
   position: relative;
   overflow: hidden;
-  border-radius: 12px;
+  border-radius: 8px;
   aspect-ratio: 1;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -371,41 +359,41 @@ export default {
 .service-card {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
-  border-radius: 16px;
-  padding: 2rem;
+  border-radius: 10px;
+  padding: 1rem;
   transition: all 0.3s ease;
   cursor: pointer;
   color: var(--text-primary);
 }
 
 .service-card:hover {
-  transform: translateY(-8px);
+  transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
   border-color: var(--primary);
 }
 
 .service-icon {
-  width: 60px;
-  height: 60px;
+  width: 36px;
+  height: 36px;
   background: var(--primary);
-  border-radius: 12px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
   color: white;
 }
 
 .service-card .price {
-  font-size: 1.5rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--primary);
 }
 
 .service-card .duration {
   color: var(--text-muted);
-  font-size: 0.9rem;
+  font-size: 0.7rem;
 }
 
 /* Features Section */
@@ -415,26 +403,26 @@ export default {
 
 .feature-card {
   background: var(--bg-secondary);
-  padding: 2rem 1rem;
-  border-radius: 12px;
+  padding: 0.75rem 0.5rem;
+  border-radius: 8px;
   transition: all 0.3s ease;
   color: var(--text-primary);
 }
 
 .feature-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-3px);
   box-shadow: var(--shadow-lg);
 }
 
 .feature-icon {
-  width: 70px;
-  height: 70px;
+  width: 40px;
+  height: 40px;
   background: rgba(59, 130, 246, 0.1);
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.8rem;
+  font-size: 1rem;
   color: var(--primary);
 }
 
@@ -445,8 +433,8 @@ export default {
 
 .cta-card {
   background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-  border-radius: 24px;
-  box-shadow: 0 20px 60px rgba(59, 130, 246, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
 }
 
 /* Mobile Optimizations */

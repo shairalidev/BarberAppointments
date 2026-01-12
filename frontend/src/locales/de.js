@@ -50,7 +50,7 @@ export default {
     yourDetails: 'Ihre Daten',
     detailsDesc: 'Wir senden Ihnen eine Bestätigung per E-Mail',
     fullName: 'Vollständiger Name',
-    mobileNumber: 'Handynummer',
+    mobileNumber: 'Mobiltelefon',
     email: 'E-Mail',
     specialRequests: 'Besondere Wünsche',
     specialRequestsPlaceholder: 'Gibt es noch etwas, was wir wissen sollten?',

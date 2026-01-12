@@ -175,9 +175,9 @@ export default {
 }
 
 .logo-container {
-  padding: 8px 16px;
+  padding: 4px 8px;
   background: transparent;
-  border-radius: 10px;
+  border-radius: 8px;
   transition: all 0.3s ease;
 }
 
@@ -186,19 +186,19 @@ export default {
 }
 
 .brand-logo {
-  height: 65px;
+  height: 45px;
   width: auto;
   object-fit: contain;
-  max-width: 250px;
+  max-width: 180px;
   display: block;
   flex-shrink: 0;
 }
 
 .brand-text {
-  font-size: 1.5rem;
+  font-size: 1rem;
   font-weight: 700;
-  letter-spacing: 0.5px;
-  margin-left: 12px;
+  letter-spacing: 0.3px;
+  margin-left: 8px;
   color: var(--text-primary);
   white-space: nowrap;
   transition: color 0.3s ease;
@@ -212,8 +212,10 @@ export default {
 .nav-link {
   color: var(--text-secondary) !important;
   transition: all 0.2s ease;
-  border-radius: 8px;
+  border-radius: 6px;
   position: relative;
+  font-size: 0.8rem !important;
+  padding: 0.4rem 0.6rem !important;
 }
 
 .nav-link:hover {
@@ -288,18 +290,18 @@ export default {
 /* Mobile Optimizations */
 @media (max-width: 991px) {
   .logo-container {
-    padding: 6px 12px;
+    padding: 4px 8px;
   }
   
   .brand-logo {
-    height: 55px;
-    max-width: 220px;
+    height: 40px;
+    max-width: 160px;
   }
   
   .brand-text {
-    font-size: 1.25rem;
-    margin-left: 10px;
-    letter-spacing: 0.3px;
+    font-size: 0.9rem;
+    margin-left: 6px;
+    letter-spacing: 0.2px;
   }
   
   .navbar-collapse {
@@ -425,30 +427,30 @@ export default {
 
 @media (max-width: 576px) {
   .logo-container {
-    padding: 5px 10px;
+    padding: 3px 6px;
   }
   
   .brand-logo {
-    height: 45px;
-    max-width: 180px;
+    height: 35px;
+    max-width: 140px;
   }
   
   .brand-text {
-    font-size: 1rem;
-    margin-left: 8px;
-    letter-spacing: 0.2px;
+    font-size: 0.8rem;
+    margin-left: 5px;
+    letter-spacing: 0.1px;
   }
 }
 
 @media (max-width: 400px) {
   .brand-text {
-    font-size: 0.875rem;
-    margin-left: 6px;
+    font-size: 0.75rem;
+    margin-left: 4px;
   }
   
   .brand-logo {
-    height: 40px;
-    max-width: 150px;
+    height: 32px;
+    max-width: 120px;
   }
 }
 </style>
