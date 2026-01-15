@@ -49,37 +49,48 @@
                 <div class="d-flex justify-content-between align-items-center mb-2">
                   <button 
                     class="btn btn-sm btn-outline-secondary calendar-nav-btn" 
-                    @click="navigateCalendar(-1)"
-                    :disabled="isCurrentMonth"
-                    title="Previous month">
+                    @click="showFullMonth ? navigateCalendar(-1) : navigateWeek(-1)"
+                    :disabled="showFullMonth ? isCurrentMonth : isCurrentWeek()"
+                    title="Previous">
                     <i class="fas fa-chevron-left"></i>
                   </button>
                   <div class="text-center flex-grow-1 position-relative">
-                    <div class="month-selector" @click="toggleMonthDropdown">
-                      <span class="month-label">{{ monthYearLabel }}</span>
-                      <i class="fas fa-chevron-down ms-1"></i>
-                    </div>
-                    <div v-if="showMonthDropdown" class="month-dropdown">
-                      <div 
-                        v-for="(month, index) in monthsList" 
-                        :key="index"
-                        class="month-option"
-                        :class="{ active: currentMonth === index && currentYear === selectedYear }"
-                        @click="selectMonth(index)"
-                      >
-                        {{ month }}
-                      </div>
+                    <div class="month-selector" @click="toggleMonthView">
+                      <span class="month-label">{{ showFullMonth ? monthYearLabel : weekLabel }}</span>
+                      <i class="fas ms-1" :class="showFullMonth ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
                     </div>
                   </div>
                   <button 
                     class="btn btn-sm btn-outline-secondary calendar-nav-btn" 
-                    @click="navigateCalendar(1)"
-                    title="Next month">
+                    @click="showFullMonth ? navigateCalendar(1) : navigateWeek(1)"
+                    title="Next">
                     <i class="fas fa-chevron-right"></i>
                   </button>
                 </div>
 
-                <div class="calendar-grid-month">
+                <!-- Week View (Default) -->
+                <div v-if="!showFullMonth" class="week-view">
+                  <div class="week-grid">
+                    <button
+                      v-for="day in weekDays"
+                      :key="day.value"
+                      class="week-day"
+                      :class="{ 
+                        active: day.isSelected, 
+                        today: day.isToday,
+                        'past-date': day.isPast,
+                        disabled: day.isPast
+                      }"
+                      :disabled="day.isPast"
+                      @click="selectDate(day.value)">
+                      <span class="day-name">{{ day.dayName }}</span>
+                      <span class="day-number">{{ day.number }}</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Month View -->
+                <div v-else class="calendar-grid-month">
                   <div class="calendar-header" v-for="day in calendarDayNames" :key="day">
                     {{ day }}
                   </div>
@@ -248,6 +259,8 @@ export default {
       currentYear: new Date().getFullYear(),
       showMonthDropdown: false,
       selectedYear: new Date().getFullYear(),
+      showFullMonth: false,
+      currentWeekStartDate: null,
       customer: {
         name: '',
         phone: '',
@@ -285,15 +298,51 @@ export default {
       return barber?.name
     },
     calendarDayNames() {
+      // Start with Monday
       return [
-        this.$t('booking.dayNames.sun'),
         this.$t('booking.dayNames.mon'),
         this.$t('booking.dayNames.tue'),
         this.$t('booking.dayNames.wed'),
         this.$t('booking.dayNames.thu'),
         this.$t('booking.dayNames.fri'),
-        this.$t('booking.dayNames.sat')
+        this.$t('booking.dayNames.sat'),
+        this.$t('booking.dayNames.sun')
       ]
+    },
+    weekDays() {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      
+      // Get start of current week (Monday)
+      const weekStart = this.currentWeekStartDate || this.getMondayOfWeek(today)
+      const days = []
+      
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(weekStart)
+        date.setDate(weekStart.getDate() + i)
+        const value = this.formatDateValue(date)
+        const isPast = date < today && !this.isSameDay(date, today)
+        
+        days.push({
+          number: String(date.getDate()).padStart(2, '0'),
+          dayName: date.toLocaleDateString(undefined, { weekday: 'short' }),
+          value,
+          isSelected: this.selectedDate === value,
+          isToday: this.isSameDay(date, today),
+          isPast
+        })
+      }
+      
+      return days
+    },
+    weekLabel() {
+      if (!this.currentWeekStartDate) return ''
+      const weekEnd = new Date(this.currentWeekStartDate)
+      weekEnd.setDate(this.currentWeekStartDate.getDate() + 6)
+      
+      const startStr = this.currentWeekStartDate.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })
+      const endStr = weekEnd.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })
+      return `${startStr} - ${endStr}`
     },
     monthDays() {
       const today = new Date()
@@ -304,7 +353,9 @@ export default {
       const prevLastDay = new Date(this.currentYear, this.currentMonth, 0)
       
       const days = []
-      const startDay = firstDay.getDay()
+      // Convert Sunday=0 to Monday-based (Monday=0, Sunday=6)
+      let startDay = firstDay.getDay() - 1
+      if (startDay < 0) startDay = 6
       
       // Previous month days
       for (let i = startDay - 1; i >= 0; i--) {
@@ -340,21 +391,21 @@ export default {
       
       // Next month days to complete the grid
       const totalSlots = Math.ceil(days.length / 7) * 7
-      const nextMonthStart = new Date(this.currentYear, this.currentMonth + 1, 1)
+      let nextDayCount = 1
       while (days.length < totalSlots) {
-        const date = new Date(nextMonthStart)
-        date.setDate(nextMonthStart.getDate() + (days.length - (startDay + lastDay.getDate())))
+        const date = new Date(this.currentYear, this.currentMonth + 1, nextDayCount)
         const value = this.formatDateValue(date)
         const isPast = date < today && !this.isSameDay(date, today)
         
         days.push({
-          number: String(date.getDate()).padStart(2, '0'),
+          number: String(nextDayCount).padStart(2, '0'),
           value,
           isSelected: this.selectedDate === value,
           isToday: this.isSameDay(date, today),
           isCurrentMonth: false,
           isPast
         })
+        nextDayCount++
       }
       
       return days
@@ -401,6 +452,7 @@ export default {
     const today = new Date()
     this.selectedDate = this.formatDateValue(today)
     this.currentWeekStart = this.getStartOfWeek(today)
+    this.currentWeekStartDate = this.getMondayOfWeek(today)
     
     // Ensure we start with today or the first available future date
     const firstAvailable = this.findFirstAvailableDate(new Date(this.currentWeekStart))
@@ -429,6 +481,42 @@ export default {
       const diff = day === 0 ? -6 : 1 - day
       parsedDate.setDate(parsedDate.getDate() + diff)
       return this.formatDateValue(parsedDate)
+    },
+    getMondayOfWeek(date) {
+      const d = new Date(date)
+      const day = d.getDay()
+      const diff = day === 0 ? -6 : 1 - day // Monday = 1, Sunday = 0 -> -6
+      d.setDate(d.getDate() + diff)
+      d.setHours(0, 0, 0, 0)
+      return d
+    },
+    navigateWeek(direction) {
+      const newWeekStart = new Date(this.currentWeekStartDate)
+      newWeekStart.setDate(newWeekStart.getDate() + (direction * 7))
+      
+      // Don't allow going before current week
+      const today = new Date()
+      const currentMonday = this.getMondayOfWeek(today)
+      if (newWeekStart < currentMonday) {
+        return
+      }
+      
+      this.currentWeekStartDate = newWeekStart
+      this.currentMonth = newWeekStart.getMonth()
+      this.currentYear = newWeekStart.getFullYear()
+      this.selectedDate = ''
+      this.selectedTime = ''
+      this.availableTimes = []
+    },
+    toggleMonthView() {
+      this.showFullMonth = !this.showFullMonth
+      this.showMonthDropdown = false
+    },
+    isCurrentWeek() {
+      if (!this.currentWeekStartDate) return true
+      const today = new Date()
+      const currentMonday = this.getMondayOfWeek(today)
+      return this.currentWeekStartDate.getTime() === currentMonday.getTime()
     },
     isSameDay(dateA, dateB) {
       return (
@@ -885,8 +973,8 @@ export default {
 }
 
 .step-item.active {
-  background: rgba(107, 114, 128, 0.1);
-  border-color: var(--primary);
+  background: rgba(16, 185, 129, 0.1);
+  border-color: var(--success);
 }
 
 .step-item.completed {
@@ -908,7 +996,7 @@ export default {
 }
 
 .step-badge.active {
-  background: var(--primary);
+  background: var(--success);
   color: white;
 }
 
@@ -924,7 +1012,7 @@ export default {
 }
 
 .step-item.active .step-label {
-  color: var(--primary);
+  color: var(--success);
   font-weight: 600;
 }
 
@@ -1013,13 +1101,13 @@ export default {
 }
 
 .service-card-new:hover {
-  border-color: var(--primary);
-  background: rgba(107, 114, 128, 0.02);
+  border-color: var(--success);
+  background: rgba(16, 185, 129, 0.02);
 }
 
 .service-card-new.selected {
-  border-color: var(--primary);
-  background: rgba(107, 114, 128, 0.05);
+  border-color: var(--success);
+  background: rgba(16, 185, 129, 0.08);
 }
 
 .service-info {
@@ -1043,7 +1131,7 @@ export default {
 .service-duration,
 .service-price {
   font-size: 0.7rem;
-  color: var(--primary);
+  color: var(--success);
   font-weight: 500;
 }
 
@@ -1053,17 +1141,18 @@ export default {
   border: 2px solid var(--border-color);
   border-radius: 4px;
   cursor: pointer;
-  accent-color: var(--primary);
+  accent-color: var(--success);
   flex-shrink: 0;
 }
 
 .service-card-new.selected .service-checkbox {
-  border-color: var(--primary);
+  border-color: var(--success);
 }
 
 .btn-outline-primary.active {
-  background: #4b5563;
-  color: #fff;
+  background: var(--success) !important;
+  border-color: var(--success) !important;
+  color: #fff !important;
 }
 
 .calendar-nav-btn {
@@ -1078,9 +1167,9 @@ export default {
 }
 
 .calendar-nav-btn:hover:not(:disabled) {
-  background-color: var(--primary);
+  background-color: var(--success);
   color: white;
-  border-color: var(--primary);
+  border-color: var(--success);
 }
 
 .calendar-nav-btn:disabled {
@@ -1118,7 +1207,7 @@ export default {
 }
 
 .month-selector:hover {
-  background: rgba(107, 114, 128, 0.1);
+  background: rgba(16, 185, 129, 0.1);
 }
 
 .month-selector i {
@@ -1155,11 +1244,11 @@ export default {
 }
 
 .month-option:hover {
-  background: rgba(107, 114, 128, 0.1);
+  background: rgba(16, 185, 129, 0.1);
 }
 
 .month-option.active {
-  background: var(--primary);
+  background: var(--success);
   color: white;
 }
 
@@ -1183,12 +1272,91 @@ export default {
   color: var(--text-primary);
 }
 
-.week-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-  gap: 12px;
+/* Week View */
+.week-view {
+  padding: 4px 0;
 }
 
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.week-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 4px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 50px;
+}
+
+.week-day .day-name {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.week-day .day-number {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.week-day:hover:not(.disabled):not(.past-date) {
+  border-color: var(--success);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.week-day.today {
+  border-color: var(--text-muted);
+  background: rgba(107, 114, 128, 0.1);
+}
+
+.week-day.active {
+  border-color: var(--success);
+  background: rgba(16, 185, 129, 0.15);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.week-day.active .day-number {
+  color: var(--success);
+}
+
+.week-day.past-date,
+.week-day.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: var(--bg-tertiary);
+}
+
+@media (max-width: 576px) {
+  .week-day {
+    padding: 6px 2px;
+    min-height: 45px;
+  }
+  
+  .week-day .day-name {
+    font-size: 0.5rem;
+  }
+  
+  .week-day .day-number {
+    font-size: 0.75rem;
+  }
+  
+  .week-grid {
+    gap: 4px;
+  }
+}
+
+/* Month View */
 .calendar-grid-month {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -1221,20 +1389,20 @@ export default {
 }
 
 .calendar-day:hover:not(.disabled):not(.past-date) {
-  border-color: var(--primary);
-  background: rgba(107, 114, 128, 0.05);
+  border-color: var(--success);
+  background: rgba(16, 185, 129, 0.05);
 }
 
 .calendar-day.today {
-  border-color: var(--primary);
+  border-color: var(--text-muted);
   background: rgba(107, 114, 128, 0.1);
   font-weight: 700;
 }
 
 .calendar-day.active {
-  border-color: var(--primary);
-  background: rgba(107, 114, 128, 0.2);
-  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+  border-color: var(--success);
+  background: rgba(16, 185, 129, 0.15);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
   font-weight: 700;
 }
 
@@ -1336,9 +1504,9 @@ export default {
 }
 
 .day-card.active {
-  border-color: var(--primary);
-  background: rgba(107, 114, 128, 0.1);
-  box-shadow: 0 12px 30px rgba(107, 114, 128, 0.2);
+  border-color: var(--success);
+  background: rgba(16, 185, 129, 0.1);
+  box-shadow: 0 12px 30px rgba(16, 185, 129, 0.2);
 }
 
 
@@ -1362,6 +1530,21 @@ export default {
   padding: 4px 6px;
   font-size: 0.7rem;
   min-height: 28px;
+  border-color: var(--border-color);
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+}
+
+.slot-button:hover:not(.active) {
+  border-color: var(--success);
+  color: var(--success);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.slot-button.active {
+  background: var(--success) !important;
+  border-color: var(--success) !important;
+  color: white !important;
 }
 
 @media (max-width: 576px) {
@@ -1433,6 +1616,37 @@ export default {
 .btn-sm {
   font-size: 0.7rem !important;
   padding: 0.35rem 0.7rem !important;
+}
+
+/* Primary buttons - Green when enabled, Gray when disabled */
+.btn-primary {
+  background-color: var(--success) !important;
+  border-color: var(--success) !important;
+  color: white !important;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #059669 !important;
+  border-color: #059669 !important;
+}
+
+.btn-primary:disabled {
+  background-color: var(--text-muted) !important;
+  border-color: var(--text-muted) !important;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Outline primary buttons */
+.btn-outline-primary {
+  color: var(--success) !important;
+  border-color: var(--success) !important;
+}
+
+.btn-outline-primary:hover:not(:disabled) {
+  background-color: var(--success) !important;
+  border-color: var(--success) !important;
+  color: white !important;
 }
 
 @media (max-width: 992px) {

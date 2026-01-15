@@ -5,8 +5,10 @@
       <div class="hero-overlay" :style="heroOverlayStyle"></div>
       <div class="container position-relative">
         <div class="row align-items-center justify-content-center min-vh-90">
-          <div class="col-auto text-white hero-content text-center">
-            <router-link class="btn btn-light btn-lg px-4 py-3 shadow-lg touch-friendly" to="/appointments">
+          <div class="col-lg-8 col-md-10 text-white hero-content text-center">
+            <h1 class="fw-bold mb-2 hero-title">{{ $t('home.title') }}</h1>
+            <p class="mb-3 hero-subtitle">{{ $t('home.subtitle') }}</p>
+            <router-link class="btn btn-light px-4 py-2 shadow-lg" to="/appointments">
               <i class="fas fa-calendar-check me-2"></i>{{ $t('home.bookNow') }}
             </router-link>
           </div>
@@ -18,21 +20,21 @@
     <!-- Stats Section -->
   
     <!-- Services Section -->
-    <section class="services-section py-3">
-      <div class="container py-2">
-        <div class="text-center mb-3">
-          <span class="badge bg-primary bg-opacity-10 text-primary mb-2 px-2 py-1 small">{{ $t('home.services') }}</span>
-          <h2 class="fs-5 fw-bold mb-2">{{ $t('home.servicesSubtitle') }}</h2>
-          <p class="text-muted small mb-0">{{ $t('home.servicesDescription') }}</p>
+    <section class="services-section py-4">
+      <div class="container py-3">
+        <div class="text-center mb-4">
+          <span class="badge bg-primary bg-opacity-10 text-primary mb-2 px-3 py-1">{{ $t('home.services') }}</span>
+          <h2 class="fs-4 fw-bold mb-2">{{ $t('home.servicesSubtitle') }}</h2>
+          <p class="text-muted">{{ $t('home.servicesDescription') }}</p>
         </div>
-        <div class="row g-2">
+        <div class="row g-3">
           <div class="col-lg-4 col-md-6" v-for="service in services" :key="service._id">
             <div class="service-card h-100">
               <div class="service-icon">
                 <i class="fas fa-cut"></i>
               </div>
               <h6 class="fw-bold mb-1">{{ service.name }}</h6>
-              <p class="text-muted small mb-2" style="font-size: 0.7rem;">{{ service.description || 'Professional service' }}</p>
+              <p class="text-muted small mb-2">{{ service.description || 'Professional service' }}</p>
               <div class="d-flex justify-content-between align-items-center">
                 <span class="price">{{ formatCurrency(service.price) }}</span>
                 <span class="duration"><i class="fas fa-clock me-1"></i>{{ service.duration }}min</span>
@@ -40,23 +42,23 @@
             </div>
           </div>
         </div>
-        <div class="text-center mt-3">
-          <router-link class="btn btn-primary btn-sm px-3 py-2 text-white" to="/appointments">
-            {{ $t('home.viewAllServices') }} <i class="fas fa-arrow-right ms-1"></i>
+        <div class="text-center mt-4">
+          <router-link class="btn btn-primary px-4 py-2 text-white" to="/appointments">
+            {{ $t('home.viewAllServices') }} <i class="fas fa-arrow-right ms-2"></i>
           </router-link>
         </div>
       </div>
     </section>
 
     <!-- Gallery Section -->
-    <section class="gallery-section py-3" v-if="galleryImages.length > 0">
-      <div class="container py-2">
-        <div class="text-center mb-3">
-          <span class="badge bg-primary bg-opacity-10 text-primary mb-2 px-2 py-1 small">{{ $t('home.gallery') }}</span>
-          <h2 class="fs-5 fw-bold mb-2">{{ $t('home.galleryTitle') }}</h2>
-          <p class="text-muted small mb-0">{{ $t('home.galleryDescription') }}</p>
+    <section class="gallery-section py-4" v-if="galleryImages.length > 0">
+      <div class="container py-3">
+        <div class="text-center mb-4">
+          <span class="badge bg-primary bg-opacity-10 text-primary mb-2 px-3 py-1">{{ $t('home.gallery') }}</span>
+          <h2 class="fs-4 fw-bold mb-2">{{ $t('home.galleryTitle') }}</h2>
+          <p class="text-muted">{{ $t('home.galleryDescription') }}</p>
         </div>
-        <div class="row g-2">
+        <div class="row g-3">
           <div class="col-lg-4 col-md-6 col-6" v-for="(image, index) in galleryImages" :key="index">
             <div class="gallery-item">
               <img 
@@ -73,16 +75,16 @@
     </section>
 
     <!-- Features Section -->
-    <section class="features-section py-3">
-      <div class="container py-2">
-        <div class="row g-2 justify-content-center">
+    <section class="features-section py-4">
+      <div class="container py-3">
+        <div class="row g-3 justify-content-center">
           <div class="col-lg-4 col-md-6 col-4">
             <div class="feature-card text-center">
               <div class="feature-icon mb-2">
                 <i class="fas fa-calendar-check"></i>
               </div>
-              <p class="fw-bold mb-1 small">{{ $t('home.features.easyBooking') }}</p>
-              <p class="text-muted mb-0" style="font-size: 0.65rem;">{{ $t('home.features.easyBookingDesc') }}</p>
+              <p class="fw-bold mb-1">{{ $t('home.features.easyBooking') }}</p>
+              <p class="text-muted small mb-0">{{ $t('home.features.easyBookingDesc') }}</p>
             </div>
           </div>
           <div class="col-lg-4 col-md-6 col-4">
@@ -90,8 +92,8 @@
               <div class="feature-icon mb-2">
                 <i class="fas fa-star"></i>
               </div>
-              <p class="fw-bold mb-1 small">{{ $t('home.features.premiumQuality') }}</p>
-              <p class="text-muted mb-0" style="font-size: 0.65rem;">{{ $t('home.features.premiumQualityDesc') }}</p>
+              <p class="fw-bold mb-1">{{ $t('home.features.premiumQuality') }}</p>
+              <p class="text-muted small mb-0">{{ $t('home.features.premiumQualityDesc') }}</p>
             </div>
           </div>
           <div class="col-lg-4 col-md-6 col-4">
@@ -99,8 +101,8 @@
               <div class="feature-icon mb-2">
                 <i class="fas fa-shield-alt"></i>
               </div>
-              <p class="fw-bold mb-1 small">{{ $t('home.features.hygieneFirst') }}</p>
-              <p class="text-muted mb-0" style="font-size: 0.65rem;">{{ $t('home.features.hygieneFirstDesc') }}</p>
+              <p class="fw-bold mb-1">{{ $t('home.features.hygieneFirst') }}</p>
+              <p class="text-muted small mb-0">{{ $t('home.features.hygieneFirstDesc') }}</p>
             </div>
           </div>
         </div>
@@ -108,13 +110,13 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="cta-section py-3">
-      <div class="container py-2">
-        <div class="cta-card text-center text-white p-3">
-          <h2 class="fs-5 fw-bold mb-2">{{ $t('home.cta.title') }}</h2>
-          <p class="small mb-3">{{ $t('home.cta.subtitle') }}</p>
-          <router-link class="btn btn-light btn-sm px-3 py-2 text-dark" to="/appointments">
-            <i class="fas fa-calendar-plus me-1"></i>{{ $t('home.cta.button') }}
+    <section class="cta-section py-4">
+      <div class="container py-3">
+        <div class="cta-card text-center text-white p-4">
+          <h2 class="fs-4 fw-bold mb-2">{{ $t('home.cta.title') }}</h2>
+          <p class="mb-3">{{ $t('home.cta.subtitle') }}</p>
+          <router-link class="btn btn-light px-4 py-2 text-dark" to="/appointments">
+            <i class="fas fa-calendar-plus me-2"></i>{{ $t('home.cta.button') }}
           </router-link>
         </div>
       </div>
@@ -298,15 +300,15 @@ export default {
 }
 
 .hero-title {
-  font-size: clamp(2.5rem, 8vw, 4.5rem);
-  line-height: 1.1;
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
+  line-height: 1.2;
   text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   color: white !important;
 }
 
 .hero-subtitle {
-  font-size: clamp(1rem, 2.5vw, 1.25rem);
-  opacity: 0.95;
+  font-size: clamp(0.85rem, 2vw, 1rem);
+  opacity: 0.9;
   color: white !important;
 }
 
@@ -332,7 +334,7 @@ export default {
 .gallery-item {
   position: relative;
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: 10px;
   aspect-ratio: 1;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -359,8 +361,8 @@ export default {
 .service-card {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
-  border-radius: 10px;
-  padding: 1rem;
+  border-radius: 12px;
+  padding: 1.25rem;
   transition: all 0.3s ease;
   cursor: pointer;
   color: var(--text-primary);
@@ -373,27 +375,27 @@ export default {
 }
 
 .service-icon {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   background: var(--primary);
-  border-radius: 8px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
   color: white;
 }
 
 .service-card .price {
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--primary);
 }
 
 .service-card .duration {
   color: var(--text-muted);
-  font-size: 0.7rem;
+  font-size: 0.8rem;
 }
 
 /* Features Section */
@@ -403,8 +405,8 @@ export default {
 
 .feature-card {
   background: var(--bg-secondary);
-  padding: 0.75rem 0.5rem;
-  border-radius: 8px;
+  padding: 1.25rem 1rem;
+  border-radius: 12px;
   transition: all 0.3s ease;
   color: var(--text-primary);
 }
@@ -415,14 +417,14 @@ export default {
 }
 
 .feature-icon {
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   background: rgba(107, 114, 128, 0.1);
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;
+  font-size: 1.25rem;
   color: var(--primary);
 }
 
@@ -433,7 +435,7 @@ export default {
 
 .cta-card {
   background: linear-gradient(135deg, #4b5563 0%, #6b7280 100%);
-  border-radius: 12px;
+  border-radius: 16px;
   box-shadow: 0 10px 30px rgba(107, 114, 128, 0.3);
 }
 

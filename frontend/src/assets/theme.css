@@ -387,8 +387,8 @@ body {
 }
 
 .form-check-input:checked {
-  background-color: var(--primary);
-  border-color: var(--primary);
+  background-color: var(--success);
+  border-color: var(--success);
 }
 
 .form-check-label {

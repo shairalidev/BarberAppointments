@@ -239,7 +239,7 @@
                   <div class="card-body p-2 p-lg-3">
                     <!-- Calendar Grid View -->
                     <div v-if="calendarViewMode === 'calendar'" class="calendar-grid">
-                      <div class="calendar-header" v-for="day in ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']" :key="day">
+                      <div class="calendar-header" v-for="day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']" :key="day">
                         {{ day }}
                       </div>
                       <div 
@@ -255,7 +255,8 @@
                         }]"
                       >
                         <span class="day-number">{{ day.dayNumber }}</span>
-                        <span v-if="day.bookingCount" class="booking-badge">{{ day.bookingCount }}</span>
+                        <span v-if="day.isOffDate" class="off-date-icon" title="Off Day"><i class="fas fa-ban"></i></span>
+                        <span v-else-if="day.bookingCount" class="booking-badge">{{ day.bookingCount }}</span>
                       </div>
                     </div>
                     <!-- Day View -->
@@ -1534,25 +1535,29 @@ export default {
       const prevLastDay = new Date(this.currentYear, this.currentMonth, 0)
       
       const days = []
-      const startDay = firstDay.getDay()
+      // Convert Sunday=0 to Monday-based (Monday=0, Sunday=6)
+      let startDay = firstDay.getDay() - 1
+      if (startDay < 0) startDay = 6
       
+      // Previous month days
       for (let i = startDay - 1; i >= 0; i--) {
         const date = new Date(this.currentYear, this.currentMonth - 1, prevLastDay.getDate() - i)
         days.push(this.createDayObject(date, false))
       }
       
+      // Current month days
       for (let i = 1; i <= lastDay.getDate(); i++) {
         const date = new Date(this.currentYear, this.currentMonth, i)
         days.push(this.createDayObject(date, true))
       }
 
-      // Fill trailing days to complete the last week for proper weekday alignment
+      // Fill trailing days to complete the last week
       const totalSlots = Math.ceil(days.length / 7) * 7
-      const nextMonthStart = new Date(this.currentYear, this.currentMonth + 1, 1)
+      let nextDayCount = 1
       while (days.length < totalSlots) {
-        const date = new Date(nextMonthStart)
-        date.setDate(nextMonthStart.getDate() + (days.length - (startDay + lastDay.getDate())))
+        const date = new Date(this.currentYear, this.currentMonth + 1, nextDayCount)
         days.push(this.createDayObject(date, false))
+        nextDayCount++
       }
 
       return days
@@ -2362,7 +2367,8 @@ getTimeSlotsForDay(dayIndex) {
     selectCalendarDate(day) {
       if (day.isCurrentMonth) {
         this.selectedCalendarDate = day.date
-        // Just select the date, don't open modal
+        // Open the date detail modal to see appointments and toggle off-date
+        this.openDateDetailModal(day.date)
       }
     },
     async openDateDetailModal(date) {
@@ -5582,6 +5588,14 @@ async setReminder(appointment) {
 .calendar-day.off-date .day-number {
   color: #856404;
   font-weight: 600;
+}
+
+.off-date-icon {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 0.6rem;
+  color: #dc3545;
 }
 
 .calendar-day.off-date::after {
