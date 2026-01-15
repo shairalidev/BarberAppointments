@@ -29,7 +29,10 @@
                         <span class="service-price">{{ formatCurrency(service.price) }}</span>
                       </div>
                     </div>
-                    <input type="checkbox" class="service-checkbox" :value="service._id" v-model="selectedServices" @change="handleAvailabilityRefresh">
+                    <input type="checkbox" class="service-checkbox-input" :value="service._id" v-model="selectedServices" @change="handleAvailabilityRefresh">
+                    <span class="service-checkbox">
+                      <i class="fas fa-check check-icon"></i>
+                    </span>
                   </label>
                 </div>
               </div>
@@ -317,6 +320,9 @@ export default {
       const weekStart = this.currentWeekStartDate || this.getMondayOfWeek(today)
       const days = []
       
+      // Map day index (0=Mon, 1=Tue, etc.) to translation keys
+      const dayKeys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+      
       for (let i = 0; i < 7; i++) {
         const date = new Date(weekStart)
         date.setDate(weekStart.getDate() + i)
@@ -325,7 +331,7 @@ export default {
         
         days.push({
           number: String(date.getDate()).padStart(2, '0'),
-          dayName: date.toLocaleDateString(undefined, { weekday: 'short' }),
+          dayName: this.$t(`booking.dayNames.${dayKeys[i]}`),
           value,
           isSelected: this.selectedDate === value,
           isToday: this.isSameDay(date, today),
@@ -1135,18 +1141,49 @@ export default {
   font-weight: 500;
 }
 
+/* Hide native checkbox but keep it accessible */
+.service-checkbox-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Custom checkbox container */
 .service-checkbox {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
   border: 2px solid var(--border-color);
   border-radius: 4px;
   cursor: pointer;
-  accent-color: var(--success);
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-primary);
+  transition: all 0.2s ease;
 }
 
+/* Checkmark icon - hidden by default */
+.service-checkbox .check-icon {
+  display: none;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Selected state - show checkmark with green background */
 .service-card-new.selected .service-checkbox {
   border-color: var(--success);
+  background: var(--success);
+}
+
+.service-card-new.selected .service-checkbox .check-icon {
+  display: block;
 }
 
 .btn-outline-primary.active {
@@ -1671,8 +1708,14 @@ export default {
   }
   
   .service-checkbox {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    min-height: 18px;
+  }
+  
+  .service-checkbox .check-icon {
+    font-size: 10px;
   }
   
   .day-card {

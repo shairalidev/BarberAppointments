@@ -93,6 +93,29 @@ export default {
       thu: 'Do',
       fri: 'Fr',
       sat: 'Sa'
+    },
+    dayNamesFull: {
+      sun: 'Sonntag',
+      mon: 'Montag',
+      tue: 'Dienstag',
+      wed: 'Mittwoch',
+      thu: 'Donnerstag',
+      fri: 'Freitag',
+      sat: 'Samstag'
+    },
+    monthNames: {
+      jan: 'Januar',
+      feb: 'Februar',
+      mar: 'März',
+      apr: 'April',
+      may: 'Mai',
+      jun: 'Juni',
+      jul: 'Juli',
+      aug: 'August',
+      sep: 'September',
+      oct: 'Oktober',
+      nov: 'November',
+      dec: 'Dezember'
     }
   },
   admin: {

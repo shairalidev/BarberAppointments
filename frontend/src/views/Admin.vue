@@ -268,7 +268,7 @@
                   <div class="card-body p-2 p-lg-3">
                     <!-- Calendar Grid View -->
                     <div v-if="calendarViewMode === 'calendar'" class="calendar-grid">
-                      <div class="calendar-header" v-for="day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']" :key="day">
+                      <div class="calendar-header" v-for="day in calendarDayNames" :key="day">
                         {{ day }}
                       </div>
                       <div 
@@ -662,7 +662,7 @@
                 </div>
                 
                 <div v-if="primaryBarber" class="timeslots-grid">
-                  <div v-for="(day, index) in daysOfWeek" :key="index" class="day-schedule-card">
+                  <div v-for="(day, index) in translatedDaysOfWeek" :key="index" class="day-schedule-card">
                     <div class="day-header">
                       <div class="day-info">
                         <h6 class="day-name">{{ day }}</h6>
@@ -925,7 +925,7 @@
                     <!-- Calendar Grid -->
                     <div class="calendar-container-pro">
                       <div class="weekdays-row">
-                        <div v-for="day in ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']" :key="day" class="weekday-cell-pro">
+                        <div v-for="day in calendarDayNames" :key="day" class="weekday-cell-pro">
                           {{ day }}
                         </div>
                       </div>
@@ -1555,8 +1555,19 @@ export default {
       ).slice(0, 8)
     },
     currentMonthYear() {
-      const date = new Date(this.currentYear, this.currentMonth)
-      return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+      const monthKeys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+      const monthName = this.$t(`booking.monthNames.${monthKeys[this.currentMonth]}`)
+      return `${monthName} ${this.currentYear}`
+    },
+    calendarDayNames() {
+      // Calendar day names starting with Monday
+      const dayKeys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+      return dayKeys.map(key => this.$t(`booking.dayNames.${key}`))
+    },
+    translatedDaysOfWeek() {
+      // Full day names starting with Sunday (index 0) for timeslots section
+      const dayKeysBySunday = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
+      return dayKeysBySunday.map(key => this.$t(`booking.dayNamesFull.${key}`))
     },
     calendarDays() {
       const firstDay = new Date(this.currentYear, this.currentMonth, 1)
@@ -1608,8 +1619,8 @@ export default {
       })
     },
     getBookingMonthYear() {
-      const date = new Date(this.bookingCalendarYear, this.bookingCalendarMonth)
-      return date.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })
+      const monthKeys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+      return this.$t(`booking.monthNames.${monthKeys[this.bookingCalendarMonth]}`)
     },
     isBookingMonthMin() {
       const today = new Date()
@@ -1708,10 +1719,10 @@ export default {
     formatDateDetailHeader() {
       if (!this.dateDetailModal.dateString) return ''
       const date = new Date(this.dateDetailModal.dateString + 'T00:00:00')
-      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-      const dayName = dayNames[date.getDay()]
-      const monthName = monthNames[date.getMonth()]
+      const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
+      const monthKeys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+      const dayName = this.$t(`booking.dayNamesFull.${dayKeys[date.getDay()]}`)
+      const monthName = this.$t(`booking.monthNames.${monthKeys[date.getMonth()]}`)
       return `${dayName}, ${monthName} ${date.getDate()}, ${date.getFullYear()}`
     },
     timeSlots() {
@@ -1733,7 +1744,8 @@ export default {
       monday.setDate(selectedDate.getDate() + diff)
       
       const days = []
-      const dayNames = ['MO.', 'DI.', 'MI.', 'DO.', 'FR.', 'SA.', 'SO.']
+      // Map index to translation keys (Mon=0, Tue=1, ..., Sun=6)
+      const dayKeys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
       
       for (let i = 0; i < 7; i++) {
         const date = new Date(monday)
@@ -1744,7 +1756,7 @@ export default {
         
         days.push({
           date: dateStr,
-          dayName: dayNames[i],
+          dayName: this.$t(`booking.dayNames.${dayKeys[i]}`).toUpperCase() + '.',
           dayNumber: date.getDate(),
           isToday: isToday
         })
@@ -1774,7 +1786,8 @@ export default {
       monday.setDate(selectedDate.getDate() + diff)
       
       const days = []
-      const dayNames = ['MO.', 'DI.', 'MI.', 'DO.', 'FR.', 'SA.', 'SO.']
+      // Map index to translation keys (Mon=0, Tue=1, ..., Sun=6)
+      const dayKeys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
       
       for (let i = 0; i < 7; i++) {
         const date = new Date(monday)
@@ -1785,7 +1798,7 @@ export default {
         
         days.push({
           date: dateStr,
-          dayName: dayNames[i],
+          dayName: this.$t(`booking.dayNames.${dayKeys[i]}`).toUpperCase() + '.',
           dayNumber: date.getDate(),
           isToday: isToday
         })
@@ -1820,19 +1833,19 @@ export default {
     dayViewFormatHeader() {
       if (!this.dayViewDate) return ''
       const date = new Date(this.dayViewDate + 'T00:00:00')
-      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-      const dayName = dayNames[date.getDay()]
-      const monthName = monthNames[date.getMonth()]
+      const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
+      const monthKeys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+      const dayName = this.$t(`booking.dayNamesFull.${dayKeys[date.getDay()]}`)
+      const monthName = this.$t(`booking.monthNames.${monthKeys[date.getMonth()]}`)
       return `${dayName}, ${monthName} ${date.getDate()}, ${date.getFullYear()}`
     },
     formatDayViewDate() {
       if (!this.dayViewDate) return ''
       const date = new Date(this.dayViewDate + 'T00:00:00')
-      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-      const dayName = dayNames[date.getDay()]
-      const monthName = monthNames[date.getMonth()]
+      const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
+      const monthKeys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+      const dayName = this.$t(`booking.dayNamesFull.${dayKeys[date.getDay()]}`)
+      const monthName = this.$t(`booking.monthNames.${monthKeys[date.getMonth()]}`)
       return `${dayName}, ${monthName} ${date.getDate()}, ${date.getFullYear()}`
     },
     dayViewHalfHourSlots() {
