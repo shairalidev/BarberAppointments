@@ -204,7 +204,36 @@
                         </template>
                       </div>
                     </div>
-                    <h6 v-if="calendarViewMode === 'calendar'" class="text-center mt-3 mb-0">{{ currentMonthYear }}</h6>
+                    <div v-if="calendarViewMode === 'calendar'" class="d-flex justify-content-between align-items-center mt-3">
+                      <h6 class="mb-0">{{ currentMonthYear }}</h6>
+                      <div v-if="selectedCalendarDate" class="off-date-toggle-wrapper">
+                        <label class="off-date-toggle-label" for="calendarOffDateToggle">
+                          <div class="toggle-switch-container">
+                            <input 
+                              class="off-date-toggle-input" 
+                              type="checkbox" 
+                              id="calendarOffDateToggle"
+                              :checked="isSelectedDateRestricted"
+                              @change="toggleCalendarOffDate"
+                            >
+                            <span class="toggle-slider" :class="{ 'active': isSelectedDateRestricted }">
+                              <span class="toggle-icon">
+                                <i v-if="isSelectedDateRestricted" class="fas fa-ban"></i>
+                                <i v-else class="fas fa-calendar-check"></i>
+                              </span>
+                            </span>
+                          </div>
+                          <span class="toggle-label-text">
+                            <span v-if="isSelectedDateRestricted" class="text-warning">
+                              <i class="fas fa-ban me-1"></i>{{ $t('admin.offDate') }}
+                            </span>
+                            <span v-else class="text-muted">
+                              <i class="fas fa-calendar-check me-1"></i>{{ $t('admin.markAsOffDate') }}
+                            </span>
+                          </span>
+                        </label>
+                      </div>
+                    </div>
                     <div v-else class="d-flex justify-content-between align-items-center mt-3">
                       <h6 class="mb-0">{{ formatDayViewDate }}</h6>
                       <div class="off-date-toggle-wrapper">
@@ -1571,6 +1600,13 @@ export default {
         return aptDate === this.selectedCalendarDate && aptDate >= today
       })
     },
+    isSelectedDateRestricted() {
+      if (!this.selectedCalendarDate) return false
+      return this.restrictions.some(restriction => {
+        const restrictionDate = new Date(restriction.date).toISOString().split('T')[0]
+        return restrictionDate === this.selectedCalendarDate
+      })
+    },
     getBookingMonthYear() {
       const date = new Date(this.bookingCalendarYear, this.bookingCalendarMonth)
       return date.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })
@@ -2367,8 +2403,6 @@ getTimeSlotsForDay(dayIndex) {
     selectCalendarDate(day) {
       if (day.isCurrentMonth) {
         this.selectedCalendarDate = day.date
-        // Open the date detail modal to see appointments and toggle off-date
-        this.openDateDetailModal(day.date)
       }
     },
     async openDateDetailModal(date) {
@@ -2635,6 +2669,38 @@ getTimeSlotsForDay(dayIndex) {
         }
       } catch (error) {
         console.error('Error toggling off date:', error)
+        this.showToast(error.response?.data?.message || 'Error updating off date', 'error')
+        // Revert checkbox
+        event.target.checked = !isRestricted
+      }
+    },
+    async toggleCalendarOffDate(event) {
+      const isRestricted = event.target.checked
+      const date = this.selectedCalendarDate
+      
+      if (!date) return
+      
+      try {
+        if (isRestricted) {
+          // Mark as off date
+          await axios.post(`${process.env.VUE_APP_API_URL}/restrictions`, {
+            date: date,
+            reason: 'Off Date'
+          })
+          this.showToast('Date marked as off date', 'success')
+        } else {
+          // Remove off date
+          await axios.delete(`${process.env.VUE_APP_API_URL}/restrictions/date/${date}`)
+          this.showToast('Off date removed', 'success')
+        }
+        
+        // Refresh restrictions list
+        await this.fetchRestrictions()
+        
+        // Refresh appointments to update calendar
+        await this.fetchAppointments()
+      } catch (error) {
+        console.error('Error toggling calendar off date:', error)
         this.showToast(error.response?.data?.message || 'Error updating off date', 'error')
         // Revert checkbox
         event.target.checked = !isRestricted
