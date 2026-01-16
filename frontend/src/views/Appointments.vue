@@ -126,7 +126,8 @@
                     @click="selectedTime = slot">
                     {{ slot }}
                   </button>
-                  <div v-if="!availableTimes.length" class="text-muted small">
+                  <div v-if="!availableTimes.length" class="no-slots-message">
+                    <i class="fas fa-info-circle me-2"></i>
                     {{ $t('booking.noAvailableSlots') }}
                   </div>
                 </div>
@@ -1554,10 +1555,41 @@ export default {
   gap: 6px;
 }
 
+.no-slots-message {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 1rem;
+  background: var(--bg-tertiary);
+  border: 1px dashed var(--border-color);
+  border-radius: 8px;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.no-slots-message i {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
 @media (max-width: 576px) {
   .slot-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 4px;
+  }
+  
+  .no-slots-message {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.7rem;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  
+  .no-slots-message i {
+    font-size: 0.9rem;
   }
 }
 

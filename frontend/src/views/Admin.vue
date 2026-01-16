@@ -5086,6 +5086,8 @@ async setReminder(appointment) {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .day-cell-pro {
@@ -6343,8 +6345,24 @@ async setReminder(appointment) {
 
 /* Booking Modal Mobile Optimization */
 @media (max-width: 768px) {
+  /* Service Selector - Make smaller and prevent overflow */
+  .modal-body .form-select-lg,
+  .modal-body select.form-select-lg {
+    font-size: 0.9rem !important;
+    padding: 0.5rem 0.75rem !important;
+    min-height: 42px !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Professional Date Picker */
   .professional-date-picker {
     border-radius: 10px !important;
+    max-width: 100%;
+    overflow: hidden;
   }
   
   .date-picker-header-pro {
@@ -6352,7 +6370,7 @@ async setReminder(appointment) {
   }
   
   .month-name {
-    font-size: 0.95rem !important;
+    font-size: 0.9rem !important;
   }
   
   .year-badge {
@@ -6362,6 +6380,12 @@ async setReminder(appointment) {
   
   .calendar-container-pro {
     padding: 0.5rem !important;
+    overflow-x: hidden;
+  }
+  
+  .calendar-grid-pro {
+    gap: 4px !important;
+    max-width: 100%;
   }
   
   .weekday-cell-pro {
@@ -6372,14 +6396,18 @@ async setReminder(appointment) {
   .day-cell-pro {
     min-height: 36px !important;
     border-radius: 6px !important;
+    aspect-ratio: 1 !important;
   }
   
   .day-number-pro {
-    font-size: 0.8rem !important;
+    font-size: 0.75rem !important;
   }
   
   .selected-date-pro {
     padding: 0.5rem !important;
+    flex-direction: row !important;
+    justify-content: center;
+    gap: 0.5rem !important;
   }
   
   .date-icon-pro {
@@ -6396,63 +6424,100 @@ async setReminder(appointment) {
   .selected-date-value {
     font-size: 0.85rem !important;
   }
+  
+  /* Time Slots Grid */
+  .time-slots-grid {
+    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)) !important;
+    gap: 0.4rem !important;
+    max-height: 150px !important;
+    padding: 0.25rem !important;
+  }
+  
+  .time-slots-grid .btn {
+    font-size: 0.7rem !important;
+    padding: 0.4rem 0.5rem !important;
+    min-width: 60px !important;
+  }
 }
 
 @media (max-width: 576px) {
+  /* Service Selector - Extra small on mobile and prevent overflow */
+  .modal-body .form-select-lg,
+  .modal-body select.form-select-lg {
+    font-size: 0.85rem !important;
+    padding: 0.4rem 0.6rem !important;
+    min-height: 38px !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Professional Date Picker */
   .professional-date-picker {
     border-radius: 8px !important;
+    max-width: 100%;
+    overflow: hidden;
   }
   
   .date-picker-header-pro {
-    padding: 0.5rem 0.75rem !important;
+    padding: 0.5rem 0.6rem !important;
   }
   
   .date-picker-header-pro button {
-    width: 28px !important;
-    height: 28px !important;
-    font-size: 0.7rem !important;
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 0.65rem !important;
   }
   
   .month-name {
-    font-size: 0.85rem !important;
+    font-size: 0.8rem !important;
   }
   
   .year-badge {
-    font-size: 0.6rem !important;
-    padding: 0.1rem 0.3rem !important;
+    font-size: 0.55rem !important;
+    padding: 0.1rem 0.25rem !important;
   }
   
   .calendar-container-pro {
-    padding: 0.35rem !important;
+    padding: 0.25rem !important;
+    overflow-x: hidden;
+  }
+  
+  .calendar-grid-pro {
+    gap: 3px !important;
+    max-width: 100%;
   }
   
   .weekday-cell-pro {
-    font-size: 0.6rem !important;
-    padding: 3px 0 !important;
+    font-size: 0.55rem !important;
+    padding: 2px 0 !important;
   }
   
   .day-cell-pro {
-    min-height: 32px !important;
-    border-radius: 5px !important;
+    min-height: 28px !important;
+    border-radius: 4px !important;
     margin: 1px !important;
+    aspect-ratio: 1 !important;
   }
   
   .day-number-pro {
-    font-size: 0.75rem !important;
+    font-size: 0.7rem !important;
   }
   
   .selected-date-pro {
     padding: 0.35rem !important;
     flex-direction: row !important;
     justify-content: center;
-    gap: 0.5rem !important;
+    gap: 0.4rem !important;
   }
   
   .date-icon-pro {
-    width: 28px !important;
-    height: 28px !important;
-    font-size: 0.8rem !important;
-    border-radius: 6px !important;
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 0.75rem !important;
+    border-radius: 5px !important;
   }
   
   .selected-date-info {
@@ -6460,11 +6525,44 @@ async setReminder(appointment) {
   }
   
   .selected-date-label {
-    font-size: 0.6rem !important;
+    font-size: 0.55rem !important;
   }
   
   .selected-date-value {
-    font-size: 0.75rem !important;
+    font-size: 0.7rem !important;
+  }
+  
+  /* Time Slots Grid - Smaller on mobile */
+  .time-slots-grid {
+    grid-template-columns: repeat(auto-fit, minmax(55px, 1fr)) !important;
+    gap: 0.3rem !important;
+    max-height: 120px !important;
+    padding: 0.2rem !important;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .time-slots-grid .btn {
+    font-size: 0.65rem !important;
+    padding: 0.3rem 0.4rem !important;
+    min-width: 55px !important;
+  }
+  
+  /* Prevent calendar overflow */
+  .professional-date-picker {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .calendar-container-pro {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  /* Modal body overflow fix */
+  .modal-body {
+    overflow-x: hidden;
+    max-width: 100%;
   }
 }
 
