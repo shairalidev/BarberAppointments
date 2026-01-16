@@ -1,37 +1,39 @@
 <template>
   <div class="admin-panel min-vh-100">
     <!-- Admin Header -->
-    <div class="admin-header shadow-sm py-3 py-md-3 mb-4">
+    <div class="admin-header shadow-sm py-2 py-md-3 mb-4">
       <div class="container-fluid">
-        <div class="row align-items-start justify-content-between">
-          <div class="col">
-            <div class="d-flex align-items-center admin-logo-container">
-              <img src="/logo.png" alt="ATES BARBEROS Logo" class="admin-logo" />
-              <span class="admin-brand-text d-none d-sm-inline">ATES BARBEROS</span>
-            </div>
+        <div class="d-flex align-items-center justify-content-between w-100">
+          <!-- Brand Text -->
+          <div class="admin-brand-section">
+            <span class="admin-brand-text">ATES BARBEROS</span>
           </div>
-          <div class="col-auto">
-            <div class="d-flex align-items-center justify-content-end gap-2 gap-md-3 action-toolbar">
-              <div class="d-none d-md-flex gap-2">
-                <button
-                  @click="toggleLanguage"
-                  class="btn btn-outline-primary btn-sm px-2"
-                  :title="currentLocale === 'en' ? 'Switch to German' : 'Switch to English'"
-                >
-                  {{ currentLocale === 'en' ? 'DE' : 'EN' }}
-                </button>
-                <button
-                  @click="toggleTheme"
-                  :class="['theme-toggle', { active: isDark }]"
-                  :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
-                >
-                  <i class="fas fa-sun theme-toggle-icon sun-icon"></i>
-                  <i class="fas fa-moon theme-toggle-icon moon-icon"></i>
-                </button>
-              </div>
-              <div class="dropdown">
+          
+          <!-- Action Toolbar -->
+          <div class="d-flex align-items-center gap-2 gap-md-3 action-toolbar">
+            <!-- Desktop Actions -->
+            <div class="d-none d-md-flex align-items-center gap-2">
+              <button
+                @click="toggleLanguage"
+                class="btn btn-outline-primary btn-sm px-3"
+                :title="currentLocale === 'en' ? 'Switch to German' : 'Switch to English'"
+              >
+                {{ currentLocale === 'en' ? 'DE' : 'EN' }}
+              </button>
+              <button
+                @click="toggleTheme"
+                :class="['theme-toggle', { active: isDark }]"
+                :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+              >
+                <i class="fas fa-sun theme-toggle-icon sun-icon"></i>
+                <i class="fas fa-moon theme-toggle-icon moon-icon"></i>
+              </button>
+            </div>
+            
+            <!-- Mobile Actions Dropdown -->
+            <div class="dropdown d-md-none">
               <button class="btn btn-link text-decoration-none p-0 d-flex align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <div class="d-flex flex-column gap-1 d-md-none me-1">
+                <div class="d-flex align-items-center gap-2">
                   <button
                     @click.stop="toggleLanguage"
                     class="btn btn-outline-primary btn-sm px-2 mobile-action-btn"
@@ -48,7 +50,12 @@
                     <i class="fas fa-moon theme-toggle-icon moon-icon"></i>
                   </button>
                 </div>
-
+              </button>
+            </div>
+            
+            <!-- Admin Account Dropdown -->
+            <div class="dropdown">
+              <button class="btn btn-link text-decoration-none p-0 d-flex align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <div class="admin-avatar">
                   <i class="fas fa-user-shield"></i>
                 </div>
@@ -62,7 +69,6 @@
                   </button>
                 </li>
               </ul>
-              </div>
             </div>
           </div>
         </div>
@@ -3255,32 +3261,27 @@ async setReminder(appointment) {
   background-color: var(--bg-secondary) !important;
 }
 
-.admin-logo-container {
-  padding: 8px 16px;
-  display: inline-block;
-}
-
-.admin-logo {
-  height: 65px;
-  width: auto;
-  object-fit: contain;
-  max-width: 250px;
-  display: block;
+.admin-brand-section {
+  display: flex;
+  align-items: center;
   flex-shrink: 0;
 }
 
 .admin-brand-text {
   font-size: 1.5rem;
   font-weight: 700;
-  letter-spacing: 0.5px;
-  margin-left: 12px;
+  letter-spacing: 1px;
   color: var(--text-primary);
   white-space: nowrap;
   transition: color 0.3s ease;
+  text-transform: uppercase;
 }
 
 .action-toolbar {
-  min-width: 260px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
 }
 
 .admin-avatar {
@@ -3547,24 +3548,14 @@ async setReminder(appointment) {
     padding-right: 0.5rem;
   }
 
-  .admin-header .row {
-    align-items: center;
-    margin: 0;
-  }
-
-  .admin-logo-container {
-    padding: 4px 8px !important;
-    gap: 6px !important;
-  }
-
-  .admin-logo {
-    height: 36px !important;
-    max-width: 120px !important;
+  .admin-brand-section {
+    flex: 1;
+    min-width: 0;
   }
 
   .admin-brand-text {
-    font-size: 0.9rem !important;
-    margin-left: 6px !important;
+    font-size: 1rem !important;
+    letter-spacing: 0.5px;
   }
 
   .admin-avatar {
@@ -3595,15 +3586,23 @@ async setReminder(appointment) {
     padding: 0.15rem 0.3rem !important;
   }
 
-  .admin-header .col {
-    padding-left: 0.25rem;
-    padding-right: 0.25rem;
+  .admin-header .container-fluid {
+    padding-left: 0.375rem;
+    padding-right: 0.375rem;
   }
 
-  .admin-header .col-auto {
-    padding-left: 0.25rem;
-    padding-right: 0.25rem;
-    flex-shrink: 0;
+  .admin-brand-section {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .admin-brand-text {
+    font-size: 0.85rem !important;
+    letter-spacing: 0.3px;
+  }
+
+  .action-toolbar {
+    gap: 0.25rem !important;
   }
 
   /* Navigation Tabs - Tablet */
@@ -4339,19 +4338,13 @@ async setReminder(appointment) {
     font-size: 1rem;
   }
 
-  .admin-logo-container {
-    padding: 2px 6px !important;
-    gap: 4px !important;
-  }
-  
-  .admin-header .admin-logo {
-    height: 32px !important;
-    max-width: 110px !important;
+  .admin-brand-section {
+    flex: 1;
+    min-width: 0;
   }
 
   .admin-brand-text {
-    font-size: 0.85rem !important;
-    margin-left: 4px !important;
+    font-size: 0.8rem !important;
     letter-spacing: 0.2px;
   }
 
