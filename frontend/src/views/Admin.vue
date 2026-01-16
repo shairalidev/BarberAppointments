@@ -6409,6 +6409,10 @@ async setReminder(appointment) {
   overflow: hidden;
 }
 
+.booking-modal-dialog.modal-lg {
+  max-width: 800px;
+}
+
 .booking-modal-content {
   max-width: 100%;
   overflow: hidden;
@@ -6418,6 +6422,7 @@ async setReminder(appointment) {
   overflow-x: hidden;
   overflow-y: auto;
   max-width: 100%;
+  padding: 1rem;
 }
 
 /* Service Selector Wrapper - Prevent overflow */
@@ -6467,6 +6472,140 @@ select.booking-service-select {
   background-position: right 0.5rem center !important;
   background-size: 0.75rem !important;
   padding-right: 2rem !important;
+}
+
+/* Booking Modal Desktop Optimization */
+@media (min-width: 992px) {
+  /* Booking Modal - Compact on desktop */
+  .booking-modal-dialog.modal-lg {
+    max-width: 650px !important;
+    margin: 1.75rem auto !important;
+  }
+  
+  .booking-modal-content {
+    max-width: 100% !important;
+  }
+  
+  .booking-modal-body {
+    padding: 0.75rem 1rem !important;
+    max-height: calc(100vh - 10rem) !important;
+  }
+  
+  .booking-modal-body .row {
+    margin-left: -0.5rem !important;
+    margin-right: -0.5rem !important;
+  }
+  
+  .booking-modal-body .col-12,
+  .booking-modal-body .col-md-6 {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+  
+  /* Service Selector Wrapper - Desktop */
+  .service-selector-wrapper {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+  
+  .service-select-container {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  /* Service Selector - Normal size on desktop */
+  .booking-service-select,
+  select.booking-service-select {
+    font-size: 0.875rem !important;
+    padding: 0.5rem 2rem 0.5rem 0.75rem !important;
+    min-height: 40px !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+  
+  .booking-service-select option {
+    font-size: 0.875rem !important;
+    padding: 0.4rem 0.6rem !important;
+  }
+  
+  /* Form labels - Normal size */
+  .booking-modal-body .form-label {
+    font-size: 0.875rem !important;
+    margin-bottom: 0.4rem !important;
+  }
+  
+  .booking-modal-body .form-label.fw-semibold {
+    font-size: 0.9rem !important;
+  }
+  
+  /* Form inputs - Normal size */
+  .booking-modal-body .form-control {
+    font-size: 0.875rem !important;
+    padding: 0.5rem 0.75rem !important;
+    min-height: 40px !important;
+  }
+  
+  /* Calendar - Normal size */
+  .professional-date-picker {
+    padding: 0.75rem !important;
+  }
+  
+  .date-picker-header-pro {
+    padding: 0.75rem !important;
+  }
+  
+  .month-name {
+    font-size: 1rem !important;
+  }
+  
+  .day-cell-pro {
+    min-height: 40px !important;
+  }
+  
+  .day-number-pro {
+    font-size: 0.875rem !important;
+  }
+  
+  /* Time slots - Normal size */
+  .time-slots-grid {
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)) !important;
+    gap: 0.5rem !important;
+  }
+  
+  .time-slots-grid .btn {
+    font-size: 0.8rem !important;
+    padding: 0.5rem 0.75rem !important;
+  }
+  
+  /* Customer search - Normal size */
+  .customer-search-container {
+    max-height: 200px !important;
+  }
+  
+  .customer-item {
+    padding: 0.5rem 0.75rem !important;
+  }
+  
+  .customer-name {
+    font-size: 0.875rem !important;
+  }
+  
+  .customer-details {
+    font-size: 0.8rem !important;
+  }
+}
+
+/* Booking Modal Tablet Optimization */
+@media (min-width: 769px) and (max-width: 991px) {
+  .booking-modal-dialog.modal-lg {
+    max-width: 600px !important;
+    margin: 1rem auto !important;
+  }
+  
+  .booking-modal-body {
+    padding: 0.75rem 1rem !important;
+    max-height: calc(100vh - 10rem) !important;
+  }
 }
 
 /* Booking Modal Mobile Optimization */
