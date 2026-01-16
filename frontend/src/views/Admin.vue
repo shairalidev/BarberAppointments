@@ -1027,7 +1027,7 @@
                   </label>
                   <select v-model="bookingForm.serviceId" @change="updateBookingPrice" class="form-select booking-service-select" required>
                     <option value="">{{ $t('admin.selectService') }}</option>
-                    <option v-for="service in services" :key="service._id" :value="service._id">
+                    <option v-for="service in activeServices" :key="service._id" :value="service._id">
                       {{ service.name }} - {{ formatCurrency(service.price) }}
                     </option>
                   </select>
@@ -1616,6 +1616,10 @@ export default {
         c.email?.toLowerCase().includes(term) ||
         c.notes?.toLowerCase().includes(term)
       ).slice(0, 8)
+    },
+    activeServices() {
+      // Filter out disabled/inactive services for booking
+      return this.services.filter(service => service.active !== false)
     },
     currentMonthYear() {
       const monthKeys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
@@ -6421,6 +6425,7 @@ async setReminder(appointment) {
   box-sizing: border-box;
   overflow: hidden;
   text-overflow: ellipsis;
+  position: relative;
 }
 
 .booking-service-select option {
@@ -6428,6 +6433,18 @@ async setReminder(appointment) {
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 100%;
+  padding: 0.3rem 0.5rem;
+}
+
+/* Prevent select dropdown from overflowing */
+select.booking-service-select {
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 0.75rem;
+  padding-right: 2rem !important;
 }
 
 /* Booking Modal Mobile Optimization */
@@ -6635,7 +6652,7 @@ async setReminder(appointment) {
   .modal-body select.form-select-lg,
   .modal-body select.booking-service-select {
     font-size: 0.7rem !important;
-    padding: 0.3rem 0.45rem !important;
+    padding: 0.3rem 1.8rem 0.3rem 0.45rem !important;
     min-height: 34px !important;
     max-width: 100% !important;
     width: 100% !important;
@@ -6644,8 +6661,12 @@ async setReminder(appointment) {
     text-overflow: ellipsis !important;
     line-height: 1.2;
     white-space: nowrap;
-    -webkit-appearance: none;
-    appearance: none;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 0.4rem center !important;
+    background-size: 0.65rem !important;
   }
   
   /* Service selector options - smaller font */
@@ -6683,23 +6704,101 @@ async setReminder(appointment) {
   /* Customer search section - smaller */
   .modal-body .customer-search-container {
     max-height: 120px !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .modal-body .input-group {
+    flex-wrap: nowrap !important;
   }
   
   .modal-body .input-group-text {
-    padding: 0.35rem 0.5rem !important;
+    padding: 0.3rem 0.4rem !important;
+    font-size: 0.65rem !important;
+    min-width: 32px !important;
+  }
+  
+  .modal-body .form-control {
     font-size: 0.7rem !important;
+    padding: 0.3rem 0.4rem !important;
+    min-height: 34px !important;
+  }
+  
+  .modal-body .customer-dropdown {
+    max-height: 150px !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
   }
   
   .modal-body .customer-item {
-    padding: 0.4rem 0.5rem !important;
+    padding: 0.35rem 0.4rem !important;
   }
   
   .modal-body .customer-name {
-    font-size: 0.75rem !important;
+    font-size: 0.7rem !important;
+  }
+  
+  .modal-body .customer-name strong {
+    font-size: 0.7rem !important;
   }
   
   .modal-body .customer-details {
-    font-size: 0.65rem !important;
+    font-size: 0.6rem !important;
+  }
+  
+  .modal-body .customer-details span {
+    font-size: 0.6rem !important;
+  }
+  
+  .modal-body .customer-details i {
+    font-size: 0.55rem !important;
+  }
+  
+  .modal-body .badge {
+    font-size: 0.6rem !important;
+    padding: 0.2rem 0.35rem !important;
+  }
+  
+  /* Form inputs */
+  .modal-body input.form-control,
+  .modal-body input[type="text"],
+  .modal-body input[type="tel"],
+  .modal-body input[type="email"],
+  .modal-body input[type="search"] {
+    font-size: 0.7rem !important;
+    padding: 0.3rem 0.4rem !important;
+    min-height: 34px !important;
+  }
+  
+  /* Alert boxes */
+  .modal-body .alert {
+    padding: 0.4rem 0.5rem !important;
+    font-size: 0.7rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+  
+  .modal-body .alert strong {
+    font-size: 0.7rem !important;
+  }
+  
+  /* Form label small text */
+  .modal-body .form-label small {
+    font-size: 0.6rem !important;
+  }
+  
+  /* Modal footer buttons */
+  .modal-footer {
+    padding: 0.4rem 0.5rem !important;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+  
+  .modal-footer .btn {
+    font-size: 0.7rem !important;
+    padding: 0.3rem 0.5rem !important;
+    min-height: 34px !important;
+    flex: 1 1 auto;
+    min-width: calc(50% - 0.15rem);
   }
   
   /* Professional Date Picker */
