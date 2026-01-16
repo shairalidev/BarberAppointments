@@ -5676,15 +5676,15 @@ async setReminder(appointment) {
 
 .schedule-row {
   display: flex;
-  min-height: 80px;
+  min-height: 100px;
 }
 
 .schedule-row.row-pink {
-  background-color: #fff5f5;
+  background-color: transparent;
 }
 
 .schedule-row.row-green {
-  background-color: #f0fff4;
+  background-color: transparent;
 }
 
 .schedule-row:hover {
@@ -5717,7 +5717,7 @@ async setReminder(appointment) {
 .half-hour-slot {
   width: 100%;
   padding: 8px;
-  min-height: 40px;
+  min-height: 50px;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -5728,10 +5728,12 @@ async setReminder(appointment) {
 
 .half-hour-slot.slot-first {
   border-top: none;
+  background-color: #ffe6e6;
 }
 
 .half-hour-slot.slot-second {
   border-bottom: none;
+  background-color: #e6ffe6;
 }
 
 .half-hour-slot.slot-left {
