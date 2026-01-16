@@ -2007,8 +2007,27 @@ export default {
       try {
         const response = await axios.get(`${process.env.VUE_APP_API_URL}/appointments`)
         this.appointments = response.data
+        // Automatically sync day view if it's currently displayed
+        this.syncDayViewData()
       } catch (error) {
         console.error('Error fetching appointments:', error)
+      }
+    },
+    // Sync day view data from current appointments without full reload
+    syncDayViewData() {
+      if (this.calendarViewMode === 'day' && this.dayViewDate && !this.dayViewData.loading) {
+        // Filter appointments for the current day view date
+        const dateAppointments = this.appointments.filter(apt => {
+          if (!apt.date) return false
+          const aptDate = typeof apt.date === 'string' ? apt.date.split('T')[0] : new Date(apt.date).toISOString().split('T')[0]
+          return aptDate === this.dayViewDate && apt.status !== 'cancelled'
+        })
+        
+        // Sort by time
+        this.dayViewData.appointments = dateAppointments.sort((a, b) => {
+          if (!a.time || !b.time) return 0
+          return a.time.localeCompare(b.time)
+        })
       }
     },
     async fetchBarbers() {
@@ -2047,11 +2066,19 @@ export default {
     },
 async updateAppointmentStatus(appointment, newStatus) {
       try {
+        // Store the appointment date for syncing views
+        const appointmentDate = appointment.date.split('T')[0]
+        
         await axios.put(`${process.env.VUE_APP_API_URL}/appointments/${appointment._id}`, {
           status: newStatus,
           sendEmail: true // Always send emails when status changes (confirmation, completion, cancellation)
         })
         await this.fetchAppointments()
+        
+        // Sync day view if viewing the appointment date
+        if (this.calendarViewMode === 'day' && this.dayViewDate === appointmentDate) {
+          this.syncDayViewData()
+        }
       } catch (error) {
         console.error('Error updating appointment:', error)
       }
@@ -2136,6 +2163,9 @@ async quickBookAppointment() {
           return
         }
         
+        // Store the booked date for syncing views
+        const bookedDate = this.bookingForm.date
+        
         const appointmentData = {
           customerId: this.bookingForm.customerId,
           customerName: this.bookingForm.customerName,
@@ -2150,6 +2180,18 @@ async quickBookAppointment() {
         
         await axios.post(`${process.env.VUE_APP_API_URL}/appointments`, appointmentData)
         await this.fetchAppointments()
+        
+        // Update selected calendar date if it matches the booked date
+        if (this.selectedCalendarDate === bookedDate) {
+          // Calendar grid will update automatically via computed property
+          // Appointments list will update automatically via computed property
+        }
+        
+        // If in day view and viewing the booked date, sync day view
+        if (this.calendarViewMode === 'day' && this.dayViewDate === bookedDate) {
+          this.syncDayViewData()
+        }
+        
         this.resetBookingForm()
         this.showBookingModal = false
         this.showToast(this.$t('toast.bookingSuccess'), 'success')
@@ -2351,6 +2393,14 @@ async quickBookAppointment() {
         await axios.put(`${process.env.VUE_APP_API_URL}/appointments/${this.editTimeModal.appointment._id}`, updateData)
         
         await this.fetchAppointments()
+        
+        // Sync day view for both old and new dates if in day view mode
+        if (this.calendarViewMode === 'day') {
+          if (this.dayViewDate === originalDate || this.dayViewDate === this.editTimeModal.newDate) {
+            this.syncDayViewData()
+          }
+        }
+        
         this.closeEditTimeModal()
         
         const changeMessage = dateChanged && timeChanged 
@@ -2523,6 +2573,12 @@ getTimeSlotsForDay(dayIndex) {
     selectCalendarDate(day) {
       if (day.isCurrentMonth) {
         this.selectedCalendarDate = day.date
+        
+        // If in day view mode, update the day view to show the selected date
+        if (this.calendarViewMode === 'day') {
+          this.dayViewDate = day.date
+          this.loadDayViewData(day.date)
+        }
       }
     },
     async openDateDetailModal(date) {
@@ -2676,12 +2732,11 @@ getTimeSlotsForDay(dayIndex) {
       if (this.calendarViewMode === 'calendar') {
         // Switch to day view
         this.calendarViewMode = 'day'
-        // Initialize day view with today's date if not set
-        if (!this.dayViewDate) {
-          this.dayViewDate = new Date().toISOString().split('T')[0]
-        }
+        // Use selected calendar date if available, otherwise use today
+        const dateToView = this.selectedCalendarDate || new Date().toISOString().split('T')[0]
+        this.dayViewDate = dateToView
         // Load day view data
-        this.loadDayViewData(this.dayViewDate)
+        this.loadDayViewData(dateToView)
       } else {
         // Switch back to calendar view
         this.calendarViewMode = 'calendar'
@@ -2934,6 +2989,9 @@ getTimeSlotsForDay(dayIndex) {
         // Skip frontend availability check when accepting pending appointments
         // The backend will handle proper conflict detection
         
+        // Store the appointment date for syncing views
+        const appointmentDate = this.responseModal.appointment.date.split('T')[0]
+        
         await axios.put(`${process.env.VUE_APP_API_URL}/appointments/${this.responseModal.appointment._id}`, {
           status: this.responseModal.status,
           responseMessage: this.responseModal.message,
@@ -2941,6 +2999,12 @@ getTimeSlotsForDay(dayIndex) {
         })
         
         await this.fetchAppointments()
+        
+        // Sync day view if viewing the appointment date
+        if (this.calendarViewMode === 'day' && this.dayViewDate === appointmentDate) {
+          this.syncDayViewData()
+        }
+        
         this.responseModal.show = false
         
         const statusKey = this.responseModal.status === 'confirmed'
@@ -2994,6 +3058,9 @@ async setReminder(appointment) {
       }
       
       try {
+        // Store the appointment date for syncing views
+        const appointmentDate = this.cancelModal.appointment.date.split('T')[0]
+        
         await axios.put(`${process.env.VUE_APP_API_URL}/appointments/${this.cancelModal.appointment._id}`, {
           status: 'cancelled',
           responseMessage: this.cancelModal.message || 'Appointment has been cancelled.',
@@ -3001,6 +3068,12 @@ async setReminder(appointment) {
         })
         
         await this.fetchAppointments()
+        
+        // Sync day view if viewing the appointment date
+        if (this.calendarViewMode === 'day' && this.dayViewDate === appointmentDate) {
+          this.syncDayViewData()
+        }
+        
         this.closeCancelModal()
         this.showToast('Appointment cancelled successfully. Customer has been notified.', 'success')
       } catch (error) {
