@@ -102,7 +102,7 @@ class EmailService {
         'Wir haben Ihre Buchung erhalten und prüfen sie gerade.',
         `Termin: ${this.formatDateTime(appointment.date, appointment.time)}`,
         `Dienstleistungen: ${appointment.services?.map(s => s.name).join(', ')}`,
-        `Friseur: ${barber?.name || 'Professioneller Friseur'}`,
+        `Barber: ${barber?.name || 'Professioneller Barber'}`,
         `Gesamtkosten: €${appointment.totalPrice}`,
         'Sie erhalten eine weitere E-Mail, sobald Ihre Buchung bestätigt wurde.',
         'Adresse: Bahnhofstraße 3, 6410 Telfs'
@@ -145,8 +145,8 @@ class EmailService {
               <span>${appointment.services?.map(s => s.name).join(', ')}</span>
             </div>
             <div class="detail">
-              <span><strong>Friseur:</strong></span>
-              <span>${barber?.name || 'Professioneller Friseur'}</span>
+              <span><strong>Barber:</strong></span>
+              <span>${barber?.name || 'Professioneller Barber'}</span>
             </div>
             <div class="detail">
               <span><strong>Gesamtkosten:</strong></span>
@@ -155,10 +155,10 @@ class EmailService {
           </div>
           
           <p><strong>Nächste Schritte:</strong></p>
-          <p>Ihr Friseur wird diese Anfrage prüfen und Ihren Termin bestätigen. Sie erhalten eine weitere E-Mail, sobald Ihre Buchung bestätigt wurde.</p>
+          <p>Ihr Barber wird diese Anfrage prüfen und Ihren Termin bestätigen. Sie erhalten eine weitere E-Mail, sobald Ihre Buchung bestätigt wurde.</p>
         </div>
         <div class="footer">
-          <p><strong>Ates Barberos</strong> - Professionelle Friseurdienstleistungen</p>
+          <p><strong>Ates Barberos</strong> - Professionelle Barberdienstleistungen</p>
           <p>Bahnhofstraße 3, 6410 Telfs | https://ates-barberos.com</p>
         </div>
       </div>
@@ -287,10 +287,10 @@ class EmailService {
       'Ihre Buchung wurde bestätigt.',
       `Termin: ${this.formatDateTime(appointment.date, appointment.time)}`,
       `Dienstleistungen: ${appointment.services?.map(s => s.name).join(', ')}`,
-      `Friseur: ${barber?.name || 'Professioneller Friseur'}`,
+      `Barber: ${barber?.name || 'Professioneller Barber'}`,
       `Gesamtkosten: €${appointment.totalPrice}`,
       `Ihre Telefonnummer: ${appointment.customerPhone}`,
-      appointment.responseMessage ? `Nachricht vom Friseur: "${appointment.responseMessage}"` : '',
+      appointment.responseMessage ? `Nachricht vom Barber: "${appointment.responseMessage}"` : '',
       'Sie erhalten 30 Minuten vor Ihrem Termin eine Erinnerung.',
       'Adresse: Bahnhofstraße 3, 6410 Telfs'
     ]);
@@ -334,8 +334,8 @@ class EmailService {
               <span>${appointment.services?.map(s => s.name).join(', ')}</span>
             </div>
             <div class="detail">
-              <span><strong>Ihr Friseur:</strong></span>
-              <span>${barber?.name || 'Professioneller Friseur'}</span>
+              <span><strong>Ihr Barber:</strong></span>
+              <span>${barber?.name || 'Professioneller Barber'}</span>
             </div>
             <div class="detail">
               <span><strong>Gesamtkosten:</strong></span>
@@ -351,7 +351,7 @@ class EmailService {
           ${appointment.responseMessage ? `<div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0;"><p style="margin: 0; color: #1e40af;"><strong>Nachricht von ${barber?.name}:</strong> "${appointment.responseMessage}"</p></div>` : ''}
         </div>
         <div class="footer">
-          <p><strong>Ates Barberos</strong> - Professionelle Friseurdienstleistungen</p>
+          <p><strong>Ates Barberos</strong> - Professionelle Barberdienstleistungen</p>
           <p>Bahnhofstraße 3, 6410 Telfs | https://ates-barberos.com</p>
         </div>
       </div>
@@ -463,7 +463,7 @@ class EmailService {
       'Ihr Termin beginnt in 30 Minuten.',
       `Termin: ${this.formatDateTime(appointment.date, appointment.time)}`,
       `Dienstleistungen: ${appointment.services?.map(s => s.name).join(', ')}`,
-      `Ihr Friseur: ${barber?.name || 'Professioneller Friseur'}`,
+      `Ihr Barber: ${barber?.name || 'Professioneller Barber'}`,
       'Adresse: Bahnhofstraße 3, 6410 Telfs',
       `Gesamt: €${appointment.totalPrice}`,
       'Bitte kommen Sie 5 Minuten früher.'
@@ -507,8 +507,8 @@ class EmailService {
               <span>${appointment.services?.map(s => s.name).join(', ')}</span>
             </div>
             <div class="detail">
-              <span><strong>Ihr Friseur:</strong></span>
-              <span>${barber?.name || 'Professioneller Friseur'}</span>
+              <span><strong>Ihr Barber:</strong></span>
+              <span>${barber?.name || 'Professioneller Barber'}</span>
             </div>
             <div class="detail">
               <span><strong>Adresse:</strong></span>
@@ -523,7 +523,7 @@ class EmailService {
           <p><strong>Bitte kommen Sie 5 Minuten früher!</strong> Wir freuen uns darauf, Sie bald zu sehen.</p>
         </div>
         <div class="footer">
-          <p><strong>Ates Barberos</strong> - Professionelle Friseurdienstleistungen</p>
+          <p><strong>Ates Barberos</strong> - Professionelle Barberdienstleistungen</p>
           <p>Bahnhofstraße 3, 6410 Telfs | https://ates-barberos.com</p>
         </div>
       </div>
@@ -634,7 +634,7 @@ class EmailService {
       'Danke für Ihren Besuch bei Ates Barberos.',
       `Datum & Uhrzeit: ${this.formatDateTime(appointment.date, appointment.time)}`,
       `Dienstleistungen: ${appointment.services?.map(s => s.name).join(', ')}`,
-      `Ihr Friseur: ${barber?.name || 'Professioneller Friseur'}`,
+      `Ihr Barber: ${barber?.name || 'Professioneller Barber'}`,
       `Bezahlt: €${appointment.totalPrice}`,
       'Wir freuen uns, Sie bald wiederzusehen!'
     ]);
@@ -677,8 +677,8 @@ class EmailService {
               <span>${appointment.services?.map(s => s.name).join(', ')}</span>
             </div>
             <div class="detail">
-              <span><strong>Ihr Friseur:</strong></span>
-              <span>${barber?.name || 'Professioneller Friseur'}</span>
+              <span><strong>Ihr Barber:</strong></span>
+              <span>${barber?.name || 'Professioneller Barber'}</span>
             </div>
             <div class="detail">
               <span><strong>Bezahlt:</strong></span>
@@ -690,7 +690,7 @@ class EmailService {
           <p><strong>Wir würden uns freuen, Sie wiederzusehen!</strong> Buchen Sie Ihren nächsten Termin jederzeit auf unserer Website.</p>
         </div>
         <div class="footer">
-          <p><strong>Ates Barberos</strong> - Professionelle Friseurdienstleistungen</p>
+          <p><strong>Ates Barberos</strong> - Professionelle Barberdienstleistungen</p>
           <p>Bahnhofstraße 3, 6410 Telfs | https://ates-barberos.com</p>
           <p>Vielen Dank, dass Sie uns gewählt haben!</p>
         </div>
@@ -793,7 +793,7 @@ class EmailService {
       'leider können wir Ihre Terminanfrage zu diesem Zeitpunkt nicht erfüllen.',
       `Angefragter Termin: ${this.formatDateTime(appointment.date, appointment.time)}`,
       `Dienstleistungen: ${appointment.services?.map(s => s.name).join(', ')}`,
-      appointment.responseMessage ? `Nachricht vom Friseur: "${appointment.responseMessage}"` : '',
+      appointment.responseMessage ? `Nachricht vom Barber: "${appointment.responseMessage}"` : '',
       'Bitte buchen Sie gerne einen anderen Zeitslot.',
       'Vielen Dank für Ihr Verständnis.'
     ]);
@@ -836,12 +836,12 @@ class EmailService {
             </div>
           </div>
           
-          ${appointment.responseMessage ? `<div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0;"><p style="margin: 0; color: #1e40af;"><strong>Nachricht von ${barber?.name || 'Ihrem Friseur'}:</strong> "${appointment.responseMessage}"</p></div>` : ''}
+          ${appointment.responseMessage ? `<div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0;"><p style="margin: 0; color: #1e40af;"><strong>Nachricht von ${barber?.name || 'Ihrem Barber'}:</strong> "${appointment.responseMessage}"</p></div>` : ''}
           
           <p>Wir entschuldigen uns für etwaige Unannehmlichkeiten. Bitte buchen Sie gerne einen anderen Zeitslot, der besser passt.</p>
         </div>
         <div class="footer">
-          <p><strong>Ates Barberos</strong> - Professionelle Friseurdienstleistungen</p>
+          <p><strong>Ates Barberos</strong> - Professionelle Barberdienstleistungen</p>
           <p>Bahnhofstraße 3, 6410 Telfs | https://ates-barberos.com</p>
         </div>
       </div>
@@ -926,8 +926,8 @@ class EmailService {
               <span>${appointment.services?.map(s => s.name).join(', ')}</span>
             </div>
             <div class="detail">
-              <span><strong>Ihr Friseur:</strong></span>
-              <span>${barber?.name || 'Professioneller Friseur'}</span>
+              <span><strong>Ihr Barber:</strong></span>
+              <span>${barber?.name || 'Professioneller Barber'}</span>
             </div>
           </div>
           
@@ -936,7 +936,7 @@ class EmailService {
           <p><strong>Wichtig:</strong> Bitte kommen Sie zur neuen Zeit. Sie erhalten 30 Minuten vor Ihrem Termin eine Erinnerung.</p>
         </div>
         <div class="footer">
-          <p><strong>Ates Barberos</strong> - Professionelle Friseurdienstleistungen</p>
+          <p><strong>Ates Barberos</strong> - Professionelle Barberdienstleistungen</p>
           <p>Bahnhofstraße 3, 6410 Telfs | https://ates-barberos.com</p>
         </div>
       </div>
@@ -1033,7 +1033,7 @@ class EmailService {
           ${message ? `<div class="message-box"><p style="margin: 0; color: #166534;"><strong>Ihre Nachricht:</strong> "${message}"</p></div>` : ''}
         </div>
         <div class="footer">
-          <p><strong>Ates Barberos</strong> - Professionelle Friseurdienstleistungen</p>
+          <p><strong>Ates Barberos</strong> - Professionelle Barberdienstleistungen</p>
           <p>Bahnhofstraße 3, 6410 Telfs | https://ates-barberos.com</p>
         </div>
       </div>

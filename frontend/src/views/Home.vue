@@ -530,7 +530,7 @@ export default {
 /* Force dark background in both light and dark themes */
 :root .premium-badge,
 .dark-theme .premium-badge {
-  background: linear-gradient(135deg, #1a1a2e 0%, #2d3748 100%) !important;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%) !important;
   color: white !important;
 }
 

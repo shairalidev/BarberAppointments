@@ -8,7 +8,7 @@
             <div class="step-item" :class="{ active: currentStep === step.number, completed: currentStep > step.number }">
               <span class="step-badge" :class="currentStep >= step.number ? 'active' : ''">{{ step.number }}</span>
               <span class="step-label">{{ $t(`booking.step${step.number}`) }}</span>
-            </div>
+          </div>
             <div v-if="index < steps.length - 1" class="step-connector" :class="{ completed: currentStep > step.number }"></div>
           </template>
         </div>
@@ -27,8 +27,8 @@
                       <div class="service-meta">
                         <span class="service-duration">{{ service.duration }} Min.</span>
                         <span class="service-price">{{ formatCurrency(service.price) }}</span>
-                      </div>
-                    </div>
+                          </div>
+                        </div>
                     <input type="checkbox" class="service-checkbox-input" :value="service._id" v-model="selectedServices" @change="handleAvailabilityRefresh">
                     <span class="service-checkbox">
                       <i class="fas fa-check check-icon"></i>

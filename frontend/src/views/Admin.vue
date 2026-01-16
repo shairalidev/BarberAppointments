@@ -150,7 +150,7 @@
                   </button>
                 </template>
               </div>
-              <div class="d-flex gap-2 justify-content-center">
+              <div class="d-flex gap-2 justify-content-center flex-wrap">
                 <button @click="calendarViewMode === 'calendar' ? goToToday() : goToTodayDayView()" class="btn btn-primary btn-sm">{{ $t('admin.today') }}</button>
                 <button @click="showBookingModal = true" class="btn btn-success btn-sm">
                   <i class="fas fa-plus me-1"></i>{{ $t('admin.bookAppointment') }}
@@ -160,6 +160,49 @@
                   <i :class="[calendarViewMode === 'calendar' ? 'fas fa-calendar-day' : 'fas fa-calendar-alt', 'me-1']"></i>
                   {{ calendarViewMode === 'calendar' ? $t('admin.dayView') : $t('admin.calendar') }}
                 </button>
+              </div>
+              <!-- Mobile Off-Date Toggle - Calendar View -->
+              <div v-if="calendarViewMode === 'calendar' && selectedCalendarDate" class="mobile-off-date-section mt-2">
+                <div class="off-date-toggle-mobile">
+                  <small class="text-muted mb-1 d-block">{{ formatSelectedDate }}</small>
+                  <label class="off-date-toggle-label-mobile" for="mobileCalendarOffDateToggle">
+                    <input 
+                      class="off-date-toggle-input" 
+                      type="checkbox" 
+                      id="mobileCalendarOffDateToggle"
+                      :checked="isSelectedDateRestricted"
+                      @change="toggleCalendarOffDate"
+                    >
+                    <span class="toggle-slider-mobile" :class="{ 'active': isSelectedDateRestricted }">
+                      <i v-if="isSelectedDateRestricted" class="fas fa-ban"></i>
+                      <i v-else class="fas fa-calendar-check"></i>
+                    </span>
+                    <span class="toggle-text-mobile">
+                      {{ isSelectedDateRestricted ? $t('admin.offDate') : $t('admin.markAsOffDate') }}
+                    </span>
+                  </label>
+                </div>
+              </div>
+              <!-- Mobile Off-Date Toggle - Day View -->
+              <div v-if="calendarViewMode === 'day'" class="mobile-off-date-section mt-2">
+                <div class="off-date-toggle-mobile">
+                  <label class="off-date-toggle-label-mobile" for="mobileDayViewOffDateToggle">
+                    <input 
+                      class="off-date-toggle-input" 
+                      type="checkbox" 
+                      id="mobileDayViewOffDateToggle"
+                      :checked="dayViewData.isRestricted"
+                      @change="toggleDayViewOffDate"
+                    >
+                    <span class="toggle-slider-mobile" :class="{ 'active': dayViewData.isRestricted }">
+                      <i v-if="dayViewData.isRestricted" class="fas fa-ban"></i>
+                      <i v-else class="fas fa-calendar-check"></i>
+                    </span>
+                    <span class="toggle-text-mobile">
+                      {{ dayViewData.isRestricted ? $t('admin.offDate') : $t('admin.markAsOffDate') }}
+                    </span>
+                  </label>
+                </div>
               </div>
             </div>
 
@@ -327,8 +370,8 @@
                         <div class="schedule-header">
                           <div class="time-column-header">Time</div>
                           <div class="slots-column-header">
-                            <div class="half-hour-slot-header">00</div>
-                            <div class="half-hour-slot-header">30</div>
+                            <div class="half-hour-slot-header-left"></div>
+                            <div class="half-hour-slot-header-right"></div>
                           </div>
                         </div>
                         <div class="schedule-body">
@@ -346,13 +389,18 @@
                                 v-for="(slot, index) in getDayViewHalfHourSlots(hour)" 
                                 :key="`${hour}-${index}`"
                                 class="half-hour-slot"
-                                :class="{ 'has-appointment': slot.appointment }"
+                                :class="{ 
+                                  'has-appointment': slot.appointment,
+                                  'slot-left': index === 0,
+                                  'slot-right': index === 1
+                                }"
+                                @click="handleSlotClick(slot, dayViewDate)"
                               >
                                 <div 
                                   v-if="slot.appointment" 
                                   class="appointment-block" 
                                   :class="getAppointmentBlockClass(slot.appointment)"
-                                  @click="slot.appointment.status === 'confirmed' ? openEditTimeModal(slot.appointment) : null"
+                                  @click.stop="slot.appointment.status === 'confirmed' ? openEditTimeModal(slot.appointment) : null"
                                 >
                                   <div class="appointment-content">
                                     <div class="appointment-customer">{{ slot.appointment.customerName }}</div>
@@ -360,7 +408,12 @@
                                     <div class="appointment-time" v-if="slot.showTime">{{ formatAppointmentTime(slot.appointment) }}</div>
                                   </div>
                                 </div>
-                                <div v-else class="empty-slot"></div>
+                                <div v-else class="empty-slot">
+                                  <div class="empty-slot-hint">
+                                    <i class="fas fa-plus-circle"></i>
+                                    <span class="d-none d-md-inline">Click to book</span>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -2747,6 +2800,18 @@ getTimeSlotsForDay(dayIndex) {
       
       return slots
     },
+    handleSlotClick(slot, date) {
+      // Only handle clicks on empty slots
+      if (!slot.appointment && date && slot.time) {
+        // Set the booking form with the selected date and time
+        this.bookingForm.date = date
+        this.bookingForm.time = slot.time
+        // Open the booking modal
+        this.showBookingModal = true
+        // Fetch available slots for this date
+        this.fetchAvailableSlots()
+      }
+    },
     getServiceNames(appointment) {
       if (!appointment.services) {
         return 'No service'
@@ -3462,23 +3527,19 @@ async setReminder(appointment) {
 }
 
 @media (max-width: 991px) {
-  .action-toolbar {
-    width: 100%;
-    gap: 0.5rem !important;
-  }
-
+  /* Admin Header - Tablet/Mobile */
   .admin-header {
-    padding: 0.375rem 0 !important;
-    margin-bottom: 0.75rem !important;
+    padding: 0.5rem 0 !important;
+    margin-bottom: 0.5rem !important;
   }
 
   .admin-header.py-3 {
-    padding-top: 0.375rem !important;
-    padding-bottom: 0.375rem !important;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
   }
 
   .admin-header.mb-4 {
-    margin-bottom: 0.75rem !important;
+    margin-bottom: 0.5rem !important;
   }
 
   .admin-header .container-fluid {
@@ -3491,64 +3552,47 @@ async setReminder(appointment) {
     margin: 0;
   }
 
-  .admin-header .action-toolbar {
-    justify-content: flex-end;
-    min-width: auto;
-  }
-
   .admin-logo-container {
     padding: 4px 8px !important;
     gap: 6px !important;
   }
 
   .admin-logo {
-    height: 40px !important;
-    max-width: 140px !important;
+    height: 36px !important;
+    max-width: 120px !important;
   }
 
   .admin-brand-text {
-    font-size: 1rem !important;
+    font-size: 0.9rem !important;
     margin-left: 6px !important;
-    letter-spacing: 0.3px;
   }
 
   .admin-avatar {
-    width: 36px !important;
-    height: 36px !important;
-    font-size: 0.9rem !important;
-    border-radius: 8px;
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 0.8rem !important;
+    border-radius: 6px;
+  }
+
+  .action-toolbar {
+    gap: 0.35rem !important;
   }
 
   .action-toolbar .btn-sm {
-    padding: 0.25rem 0.5rem !important;
+    padding: 0.25rem 0.4rem !important;
     font-size: 0.7rem !important;
   }
 
   .action-toolbar .theme-toggle {
-    width: 32px !important;
-    height: 32px !important;
-    padding: 0.25rem !important;
-    font-size: 0.75rem !important;
-  }
-
-  .action-toolbar .theme-toggle-icon {
-    font-size: 0.75rem !important;
-  }
-
-  .action-toolbar .dropdown .d-flex.flex-column {
-    gap: 0.25rem !important;
+    width: 30px !important;
+    height: 30px !important;
+    padding: 0.2rem !important;
+    font-size: 0.7rem !important;
   }
 
   .action-toolbar .dropdown .btn-sm {
-    font-size: 0.55rem !important;
-    padding: 0.15rem 0.3rem !important;
-  }
-
-  .mobile-action-btn {
     font-size: 0.6rem !important;
-    padding: 0.2rem 0.4rem !important;
-    min-width: auto;
-    line-height: 1.2;
+    padding: 0.15rem 0.3rem !important;
   }
 
   .admin-header .col {
@@ -3562,51 +3606,45 @@ async setReminder(appointment) {
     flex-shrink: 0;
   }
 
+  /* Navigation Tabs - Tablet */
   .nav-tabs-wrapper {
     padding: 0.25rem !important;
-    margin: 0 0.125rem 0.5rem 0.125rem !important;
+    margin: 0 0.25rem 0.5rem 0.25rem !important;
     border-radius: 8px !important;
-    box-shadow: var(--shadow-sm) !important;
-  }
-
-  .nav-tabs-wrapper::-webkit-scrollbar {
-    height: 3px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .mobile-nav {
-    gap: 0.125rem !important;
-    justify-content: flex-start;
-    flex-wrap: nowrap;
-    padding: 0;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 0.2rem !important;
   }
 
   .mobile-nav .nav-item {
-    flex: 0 0 auto;
-    min-width: 70px;
-    max-width: 80px;
+    flex: 0 0 auto !important;
+    min-width: 65px;
   }
 
   .mobile-nav .nav-link {
-    padding: 0.4rem 0.5rem !important;
+    padding: 0.5rem 0.4rem !important;
     text-align: center;
-    font-size: 0.7rem;
-    min-width: 0;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 52px !important;
     gap: 0.25rem !important;
-    min-height: 50px !important;
     border-radius: 6px;
   }
 
   .mobile-nav .nav-icon {
-    font-size: 0.85rem !important;
+    font-size: 0.95rem !important;
     margin-bottom: 0;
-    width: auto;
   }
 
   .mobile-nav .nav-text {
-    font-size: 0.65rem !important;
+    font-size: 0.7rem !important;
     line-height: 1.1;
     font-weight: 500;
   }
@@ -3721,78 +3759,63 @@ async setReminder(appointment) {
 }
 
 @media (max-width: 768px) {
-  .mobile-nav {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  
-  .nav-item {
-    flex: 1;
-    min-width: 80px;
-    max-width: 100px;
-  }
-  
-  .nav-link {
-    padding: 0.75rem 0.5rem;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .nav-text {
-    font-size: 0.7rem;
-  }
-  
-  .nav-icon {
-    font-size: 1rem;
-    margin-bottom: 0.2rem;
-  }
-
+  /* Mobile Navigation - Horizontal Scroll */
   .nav-tabs-wrapper {
-    padding: 0.2rem !important;
-    margin: 0 0.125rem 0.375rem 0.125rem !important;
+    padding: 0.25rem !important;
+    margin: 0 0.25rem 0.5rem 0.25rem !important;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    border-radius: 6px !important;
+    border-radius: 8px !important;
     box-shadow: var(--shadow-sm) !important;
   }
 
   .nav-tabs-wrapper::-webkit-scrollbar {
-    height: 2px;
+    height: 0;
+    display: none;
   }
 
   .mobile-nav {
-    gap: 0.1rem !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
+    gap: 0.15rem !important;
+    overflow-x: auto;
+    padding-bottom: 2px;
   }
-
+  
   .mobile-nav .nav-item {
-    min-width: 65px;
-    max-width: 75px;
+    flex: 0 0 auto !important;
+    min-width: 58px;
+    max-width: 70px;
   }
-
+  
   .mobile-nav .nav-link {
-    padding: 0.35rem 0.4rem !important;
-    min-width: 65px;
-    white-space: nowrap;
-    min-height: 45px !important;
+    padding: 0.4rem 0.35rem !important;
+    text-align: center;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 48px !important;
     gap: 0.2rem !important;
+    border-radius: 6px !important;
+    white-space: nowrap;
   }
-
+  
   .mobile-nav .nav-text {
     font-size: 0.6rem !important;
     font-weight: 500;
-    line-height: 1;
+    line-height: 1.1;
   }
-
+  
   .mobile-nav .nav-icon {
-    font-size: 0.8rem !important;
+    font-size: 0.9rem !important;
     margin-bottom: 0;
   }
 
   .nav-badge {
-    top: 3px;
-    right: 3px;
+    top: 2px;
+    right: 2px;
     min-width: 12px;
     height: 12px;
     font-size: 0.55rem;
@@ -4395,52 +4418,58 @@ async setReminder(appointment) {
   }
 
   .admin-info {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
   }
 
+  /* Navigation Tabs - Small Mobile */
   .nav-tabs-wrapper {
-    padding: 0.15rem !important;
-    margin: 0 0.1rem 0.25rem 0.1rem !important;
-    border-radius: 4px !important;
+    padding: 0.2rem !important;
+    margin: 0 0.15rem 0.35rem 0.15rem !important;
+    border-radius: 6px !important;
     box-shadow: var(--shadow-sm) !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .nav-tabs-wrapper::-webkit-scrollbar {
-    height: 2px;
+    height: 0;
+    display: none;
   }
 
   .mobile-nav {
-    gap: 0.075rem !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 0.1rem !important;
+    overflow-x: auto;
   }
 
   .mobile-nav .nav-item {
-    min-width: 55px;
-    max-width: 65px;
+    flex: 0 0 auto !important;
+    min-width: 52px;
+    max-width: 60px;
   }
 
   .mobile-nav .nav-link {
-    padding: 0.25rem 0.3rem !important;
-    min-width: 55px;
-    min-height: 40px !important;
+    padding: 0.35rem 0.25rem !important;
+    min-width: 52px;
+    min-height: 44px !important;
     gap: 0.15rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 5px !important;
   }
 
   .mobile-nav .nav-icon {
-    font-size: 0.7rem !important;
+    font-size: 0.8rem !important;
     margin-bottom: 0;
   }
 
   .mobile-nav .nav-text {
     font-size: 0.55rem !important;
     line-height: 1;
-  }
-
-  .nav-icon {
-    font-size: 0.7rem !important;
-  }
-
-  .nav-text {
-    font-size: 0.55rem !important;
+    font-weight: 500;
   }
 
   .nav-badge {
@@ -4451,24 +4480,50 @@ async setReminder(appointment) {
     font-size: 0.5rem;
   }
   
+  /* Calendar Grid Mobile Optimization */
+  .calendar-grid {
+    gap: 4px !important;
+    padding: 6px !important;
+  }
+  
   .calendar-day {
-    min-height: 35px;
+    min-height: 32px;
     padding: 2px 1px;
+    border-radius: 4px !important;
   }
   
   .calendar-header {
-    padding: 6px 2px;
-    font-size: 0.65rem;
+    padding: 4px 2px;
+    font-size: 0.6rem;
+    font-weight: 600;
   }
   
   .day-number {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
+    margin-bottom: 0;
   }
   
   .booking-badge {
-    width: 14px;
-    height: 14px;
-    font-size: 0.55rem;
+    width: 12px;
+    height: 12px;
+    font-size: 0.5rem;
+    top: 2px;
+    right: 2px;
+  }
+  
+  .off-date-icon {
+    font-size: 0.6rem !important;
+    top: 2px;
+    right: 2px;
+  }
+  
+  /* iOS Safari Calendar Optimization */
+  .calendar-grid {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .calendar-day {
+    -webkit-tap-highlight-color: rgba(107, 114, 128, 0.1);
   }
   
   .card-body {
@@ -4961,7 +5016,7 @@ async setReminder(appointment) {
   justify-content: space-between;
   align-items: center;
   padding: 1.25rem 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4a4a4a 0%, #3a3a3a 100%);
   color: white;
   position: relative;
 }
@@ -5073,10 +5128,10 @@ async setReminder(appointment) {
 }
 
 .day-cell-pro.selected {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4a4a4a 0%, #3a3a3a 100%);
   color: white;
-  border-color: #5a67d8;
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+  border-color: #505050;
+  box-shadow: 0 8px 24px rgba(60, 60, 60, 0.4);
   transform: scale(1.08);
   z-index: 2;
 }
@@ -5108,7 +5163,7 @@ async setReminder(appointment) {
 .day-number-pro {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   transition: all 0.3s ease;
 }
 
@@ -5135,13 +5190,13 @@ async setReminder(appointment) {
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4a4a4a 0%, #3a3a3a 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   font-size: 1.25rem;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(60, 60, 60, 0.3);
 }
 
 .selected-date-info {
@@ -5160,7 +5215,7 @@ async setReminder(appointment) {
 .selected-date-value {
   font-size: 1rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 /* Dark mode styles for professional calendar */
@@ -5170,7 +5225,7 @@ async setReminder(appointment) {
 }
 
 .dark-theme .date-picker-header-pro {
-  background: linear-gradient(135deg, #4c51bf 0%, #553c9a 100%);
+  background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%);
 }
 
 .dark-theme .calendar-container-pro {
@@ -5187,13 +5242,13 @@ async setReminder(appointment) {
 }
 
 .dark-theme .day-cell-pro:hover:not(.past):not(.other-month):not(.selected) {
-  background: rgba(102, 126, 234, 0.2);
-  border-color: #667eea;
+  background: rgba(150, 150, 150, 0.2);
+  border-color: #707070;
 }
 
 .dark-theme .day-cell-pro.today:not(.selected) {
-  background: rgba(102, 126, 234, 0.25);
-  border-color: #667eea;
+  background: rgba(150, 150, 150, 0.25);
+  border-color: #808080;
 }
 
 .dark-theme .day-cell-pro.today:not(.selected) .day-number-pro {
@@ -5218,8 +5273,8 @@ async setReminder(appointment) {
 }
 
 .dark-theme .selected-date-pro {
-  background: rgba(102, 126, 234, 0.1);
-  border-top-color: #667eea;
+  background: rgba(150, 150, 150, 0.1);
+  border-top-color: #707070;
 }
 
 .dark-theme .selected-date-value {
@@ -5389,7 +5444,7 @@ async setReminder(appointment) {
 }
 
 .week-day-cell.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4a4a4a 0%, #3a3a3a 100%);
   color: white;
   font-weight: 600;
 }
@@ -5464,16 +5519,25 @@ async setReminder(appointment) {
   border-right: 1px solid #dee2e6;
 }
 
-.half-hour-slot-header {
+.half-hour-slot-header-left,
+.half-hour-slot-header-right {
   flex: 1;
-  padding: 12px;
-  font-weight: 600;
-  color: #495057;
+  padding: 8px;
   text-align: center;
-  border-right: 1px solid #e9ecef;
+  position: relative;
 }
 
-.half-hour-slot-header:last-child {
+.half-hour-slot-header-left::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 20%;
+  bottom: 20%;
+  width: 1px;
+  background: #e9ecef;
+}
+
+.half-hour-slot-header-right {
   border-right: none;
 }
 
@@ -5524,15 +5588,24 @@ async setReminder(appointment) {
 .half-hour-slot {
   flex: 1;
   padding: 8px;
-  border-right: 1px solid #e9ecef;
   min-height: 80px;
   display: flex;
   flex-direction: column;
   position: relative;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
-.half-hour-slot:last-child {
+.half-hour-slot.slot-left {
+  border-right: 1px solid #e9ecef;
+}
+
+.half-hour-slot.slot-right {
   border-right: none;
+}
+
+.half-hour-slot:hover:not(.has-appointment) {
+  background-color: rgba(107, 114, 128, 0.05);
 }
 
 .half-hour-slot.has-appointment {
@@ -5545,6 +5618,36 @@ async setReminder(appointment) {
   background: transparent;
   border: 1px dashed #e9ecef;
   border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.empty-slot:hover {
+  background-color: rgba(16, 185, 129, 0.05);
+  border-color: var(--success);
+  border-style: solid;
+}
+
+.empty-slot-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  opacity: 0.6;
+}
+
+.empty-slot-hint i {
+  font-size: 1rem;
+  color: var(--success);
+}
+
+.empty-slot:hover .empty-slot-hint {
+  opacity: 1;
+  color: var(--success);
 }
 
 .appointment-block {
@@ -5626,32 +5729,139 @@ async setReminder(appointment) {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  .schedule-header {
+    font-size: 0.75rem;
+  }
+  
   .time-column {
-    width: 60px;
-    padding: 8px;
+    width: 50px;
+    padding: 6px 4px;
   }
   
   .time-column-header {
-    width: 60px;
-    padding: 8px;
+    width: 50px;
+    padding: 6px 4px;
+    font-size: 0.7rem;
   }
   
-  .half-hour-slot {
-    padding: 4px;
-    min-height: 60px;
-  }
-  
-  .appointment-block {
-    padding: 6px;
-  }
-  
-  .appointment-customer {
+  .time-label {
     font-size: 0.8rem;
   }
   
+  .half-hour-slot {
+    padding: 3px;
+    min-height: 50px;
+  }
+  
+  .half-hour-slot-header-left,
+  .half-hour-slot-header-right {
+    padding: 4px;
+  }
+  
+  .appointment-block {
+    padding: 4px;
+  }
+  
+  .appointment-customer {
+    font-size: 0.7rem;
+    line-height: 1.2;
+  }
+  
   .appointment-service {
+    font-size: 0.65rem;
+    line-height: 1.1;
+  }
+  
+  .empty-slot-hint {
+    font-size: 0.65rem;
+  }
+  
+  .empty-slot-hint i {
+    font-size: 0.85rem;
+  }
+  
+  .schedule-row {
+    min-height: 50px;
+  }
+}
+
+@media (max-width: 576px) {
+  .schedule-header {
     font-size: 0.7rem;
   }
+  
+  .time-column {
+    width: 45px;
+    padding: 4px 2px;
+  }
+  
+  .time-column-header {
+    width: 45px;
+    padding: 4px 2px;
+    font-size: 0.65rem;
+  }
+  
+  .time-label {
+    font-size: 0.75rem;
+  }
+  
+  .half-hour-slot {
+    padding: 2px;
+    min-height: 42px;
+  }
+  
+  .half-hour-slot-header-left,
+  .half-hour-slot-header-right {
+    padding: 3px;
+  }
+  
+  .appointment-block {
+    padding: 3px;
+  }
+  
+  .appointment-customer {
+    font-size: 0.65rem;
+    line-height: 1.1;
+  }
+  
+  .appointment-service {
+    font-size: 0.6rem;
+    line-height: 1;
+  }
+  
+  .appointment-time {
+    font-size: 0.55rem;
+  }
+  
+  .empty-slot {
+    border-width: 1px;
+  }
+  
+  .empty-slot-hint {
+    font-size: 0.6rem;
+  }
+  
+  .empty-slot-hint i {
+    font-size: 0.75rem;
+  }
+  
+  .empty-slot-hint span {
+    display: none !important;
+  }
+  
+  .schedule-row {
+    min-height: 42px;
+  }
+  
+  /* iOS Safari optimization */
+  .schedule-body {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .half-hour-slot {
+    -webkit-tap-highlight-color: rgba(16, 185, 129, 0.1);
+  }
+}
   
   .appointment-time {
     font-size: 0.65rem;
@@ -5910,6 +6120,648 @@ async setReminder(appointment) {
   
   .toggle-slider.active::before {
     transform: translateX(22px);
+  }
+}
+
+/* ==============================================
+   MOBILE OFF-DATE TOGGLE
+   ============================================== */
+.mobile-off-date-section {
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+}
+
+.off-date-toggle-mobile {
+  text-align: center;
+}
+
+.off-date-toggle-label-mobile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+  font-size: 0.8rem;
+  color: var(--text-primary);
+}
+
+.off-date-toggle-label-mobile:active {
+  transform: scale(0.98);
+}
+
+.toggle-slider-mobile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--bg-tertiary);
+  color: var(--success);
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.toggle-slider-mobile.active {
+  background: var(--warning);
+  color: white;
+}
+
+.toggle-text-mobile {
+  font-weight: 500;
+  font-size: 0.75rem;
+}
+
+@media (max-width: 576px) {
+  .mobile-off-date-section {
+    padding: 0.35rem;
+  }
+  
+  .off-date-toggle-label-mobile {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.75rem;
+    gap: 0.35rem;
+  }
+  
+  .toggle-slider-mobile {
+    width: 24px;
+    height: 24px;
+    font-size: 0.75rem;
+  }
+  
+  .toggle-text-mobile {
+    font-size: 0.7rem;
+  }
+}
+
+/* ==============================================
+   COMPREHENSIVE MOBILE MODAL OPTIMIZATION
+   iPhone Safari & All Mobile Devices
+   ============================================== */
+
+/* All modals - Mobile optimized */
+@media (max-width: 768px) {
+  .modal-dialog {
+    margin: 0.5rem !important;
+    max-width: calc(100% - 1rem) !important;
+  }
+  
+  .modal-dialog.modal-lg,
+  .modal-dialog.modal-xl {
+    max-width: calc(100% - 1rem) !important;
+  }
+  
+  .modal-content {
+    border-radius: 12px !important;
+    max-height: calc(100vh - 1rem) !important;
+    overflow: hidden;
+  }
+  
+  .modal-header {
+    padding: 0.75rem 1rem !important;
+    min-height: auto !important;
+  }
+  
+  .modal-header .modal-title {
+    font-size: 0.95rem !important;
+    line-height: 1.3;
+  }
+  
+  .modal-header .modal-title i {
+    font-size: 0.9rem !important;
+    margin-right: 0.5rem !important;
+  }
+  
+  .modal-body {
+    padding: 0.75rem !important;
+    max-height: calc(100vh - 10rem) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .modal-footer {
+    padding: 0.5rem 0.75rem !important;
+    gap: 0.5rem !important;
+  }
+  
+  .modal-footer .btn {
+    padding: 0.4rem 0.75rem !important;
+    font-size: 0.8rem !important;
+  }
+  
+  /* Modal form elements */
+  .modal-body .form-label {
+    font-size: 0.8rem !important;
+    margin-bottom: 0.25rem !important;
+    font-weight: 600;
+  }
+  
+  .modal-body .form-control,
+  .modal-body .form-select {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.85rem !important;
+    min-height: 38px !important;
+  }
+  
+  .modal-body textarea.form-control {
+    min-height: 60px !important;
+  }
+  
+  .modal-body .row.g-3 {
+    --bs-gutter-y: 0.5rem !important;
+    --bs-gutter-x: 0.5rem !important;
+  }
+  
+  .modal-body p {
+    font-size: 0.85rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+  
+  .modal-body p strong {
+    font-size: 0.8rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .modal-dialog {
+    margin: 0.25rem !important;
+    max-width: calc(100% - 0.5rem) !important;
+  }
+  
+  .modal-content {
+    border-radius: 10px !important;
+  }
+  
+  .modal-header {
+    padding: 0.5rem 0.75rem !important;
+  }
+  
+  .modal-header .modal-title {
+    font-size: 0.85rem !important;
+  }
+  
+  .modal-header .modal-title i {
+    font-size: 0.8rem !important;
+    margin-right: 0.35rem !important;
+  }
+  
+  .modal-header .btn-close {
+    padding: 0.25rem !important;
+    font-size: 0.7rem !important;
+  }
+  
+  .modal-body {
+    padding: 0.5rem !important;
+    max-height: calc(100vh - 8rem) !important;
+  }
+  
+  .modal-body .form-label {
+    font-size: 0.75rem !important;
+    margin-bottom: 0.2rem !important;
+  }
+  
+  .modal-body .form-control,
+  .modal-body .form-select {
+    padding: 0.4rem 0.5rem !important;
+    font-size: 0.8rem !important;
+    min-height: 34px !important;
+  }
+  
+  .modal-body textarea.form-control {
+    min-height: 50px !important;
+  }
+  
+  .modal-body .row.g-3 {
+    --bs-gutter-y: 0.35rem !important;
+    --bs-gutter-x: 0.35rem !important;
+  }
+  
+  .modal-footer {
+    padding: 0.35rem 0.5rem !important;
+  }
+  
+  .modal-footer .btn {
+    padding: 0.35rem 0.5rem !important;
+    font-size: 0.75rem !important;
+  }
+}
+
+/* Booking Modal Mobile Optimization */
+@media (max-width: 768px) {
+  .professional-date-picker {
+    border-radius: 10px !important;
+  }
+  
+  .date-picker-header-pro {
+    padding: 0.75rem !important;
+  }
+  
+  .month-name {
+    font-size: 0.95rem !important;
+  }
+  
+  .year-badge {
+    font-size: 0.65rem !important;
+    padding: 0.15rem 0.4rem !important;
+  }
+  
+  .calendar-container-pro {
+    padding: 0.5rem !important;
+  }
+  
+  .weekday-cell-pro {
+    font-size: 0.65rem !important;
+    padding: 4px 0 !important;
+  }
+  
+  .day-cell-pro {
+    min-height: 36px !important;
+    border-radius: 6px !important;
+  }
+  
+  .day-number-pro {
+    font-size: 0.8rem !important;
+  }
+  
+  .selected-date-pro {
+    padding: 0.5rem !important;
+  }
+  
+  .date-icon-pro {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 0.9rem !important;
+    border-radius: 8px !important;
+  }
+  
+  .selected-date-label {
+    font-size: 0.65rem !important;
+  }
+  
+  .selected-date-value {
+    font-size: 0.85rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .professional-date-picker {
+    border-radius: 8px !important;
+  }
+  
+  .date-picker-header-pro {
+    padding: 0.5rem 0.75rem !important;
+  }
+  
+  .date-picker-header-pro button {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 0.7rem !important;
+  }
+  
+  .month-name {
+    font-size: 0.85rem !important;
+  }
+  
+  .year-badge {
+    font-size: 0.6rem !important;
+    padding: 0.1rem 0.3rem !important;
+  }
+  
+  .calendar-container-pro {
+    padding: 0.35rem !important;
+  }
+  
+  .weekday-cell-pro {
+    font-size: 0.6rem !important;
+    padding: 3px 0 !important;
+  }
+  
+  .day-cell-pro {
+    min-height: 32px !important;
+    border-radius: 5px !important;
+    margin: 1px !important;
+  }
+  
+  .day-number-pro {
+    font-size: 0.75rem !important;
+  }
+  
+  .selected-date-pro {
+    padding: 0.35rem !important;
+    flex-direction: row !important;
+    justify-content: center;
+    gap: 0.5rem !important;
+  }
+  
+  .date-icon-pro {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 0.8rem !important;
+    border-radius: 6px !important;
+  }
+  
+  .selected-date-info {
+    text-align: left !important;
+  }
+  
+  .selected-date-label {
+    font-size: 0.6rem !important;
+  }
+  
+  .selected-date-value {
+    font-size: 0.75rem !important;
+  }
+}
+
+/* Edit Appointment Modal Mobile */
+@media (max-width: 768px) {
+  .available-slots-container {
+    max-height: 120px !important;
+    overflow-y: auto !important;
+  }
+  
+  .available-slots-container .btn {
+    padding: 0.35rem 0.5rem !important;
+    font-size: 0.75rem !important;
+    min-width: 50px !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .available-slots-container {
+    max-height: 100px !important;
+  }
+  
+  .available-slots-container .btn {
+    padding: 0.25rem 0.4rem !important;
+    font-size: 0.7rem !important;
+    min-width: 45px !important;
+  }
+}
+
+/* Date Detail Modal Mobile */
+@media (max-width: 768px) {
+  .date-detail-modal .modal-dialog {
+    max-width: calc(100% - 0.5rem) !important;
+    margin: 0.25rem !important;
+  }
+  
+  .date-detail-modal .modal-body {
+    max-height: calc(100vh - 8rem) !important;
+    padding: 0.5rem !important;
+  }
+  
+  .date-detail-modal .modal-header {
+    padding: 0.5rem 0.75rem !important;
+  }
+  
+  .date-detail-modal .modal-header .modal-title {
+    font-size: 0.85rem !important;
+  }
+  
+  .date-detail-modal .off-date-toggle-wrapper {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+  
+  .date-detail-modal .off-date-toggle-label {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Calendar view off-date toggle - Mobile */
+@media (max-width: 768px) {
+  .mobile-calendar-controls .d-flex.justify-content-between.align-items-center.mt-3 {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.5rem !important;
+  }
+  
+  .mobile-calendar-controls .off-date-toggle-wrapper {
+    width: 100%;
+    margin-top: 0.25rem;
+  }
+  
+  .mobile-calendar-controls .off-date-toggle-label {
+    width: 100%;
+    justify-content: center;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 576px) {
+  .mobile-calendar-controls .off-date-toggle-label {
+    padding: 0.4rem 0.6rem !important;
+  }
+  
+  .toggle-label-text {
+    font-size: 0.7rem !important;
+  }
+}
+
+/* Customer Modal Mobile */
+@media (max-width: 768px) {
+  .customer-dropdown {
+    max-height: 150px !important;
+  }
+  
+  .customer-item {
+    padding: 0.5rem !important;
+  }
+  
+  .customer-name {
+    font-size: 0.85rem !important;
+  }
+  
+  .customer-details {
+    font-size: 0.75rem !important;
+  }
+}
+
+/* Response Modal Mobile */
+@media (max-width: 576px) {
+  .response-modal .modal-body textarea {
+    min-height: 50px !important;
+  }
+}
+
+/* Cancel Modal Mobile */
+@media (max-width: 576px) {
+  .cancel-modal .modal-body textarea {
+    min-height: 50px !important;
+  }
+}
+
+/* Admin Card Body Optimization */
+@media (max-width: 768px) {
+  .admin-content .card-body {
+    padding: 0.75rem !important;
+  }
+  
+  .admin-content h5.mb-3 {
+    font-size: 0.95rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+  
+  .admin-content h6 {
+    font-size: 0.85rem !important;
+  }
+  
+  .admin-content .table th,
+  .admin-content .table td {
+    padding: 0.4rem 0.5rem !important;
+    font-size: 0.8rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .admin-content .card-body {
+    padding: 0.5rem !important;
+  }
+  
+  .admin-content h5.mb-3 {
+    font-size: 0.85rem !important;
+    margin-bottom: 0.35rem !important;
+  }
+  
+  .admin-content h6 {
+    font-size: 0.75rem !important;
+  }
+  
+  .admin-content .table th,
+  .admin-content .table td {
+    padding: 0.3rem 0.35rem !important;
+    font-size: 0.7rem !important;
+  }
+  
+  .admin-content .badge {
+    font-size: 0.6rem !important;
+    padding: 0.2rem 0.35rem !important;
+  }
+}
+
+/* iOS Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+  .modal-body {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .modal-content {
+    -webkit-transform: translate3d(0, 0, 0);
+  }
+  
+  @media (max-width: 576px) {
+    .modal-dialog {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    
+    .form-control, .form-select {
+      font-size: 16px !important; /* Prevents iOS zoom on input focus */
+    }
+  }
+}
+
+/* Time slot selection in modals */
+@media (max-width: 576px) {
+  .time-slot-grid,
+  .d-flex.flex-wrap.gap-2 {
+    gap: 0.25rem !important;
+  }
+  
+  .time-slot-grid .btn,
+  .d-flex.flex-wrap.gap-2 .btn-outline-primary {
+    padding: 0.3rem 0.4rem !important;
+    font-size: 0.7rem !important;
+    min-width: 48px !important;
+  }
+}
+
+/* ==============================================
+   COMPREHENSIVE iOS SAFARI OPTIMIZATION
+   ============================================== */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari specific fixes */
+  .admin-panel {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .schedule-body,
+  .appointments-list,
+  .modal-body {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .calendar-grid,
+  .mobile-nav {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Prevent iOS zoom on input focus */
+  @media (max-width: 576px) {
+    .form-control,
+    .form-select,
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    textarea {
+      font-size: 16px !important;
+    }
+  }
+  
+  /* Touch-friendly tap highlights */
+  .calendar-day,
+  .half-hour-slot,
+  .btn,
+  .nav-link {
+    -webkit-tap-highlight-color: rgba(107, 114, 128, 0.1);
+  }
+  
+  /* Smooth scrolling */
+  .admin-content,
+  .card-body,
+  .modal-body {
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+  }
+  
+  /* Fix for iOS Safari viewport units */
+  @media (max-width: 576px) {
+    .modal-content {
+      max-height: -webkit-fill-available;
+    }
+  }
+  
+  /* Prevent text selection on touch */
+  .calendar-day,
+  .half-hour-slot,
+  .nav-link {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  
+  /* Fix for iOS Safari button rendering */
+  .btn {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  
+  /* Fix for iOS Safari input rendering */
+  input,
+  select,
+  textarea {
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: var(--border-radius-sm);
   }
 }
 
