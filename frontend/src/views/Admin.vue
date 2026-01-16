@@ -1032,9 +1032,13 @@
                     </option>
                   </select>
                 </div>
-                <div class="col-12" v-if="availableSlots.length">
+                <div class="col-12" v-if="availableSlots.length || bookingForm.time">
                   <label class="form-label">{{ $t('booking.availableTimes') }}</label>
-                  <div class="time-slots-grid">
+                  <div v-if="bookingForm.time && !availableSlots.length" class="selected-time-preview mb-2">
+                    <span class="badge bg-success">{{ bookingForm.time }}</span>
+                    <small class="text-muted ms-2">{{ $t('admin.selectService') }} {{ $t('common.to') }} {{ $t('common.continue') }}</small>
+                  </div>
+                  <div v-if="availableSlots.length" class="time-slots-grid">
                     <button 
                       v-for="slot in availableSlots" 
                       :key="slot"
@@ -2184,6 +2188,9 @@ async quickBookAppointment() {
         return
       }
       
+      // Preserve the currently selected time
+      const previouslySelectedTime = this.bookingForm.time
+      
       try {
         const service = this.services.find(s => s._id === this.bookingForm.serviceId)
         if (!service) return
@@ -2197,6 +2204,14 @@ async quickBookAppointment() {
         })
         
         this.availableSlots = response.data.availableTimes || []
+        
+        // If we had a previously selected time and it's still available, keep it selected
+        if (previouslySelectedTime && this.availableSlots.includes(previouslySelectedTime)) {
+          this.bookingForm.time = previouslySelectedTime
+        } else if (previouslySelectedTime && !this.availableSlots.includes(previouslySelectedTime)) {
+          // If the previously selected time is no longer available, clear it
+          this.bookingForm.time = ''
+        }
       } catch (error) {
         console.error('Error fetching available slots:', error)
         this.availableSlots = []
@@ -2812,9 +2827,16 @@ getTimeSlotsForDay(dayIndex) {
         // Set the booking form with the selected date and time
         this.bookingForm.date = date
         this.bookingForm.time = slot.time
+        
+        // Set the booking calendar to show the selected date's month
+        const selectedDate = new Date(date)
+        this.bookingCalendarMonth = selectedDate.getMonth()
+        this.bookingCalendarYear = selectedDate.getFullYear()
+        
         // Open the booking modal
         this.showBookingModal = true
-        // Fetch available slots for this date
+        
+        // Fetch available slots for this date (will auto-select the time when slots load)
         this.fetchAvailableSlots()
       }
     },
@@ -3182,13 +3204,7 @@ async setReminder(appointment) {
 
 /* Desktop Optimizations */
 @media (min-width: 992px) {
-  .admin-panel {
-    /*padding: 0 2rem;*/
-  }
-  
-  .admin-content {
-    /*padding: 0 2rem;*/
-  }
+  /* Desktop-specific styles can be added here if needed */
   
   .calendar-tab .row {
     height: calc(100vh - 250px);
@@ -6345,17 +6361,40 @@ async setReminder(appointment) {
 
 /* Booking Modal Mobile Optimization */
 @media (max-width: 768px) {
+  /* Booking Modal - Smaller on tablet */
+  .modal-dialog.modal-lg {
+    max-width: calc(100% - 1rem) !important;
+    margin: 0.5rem !important;
+  }
+  
   /* Service Selector - Make smaller and prevent overflow */
   .modal-body .form-select-lg,
   .modal-body select.form-select-lg {
-    font-size: 0.9rem !important;
-    padding: 0.5rem 0.75rem !important;
-    min-height: 42px !important;
+    font-size: 0.85rem !important;
+    padding: 0.45rem 0.65rem !important;
+    min-height: 40px !important;
     max-width: 100% !important;
     width: 100% !important;
     box-sizing: border-box !important;
     overflow: hidden;
     text-overflow: ellipsis;
+    line-height: 1.4;
+  }
+  
+  /* Service selector options - smaller font */
+  .modal-body .form-select-lg option {
+    font-size: 0.8rem !important;
+    padding: 0.35rem 0.5rem !important;
+  }
+  
+  /* Form labels - smaller */
+  .modal-body .form-label {
+    font-size: 0.8rem !important;
+    margin-bottom: 0.3rem !important;
+  }
+  
+  .modal-body .form-label.fw-semibold {
+    font-size: 0.85rem !important;
   }
   
   /* Professional Date Picker */
@@ -6438,20 +6477,113 @@ async setReminder(appointment) {
     padding: 0.4rem 0.5rem !important;
     min-width: 60px !important;
   }
+  
+  /* Selected Time Preview */
+  .selected-time-preview {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    background: rgba(16, 185, 129, 0.1);
+    border-radius: 6px;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+  
+  .selected-time-preview .badge {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+  }
+  
+  .selected-time-preview small {
+    font-size: 0.7rem;
+  }
 }
 
 @media (max-width: 576px) {
+  /* Booking Modal - Much smaller on mobile */
+  .modal-dialog.modal-lg {
+    max-width: calc(100% - 0.5rem) !important;
+    margin: 0.25rem !important;
+  }
+  
+  .modal-content {
+    border-radius: 10px !important;
+  }
+  
+  .modal-header {
+    padding: 0.5rem 0.75rem !important;
+  }
+  
+  .modal-header .modal-title {
+    font-size: 0.85rem !important;
+  }
+  
+  .modal-header .modal-title i {
+    font-size: 0.8rem !important;
+    margin-right: 0.4rem !important;
+  }
+  
+  .modal-body {
+    padding: 0.5rem !important;
+    max-height: calc(100vh - 8rem) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  
   /* Service Selector - Extra small on mobile and prevent overflow */
   .modal-body .form-select-lg,
   .modal-body select.form-select-lg {
-    font-size: 0.85rem !important;
-    padding: 0.4rem 0.6rem !important;
-    min-height: 38px !important;
+    font-size: 0.75rem !important;
+    padding: 0.35rem 0.5rem !important;
+    min-height: 36px !important;
     max-width: 100% !important;
     width: 100% !important;
     box-sizing: border-box !important;
     overflow: hidden;
     text-overflow: ellipsis;
+    line-height: 1.3;
+  }
+  
+  /* Service selector options - smaller font */
+  .modal-body .form-select-lg option {
+    font-size: 0.7rem !important;
+    padding: 0.3rem 0.4rem !important;
+  }
+  
+  /* Form labels - smaller */
+  .modal-body .form-label {
+    font-size: 0.7rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+  
+  .modal-body .form-label.fw-semibold {
+    font-size: 0.75rem !important;
+  }
+  
+  .modal-body .form-label i {
+    font-size: 0.7rem !important;
+    margin-right: 0.4rem !important;
+  }
+  
+  /* Customer search section - smaller */
+  .modal-body .customer-search-container {
+    max-height: 120px !important;
+  }
+  
+  .modal-body .input-group-text {
+    padding: 0.35rem 0.5rem !important;
+    font-size: 0.7rem !important;
+  }
+  
+  .modal-body .customer-item {
+    padding: 0.4rem 0.5rem !important;
+  }
+  
+  .modal-body .customer-name {
+    font-size: 0.75rem !important;
+  }
+  
+  .modal-body .customer-details {
+    font-size: 0.65rem !important;
   }
   
   /* Professional Date Picker */
@@ -6546,6 +6678,22 @@ async setReminder(appointment) {
     font-size: 0.65rem !important;
     padding: 0.3rem 0.4rem !important;
     min-width: 55px !important;
+  }
+  
+  /* Selected Time Preview - Mobile */
+  .selected-time-preview {
+    padding: 0.4rem !important;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+  
+  .selected-time-preview .badge {
+    font-size: 0.7rem !important;
+    padding: 0.25rem 0.5rem !important;
+  }
+  
+  .selected-time-preview small {
+    font-size: 0.65rem !important;
   }
   
   /* Prevent calendar overflow */
@@ -6743,6 +6891,7 @@ async setReminder(appointment) {
   }
   
   .modal-content {
+    transform: translate3d(0, 0, 0);
     -webkit-transform: translate3d(0, 0, 0);
   }
   
