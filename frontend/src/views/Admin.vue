@@ -376,47 +376,48 @@
                         <div class="schedule-header">
                           <div class="time-column-header">Time</div>
                           <div class="slots-column-header">
-                            <div class="half-hour-slot-header-left"></div>
-                            <div class="half-hour-slot-header-right"></div>
+                            <div class="half-hour-slot-header">Slots</div>
                           </div>
                         </div>
                         <div class="schedule-body">
                           <div 
                             v-for="(hour, hourIndex) in timeSlots" 
                             :key="hour"
-                            class="schedule-row"
+                            class="schedule-row-wrapper"
                             :class="{ 'row-pink': hourIndex % 2 === 0, 'row-green': hourIndex % 2 === 1 }"
                           >
-                            <div class="time-column">
-                              <span class="time-label">{{ hour }}</span>
-                            </div>
-                            <div class="slots-column">
-                              <div 
-                                v-for="(slot, index) in getDayViewHalfHourSlots(hour)" 
-                                :key="`${hour}-${index}`"
-                                class="half-hour-slot"
-                                :class="{ 
-                                  'has-appointment': slot.appointment,
-                                  'slot-left': index === 0,
-                                  'slot-right': index === 1
-                                }"
-                                @click="handleSlotClick(slot, dayViewDate)"
-                              >
+                            <div class="schedule-row">
+                              <div class="time-column">
+                                <span class="time-label">{{ hour }}</span>
+                              </div>
+                              <div class="slots-column">
                                 <div 
-                                  v-if="slot.appointment" 
-                                  class="appointment-block" 
-                                  :class="getAppointmentBlockClass(slot.appointment)"
-                                  @click.stop="slot.appointment.status === 'confirmed' ? openEditTimeModal(slot.appointment) : null"
+                                  v-for="(slot, index) in getDayViewHalfHourSlots(hour)" 
+                                  :key="`${hour}-${index}`"
+                                  class="half-hour-slot"
+                                  :class="{ 
+                                    'has-appointment': slot.appointment,
+                                    'slot-first': index === 0,
+                                    'slot-second': index === 1
+                                  }"
+                                  @click="handleSlotClick(slot, dayViewDate)"
                                 >
-                                  <div class="appointment-content">
-                                    <div class="appointment-customer">{{ slot.appointment.customerName }}</div>
-                                    <div class="appointment-service">{{ getServiceNames(slot.appointment) }}</div>
-                                    <div class="appointment-time" v-if="slot.showTime">{{ formatAppointmentTime(slot.appointment) }}</div>
+                                  <div 
+                                    v-if="slot.appointment" 
+                                    class="appointment-block" 
+                                    :class="getAppointmentBlockClass(slot.appointment)"
+                                    @click.stop="slot.appointment.status === 'confirmed' ? openEditTimeModal(slot.appointment) : null"
+                                  >
+                                    <div class="appointment-content">
+                                      <div class="appointment-customer">{{ slot.appointment.customerName }}</div>
+                                      <div class="appointment-service">{{ getServiceNames(slot.appointment) }}</div>
+                                      <div class="appointment-time" v-if="slot.showTime">{{ formatAppointmentTime(slot.appointment) }}</div>
+                                    </div>
                                   </div>
-                                </div>
-                                <div v-else class="empty-slot">
-                                  <div class="empty-slot-hint">
-                                    
+                                  <div v-else class="empty-slot">
+                                    <div class="empty-slot-hint">
+                                      
+                                    </div>
                                   </div>
                                 </div>
                               </div>
@@ -5634,6 +5635,14 @@ async setReminder(appointment) {
   border-right: 1px solid #dee2e6;
 }
 
+.half-hour-slot-header {
+  flex: 1;
+  padding: 8px;
+  text-align: center;
+  font-weight: 600;
+  color: #495057;
+}
+
 .half-hour-slot-header-left,
 .half-hour-slot-header-right {
   flex: 1;
@@ -5661,9 +5670,12 @@ async setReminder(appointment) {
   flex-direction: column;
 }
 
+.schedule-row-wrapper {
+  border-bottom: 1px solid #e9ecef;
+}
+
 .schedule-row {
   display: flex;
-  border-bottom: 1px solid #e9ecef;
   min-height: 80px;
 }
 
@@ -5689,6 +5701,7 @@ async setReminder(appointment) {
   background: #f8f9fa;
   font-weight: 600;
   color: #495057;
+  align-self: stretch;
 }
 
 .time-label {
@@ -5698,21 +5711,31 @@ async setReminder(appointment) {
 .slots-column {
   flex: 1;
   display: flex;
+  flex-direction: column;
 }
 
 .half-hour-slot {
-  flex: 1;
+  width: 100%;
   padding: 8px;
-  min-height: 80px;
+  min-height: 40px;
   display: flex;
   flex-direction: column;
   position: relative;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.half-hour-slot.slot-first {
+  border-top: none;
+}
+
+.half-hour-slot.slot-second {
+  border-bottom: none;
 }
 
 .half-hour-slot.slot-left {
-  border-right: 1px solid #e9ecef;
+  border-right: none;
 }
 
 .half-hour-slot.slot-right {
@@ -5864,13 +5887,18 @@ async setReminder(appointment) {
   }
   
   .half-hour-slot {
-    padding: 3px;
-    min-height: 50px;
+    padding: 6px;
+    min-height: 40px;
   }
   
+  .half-hour-slot-header,
   .half-hour-slot-header-left,
   .half-hour-slot-header-right {
     padding: 4px;
+  }
+  
+  .schedule-row {
+    min-height: 80px;
   }
   
   .appointment-block {
@@ -5895,8 +5923,12 @@ async setReminder(appointment) {
     font-size: 0.85rem;
   }
   
+  .schedule-row-wrapper {
+    border-bottom: 1px solid #e9ecef;
+  }
+  
   .schedule-row {
-    min-height: 50px;
+    min-height: 80px;
   }
 }
 
@@ -5921,13 +5953,18 @@ async setReminder(appointment) {
   }
   
   .half-hour-slot {
-    padding: 2px;
-    min-height: 42px;
+    padding: 4px;
+    min-height: 35px;
   }
   
+  .half-hour-slot-header,
   .half-hour-slot-header-left,
   .half-hour-slot-header-right {
     padding: 3px;
+  }
+  
+  .schedule-row {
+    min-height: 70px;
   }
   
   .appointment-block {
@@ -5964,8 +6001,12 @@ async setReminder(appointment) {
     display: none !important;
   }
   
+  .schedule-row-wrapper {
+    border-bottom: 1px solid #e9ecef;
+  }
+  
   .schedule-row {
-    min-height: 42px;
+    min-height: 70px;
   }
   
   /* iOS Safari optimization */
