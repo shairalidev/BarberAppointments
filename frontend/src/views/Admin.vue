@@ -1021,16 +1021,18 @@
                 </div>
                 
                 <!-- Service Selection -->
-                <div class="col-12">
+                <div class="col-12 service-selector-wrapper">
                   <label class="form-label fw-semibold">
                     <i class="fas fa-cut me-2 text-primary"></i>{{ $t('admin.service') }}
                   </label>
-                  <select v-model="bookingForm.serviceId" @change="updateBookingPrice" class="form-select booking-service-select" required>
-                    <option value="">{{ $t('admin.selectService') }}</option>
-                    <option v-for="service in activeServices" :key="service._id" :value="service._id">
-                      {{ service.name }} - {{ formatCurrency(service.price) }}
-                    </option>
-                  </select>
+                  <div class="service-select-container">
+                    <select v-model="bookingForm.serviceId" @change="updateBookingPrice" class="form-select booking-service-select" required>
+                      <option value="">{{ $t('admin.selectService') }}</option>
+                      <option v-for="service in activeServices" :key="service._id" :value="service._id">
+                        {{ service.name }} - {{ formatCurrency(service.price) }}
+                      </option>
+                    </select>
+                  </div>
                 </div>
                 <div class="col-12" v-if="availableSlots.length || bookingForm.time">
                   <label class="form-label">{{ $t('booking.availableTimes') }}</label>
@@ -6418,14 +6420,34 @@ async setReminder(appointment) {
   max-width: 100%;
 }
 
+/* Service Selector Wrapper - Prevent overflow */
+.service-selector-wrapper {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.service-select-container {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+
 /* Booking Service Selector - Base Styles */
-.booking-service-select {
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  position: relative;
+.booking-service-select,
+select.booking-service-select {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  position: relative !important;
+  display: block !important;
 }
 
 .booking-service-select option {
@@ -6436,14 +6458,14 @@ async setReminder(appointment) {
   padding: 0.3rem 0.5rem;
 }
 
-/* Prevent select dropdown from overflowing */
+/* Prevent select dropdown from overflowing - Base */
 select.booking-service-select {
-  -webkit-appearance: none;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.5rem center;
-  background-size: 0.75rem;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 0.5rem center !important;
+  background-size: 0.75rem !important;
   padding-right: 2rem !important;
 }
 
@@ -6642,15 +6664,49 @@ select.booking-service-select {
   .modal-body .col-12 {
     padding-left: 0 !important;
     padding-right: 0 !important;
-    max-width: 100%;
-    overflow: hidden;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Service Selector Wrapper - Mobile */
+  .service-selector-wrapper {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    overflow: hidden !important;
+  }
+  
+  .service-select-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  /* Service Selector Container - Prevent overflow */
+  .modal-body .col-12:has(.booking-service-select),
+  .modal-body .col-12:has(select.booking-service-select),
+  .modal-body .service-selector-wrapper {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    overflow: hidden !important;
   }
   
   /* Service Selector - Extra small on mobile and prevent overflow */
+  .booking-modal-body .booking-service-select,
+  .booking-modal-body select.booking-service-select,
   .modal-body .booking-service-select,
   .modal-body .form-select-lg,
   .modal-body select.form-select-lg,
-  .modal-body select.booking-service-select {
+  .modal-body select.booking-service-select,
+  .modal-body .col-12 select.booking-service-select,
+  .modal-body .col-12 .booking-service-select {
     font-size: 0.7rem !important;
     padding: 0.3rem 1.8rem 0.3rem 0.45rem !important;
     min-height: 34px !important;
@@ -6659,14 +6715,15 @@ select.booking-service-select {
     box-sizing: border-box !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    line-height: 1.2;
-    white-space: nowrap;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
     -webkit-appearance: none !important;
     appearance: none !important;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E") !important;
     background-repeat: no-repeat !important;
     background-position: right 0.4rem center !important;
     background-size: 0.65rem !important;
+    border-radius: 0.375rem !important;
   }
   
   /* Service selector options - smaller font */
@@ -6695,10 +6752,20 @@ select.booking-service-select {
     margin-right: 0.3rem !important;
   }
   
-  /* Ensure no element overflows */
-  .modal-body * {
-    max-width: 100%;
-    box-sizing: border-box;
+  /* Ensure form elements don't overflow */
+  .modal-body form,
+  .modal-body .row,
+  .modal-body .col-12,
+  .modal-body .col-md-6 {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  .modal-body select,
+  .modal-body input,
+  .modal-body textarea {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
   
   /* Customer search section - smaller */
