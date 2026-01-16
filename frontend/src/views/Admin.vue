@@ -940,14 +940,14 @@
     </div>
 
     <!-- Booking Modal -->
-    <div v-if="showBookingModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" @click.self="showBookingModal = false">
-      <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
+    <div v-if="showBookingModal" class="modal fade show d-block booking-modal-overlay" style="background: rgba(0,0,0,0.5);" @click.self="showBookingModal = false">
+      <div class="modal-dialog modal-lg modal-dialog-centered booking-modal-dialog">
+        <div class="modal-content booking-modal-content">
           <div class="modal-header bg-gradient-primary text-white">
             <h5 class="modal-title"><i class="fas fa-plus me-2"></i>{{ $t('admin.bookNewAppointment') }}</h5>
             <button @click="showBookingModal = false" class="btn-close btn-close-white"></button>
           </div>
-          <div class="modal-body">
+          <div class="modal-body booking-modal-body">
             <form @submit.prevent="quickBookAppointment">
               <div class="row g-3">
                 <!-- Professional Date Picker -->
@@ -1025,7 +1025,7 @@
                   <label class="form-label fw-semibold">
                     <i class="fas fa-cut me-2 text-primary"></i>{{ $t('admin.service') }}
                   </label>
-                  <select v-model="bookingForm.serviceId" @change="updateBookingPrice" class="form-select form-select-lg" required>
+                  <select v-model="bookingForm.serviceId" @change="updateBookingPrice" class="form-select booking-service-select" required>
                     <option value="">{{ $t('admin.selectService') }}</option>
                     <option v-for="service in services" :key="service._id" :value="service._id">
                       {{ service.name }} - {{ formatCurrency(service.price) }}
@@ -2184,7 +2184,11 @@ async quickBookAppointment() {
     },
     async fetchAvailableSlots() {
       if (!this.bookingForm.date || !this.bookingForm.serviceId || !this.primaryBarber) {
-        this.availableSlots = []
+        // Don't clear availableSlots or time if we're just missing serviceId
+        // This allows time to be pre-selected before service selection
+        if (!this.bookingForm.date || !this.primaryBarber) {
+          this.availableSlots = []
+        }
         return
       }
       
@@ -2205,12 +2209,35 @@ async quickBookAppointment() {
         
         this.availableSlots = response.data.availableTimes || []
         
-        // If we had a previously selected time and it's still available, keep it selected
-        if (previouslySelectedTime && this.availableSlots.includes(previouslySelectedTime)) {
-          this.bookingForm.time = previouslySelectedTime
-        } else if (previouslySelectedTime && !this.availableSlots.includes(previouslySelectedTime)) {
-          // If the previously selected time is no longer available, clear it
-          this.bookingForm.time = ''
+        // Normalize time formats for comparison (handle both "9:00" and "09:00")
+        const normalizeTime = (time) => {
+          if (!time) return ''
+          const parts = time.split(':')
+          if (parts.length === 2) {
+            return `${parts[0].padStart(2, '0')}:${parts[1].padStart(2, '0')}`
+          }
+          return time
+        }
+        
+        const normalizedSelectedTime = normalizeTime(previouslySelectedTime)
+        const normalizedAvailableSlots = this.availableSlots.map(normalizeTime)
+        
+        // If we had a previously selected time, try to match it with available slots
+        if (normalizedSelectedTime) {
+          if (normalizedAvailableSlots.includes(normalizedSelectedTime)) {
+            // Find the exact format from available slots to match API format
+            const matchingSlot = this.availableSlots.find(slot => normalizeTime(slot) === normalizedSelectedTime)
+            if (matchingSlot) {
+              this.bookingForm.time = matchingSlot
+            } else {
+              // Keep the original format if no exact match found
+              this.bookingForm.time = previouslySelectedTime
+            }
+          } else {
+            // Time is not available, but keep it selected so user can see what they chose
+            // They'll need to select a different time or service
+            this.bookingForm.time = previouslySelectedTime
+          }
         }
       } catch (error) {
         console.error('Error fetching available slots:', error)
@@ -6359,6 +6386,50 @@ async setReminder(appointment) {
   }
 }
 
+/* Booking Modal - Base Styles */
+.booking-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1050;
+  overflow: hidden;
+}
+
+.booking-modal-dialog {
+  max-width: 100%;
+  margin: 0.5rem;
+  overflow: hidden;
+}
+
+.booking-modal-content {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.booking-modal-body {
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-width: 100%;
+}
+
+/* Booking Service Selector - Base Styles */
+.booking-service-select {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.booking-service-select option {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
 /* Booking Modal Mobile Optimization */
 @media (max-width: 768px) {
   /* Booking Modal - Smaller on tablet */
@@ -6368,33 +6439,45 @@ async setReminder(appointment) {
   }
   
   /* Service Selector - Make smaller and prevent overflow */
+  .modal-body .booking-service-select,
   .modal-body .form-select-lg,
-  .modal-body select.form-select-lg {
-    font-size: 0.85rem !important;
-    padding: 0.45rem 0.65rem !important;
-    min-height: 40px !important;
+  .modal-body select.form-select-lg,
+  .modal-body select.booking-service-select {
+    font-size: 0.8rem !important;
+    padding: 0.4rem 0.6rem !important;
+    min-height: 38px !important;
     max-width: 100% !important;
     width: 100% !important;
     box-sizing: border-box !important;
     overflow: hidden;
     text-overflow: ellipsis;
-    line-height: 1.4;
+    line-height: 1.3;
+    white-space: nowrap;
   }
   
   /* Service selector options - smaller font */
+  .modal-body .booking-service-select option,
   .modal-body .form-select-lg option {
-    font-size: 0.8rem !important;
-    padding: 0.35rem 0.5rem !important;
+    font-size: 0.75rem !important;
+    padding: 0.3rem 0.4rem !important;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   
   /* Form labels - smaller */
   .modal-body .form-label {
-    font-size: 0.8rem !important;
+    font-size: 0.75rem !important;
     margin-bottom: 0.3rem !important;
   }
   
   .modal-body .form-label.fw-semibold {
-    font-size: 0.85rem !important;
+    font-size: 0.8rem !important;
+  }
+  
+  .modal-body .form-label i {
+    font-size: 0.75rem !important;
+    margin-right: 0.4rem !important;
   }
   
   /* Professional Date Picker */
@@ -6507,61 +6590,94 @@ async setReminder(appointment) {
   
   .modal-content {
     border-radius: 10px !important;
+    max-width: 100%;
+    overflow: hidden;
   }
   
   .modal-header {
-    padding: 0.5rem 0.75rem !important;
+    padding: 0.5rem 0.6rem !important;
   }
   
   .modal-header .modal-title {
-    font-size: 0.85rem !important;
+    font-size: 0.8rem !important;
   }
   
   .modal-header .modal-title i {
-    font-size: 0.8rem !important;
-    margin-right: 0.4rem !important;
+    font-size: 0.75rem !important;
+    margin-right: 0.35rem !important;
   }
   
   .modal-body {
-    padding: 0.5rem !important;
-    max-height: calc(100vh - 8rem) !important;
+    padding: 0.4rem !important;
+    max-height: calc(100vh - 7rem) !important;
     overflow-y: auto !important;
+    overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .modal-body .row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  
+  .modal-body .col-12 {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    max-width: 100%;
+    overflow: hidden;
   }
   
   /* Service Selector - Extra small on mobile and prevent overflow */
+  .modal-body .booking-service-select,
   .modal-body .form-select-lg,
-  .modal-body select.form-select-lg {
-    font-size: 0.75rem !important;
-    padding: 0.35rem 0.5rem !important;
-    min-height: 36px !important;
+  .modal-body select.form-select-lg,
+  .modal-body select.booking-service-select {
+    font-size: 0.7rem !important;
+    padding: 0.3rem 0.45rem !important;
+    min-height: 34px !important;
     max-width: 100% !important;
     width: 100% !important;
     box-sizing: border-box !important;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1.3;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1.2;
+    white-space: nowrap;
+    -webkit-appearance: none;
+    appearance: none;
   }
   
   /* Service selector options - smaller font */
+  .modal-body .booking-service-select option,
   .modal-body .form-select-lg option {
-    font-size: 0.7rem !important;
-    padding: 0.3rem 0.4rem !important;
+    font-size: 0.65rem !important;
+    padding: 0.25rem 0.35rem !important;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   
   /* Form labels - smaller */
   .modal-body .form-label {
-    font-size: 0.7rem !important;
-    margin-bottom: 0.25rem !important;
+    font-size: 0.65rem !important;
+    margin-bottom: 0.2rem !important;
   }
   
   .modal-body .form-label.fw-semibold {
-    font-size: 0.75rem !important;
+    font-size: 0.7rem !important;
   }
   
   .modal-body .form-label i {
-    font-size: 0.7rem !important;
-    margin-right: 0.4rem !important;
+    font-size: 0.65rem !important;
+    margin-right: 0.3rem !important;
+  }
+  
+  /* Ensure no element overflows */
+  .modal-body * {
+    max-width: 100%;
+    box-sizing: border-box;
   }
   
   /* Customer search section - smaller */
