@@ -5862,11 +5862,6 @@ async setReminder(appointment) {
     -webkit-tap-highlight-color: rgba(16, 185, 129, 0.1);
   }
 }
-  
-  .appointment-time {
-    font-size: 0.65rem;
-  }
-}
 
 /* Off date indicator in calendar */
 .calendar-day.off-date {
