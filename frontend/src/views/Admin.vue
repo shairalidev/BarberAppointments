@@ -416,8 +416,7 @@
                                 </div>
                                 <div v-else class="empty-slot">
                                   <div class="empty-slot-hint">
-                                    <i class="fas fa-plus-circle"></i>
-                                    <span class="d-none d-md-inline">Click to book</span>
+                                    
                                   </div>
                                 </div>
                               </div>
