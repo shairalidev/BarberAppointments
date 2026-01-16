@@ -144,23 +144,13 @@ export default {
   },
   computed: {
     heroBackgroundStyle() {
-      // Use process.env.BASE_URL or just / for public folder files
-      const imgPath = '/img1.jpeg'
       return {
-        backgroundImage: `linear-gradient(135deg, rgba(55, 55, 55, 0.7) 0%, rgba(45, 45, 45, 0.7) 50%, rgba(35, 35, 35, 0.7) 100%), url(${imgPath})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
+        background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%)'
       }
     },
     heroOverlayStyle() {
-      const imgPath = '/img1.jpeg'
       return {
-        backgroundImage: `url(${imgPath})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        opacity: '0.3'
+        background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(45, 45, 45, 0.3) 50%, rgba(0, 0, 0, 0.4) 100%)'
       }
     }
   },
@@ -229,10 +219,7 @@ export default {
 .hero-section {
   position: relative;
   min-height: 100vh;
-  background: linear-gradient(135deg, #373737 0%, #2d2d2d 50%, #232323 100%);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
   overflow: hidden;
 }
 
@@ -243,7 +230,7 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(55, 55, 55, 0.7) 0%, rgba(45, 45, 45, 0.7) 50%, rgba(35, 35, 35, 0.7) 100%);
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(45, 45, 45, 0.3) 50%, rgba(0, 0, 0, 0.4) 100%);
   z-index: 1;
 }
 

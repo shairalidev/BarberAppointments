@@ -1063,7 +1063,6 @@
                         v-model="bookingCustomerSearch"
                         type="search"
                         class="form-control"
-                        :placeholder="$t('admin.searchByNamePhoneEmail')"
                         @focus="showCustomerDropdown = true"
                       />
                       <button 
