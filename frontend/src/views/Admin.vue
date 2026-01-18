@@ -941,7 +941,7 @@
 
     <!-- Booking Modal -->
     <div v-if="showBookingModal" class="modal fade show d-block booking-modal-overlay" style="background: rgba(0,0,0,0.5);" @click.self="showBookingModal = false">
-      <div class="modal-dialog modal-lg modal-dialog-centered booking-modal-dialog">
+      <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable booking-modal-dialog">
         <div class="modal-content booking-modal-content">
           <div class="modal-header bg-gradient-primary text-white">
             <h5 class="modal-title"><i class="fas fa-plus me-2"></i>{{ $t('admin.bookNewAppointment') }}</h5>
@@ -1261,8 +1261,8 @@
     </div>
 
     <!-- Edit Appointment Modal -->
-    <div v-if="editTimeModal.show" class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" @click.self="closeEditTimeModal">
-      <div class="modal-dialog modal-dialog-centered">
+    <div v-if="editTimeModal.show" class="modal fade show d-block edit-appointment-modal" style="background: rgba(0,0,0,0.5);" @click.self="closeEditTimeModal">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
           <div class="modal-header bg-gradient-primary text-white">
             <h5 class="modal-title">
@@ -1270,45 +1270,85 @@
             </h5>
             <button @click="closeEditTimeModal" class="btn-close btn-close-white"></button>
           </div>
-          <div class="modal-body">
-            <div v-if="editTimeModal.appointment" class="mb-3">
+          <div class="modal-body edit-modal-body">
+            <div v-if="editTimeModal.appointment" class="mb-3 current-appointment-info">
               <p class="mb-1"><strong>{{ $t('admin.customer') }}:</strong> {{ editTimeModal.appointment.customerName }}</p>
               <p class="mb-1"><strong>{{ $t('admin.currentDate') }}:</strong> {{ new Date(editTimeModal.appointment.date).toLocaleDateString() }}</p>
               <p class="mb-0"><strong>{{ $t('admin.currentTime') }}:</strong> {{ editTimeModal.appointment.time }}</p>
             </div>
+
+            <!-- Week View Date Picker -->
             <div class="mb-3">
-              <label class="form-label">{{ $t('admin.selectNewDate') }}</label>
-              <input 
-                v-model="editTimeModal.newDate" 
-                type="date" 
-                class="form-control"
-                :min="todayDate"
-                @change="onEditDateChange"
-              />
+              <label class="form-label fw-semibold">
+                <i class="fas fa-calendar-alt me-2"></i>{{ $t('admin.selectNewDate') }}
+              </label>
+              <div class="week-date-picker">
+                <!-- Week Navigation -->
+                <div class="week-nav-header">
+                  <button
+                    type="button"
+                    @click="changeEditWeek(-1)"
+                    class="week-nav-btn"
+                    :disabled="isEditWeekMin"
+                  >
+                    <i class="fas fa-chevron-left"></i>
+                  </button>
+                  <div class="week-display">
+                    <span class="week-label">{{ getEditWeekLabel }}</span>
+                  </div>
+                  <button
+                    type="button"
+                    @click="changeEditWeek(1)"
+                    class="week-nav-btn"
+                  >
+                    <i class="fas fa-chevron-right"></i>
+                  </button>
+                </div>
+
+                <!-- Week Days -->
+                <div class="week-days-grid">
+                  <div
+                    v-for="day in editWeekDays"
+                    :key="day.date"
+                    @click="selectEditDate(day)"
+                    :class="['week-day-cell', {
+                      'today': day.isToday,
+                      'selected': day.date === editTimeModal.newDate,
+                      'past': day.isPast,
+                      'off-date': day.isOffDate
+                    }]"
+                  >
+                    <div class="day-name">{{ day.dayName }}</div>
+                    <div class="day-number">{{ day.dayNumber }}</div>
+                    <div v-if="day.monthLabel" class="month-label">{{ day.monthLabel }}</div>
+                  </div>
+                </div>
+              </div>
             </div>
+
             <div class="mb-3">
-              <label class="form-label">{{ $t('admin.selectNewTime') }}</label>
-              <div v-if="editTimeModal.availableTimes.length" class="time-slots-grid">
-                <button 
-                  v-for="slot in editTimeModal.availableTimes" 
+              <label class="form-label fw-semibold">{{ $t('admin.selectNewTime') }}</label>
+              <div v-if="editTimeModal.availableTimes.length" class="time-slots-grid mobile-optimized">
+                <button
+                  v-for="slot in editTimeModal.availableTimes"
                   :key="slot"
                   type="button"
                   @click="editTimeModal.newTime = slot"
-                  :class="['btn', 'btn-sm', editTimeModal.newTime === slot ? 'btn-primary' : 'btn-outline-primary']"
+                  :class="['btn', 'btn-sm', 'time-slot-btn', editTimeModal.newTime === slot ? 'btn-primary' : 'btn-outline-primary']"
                 >
                   {{ slot }}
                 </button>
               </div>
-              <div v-else class="alert alert-info">
+              <div v-else class="alert alert-info mb-0">
                 <i class="fas fa-info-circle me-2"></i>{{ $t('admin.loadingAvailableSlots') }}
               </div>
             </div>
-            <div class="mb-3">
-              <label class="form-label">{{ $t('admin.messageOptional') }}</label>
-              <textarea 
-                v-model="editTimeModal.message" 
-                class="form-control" 
-                rows="3" 
+            <div class="mb-0">
+              <label class="form-label fw-semibold">{{ $t('admin.messageOptional') }}</label>
+              <textarea
+                v-model="editTimeModal.message"
+                class="form-control"
+                rows="3"
                 :placeholder="$t('admin.addNoteAboutChange')"
               ></textarea>
               <small class="text-muted">{{ $t('admin.messageWillBeSent') }}</small>
@@ -1326,7 +1366,7 @@
 
     <!-- Date Detail Modal -->
     <div v-if="dateDetailModal.show" class="modal fade show d-block date-detail-modal" style="background: rgba(0,0,0,0.5);" @click.self="closeDateDetailModal">
-      <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width: 95%;">
+      <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable date-detail-modal-dialog" style="max-width: 95%;">
         <div class="modal-content">
           <div class="modal-header bg-gradient-primary text-white">
             <div class="d-flex align-items-center justify-content-between w-100">
@@ -1566,7 +1606,8 @@ export default {
         newDate: '',
         newTime: '',
         availableTimes: [],
-        message: ''
+        message: '',
+        weekOffset: 0
       },
       cancelModal: {
         show: false,
@@ -1575,7 +1616,7 @@ export default {
       },
       bookingCalendarMonth: new Date().getMonth(),
       bookingCalendarYear: new Date().getFullYear(),
-      calendarViewMode: 'calendar', // 'calendar' or 'day'
+      calendarViewMode: 'day', // 'calendar' or 'day' - default to day view
       dayViewDate: new Date().toISOString().split('T')[0],
       dayViewData: {
         date: null,
@@ -1876,13 +1917,83 @@ export default {
     },
     dayViewCalendarWeek() {
       if (!this.dayViewDate) return ''
-      
+
       const date = new Date(this.dayViewDate + 'T00:00:00')
       const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
       const dayNum = d.getUTCDay() || 7
       d.setUTCDate(d.getUTCDate() + 4 - dayNum)
       const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
       return Math.ceil((((d - yearStart) / 86400000) + 1) / 7)
+    },
+    // Edit modal week view computed properties
+    editWeekDays() {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+
+      // Start from today and add weekOffset weeks
+      const startDate = new Date(today)
+      startDate.setDate(today.getDate() + (this.editTimeModal.weekOffset * 7))
+
+      const days = []
+      const dayKeys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(startDate)
+        date.setDate(startDate.getDate() + i)
+        const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+        const isPast = date < today
+        const isToday = date.toDateString() === today.toDateString()
+
+        // Check if date is restricted
+        const isOffDate = this.restrictions.some(restriction => {
+          const restrictionDate = new Date(restriction.date).toISOString().split('T')[0]
+          return restrictionDate === dateStr
+        })
+
+        // Show month label on first day or when month changes
+        let monthLabel = ''
+        if (i === 0 || date.getDate() === 1) {
+          const monthKeys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+          monthLabel = this.$t(`booking.monthNames.${monthKeys[date.getMonth()]}`)
+        }
+
+        days.push({
+          date: dateStr,
+          dayName: this.$t(`booking.dayNames.${dayKeys[i]}`),
+          dayNumber: date.getDate(),
+          isToday,
+          isPast,
+          isOffDate,
+          monthLabel
+        })
+      }
+
+      return days
+    },
+    getEditWeekLabel() {
+      if (this.editTimeModal.weekOffset === 0) {
+        return this.$t('admin.thisWeek') || 'This Week'
+      } else if (this.editTimeModal.weekOffset === 1) {
+        return this.$t('admin.nextWeek') || 'Next Week'
+      } else {
+        const startDate = new Date()
+        startDate.setDate(startDate.getDate() + (this.editTimeModal.weekOffset * 7))
+        const endDate = new Date(startDate)
+        endDate.setDate(startDate.getDate() + 6)
+
+        const monthKeys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+        const startMonth = this.$t(`booking.monthNames.${monthKeys[startDate.getMonth()]}`)
+        const endMonth = this.$t(`booking.monthNames.${monthKeys[endDate.getMonth()]}`)
+
+        if (startDate.getMonth() === endDate.getMonth()) {
+          return `${startMonth} ${startDate.getDate()}-${endDate.getDate()}`
+        } else {
+          return `${startMonth} ${startDate.getDate()} - ${endMonth} ${endDate.getDate()}`
+        }
+      }
+    },
+    isEditWeekMin() {
+      return this.editTimeModal.weekOffset === 0
     },
     dayViewAppointments() {
       if (!this.dayViewDate) return []
@@ -2357,6 +2468,15 @@ async quickBookAppointment() {
       this.editTimeModal.newTime = ''
       this.editTimeModal.message = ''
       this.editTimeModal.availableTimes = []
+      this.editTimeModal.weekOffset = 0
+    },
+    changeEditWeek(offset) {
+      this.editTimeModal.weekOffset += offset
+    },
+    selectEditDate(day) {
+      if (day.isPast || day.isOffDate) return
+      this.editTimeModal.newDate = day.date
+      this.onEditDateChange()
     },
     async updateAppointmentTime() {
       if (!this.editTimeModal.appointment || !this.editTimeModal.newTime || !this.editTimeModal.newDate) {
@@ -4070,6 +4190,156 @@ async setReminder(appointment) {
 .time-slots-grid .btn {
   font-size: 0.8rem;
   padding: 6px 8px;
+}
+
+.time-slots-grid.mobile-optimized {
+  grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+  gap: 10px;
+  max-height: 250px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.time-slots-grid.mobile-optimized .btn.time-slot-btn {
+  min-height: 44px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Week Date Picker for Edit Modal */
+.week-date-picker {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+}
+
+.week-nav-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+.week-nav-btn {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.week-nav-btn:hover:not(:disabled) {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.week-nav-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.week-display {
+  flex: 1;
+  text-align: center;
+}
+
+.week-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.week-days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.week-day-cell {
+  background: var(--bg-primary);
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  min-height: 70px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.week-day-cell:hover:not(.past):not(.off-date) {
+  background: var(--primary-color-light);
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+}
+
+.week-day-cell.selected {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+.week-day-cell.today:not(.selected) {
+  border-color: var(--primary-color);
+  background: var(--primary-color-light);
+}
+
+.week-day-cell.past {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: var(--bg-tertiary);
+}
+
+.week-day-cell.off-date {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--bg-tertiary),
+    var(--bg-tertiary) 10px,
+    var(--bg-secondary) 10px,
+    var(--bg-secondary) 20px
+  );
+}
+
+.week-day-cell .day-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  opacity: 0.8;
+}
+
+.week-day-cell .day-number {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.week-day-cell .month-label {
+  font-size: 0.65rem;
+  margin-top: 4px;
+  opacity: 0.7;
+  font-weight: 500;
+}
+
+.week-day-cell.selected .day-name,
+.week-day-cell.selected .day-number,
+.week-day-cell.selected .month-label {
+  color: white;
+  opacity: 1;
 }
 
 /* Appointment Cards */
@@ -6066,29 +6336,221 @@ async setReminder(appointment) {
 }
 
 @media (max-width: 768px) {
-  .date-detail-modal .modal-header {
-    padding: 1rem;
+  .date-detail-modal-dialog {
+    margin: 0.5rem !important;
+    max-width: calc(100% - 1rem) !important;
   }
-  
-  .date-detail-modal .modal-header .d-flex {
+
+  .date-detail-modal .modal-header {
+    padding: 0.75rem !important;
     flex-direction: column;
     align-items: flex-start !important;
-    gap: 12px;
   }
-  
+
+  .date-detail-modal .modal-header > div.d-flex {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    width: 100%;
+  }
+
+  .date-detail-modal .modal-header .d-flex:last-child {
+    flex-direction: row !important;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center !important;
+  }
+
   .date-detail-modal .modal-header .col-auto {
     width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
-  
+
   .date-detail-modal .modal-title {
-    font-size: 1rem;
+    font-size: 0.95rem !important;
   }
-  
+
   .date-detail-modal .modal-title small {
-    font-size: 0.75rem;
+    font-size: 0.7rem !important;
+  }
+
+  .off-date-toggle-label {
+    padding: 6px 10px !important;
+    gap: 8px !important;
+    font-size: 0.75rem !important;
+  }
+
+  .toggle-slider {
+    width: 48px !important;
+    height: 24px !important;
+  }
+
+  .toggle-slider::before {
+    height: 16px !important;
+    width: 16px !important;
+    bottom: 2px !important;
+  }
+
+  .toggle-label-text {
+    font-size: 0.75rem !important;
+  }
+
+  .date-detail-modal .modal-body {
+    padding: 0 !important;
+    max-height: calc(100vh - 220px) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .week-navigation-row {
+    gap: 4px !important;
+    padding: 0.5rem !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .week-navigation-row .week-day-cell {
+    min-width: 45px !important;
+    padding: 8px 6px !important;
+    font-size: 0.7rem !important;
+  }
+
+  .week-day-name {
+    font-size: 0.6rem !important;
+  }
+
+  .week-day-number {
+    font-size: 1rem !important;
+  }
+
+  .calendar-week-cell {
+    min-width: 45px !important;
+    font-size: 0.65rem !important;
+  }
+
+  .schedule-header {
+    padding: 0.5rem 0.25rem !important;
+    gap: 8px !important;
+  }
+
+  .time-column-header {
+    font-size: 0.7rem !important;
+    width: 50px !important;
+  }
+
+  .half-hour-slot-header {
+    font-size: 0.65rem !important;
+    padding: 4px !important;
+  }
+
+  .schedule-row {
+    min-height: 50px !important;
+  }
+
+  .time-column {
+    width: 50px !important;
+    font-size: 0.75rem !important;
+    padding: 0 4px !important;
+  }
+
+  .time-label {
+    font-size: 0.7rem !important;
+  }
+
+  .half-hour-slot {
+    min-height: 50px !important;
+  }
+
+  .appointment-block {
+    font-size: 0.7rem !important;
+    padding: 4px 6px !important;
+  }
+
+  .appointment-customer {
+    font-size: 0.75rem !important;
+    font-weight: 600;
+  }
+
+  .appointment-service {
+    font-size: 0.65rem !important;
+  }
+
+  .appointment-time {
+    font-size: 0.6rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .date-detail-modal-dialog {
+    margin: 0.25rem !important;
+    max-width: calc(100% - 0.5rem) !important;
+  }
+
+  .date-detail-modal .modal-title {
+    font-size: 0.85rem !important;
+  }
+
+  .date-detail-modal .modal-title i {
+    font-size: 0.75rem !important;
+  }
+
+  .off-date-toggle-label {
+    padding: 4px 8px !important;
+    gap: 6px !important;
+  }
+
+  .toggle-label-text {
+    display: none !important;
+  }
+
+  .toggle-slider {
+    width: 40px !important;
+    height: 20px !important;
+  }
+
+  .toggle-slider::before {
+    height: 14px !important;
+    width: 14px !important;
+    left: 2px !important;
+  }
+
+  .week-navigation-row .week-day-cell {
+    min-width: 38px !important;
+    padding: 6px 4px !important;
+  }
+
+  .week-day-name {
+    font-size: 0.55rem !important;
+  }
+
+  .week-day-number {
+    font-size: 0.9rem !important;
+  }
+
+  .calendar-week-cell {
+    min-width: 38px !important;
+  }
+
+  .time-column {
+    width: 42px !important;
+  }
+
+  .time-label {
+    font-size: 0.65rem !important;
+  }
+
+  .appointment-customer {
+    font-size: 0.7rem !important;
+  }
+
+  .appointment-service {
+    font-size: 0.6rem !important;
+  }
+
+  .appointment-time {
+    font-size: 0.55rem !important;
   }
 }
 
@@ -7163,14 +7625,26 @@ select.booking-service-select {
   }
   
   .day-cell-pro {
-    min-height: 28px !important;
-    border-radius: 4px !important;
-    margin: 1px !important;
+    min-height: 36px !important;
+    border-radius: 6px !important;
+    margin: 0 !important;
     aspect-ratio: 1 !important;
+    -webkit-tap-highlight-color: rgba(107, 114, 128, 0.1);
   }
-  
+
   .day-number-pro {
-    font-size: 0.7rem !important;
+    font-size: 0.85rem !important;
+  }
+
+  .booking-modal-dialog {
+    margin: 0.5rem !important;
+    max-width: calc(100% - 1rem) !important;
+  }
+
+  .booking-modal-body {
+    max-height: calc(100vh - 180px) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
   }
   
   .selected-date-pro {
@@ -7208,11 +7682,88 @@ select.booking-service-select {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
-  
+
   .time-slots-grid .btn {
     font-size: 0.65rem !important;
     padding: 0.3rem 0.4rem !important;
     min-width: 55px !important;
+  }
+
+  /* Mobile Optimized Time Slots */
+  .time-slots-grid.mobile-optimized {
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)) !important;
+    gap: 8px !important;
+    max-height: 180px !important;
+  }
+
+  .time-slots-grid.mobile-optimized .btn.time-slot-btn {
+    min-height: 42px !important;
+    font-size: 0.8rem !important;
+    padding: 0.4rem 0.5rem !important;
+  }
+
+  /* Week Date Picker Mobile */
+  .week-date-picker {
+    padding: 0.75rem !important;
+    border-radius: 10px !important;
+  }
+
+  .week-nav-header {
+    margin-bottom: 0.75rem !important;
+    gap: 0.5rem !important;
+  }
+
+  .week-nav-btn {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 0.75rem !important;
+  }
+
+  .week-label {
+    font-size: 0.85rem !important;
+  }
+
+  .week-days-grid {
+    gap: 6px !important;
+  }
+
+  .week-day-cell {
+    min-height: 60px !important;
+    padding: 8px 4px !important;
+    border-radius: 8px !important;
+  }
+
+  .week-day-cell .day-name {
+    font-size: 0.65rem !important;
+    margin-bottom: 2px !important;
+  }
+
+  .week-day-cell .day-number {
+    font-size: 1.1rem !important;
+  }
+
+  .week-day-cell .month-label {
+    font-size: 0.6rem !important;
+    margin-top: 2px !important;
+  }
+
+  /* Edit Modal Body */
+  .edit-modal-body {
+    max-height: calc(100vh - 200px) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .current-appointment-info {
+    background: var(--bg-secondary);
+    padding: 0.75rem !important;
+    border-radius: 8px;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .current-appointment-info p {
+    font-size: 0.8rem !important;
+    margin-bottom: 0.4rem !important;
   }
   
   /* Selected Time Preview - Mobile */
@@ -7519,6 +8070,29 @@ select.booking-service-select {
     user-select: none;
   }
   
+  /* Week picker touch-friendly */
+  .week-day-cell {
+    -webkit-tap-highlight-color: rgba(107, 114, 128, 0.1);
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  .week-nav-btn {
+    -webkit-tap-highlight-color: rgba(107, 114, 128, 0.1);
+    -webkit-appearance: none;
+  }
+
+  /* Edit modal scrolling */
+  .edit-modal-body {
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+  }
+
+  .week-date-picker {
+    -webkit-touch-callout: none;
+  }
+
   /* Fix for iOS Safari button rendering */
   .btn {
     -webkit-appearance: none;
@@ -7532,6 +8106,236 @@ select.booking-service-select {
     -webkit-appearance: none;
     appearance: none;
     border-radius: var(--border-radius-sm);
+  }
+
+  /* All modals scrolling */
+  .modal-dialog-scrollable .modal-body {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Date detail modal schedule */
+  .schedule-body {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Professional date picker */
+  .calendar-grid-pro {
+    -webkit-tap-highlight-color: rgba(107, 114, 128, 0.1);
+  }
+
+  .day-cell-pro {
+    -webkit-tap-highlight-color: rgba(107, 114, 128, 0.1);
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .month-nav-btn {
+    -webkit-tap-highlight-color: rgba(107, 114, 128, 0.1);
+    -webkit-appearance: none;
+  }
+}
+
+/* ==============================================
+   COMPREHENSIVE MOBILE MODAL OPTIMIZATIONS
+   For all modals to work perfectly on mobile
+   ============================================== */
+@media (max-width: 768px) {
+  /* All modals general improvements */
+  .modal-dialog {
+    margin: 0.5rem;
+  }
+
+  .modal-content {
+    border-radius: 16px;
+    max-height: calc(100vh - 1rem);
+  }
+
+  .modal-dialog-scrollable .modal-body {
+    max-height: calc(100vh - 200px);
+  }
+
+  .modal-header {
+    padding: 1rem;
+    border-bottom: 2px solid var(--border-color);
+  }
+
+  .modal-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .modal-body {
+    padding: 1rem;
+  }
+
+  .modal-footer {
+    padding: 0.75rem 1rem;
+    gap: 0.5rem;
+  }
+
+  .modal-footer .btn {
+    flex: 1;
+    min-height: 44px;
+    font-size: 0.95rem;
+  }
+
+  /* Form elements in modals */
+  .modal-body .form-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .modal-body .form-control,
+  .modal-body .form-select {
+    min-height: 44px;
+    font-size: 1rem;
+    padding: 0.75rem;
+    border-radius: 8px;
+  }
+
+  .modal-body textarea.form-control {
+    min-height: 80px;
+  }
+
+  .modal-body .btn {
+    min-height: 44px;
+    padding: 0.625rem 1rem;
+    font-size: 0.95rem;
+    border-radius: 8px;
+  }
+
+  .modal-body .btn-sm {
+    min-height: 36px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  /* Response and Cancel modals */
+  .modal-body .alert {
+    padding: 1rem;
+    border-radius: 10px;
+    font-size: 0.95rem;
+  }
+
+  /* Customer and Service forms */
+  .modal-body .row {
+    margin: 0 -0.5rem;
+  }
+
+  .modal-body .row > [class*="col-"] {
+    padding: 0 0.5rem;
+  }
+
+  /* Improve touch targets for all interactive elements */
+  .modal-body input[type="checkbox"],
+  .modal-body input[type="radio"] {
+    min-width: 20px;
+    min-height: 20px;
+  }
+
+  /* Customer dropdown in booking modal */
+  .customer-dropdown {
+    max-height: 300px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .customer-item {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin: 0.25rem;
+  }
+
+  .customer-item:active {
+    background: var(--primary-color-light);
+  }
+
+  /* Service selection */
+  .service-select-container .form-select {
+    background-size: 20px;
+    padding-right: 2.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .modal-dialog {
+    margin: 0.25rem;
+  }
+
+  .modal-content {
+    border-radius: 12px;
+  }
+
+  .modal-header {
+    padding: 0.75rem;
+  }
+
+  .modal-title {
+    font-size: 1rem;
+  }
+
+  .modal-title i {
+    font-size: 0.9rem;
+  }
+
+  .modal-body {
+    padding: 0.75rem;
+  }
+
+  .modal-footer {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .modal-footer .btn {
+    font-size: 0.9rem;
+  }
+
+  .modal-body .form-label {
+    font-size: 0.85rem;
+  }
+
+  .modal-body small,
+  .modal-body .text-muted {
+    font-size: 0.75rem;
+  }
+}
+
+/* iOS Safari specific modal fixes */
+@supports (-webkit-touch-callout: none) {
+  @media (max-width: 768px) {
+    .modal-content {
+      max-height: -webkit-fill-available;
+    }
+
+    .modal-dialog-scrollable .modal-body {
+      max-height: calc(100vh - 200px);
+      max-height: -webkit-fill-available;
+    }
+
+    /* Prevent zoom on input focus */
+    .modal-body input,
+    .modal-body select,
+    .modal-body textarea {
+      font-size: 16px !important;
+    }
+
+    /* Smooth momentum scrolling */
+    .modal-body,
+    .customer-dropdown,
+    .time-slots-grid,
+    .schedule-body {
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Fix button tap delay */
+    .modal-body .btn,
+    .modal-footer .btn,
+    .day-cell-pro,
+    .week-day-cell,
+    .time-slot-btn {
+      touch-action: manipulation;
+    }
   }
 }
 
