@@ -940,18 +940,35 @@
     </div>
 
     <!-- Booking Modal -->
-    <div v-if="showBookingModal" class="modal fade show d-block booking-modal-overlay" style="background: rgba(0,0,0,0.5);" @click.self="showBookingModal = false">
+    <div v-if="showBookingModal" class="modal fade show d-block booking-modal-overlay" style="background: rgba(0,0,0,0.5);" @click.self="closeBookingModal">
       <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable booking-modal-dialog">
         <div class="modal-content booking-modal-content">
           <div class="modal-header bg-gradient-primary text-white">
             <h5 class="modal-title"><i class="fas fa-plus me-2"></i>{{ $t('admin.bookNewAppointment') }}</h5>
-            <button @click="showBookingModal = false" class="btn-close btn-close-white"></button>
+            <button @click="closeBookingModal" class="btn-close btn-close-white"></button>
           </div>
           <div class="modal-body booking-modal-body">
             <form @submit.prevent="quickBookAppointment">
               <div class="row g-3">
-                <!-- Professional Date Picker -->
-                <div class="col-12">
+
+                <!-- Show selected date/time when opened from slot click -->
+                <div v-if="bookingFromSlotClick" class="col-12">
+                  <div class="alert alert-info d-flex align-items-center gap-3">
+                    <div class="flex-grow-1">
+                      <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="fas fa-calendar-check text-primary"></i>
+                        <strong>{{ $t('admin.selectedDateTime') || 'Selected Date & Time' }}</strong>
+                      </div>
+                      <div class="d-flex gap-3">
+                        <span><i class="fas fa-calendar me-1"></i>{{ formatBookingDate }}</span>
+                        <span><i class="fas fa-clock me-1"></i>{{ bookingForm.time }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Professional Date Picker - Only show when NOT from slot click -->
+                <div v-if="!bookingFromSlotClick" class="col-12">
                   <label class="form-label fw-semibold mb-3 d-flex align-items-center">
                     <i class="fas fa-calendar-alt me-2 text-primary"></i>
                     <span>{{ $t('booking.date') }}</span>
@@ -1034,15 +1051,17 @@
                     </select>
                   </div>
                 </div>
-                <div class="col-12" v-if="availableSlots.length || bookingForm.time">
+
+                <!-- Time Slots - Only show when NOT from slot click -->
+                <div v-if="!bookingFromSlotClick && (availableSlots.length || bookingForm.time)" class="col-12">
                   <label class="form-label">{{ $t('booking.availableTimes') }}</label>
                   <div v-if="bookingForm.time && !availableSlots.length" class="selected-time-preview mb-2">
                     <span class="badge bg-success">{{ bookingForm.time }}</span>
                     <small class="text-muted ms-2">{{ $t('admin.selectService') }} {{ $t('common.to') }} {{ $t('common.continue') }}</small>
                   </div>
                   <div v-if="availableSlots.length" class="time-slots-grid">
-                    <button 
-                      v-for="slot in availableSlots" 
+                    <button
+                      v-for="slot in availableSlots"
                       :key="slot"
                       type="button"
                       @click="bookingForm.time = slot"
@@ -1130,7 +1149,7 @@
             </form>
           </div>
           <div class="modal-footer">
-            <button @click="showBookingModal = false" class="btn btn-secondary">{{ $t('common.cancel') }}</button>
+            <button @click="closeBookingModal" class="btn btn-secondary">{{ $t('common.cancel') }}</button>
             <button @click="quickBookAppointment" class="btn btn-success" :disabled="!bookingForm.time">
               <i class="fas fa-check me-2"></i>{{ $t('admin.bookAppointment') }}
             </button>
@@ -1557,6 +1576,7 @@ export default {
       availableSlots: [],
       primaryBarber: null,
       showBookingModal: false,
+      bookingFromSlotClick: false, // Track if booking modal opened from time slot click
       showCustomerModal: false,
       showDeleteCustomerModal: false,
       customerToDelete: null,
@@ -1812,12 +1832,21 @@ export default {
     formatBookingSelectedDate() {
       if (!this.bookingForm.date) return ''
       const date = new Date(this.bookingForm.date)
-      return date.toLocaleDateString('de-DE', { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
+      return date.toLocaleDateString('de-DE', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
       })
+    },
+    formatBookingDate() {
+      if (!this.bookingForm.date) return ''
+      const date = new Date(this.bookingForm.date + 'T00:00:00')
+      const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
+      const monthKeys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+      const dayName = this.$t(`booking.dayNamesFull.${dayKeys[date.getDay()]}`)
+      const monthName = this.$t(`booking.monthNames.${monthKeys[date.getMonth()]}`)
+      return `${dayName}, ${monthName} ${date.getDate()}, ${date.getFullYear()}`
     },
     formatSelectedDate() {
       if (!this.selectedCalendarDate) return ''
@@ -2329,9 +2358,14 @@ async quickBookAppointment() {
       this.bookingCalendarMonth = today.getMonth()
       this.bookingCalendarYear = today.getFullYear()
       this.todayDate = todayStr
+      this.bookingFromSlotClick = false // Reset the slot click flag
       this.availableSlots = []
       this.bookingCustomerSearch = ''
       this.showCustomerDropdown = false
+    },
+    closeBookingModal() {
+      this.showBookingModal = false
+      this.bookingFromSlotClick = false
     },
     updateBookingPrice() {
       const service = this.services.find(s => s._id === this.bookingForm.serviceId)
@@ -3034,15 +3068,18 @@ getTimeSlotsForDay(dayIndex) {
         // Set the booking form with the selected date and time
         this.bookingForm.date = date
         this.bookingForm.time = slot.time
-        
+
         // Set the booking calendar to show the selected date's month
         const selectedDate = new Date(date)
         this.bookingCalendarMonth = selectedDate.getMonth()
         this.bookingCalendarYear = selectedDate.getFullYear()
-        
+
+        // Mark that this booking is from a slot click (hide calendar/time in modal)
+        this.bookingFromSlotClick = true
+
         // Open the booking modal
         this.showBookingModal = true
-        
+
         // Fetch available slots for this date (will auto-select the time when slots load)
         this.fetchAvailableSlots()
       }
@@ -4264,7 +4301,8 @@ async setReminder(appointment) {
   gap: 8px;
 }
 
-.week-day-cell {
+/* Week picker cells for Edit Appointment Modal */
+.week-date-picker .week-day-cell {
   background: var(--bg-primary);
   border: 2px solid var(--border-color);
   border-radius: 12px;
@@ -4278,32 +4316,35 @@ async setReminder(appointment) {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  color: var(--text-primary);
 }
 
-.week-day-cell:hover:not(.past):not(.off-date) {
+.week-date-picker .week-day-cell:hover:not(.past):not(.off-date) {
   background: var(--primary-color-light);
   border-color: var(--primary-color);
   transform: translateY(-2px);
 }
 
-.week-day-cell.selected {
+.week-date-picker .week-day-cell.selected {
   background: var(--primary-color);
   border-color: var(--primary-color);
   color: white;
 }
 
-.week-day-cell.today:not(.selected) {
+.week-date-picker .week-day-cell.today:not(.selected) {
   border-color: var(--primary-color);
   background: var(--primary-color-light);
+  color: var(--text-primary);
 }
 
-.week-day-cell.past {
+.week-date-picker .week-day-cell.past {
   opacity: 0.4;
   cursor: not-allowed;
   background: var(--bg-tertiary);
+  color: var(--text-secondary);
 }
 
-.week-day-cell.off-date {
+.week-date-picker .week-day-cell.off-date {
   opacity: 0.5;
   cursor: not-allowed;
   background: repeating-linear-gradient(
@@ -4313,31 +4354,35 @@ async setReminder(appointment) {
     var(--bg-secondary) 10px,
     var(--bg-secondary) 20px
   );
+  color: var(--text-secondary);
 }
 
-.week-day-cell .day-name {
+.week-date-picker .week-day-cell .day-name {
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   margin-bottom: 4px;
   opacity: 0.8;
+  color: inherit;
 }
 
-.week-day-cell .day-number {
+.week-date-picker .week-day-cell .day-number {
   font-size: 1.25rem;
   font-weight: 700;
+  color: inherit;
 }
 
-.week-day-cell .month-label {
+.week-date-picker .week-day-cell .month-label {
   font-size: 0.65rem;
   margin-top: 4px;
   opacity: 0.7;
   font-weight: 500;
+  color: inherit;
 }
 
-.week-day-cell.selected .day-name,
-.week-day-cell.selected .day-number,
-.week-day-cell.selected .month-label {
+.week-date-picker .week-day-cell.selected .day-name,
+.week-date-picker .week-day-cell.selected .day-number,
+.week-date-picker .week-day-cell.selected .month-label {
   color: white;
   opacity: 1;
 }
