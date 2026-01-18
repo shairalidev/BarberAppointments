@@ -2386,11 +2386,12 @@ async quickBookAppointment() {
       
       // Preserve the currently selected time
       const previouslySelectedTime = this.bookingForm.time
-      
+      const isFromSlotClick = this.bookingFromSlotClick
+
       try {
         const service = this.services.find(s => s._id === this.bookingForm.serviceId)
         if (!service) return
-        
+
         const response = await axios.get(`${process.env.VUE_APP_API_URL}/appointments/availability`, {
           params: {
             barberId: this.primaryBarber._id,
@@ -2398,9 +2399,9 @@ async quickBookAppointment() {
             duration: service.duration
           }
         })
-        
+
         this.availableSlots = response.data.availableTimes || []
-        
+
         // Normalize time formats for comparison (handle both "9:00" and "09:00")
         const normalizeTime = (time) => {
           if (!time) return ''
@@ -2410,10 +2411,10 @@ async quickBookAppointment() {
           }
           return time
         }
-        
+
         const normalizedSelectedTime = normalizeTime(previouslySelectedTime)
         const normalizedAvailableSlots = this.availableSlots.map(normalizeTime)
-        
+
         // If we had a previously selected time, try to match it with available slots
         if (normalizedSelectedTime) {
           if (normalizedAvailableSlots.includes(normalizedSelectedTime)) {
@@ -2426,14 +2427,28 @@ async quickBookAppointment() {
               this.bookingForm.time = previouslySelectedTime
             }
           } else {
-            // Time is not available, but keep it selected so user can see what they chose
-            // They'll need to select a different time or service
-            this.bookingForm.time = previouslySelectedTime
+            // If booking from slot click, ALWAYS keep the selected time
+            // The slot was empty when clicked, so it should be available
+            if (isFromSlotClick) {
+              this.bookingForm.time = previouslySelectedTime
+              // Also add it to available slots to prevent validation errors
+              if (!this.availableSlots.includes(previouslySelectedTime)) {
+                this.availableSlots.push(previouslySelectedTime)
+                this.availableSlots.sort()
+              }
+            } else {
+              // For regular booking, keep it selected so user can see what they chose
+              this.bookingForm.time = previouslySelectedTime
+            }
           }
         }
       } catch (error) {
         console.error('Error fetching available slots:', error)
         this.availableSlots = []
+        // If booking from slot click, preserve the time even if fetch fails
+        if (isFromSlotClick && previouslySelectedTime) {
+          this.bookingForm.time = previouslySelectedTime
+        }
       }
     },
     watchBookingFormChanges() {
@@ -3080,8 +3095,9 @@ getTimeSlotsForDay(dayIndex) {
         // Open the booking modal
         this.showBookingModal = true
 
-        // Fetch available slots for this date (will auto-select the time when slots load)
-        this.fetchAvailableSlots()
+        // Don't fetch available slots when opening from slot click
+        // The time is already selected and guaranteed to be available
+        // Slots will be fetched when service is selected if needed
       }
     },
     getServiceNames(appointment) {
