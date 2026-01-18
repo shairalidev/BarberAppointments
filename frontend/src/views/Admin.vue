@@ -961,7 +961,7 @@
                       </div>
                       <div class="d-flex gap-3">
                         <span><i class="fas fa-calendar me-1"></i>{{ formatBookingDate }}</span>
-                        <span><i class="fas fa-clock me-1"></i>{{ bookingForm.time }}</span>
+                        <span><i class="fas fa-clock me-1"></i>{{ formatBookingTime }}</span>
                       </div>
                     </div>
                   </div>
@@ -1847,6 +1847,11 @@ export default {
       const dayName = this.$t(`booking.dayNamesFull.${dayKeys[date.getDay()]}`)
       const monthName = this.$t(`booking.monthNames.${monthKeys[date.getMonth()]}`)
       return `${dayName}, ${monthName} ${date.getDate()}, ${date.getFullYear()}`
+    },
+    formatBookingTime() {
+      if (!this.bookingForm.time) return ''
+      // Remove seconds if present (e.g., "14:00:30" -> "14:00")
+      return this.bookingForm.time.split(':').slice(0, 2).join(':')
     },
     formatSelectedDate() {
       if (!this.selectedCalendarDate) return ''
@@ -3080,9 +3085,12 @@ getTimeSlotsForDay(dayIndex) {
     handleSlotClick(slot, date) {
       // Only handle clicks on empty slots
       if (!slot.appointment && date && slot.time) {
+        // Normalize time format - remove seconds if present (e.g., "14:00:30" -> "14:00")
+        const normalizedTime = slot.time.split(':').slice(0, 2).join(':')
+
         // Set the booking form with the selected date and time
         this.bookingForm.date = date
-        this.bookingForm.time = slot.time
+        this.bookingForm.time = normalizedTime
 
         // Set the booking calendar to show the selected date's month
         const selectedDate = new Date(date)
