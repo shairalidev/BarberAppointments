@@ -3,9 +3,9 @@
     <!-- Admin Header -->
     <div class="admin-header shadow-sm">
       <div class="admin-header-inner">
-        <!-- Brand Text -->
+        <!-- Brand Logo -->
         <div class="admin-brand-section">
-          <span class="admin-brand-text">ATES BARBEROS</span>
+          <img src="/logo.png" alt="Ates Barberos" class="admin-brand-logo">
         </div>
 
         <!-- Action Toolbar -->
@@ -3705,6 +3705,8 @@ async setReminder(appointment) {
   position: sticky;
   top: 0;
   z-index: 100;
+  width: 100%;
+  overflow: hidden;
 }
 
 .admin-header-inner {
@@ -3712,13 +3714,27 @@ async setReminder(appointment) {
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 1rem;
-  gap: 0.75rem;
+  gap: 0.5rem;
+  width: 100%;
   max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .admin-brand-section {
   flex: 0 1 auto;
   min-width: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.admin-brand-logo {
+  height: 36px;
+  width: auto;
+  max-width: 150px;
+  object-fit: contain;
+  display: block;
 }
 
 .admin-brand-text {
@@ -3729,13 +3745,16 @@ async setReminder(appointment) {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: block;
+  max-width: 100%;
 }
 
 .admin-toolbar {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   flex-shrink: 0;
+  flex-wrap: nowrap;
 }
 
 .toolbar-btn {
@@ -3786,6 +3805,37 @@ async setReminder(appointment) {
 .admin-avatar-btn:hover {
   opacity: 0.9;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+  position: relative;
+  overflow: hidden;
+}
+
+.theme-toggle-icon {
+  position: absolute;
+  transition: all 0.3s ease;
+}
+
+.theme-toggle .sun-icon {
+  opacity: 1;
+  transform: rotate(0deg);
+}
+
+.theme-toggle .moon-icon {
+  opacity: 0;
+  transform: rotate(-90deg);
+}
+
+.theme-toggle.active .sun-icon {
+  opacity: 0;
+  transform: rotate(90deg);
+}
+
+.theme-toggle.active .moon-icon {
+  opacity: 1;
+  transform: rotate(0deg);
 }
 
 .bg-gradient-primary {
@@ -4164,30 +4214,45 @@ async setReminder(appointment) {
    ============================================ */
 @media (max-width: 768px) {
   .admin-header-inner {
-    padding: 0.5rem;
-    gap: 0.5rem;
+    padding: 0.5rem 0.625rem;
+    gap: 0.375rem;
+    overflow: hidden;
+  }
+
+  .admin-brand-section {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .admin-brand-logo {
+    height: 30px;
+    max-width: 120px;
   }
 
   .admin-brand-text {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     letter-spacing: 0.25px;
+    max-width: 100%;
   }
 
   .admin-toolbar {
-    gap: 0.375rem;
+    gap: 0.25rem;
+    flex-shrink: 0;
   }
 
   .toolbar-btn {
-    width: 30px;
-    height: 30px;
-    font-size: 0.75rem;
+    width: 32px;
+    height: 32px;
+    font-size: 0.7rem;
     border-radius: 6px;
+    padding: 0;
   }
 
   .admin-avatar-btn {
-    width: 30px;
-    height: 30px;
-    font-size: 0.75rem;
+    width: 32px;
+    height: 32px;
+    font-size: 0.7rem;
   }
 
   .admin-nav-container {
@@ -4218,22 +4283,44 @@ async setReminder(appointment) {
    ============================================ */
 @media (max-width: 380px) {
   .admin-header-inner {
-    padding: 0.375rem;
+    padding: 0.375rem 0.5rem;
+    gap: 0.25rem;
+  }
+
+  .admin-brand-section {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+  .admin-brand-logo {
+    height: 26px;
+    max-width: 100px;
   }
 
   .admin-brand-text {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
+    letter-spacing: 0;
+  }
+
+  .admin-toolbar {
+    gap: 0.15rem;
   }
 
   .toolbar-btn {
-    width: 28px;
-    height: 28px;
-    font-size: 0.7rem;
+    width: 26px;
+    height: 26px;
+    font-size: 0.6rem;
+    border-radius: 5px;
+  }
+
+  .toolbar-btn-outline {
+    border-width: 1px;
   }
 
   .admin-avatar-btn {
     width: 28px;
     height: 28px;
+    font-size: 0.65rem;
   }
 
   .admin-nav-item {
