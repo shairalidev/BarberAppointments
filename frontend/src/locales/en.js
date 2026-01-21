@@ -5,8 +5,8 @@ export default {
     admin: 'Admin'
   },
   home: {
-    title: 'Your Style, Our Expertise',
-    subtitle: 'Experience luxury grooming with master barbers. Book online and step into excellence.',
+    title: 'This is Barberos.',
+    subtitle: 'Book appointment. Sit back. Look good.',
     bookNow: 'Book Now',
     callUs: 'Call Us',
     services: 'Our Services',

@@ -1,7 +1,7 @@
 import { ref, watch, onMounted } from 'vue'
 import { useStorage } from '@vueuse/core'
 
-const isDark = useStorage('theme-dark', false)
+const isDark = useStorage('theme-dark', true)
 
 export function useTheme() {
   const toggleTheme = () => {

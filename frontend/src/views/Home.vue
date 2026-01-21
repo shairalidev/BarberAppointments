@@ -6,6 +6,7 @@
       <div class="container position-relative">
         <div class="row align-items-center justify-content-center min-vh-90">
           <div class="col-lg-8 col-md-10 text-white hero-content text-center">
+            <img src="/logo.png" alt="Barberos Logo" class="hero-logo mb-3" />
             <h1 class="fw-bold mb-2 hero-title">{{ $t('home.title') }}</h1>
             <p class="mb-3 hero-subtitle">{{ $t('home.subtitle') }}</p>
             <router-link class="btn btn-light px-4 py-2 shadow-lg" to="/appointments">
@@ -286,6 +287,13 @@ export default {
   }
 }
 
+.hero-logo {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.3));
+}
+
 .hero-title {
   font-size: clamp(1.5rem, 5vw, 2.5rem);
   line-height: 1.2;
@@ -432,7 +440,12 @@ export default {
     min-height: 100vh;
     padding: 1rem 0;
   }
-  
+
+  .hero-logo {
+    width: 100px;
+    height: 100px;
+  }
+
   .hero-title {
     font-size: 2.5rem;
   }

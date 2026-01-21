@@ -1,131 +1,94 @@
 <template>
   <div class="admin-panel min-vh-100">
     <!-- Admin Header -->
-    <div class="admin-header shadow-sm py-2 py-md-3 mb-4">
-      <div class="container-fluid">
-        <div class="d-flex align-items-center justify-content-between w-100">
-          <!-- Brand Text -->
-          <div class="admin-brand-section">
-            <span class="admin-brand-text">ATES BARBEROS</span>
-          </div>
-          
-          <!-- Action Toolbar -->
-          <div class="d-flex align-items-center gap-2 gap-md-3 action-toolbar">
-            <!-- Desktop Actions -->
-            <div class="d-none d-md-flex align-items-center gap-2">
-              <button
-                @click="toggleLanguage"
-                class="btn btn-outline-primary btn-sm px-3"
-                :title="currentLocale === 'en' ? 'Switch to German' : 'Switch to English'"
-              >
-                {{ currentLocale === 'en' ? 'DE' : 'EN' }}
-              </button>
-              <button
-                @click="toggleTheme"
-                :class="['theme-toggle', { active: isDark }]"
-                :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
-              >
-                <i class="fas fa-sun theme-toggle-icon sun-icon"></i>
-                <i class="fas fa-moon theme-toggle-icon moon-icon"></i>
-              </button>
-            </div>
-            
-            <!-- Mobile Actions Dropdown -->
-            <div class="dropdown d-md-none">
-              <button class="btn btn-link text-decoration-none p-0 d-flex align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <div class="d-flex align-items-center gap-2">
-                  <button
-                    @click.stop="toggleLanguage"
-                    class="btn btn-outline-primary btn-sm px-2 mobile-action-btn"
-                    :title="currentLocale === 'en' ? 'Switch to German' : 'Switch to English'"
-                  >
-                    {{ currentLocale === 'en' ? 'DE' : 'EN' }}
-                  </button>
-                  <button
-                    @click.stop="toggleTheme"
-                    :class="['theme-toggle', 'mobile-action-btn', { active: isDark }]"
-                    :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
-                  >
-                    <i class="fas fa-sun theme-toggle-icon sun-icon"></i>
-                    <i class="fas fa-moon theme-toggle-icon moon-icon"></i>
-                  </button>
-                </div>
-              </button>
-            </div>
-            
-            <!-- Admin Account Dropdown -->
-            <div class="dropdown">
-              <button class="btn btn-link text-decoration-none p-0 d-flex align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <div class="admin-avatar">
-                  <i class="fas fa-user-shield"></i>
-                </div>
-              </button>
-              <ul class="dropdown-menu dropdown-menu-end shadow-lg">
-                <li><h6 class="dropdown-header">{{ $t('admin.adminAccount') }}</h6></li>
-                <li><hr class="dropdown-divider"></li>
-                <li>
-                  <button @click="logout" class="dropdown-item text-danger d-flex align-items-center">
-                    <i class="fas fa-sign-out-alt me-2"></i>{{ $t('admin.logout') }}
-                  </button>
-                </li>
-              </ul>
-            </div>
+    <div class="admin-header shadow-sm">
+      <div class="admin-header-inner">
+        <!-- Brand Text -->
+        <div class="admin-brand-section">
+          <span class="admin-brand-text">ATES BARBEROS</span>
+        </div>
+
+        <!-- Action Toolbar -->
+        <div class="admin-toolbar">
+          <button
+            @click="toggleLanguage"
+            class="toolbar-btn toolbar-btn-outline"
+            :title="currentLocale === 'en' ? 'Switch to German' : 'Switch to English'"
+          >
+            {{ currentLocale === 'en' ? 'DE' : 'EN' }}
+          </button>
+          <button
+            @click="toggleTheme"
+            :class="['toolbar-btn', 'theme-toggle', { active: isDark }]"
+            :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+          >
+            <i class="fas fa-sun theme-toggle-icon sun-icon"></i>
+            <i class="fas fa-moon theme-toggle-icon moon-icon"></i>
+          </button>
+
+          <!-- Admin Account Dropdown -->
+          <div class="dropdown">
+            <button class="toolbar-btn admin-avatar-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-user-shield"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-lg">
+              <li><h6 class="dropdown-header">{{ $t('admin.adminAccount') }}</h6></li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <button @click="logout" class="dropdown-item text-danger d-flex align-items-center">
+                  <i class="fas fa-sign-out-alt me-2"></i>{{ $t('admin.logout') }}
+                </button>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Navigation Tabs -->
-    <div class="mb-4">
-      <div class="nav-tabs-wrapper">
-        <ul class="nav nav-tabs border-0 mobile-nav flex-nowrap overflow-auto" role="tablist">
-          <li class="nav-item">
-            <button 
-              @click="activeTab = 'calendar'" 
-              :class="['nav-link', 'fw-medium', activeTab === 'calendar' ? 'active' : '']"
-            >
-              <i class="fas fa-calendar-alt nav-icon"></i>
-              <span class="nav-text">{{ $t('admin.calendar') }}</span>
-            </button>
-          </li>
-          <li class="nav-item">
-            <button 
-              @click="activeTab = 'customers'" 
-              :class="['nav-link', 'fw-medium', activeTab === 'customers' ? 'active' : '']"
-            >
-              <i class="fas fa-users nav-icon"></i>
-              <span class="nav-text">{{ $t('admin.customers') }}</span>
-            </button>
-          </li>
-          <li class="nav-item">
-            <button 
-              @click="activeTab = 'services'" 
-              :class="['nav-link', 'fw-medium', activeTab === 'services' ? 'active' : '']"
-            >
-              <i class="fas fa-cut nav-icon"></i>
-              <span class="nav-text">{{ $t('admin.services') }}</span>
-            </button>
-          </li>
-          <li class="nav-item">
-            <button 
-              @click="activeTab = 'timeslots'" 
-              :class="['nav-link', 'fw-medium', activeTab === 'timeslots' ? 'active' : '']"
-            >
-              <i class="fas fa-clock nav-icon"></i>
-              <span class="nav-text">{{ $t('admin.slots') }}</span>
-            </button>
-          </li>
-          <li class="nav-item">
-            <button 
-              @click="activeTab = 'profile'" 
-              :class="['nav-link', 'fw-medium', activeTab === 'profile' ? 'active' : '']"
-            >
-              <i class="fas fa-user-cog nav-icon"></i>
-              <span class="nav-text">{{ $t('admin.profile') }}</span>
-            </button>
-          </li>
-        </ul>
-      </div>
+    <div class="admin-nav-container">
+      <nav class="admin-nav" role="tablist">
+        <button
+          @click="activeTab = 'calendar'"
+          :class="['admin-nav-item', { active: activeTab === 'calendar' }]"
+          role="tab"
+        >
+          <i class="fas fa-calendar-alt"></i>
+          <span>{{ $t('admin.calendar') }}</span>
+        </button>
+        <button
+          @click="activeTab = 'customers'"
+          :class="['admin-nav-item', { active: activeTab === 'customers' }]"
+          role="tab"
+        >
+          <i class="fas fa-users"></i>
+          <span>{{ $t('admin.customers') }}</span>
+        </button>
+        <button
+          @click="activeTab = 'services'"
+          :class="['admin-nav-item', { active: activeTab === 'services' }]"
+          role="tab"
+        >
+          <i class="fas fa-cut"></i>
+          <span>{{ $t('admin.services') }}</span>
+        </button>
+        <button
+          @click="activeTab = 'timeslots'"
+          :class="['admin-nav-item', { active: activeTab === 'timeslots' }]"
+          role="tab"
+        >
+          <i class="fas fa-clock"></i>
+          <span>{{ $t('admin.slots') }}</span>
+        </button>
+        <button
+          @click="activeTab = 'profile'"
+          :class="['admin-nav-item', { active: activeTab === 'profile' }]"
+          role="tab"
+        >
+          <i class="fas fa-user-cog"></i>
+          <span>{{ $t('admin.profile') }}</span>
+        </button>
+      </nav>
     </div>
 
     <div class="container-fluid admin-content">
@@ -973,12 +936,66 @@
                     <i class="fas fa-calendar-alt me-2 text-primary"></i>
                     <span>{{ $t('booking.date') }}</span>
                   </label>
-                  <div class="professional-date-picker">
+
+                  <!-- Mobile Week View - Compact horizontal strip -->
+                  <div class="mobile-week-picker d-md-none">
+                    <!-- Week Navigation Header -->
+                    <div class="week-picker-header">
+                      <button
+                        type="button"
+                        @click="changeBookingWeek(-1)"
+                        class="week-nav-btn"
+                        :disabled="isBookingWeekMin()"
+                        :class="{ 'disabled': isBookingWeekMin() }"
+                      >
+                        <i class="fas fa-chevron-left"></i>
+                      </button>
+                      <div class="week-range-display">
+                        <span class="week-range-text">{{ bookingWeekRange }}</span>
+                      </div>
+                      <button
+                        type="button"
+                        @click="changeBookingWeek(1)"
+                        class="week-nav-btn"
+                      >
+                        <i class="fas fa-chevron-right"></i>
+                      </button>
+                    </div>
+
+                    <!-- Horizontal Week Strip -->
+                    <div class="week-strip-container">
+                      <div class="week-strip">
+                        <div
+                          v-for="day in bookingWeekDays"
+                          :key="day.date"
+                          @click="selectBookingDate(day.date)"
+                          :class="['week-day-cell', {
+                            'today': day.isToday,
+                            'selected': day.date === bookingForm.date,
+                            'past': day.isPast,
+                            'off-date': day.isOffDate
+                          }]"
+                        >
+                          <span class="week-day-name">{{ day.dayName }}</span>
+                          <span class="week-day-number">{{ day.dayNumber }}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Selected Date Display (compact) -->
+                    <div v-if="bookingForm.date" class="week-selected-date">
+                      <i class="fas fa-check-circle text-success me-2"></i>
+                      <span>{{ formatBookingSelectedDate }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Desktop Full Calendar -->
+                  <div class="professional-date-picker d-none d-md-block">
                     <!-- Month Navigation -->
                     <div class="date-picker-header-pro">
-                      <button 
+                      <button
                         type="button"
-                        @click="changeBookingMonth(-1)" 
+                        @click="changeBookingMonth(-1)"
                         class="month-nav-btn"
                         :disabled="isBookingMonthMin"
                         :class="{ 'disabled': isBookingMonthMin }"
@@ -989,15 +1006,15 @@
                         <div class="month-name">{{ getBookingMonthYear }}</div>
                         <div class="year-badge">{{ bookingCalendarYear }}</div>
                       </div>
-                      <button 
+                      <button
                         type="button"
-                        @click="changeBookingMonth(1)" 
+                        @click="changeBookingMonth(1)"
                         class="month-nav-btn"
                       >
                         <i class="fas fa-chevron-right"></i>
                       </button>
                     </div>
-                    
+
                     <!-- Calendar Grid -->
                     <div class="calendar-container-pro">
                       <div class="weekdays-row">
@@ -1006,8 +1023,8 @@
                         </div>
                       </div>
                       <div class="calendar-grid-pro">
-                        <div 
-                          v-for="day in bookingCalendarDays" 
+                        <div
+                          v-for="day in bookingCalendarDays"
                           :key="day.date"
                           @click="selectBookingDate(day.date)"
                           :class="['day-cell-pro', {
@@ -1023,7 +1040,7 @@
                         </div>
                       </div>
                     </div>
-                    
+
                     <!-- Selected Date Display -->
                     <div v-if="bookingForm.date" class="selected-date-pro">
                       <div class="selected-date-icon">
@@ -1829,6 +1846,64 @@ export default {
       
       return days
     },
+    // Week view for mobile - shows current week containing selected date or today
+    bookingWeekDays() {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+
+      // Use selected date or today as reference
+      const referenceDate = this.bookingForm.date
+        ? new Date(this.bookingForm.date + 'T00:00:00')
+        : new Date()
+
+      // Find Monday of the current week
+      const dayOfWeek = referenceDate.getDay()
+      const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek
+      const monday = new Date(referenceDate)
+      monday.setDate(referenceDate.getDate() + mondayOffset)
+
+      // Helper function to format date string
+      const formatDateString = (date) => {
+        const year = date.getFullYear()
+        const month = String(date.getMonth() + 1).padStart(2, '0')
+        const day = String(date.getDate()).padStart(2, '0')
+        return `${year}-${month}-${day}`
+      }
+
+      // Helper to check if date is off date
+      const isOffDate = (dateStr) => {
+        return this.restrictions.some(restriction => {
+          const restrictionDate = new Date(restriction.date).toISOString().split('T')[0]
+          return restrictionDate === dateStr
+        })
+      }
+
+      const days = []
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(monday)
+        date.setDate(monday.getDate() + i)
+        const dateStr = formatDateString(date)
+        days.push({
+          date: dateStr,
+          dayNumber: date.getDate(),
+          dayName: this.$t(`booking.dayNames.${['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'][i]}`),
+          isCurrentMonth: date.getMonth() === referenceDate.getMonth(),
+          isToday: this.isSameDay(date, today),
+          isPast: date < today,
+          isOffDate: isOffDate(dateStr),
+          monthName: this.$t(`booking.monthNames.${['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'][date.getMonth()]}`)
+        })
+      }
+
+      return days
+    },
+    // Get the week range display text
+    bookingWeekRange() {
+      if (this.bookingWeekDays.length === 0) return ''
+      const firstDay = this.bookingWeekDays[0]
+      const lastDay = this.bookingWeekDays[6]
+      return `${firstDay.dayNumber} ${firstDay.monthName} - ${lastDay.dayNumber} ${lastDay.monthName}`
+    },
     formatBookingSelectedDate() {
       if (!this.bookingForm.date) return ''
       const date = new Date(this.bookingForm.date)
@@ -2602,6 +2677,69 @@ async quickBookAppointment() {
         this.bookingCalendarMonth = 0
         this.bookingCalendarYear++
       }
+    },
+    changeBookingWeek(direction) {
+      // Navigate week by changing the reference date
+      const referenceDate = this.bookingForm.date
+        ? new Date(this.bookingForm.date + 'T00:00:00')
+        : new Date()
+
+      const newDate = new Date(referenceDate)
+      newDate.setDate(referenceDate.getDate() + (direction * 7))
+
+      // Don't allow going to past weeks
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const monday = new Date(newDate)
+      const dayOfWeek = monday.getDay()
+      const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek
+      monday.setDate(newDate.getDate() + mondayOffset)
+
+      // Check if the week's Sunday is before today (entire week is past)
+      const sunday = new Date(monday)
+      sunday.setDate(monday.getDate() + 6)
+
+      if (direction < 0 && sunday < today) {
+        return // Don't go back to a week entirely in the past
+      }
+
+      // Format the new date
+      const formatDateString = (date) => {
+        const year = date.getFullYear()
+        const month = String(date.getMonth() + 1).padStart(2, '0')
+        const day = String(date.getDate()).padStart(2, '0')
+        return `${year}-${month}-${day}`
+      }
+
+      // Update the form date to trigger week recalculation
+      // Use the first non-past day of the week
+      for (let i = 0; i < 7; i++) {
+        const checkDate = new Date(monday)
+        checkDate.setDate(monday.getDate() + i)
+        if (checkDate >= today) {
+          this.bookingForm.date = formatDateString(checkDate)
+          this.fetchAvailableSlots()
+          break
+        }
+      }
+
+      // Also update the full calendar month/year to stay in sync
+      this.bookingCalendarMonth = newDate.getMonth()
+      this.bookingCalendarYear = newDate.getFullYear()
+    },
+    isBookingWeekMin() {
+      // Check if current week contains today
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+
+      if (this.bookingWeekDays.length === 0) return true
+
+      const firstDayStr = this.bookingWeekDays[0].date
+      const lastDayStr = this.bookingWeekDays[6].date
+      const firstDay = new Date(firstDayStr + 'T00:00:00')
+      const lastDay = new Date(lastDayStr + 'T00:00:00')
+
+      return today >= firstDay && today <= lastDay
     },
     selectBookingDate(date) {
       const selectedDate = new Date(date)
@@ -3558,44 +3696,96 @@ async setReminder(appointment) {
   }
 }
 
+/* ============================================
+   ADMIN HEADER - Clean, Non-overlapping Design
+   ============================================ */
 .admin-header {
+  background-color: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
-  background-color: var(--bg-secondary) !important;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.admin-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  gap: 0.75rem;
+  max-width: 100%;
 }
 
 .admin-brand-section {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
+  flex: 0 1 auto;
+  min-width: 0;
 }
 
 .admin-brand-text {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   color: var(--text-primary);
   white-space: nowrap;
-  transition: color 0.3s ease;
-  text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.action-toolbar {
+.admin-toolbar {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   flex-shrink: 0;
 }
 
-.admin-avatar {
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  border-radius: 12px;
+.toolbar-btn {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.toolbar-btn:hover {
+  background: var(--bg-primary);
+}
+
+.toolbar-btn:active {
+  transform: scale(0.95);
+}
+
+.toolbar-btn-outline {
+  background: transparent;
+  border: 1.5px solid var(--primary);
+  color: var(--primary);
+}
+
+.toolbar-btn-outline:hover {
+  background: var(--primary);
   color: white;
-  font-size: 1.2rem;
+}
+
+.admin-avatar-btn {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  font-size: 0.9rem;
+}
+
+.admin-avatar-btn:hover {
+  opacity: 0.9;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
 }
 
 .bg-gradient-primary {
@@ -3747,216 +3937,126 @@ async setReminder(appointment) {
   background-color: rgba(239, 68, 68, 0.1);
 }
 
-/* Navigation Tabs */
-.nav-tabs-wrapper {
+/* ============================================
+   ADMIN NAVIGATION - Full Width Mobile Design
+   ============================================ */
+.admin-nav-container {
+  padding: 0 0.5rem 0.75rem;
+}
+
+.admin-nav {
+  display: flex;
   background: var(--bg-secondary);
   border-radius: 12px;
-  box-shadow: var(--shadow-md);
-  padding: 0.5rem;
-  overflow-x: auto;
-}
-
-.nav-tabs .nav-link {
-  border: none;
-  border-radius: 10px;
-  color: var(--text-secondary);
-  transition: all 0.2s ease;
-  padding: 0.875rem 1.25rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  text-align: left;
-  min-height: 48px;
-}
-
-.nav-tabs .nav-icon {
-  font-size: 1.1rem;
-  width: 18px;
-  text-align: center;
-  flex-shrink: 0;
-}
-
-.nav-tabs .nav-text {
-  font-size: 0.95rem;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.nav-tabs .nav-link:hover {
-  background-color: rgba(107, 114, 128, 0.1);
-  color: var(--primary);
-}
-
-.nav-tabs .nav-link.active {
-  background: var(--primary) !important;
-  color: white !important;
-  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
-  transform: translateY(-2px);
-}
-
-.nav-tabs .nav-link.active .nav-text,
-.nav-tabs .nav-link.active .nav-icon {
-  color: white !important;
-}
-
-/* Mobile Navigation */
-.mobile-nav {
-  display: flex;
-  align-items: stretch;
-  justify-content: flex-start;
+  padding: 0.375rem;
+  box-shadow: var(--shadow-sm);
   gap: 0.25rem;
-  white-space: nowrap;
+  /* iOS Safari scroll fix */
+  -webkit-overflow-scrolling: touch;
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 
-.mobile-nav::-webkit-scrollbar {
+.admin-nav::-webkit-scrollbar {
   display: none;
 }
 
-.nav-badge {
-  margin-left: auto;
-  background: #dc2626;
-  color: white;
-  border-radius: 50%;
-  min-width: 18px;
-  height: 18px;
-  font-size: 0.7rem;
-  display: inline-flex;
+.admin-nav-item {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
+  gap: 0.25rem;
+  padding: 0.625rem 0.5rem;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
+.admin-nav-item i {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.admin-nav-item span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.admin-nav-item:hover {
+  background: rgba(107, 114, 128, 0.1);
+  color: var(--primary);
+}
+
+.admin-nav-item:active {
+  transform: scale(0.97);
+}
+
+.admin-nav-item.active {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 2px 8px rgba(107, 114, 128, 0.25);
+}
+
+.admin-nav-item.active:hover {
+  background: var(--primary);
+  color: white;
+}
+
+/* ============================================
+   RESPONSIVE - Tablet (max-width: 991px)
+   ============================================ */
 @media (max-width: 991px) {
-  /* Admin Header - Tablet/Mobile */
-  .admin-header {
-    padding: 0.5rem 0 !important;
-    margin-bottom: 0.5rem !important;
-  }
-
-  .admin-header.py-3 {
-    padding-top: 0.5rem !important;
-    padding-bottom: 0.5rem !important;
-  }
-
-  .admin-header.mb-4 {
-    margin-bottom: 0.5rem !important;
-  }
-
-  .admin-header .container-fluid {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-  }
-
-  .admin-brand-section {
-    flex: 1;
-    min-width: 0;
+  .admin-header-inner {
+    padding: 0.5rem 0.75rem;
   }
 
   .admin-brand-text {
-    font-size: 1rem !important;
-    letter-spacing: 0.5px;
+    font-size: 1rem;
   }
 
-  .admin-avatar {
-    width: 32px !important;
-    height: 32px !important;
-    font-size: 0.8rem !important;
-    border-radius: 6px;
+  .toolbar-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 0.8rem;
   }
 
-  .action-toolbar {
-    gap: 0.35rem !important;
+  .admin-avatar-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 0.8rem;
   }
 
-  .action-toolbar .btn-sm {
-    padding: 0.25rem 0.4rem !important;
-    font-size: 0.7rem !important;
+  .admin-nav-container {
+    padding: 0 0.375rem 0.5rem;
   }
 
-  .action-toolbar .theme-toggle {
-    width: 30px !important;
-    height: 30px !important;
-    padding: 0.2rem !important;
-    font-size: 0.7rem !important;
+  .admin-nav {
+    padding: 0.25rem;
+    border-radius: 10px;
   }
 
-  .action-toolbar .dropdown .btn-sm {
-    font-size: 0.6rem !important;
-    padding: 0.15rem 0.3rem !important;
+  .admin-nav-item {
+    padding: 0.5rem 0.25rem;
+    font-size: 0.65rem;
+    min-height: 52px;
   }
 
-  .admin-header .container-fluid {
-    padding-left: 0.375rem;
-    padding-right: 0.375rem;
-  }
-
-  .admin-brand-section {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .admin-brand-text {
-    font-size: 0.85rem !important;
-    letter-spacing: 0.3px;
-  }
-
-  .action-toolbar {
-    gap: 0.25rem !important;
-  }
-
-  /* Navigation Tabs - Tablet */
-  .nav-tabs-wrapper {
-    padding: 0.25rem !important;
-    margin: 0 0.25rem 0.5rem 0.25rem !important;
-    border-radius: 8px !important;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .mobile-nav {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    gap: 0.2rem !important;
-  }
-
-  .mobile-nav .nav-item {
-    flex: 0 0 auto !important;
-    min-width: 65px;
-  }
-
-  .mobile-nav .nav-link {
-    padding: 0.5rem 0.4rem !important;
-    text-align: center;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    min-height: 52px !important;
-    gap: 0.25rem !important;
-    border-radius: 6px;
-  }
-
-  .mobile-nav .nav-icon {
-    font-size: 0.95rem !important;
-    margin-bottom: 0;
-  }
-
-  .mobile-nav .nav-text {
-    font-size: 0.7rem !important;
-    line-height: 1.1;
-    font-weight: 500;
-  }
-
-  .nav-badge {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    min-width: 14px;
-    height: 14px;
-    font-size: 0.6rem;
+  .admin-nav-item i {
+    font-size: 1rem;
   }
 }
 
@@ -4059,67 +4159,137 @@ async setReminder(appointment) {
   margin-bottom: 0;
 }
 
+/* ============================================
+   RESPONSIVE - Mobile (max-width: 768px)
+   ============================================ */
 @media (max-width: 768px) {
-  /* Mobile Navigation - Horizontal Scroll */
-  .nav-tabs-wrapper {
-    padding: 0.25rem !important;
-    margin: 0 0.25rem 0.5rem 0.25rem !important;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    border-radius: 8px !important;
-    box-shadow: var(--shadow-sm) !important;
+  .admin-header-inner {
+    padding: 0.5rem;
+    gap: 0.5rem;
   }
 
-  .nav-tabs-wrapper::-webkit-scrollbar {
-    height: 0;
-    display: none;
+  .admin-brand-text {
+    font-size: 0.9rem;
+    letter-spacing: 0.25px;
   }
 
-  .mobile-nav {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    justify-content: flex-start !important;
-    gap: 0.15rem !important;
-    overflow-x: auto;
-    padding-bottom: 2px;
-  }
-  
-  .mobile-nav .nav-item {
-    flex: 0 0 auto !important;
-    min-width: 58px;
-    max-width: 70px;
-  }
-  
-  .mobile-nav .nav-link {
-    padding: 0.4rem 0.35rem !important;
-    text-align: center;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    min-height: 48px !important;
-    gap: 0.2rem !important;
-    border-radius: 6px !important;
-    white-space: nowrap;
-  }
-  
-  .mobile-nav .nav-text {
-    font-size: 0.6rem !important;
-    font-weight: 500;
-    line-height: 1.1;
-  }
-  
-  .mobile-nav .nav-icon {
-    font-size: 0.9rem !important;
-    margin-bottom: 0;
+  .admin-toolbar {
+    gap: 0.375rem;
   }
 
-  .nav-badge {
-    top: 2px;
-    right: 2px;
-    min-width: 12px;
-    height: 12px;
+  .toolbar-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 0.75rem;
+    border-radius: 6px;
+  }
+
+  .admin-avatar-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 0.75rem;
+  }
+
+  .admin-nav-container {
+    padding: 0 0.25rem 0.5rem;
+  }
+
+  .admin-nav {
+    padding: 0.2rem;
+    border-radius: 8px;
+    gap: 0.125rem;
+  }
+
+  .admin-nav-item {
+    padding: 0.4rem 0.2rem;
+    font-size: 0.6rem;
+    gap: 0.2rem;
+    min-height: 48px;
+    border-radius: 6px;
+  }
+
+  .admin-nav-item i {
+    font-size: 0.95rem;
+  }
+}
+
+/* ============================================
+   RESPONSIVE - Small Mobile (max-width: 380px)
+   ============================================ */
+@media (max-width: 380px) {
+  .admin-header-inner {
+    padding: 0.375rem;
+  }
+
+  .admin-brand-text {
+    font-size: 0.8rem;
+  }
+
+  .toolbar-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 0.7rem;
+  }
+
+  .admin-avatar-btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .admin-nav-item {
+    padding: 0.35rem 0.15rem;
     font-size: 0.55rem;
+    min-height: 44px;
+  }
+
+  .admin-nav-item i {
+    font-size: 0.9rem;
+  }
+}
+
+/* ============================================
+   DESKTOP Enhancements (min-width: 992px)
+   ============================================ */
+@media (min-width: 992px) {
+  .admin-header-inner {
+    padding: 0.875rem 1.5rem;
+  }
+
+  .admin-brand-text {
+    font-size: 1.35rem;
+  }
+
+  .toolbar-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 0.9rem;
+  }
+
+  .admin-avatar-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .admin-nav-container {
+    padding: 0 1rem 1rem;
+  }
+
+  .admin-nav {
+    padding: 0.5rem;
+    border-radius: 14px;
+    gap: 0.375rem;
+  }
+
+  .admin-nav-item {
+    flex-direction: row;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.9rem;
+    gap: 0.625rem;
+    min-height: auto;
+  }
+
+  .admin-nav-item i {
+    font-size: 1.1rem;
   }
 }
 
@@ -4128,14 +4298,6 @@ async setReminder(appointment) {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: #6b7280;
-}
-
-.btn-link:hover .admin-avatar {
-  transform: scale(1.05);
-}
-
-.admin-avatar {
-  transition: transform 0.2s ease;
 }
 
 /* Calendar Styles */
@@ -5738,6 +5900,281 @@ async setReminder(appointment) {
 
 .dark-theme .selected-date-label {
   color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* ==========================================
+   Mobile Week Picker Styles
+   Optimized for mobile devices and iOS Safari
+   ========================================== */
+.mobile-week-picker {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+  /* iOS Safari optimizations */
+  -webkit-overflow-scrolling: touch;
+  transform: translateZ(0);
+}
+
+.week-picker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #4a4a4a 0%, #3a3a3a 100%);
+  color: white;
+}
+
+.week-nav-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  /* Prevent iOS zoom on tap */
+  touch-action: manipulation;
+}
+
+.week-nav-btn:active:not(.disabled) {
+  background: rgba(255, 255, 255, 0.35);
+  transform: scale(0.95);
+}
+
+.week-nav-btn.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.week-range-display {
+  text-align: center;
+  flex: 1;
+}
+
+.week-range-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.week-strip-container {
+  padding: 8px;
+  background: #f8fafc;
+  /* iOS Safari smooth scrolling */
+  -webkit-overflow-scrolling: touch;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.week-strip {
+  display: flex;
+  gap: 6px;
+  justify-content: space-between;
+  min-width: 100%;
+}
+
+.week-day-cell {
+  flex: 1;
+  min-width: 44px;
+  max-width: 52px;
+  padding: 8px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+  border: 2px solid transparent;
+  /* iOS tap optimizations */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  /* Prevent text selection on tap */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.week-day-cell:active:not(.past):not(.off-date) {
+  transform: scale(0.95);
+}
+
+.week-day-name {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 4px;
+}
+
+.week-day-number {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary, #1a1a1a);
+}
+
+.week-day-cell.today:not(.selected) {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border-color: #6b7280;
+}
+
+.week-day-cell.today:not(.selected) .week-day-number {
+  color: #1e40af;
+}
+
+.week-day-cell.selected {
+  background: linear-gradient(135deg, #4a4a4a 0%, #3a3a3a 100%);
+  border-color: #505050;
+  box-shadow: 0 4px 12px rgba(60, 60, 60, 0.3);
+  transform: scale(1.05);
+}
+
+.week-day-cell.selected .week-day-name,
+.week-day-cell.selected .week-day-number {
+  color: white;
+}
+
+.week-day-cell.past {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: #f1f5f9;
+}
+
+.week-day-cell.off-date {
+  opacity: 0.3;
+  cursor: not-allowed;
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.week-selected-date {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-top: 1px solid #e2e8f0;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary, #1a1a1a);
+}
+
+/* Dark theme for mobile week picker */
+.dark-theme .mobile-week-picker {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+.dark-theme .week-picker-header {
+  background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%);
+}
+
+.dark-theme .week-strip-container {
+  background: var(--bg-primary);
+}
+
+.dark-theme .week-day-cell {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+.dark-theme .week-day-name {
+  color: var(--text-secondary);
+}
+
+.dark-theme .week-day-number {
+  color: #ffffff;
+}
+
+.dark-theme .week-day-cell.today:not(.selected) {
+  background: rgba(150, 150, 150, 0.25);
+  border-color: #808080;
+}
+
+.dark-theme .week-day-cell.today:not(.selected) .week-day-number {
+  color: #ffffff;
+}
+
+.dark-theme .week-day-cell.past {
+  background: var(--bg-primary);
+  opacity: 0.35;
+}
+
+.dark-theme .week-day-cell.off-date {
+  background: rgba(255, 100, 100, 0.1);
+  border-color: rgba(255, 100, 100, 0.3);
+}
+
+.dark-theme .week-selected-date {
+  background: rgba(150, 150, 150, 0.1);
+  border-top-color: var(--border-color);
+  color: #ffffff;
+}
+
+/* Extra small screens - even more compact */
+@media (max-width: 360px) {
+  .week-day-cell {
+    min-width: 38px;
+    padding: 6px 2px;
+  }
+
+  .week-day-name {
+    font-size: 0.6rem;
+  }
+
+  .week-day-number {
+    font-size: 0.9rem;
+  }
+
+  .week-picker-header {
+    padding: 10px 12px;
+  }
+
+  .week-nav-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .week-range-text {
+    font-size: 0.8rem;
+  }
+
+  .week-selected-date {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
+}
+
+/* iOS Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+  .mobile-week-picker {
+    /* Fix for iOS Safari rendering issues */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  .week-day-cell {
+    /* Prevent iOS double-tap zoom */
+    touch-action: manipulation;
+  }
+
+  .week-strip-container {
+    /* Momentum scrolling for iOS */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .week-nav-btn {
+    /* Larger tap targets for iOS */
+    min-width: 44px;
+    min-height: 44px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -8405,6 +8842,642 @@ select.booking-service-select {
     .time-slot-btn {
       touch-action: manipulation;
     }
+
+    /* Booking modal specific iOS Safari fixes */
+    .booking-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 100%;
+      height: -webkit-fill-available;
+    }
+
+    .booking-modal-dialog {
+      max-height: calc(100% - 1rem);
+      max-height: calc(-webkit-fill-available - 1rem);
+      margin: 0.5rem;
+    }
+
+    .booking-modal-content {
+      max-height: calc(100vh - 1rem);
+      max-height: calc(-webkit-fill-available - 1rem);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .booking-modal-body {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      max-height: calc(100vh - 150px);
+      max-height: calc(-webkit-fill-available - 150px);
+    }
+
+    /* Week picker iOS fixes */
+    .mobile-week-picker {
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
+    }
+
+    .week-strip-container {
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+    }
+
+    .week-day-cell {
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+    }
+
+    .week-nav-btn {
+      -webkit-tap-highlight-color: transparent;
+      min-width: 44px;
+      min-height: 44px;
+    }
+  }
+}
+
+/* ==========================================
+   COMPREHENSIVE MOBILE OPTIMIZATION
+   ========================================== */
+
+/* Extra Small Screens (320px - 380px) */
+@media (max-width: 380px) {
+  /* Container and Content */
+  .admin-content {
+    padding: 0.25rem !important;
+  }
+
+  .container-fluid {
+    padding-left: 0.375rem !important;
+    padding-right: 0.375rem !important;
+  }
+
+  /* Cards */
+  .card {
+    border-radius: 10px !important;
+  }
+
+  .card-header {
+    padding: 0.5rem 0.75rem !important;
+  }
+
+  .card-header h5 {
+    font-size: 0.9rem !important;
+  }
+
+  .card-header small {
+    font-size: 0.7rem !important;
+  }
+
+  .card-body {
+    padding: 0.5rem !important;
+  }
+
+  /* Buttons - Ensure minimum touch targets */
+  .btn {
+    min-height: 40px;
+    padding: 0.4rem 0.6rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  .btn-sm {
+    min-height: 36px;
+    padding: 0.3rem 0.5rem !important;
+    font-size: 0.7rem !important;
+  }
+
+  .btn i {
+    font-size: 0.75rem !important;
+  }
+
+  /* Form Controls */
+  .form-control,
+  .form-select {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 16px !important; /* Prevents iOS zoom */
+    border-radius: 8px !important;
+  }
+
+  .form-label {
+    font-size: 0.75rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  /* Input Groups */
+  .input-group {
+    flex-wrap: nowrap !important;
+  }
+
+  .input-group-text {
+    padding: 0.4rem 0.6rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* Tables */
+  .table {
+    font-size: 0.7rem !important;
+  }
+
+  .table th,
+  .table td {
+    padding: 0.4rem 0.3rem !important;
+  }
+
+  /* Badges */
+  .badge {
+    padding: 0.2rem 0.4rem !important;
+    font-size: 0.6rem !important;
+  }
+
+  /* Alerts */
+  .alert {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.75rem !important;
+    border-radius: 8px !important;
+  }
+
+  /* Service Cards */
+  .service-card {
+    margin-bottom: 0.5rem !important;
+  }
+
+  .service-card .card-body {
+    padding: 0.75rem !important;
+  }
+
+  .service-card h6 {
+    font-size: 0.85rem !important;
+  }
+
+  .service-actions .btn {
+    font-size: 0.65rem !important;
+    padding: 0.3rem 0.4rem !important;
+  }
+
+  /* Timeslots */
+  .day-schedule-card {
+    border-radius: 10px !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .day-header {
+    padding: 0.6rem 0.75rem !important;
+  }
+
+  .day-name {
+    font-size: 0.9rem !important;
+  }
+
+  .slot-count {
+    font-size: 0.65rem !important;
+  }
+
+  .status-active,
+  .status-inactive {
+    padding: 0.15rem 0.5rem !important;
+    font-size: 0.6rem !important;
+  }
+
+  .add-slot-section {
+    padding: 0.6rem !important;
+  }
+
+  .time-input {
+    padding: 0.4rem !important;
+    font-size: 0.85rem !important;
+  }
+
+  .time-label {
+    font-size: 0.65rem !important;
+  }
+
+  .add-slot-btn {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  .slot-item {
+    padding: 0.5rem 0.6rem !important;
+  }
+
+  .time-range {
+    font-size: 0.8rem !important;
+  }
+
+  .delete-slot-btn {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 0.65rem !important;
+  }
+
+  /* Appointments */
+  .appointments-card .card-header {
+    padding: 0.5rem 0.75rem !important;
+  }
+
+  .appointments-card .card-header h6 {
+    font-size: 0.8rem !important;
+  }
+
+  .appointment-card {
+    padding: 0.6rem !important;
+    margin: 0.25rem !important;
+    border-radius: 10px !important;
+  }
+
+  .appointment-time-mobile {
+    font-size: 0.8rem !important;
+  }
+
+  .appointment-details h6 {
+    font-size: 0.8rem !important;
+  }
+
+  .appointment-details p {
+    font-size: 0.7rem !important;
+  }
+
+  .appointment-meta {
+    font-size: 0.7rem !important;
+  }
+
+  .appointment-actions .btn {
+    font-size: 0.65rem !important;
+    padding: 0.3rem 0.4rem !important;
+  }
+
+  /* Customer Tab */
+  .customers-tab .input-group {
+    margin-bottom: 0.5rem;
+  }
+
+  /* Profile Tab */
+  .profile-tab .card-header {
+    padding: 0.6rem 0.75rem !important;
+  }
+
+  .profile-tab .card-header h5 {
+    font-size: 0.9rem !important;
+  }
+
+  .profile-tab .form-control {
+    font-size: 16px !important;
+  }
+
+  /* Modals */
+  .modal-dialog {
+    margin: 0.25rem !important;
+    max-width: calc(100% - 0.5rem) !important;
+  }
+
+  .modal-header {
+    padding: 0.6rem 0.75rem !important;
+  }
+
+  .modal-title {
+    font-size: 0.9rem !important;
+  }
+
+  .modal-body {
+    padding: 0.75rem !important;
+  }
+
+  .modal-footer {
+    padding: 0.5rem 0.75rem !important;
+    gap: 0.5rem !important;
+  }
+
+  .modal-footer .btn {
+    flex: 1;
+  }
+
+  /* Booking Modal Specific */
+  .booking-modal-body .form-label {
+    font-size: 0.75rem !important;
+  }
+
+  .booking-modal-body .customer-search-container {
+    margin-bottom: 0.5rem;
+  }
+
+  .booking-modal-body .customer-dropdown {
+    max-height: 200px !important;
+  }
+
+  .booking-modal-body .customer-item {
+    padding: 0.5rem !important;
+  }
+
+  .booking-modal-body .customer-name {
+    font-size: 0.8rem !important;
+  }
+
+  .booking-modal-body .customer-details {
+    font-size: 0.65rem !important;
+  }
+
+  /* Time Slots Grid */
+  .time-slots-grid {
+    grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)) !important;
+    gap: 0.25rem !important;
+    max-height: 100px !important;
+  }
+
+  .time-slots-grid .btn {
+    font-size: 0.6rem !important;
+    padding: 0.25rem 0.3rem !important;
+    min-width: 50px !important;
+  }
+
+  /* Week Picker */
+  .mobile-week-picker {
+    border-radius: 10px !important;
+  }
+
+  .week-picker-header {
+    padding: 8px 12px !important;
+  }
+
+  .week-range-text {
+    font-size: 0.75rem !important;
+  }
+
+  .week-nav-btn {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .week-day-cell {
+    min-width: 36px !important;
+    padding: 6px 2px !important;
+  }
+
+  .week-day-name {
+    font-size: 0.55rem !important;
+  }
+
+  .week-day-number {
+    font-size: 0.85rem !important;
+  }
+
+  .week-selected-date {
+    padding: 8px 10px !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* Date Detail Modal */
+  .date-detail-modal .modal-header {
+    padding: 0.5rem 0.75rem !important;
+  }
+
+  .date-detail-modal .modal-title {
+    font-size: 0.85rem !important;
+  }
+
+  .week-navigation-row .week-day-cell {
+    min-width: 38px !important;
+    padding: 6px 4px !important;
+  }
+
+  .calendar-week-cell {
+    min-width: 32px !important;
+    padding: 4px !important;
+  }
+
+  .schedule-header {
+    font-size: 0.65rem !important;
+  }
+
+  .time-column {
+    width: 42px !important;
+    padding: 4px 2px !important;
+  }
+
+  .time-label {
+    font-size: 0.7rem !important;
+  }
+
+  .half-hour-slot {
+    min-height: 35px !important;
+    padding: 4px !important;
+  }
+
+  .appointment-customer {
+    font-size: 0.6rem !important;
+  }
+
+  .appointment-service {
+    font-size: 0.55rem !important;
+  }
+
+  /* Off Date Toggle */
+  .off-date-toggle-label-mobile {
+    font-size: 0.7rem !important;
+    padding: 0.3rem 0.5rem !important;
+  }
+
+  .toggle-slider-mobile {
+    width: 36px !important;
+    height: 20px !important;
+  }
+
+  /* Empty States */
+  .empty-state i {
+    font-size: 1.5rem !important;
+  }
+
+  .empty-state p {
+    font-size: 0.75rem !important;
+  }
+
+  /* Dropdowns */
+  .dropdown-menu {
+    min-width: 160px !important;
+    font-size: 0.8rem !important;
+  }
+
+  .dropdown-item {
+    padding: 0.5rem 0.75rem !important;
+  }
+}
+
+/* Small Mobile (380px - 576px) */
+@media (min-width: 381px) and (max-width: 576px) {
+  .admin-content {
+    padding: 0.5rem !important;
+  }
+
+  .card-header {
+    padding: 0.75rem !important;
+  }
+
+  .card-body {
+    padding: 0.75rem !important;
+  }
+
+  /* Buttons */
+  .btn {
+    min-height: 42px;
+  }
+
+  .btn-sm {
+    min-height: 38px;
+  }
+
+  /* Form Controls */
+  .form-control,
+  .form-select {
+    font-size: 16px !important; /* Prevents iOS zoom */
+  }
+
+  /* Service Cards */
+  .service-card .card-body {
+    padding: 0.875rem !important;
+  }
+
+  .service-actions .btn {
+    font-size: 0.7rem !important;
+    padding: 0.35rem 0.5rem !important;
+  }
+
+  /* Appointments */
+  .appointment-card {
+    padding: 0.75rem !important;
+  }
+
+  .appointment-actions .btn {
+    font-size: 0.7rem !important;
+    padding: 0.35rem 0.5rem !important;
+  }
+
+  /* Modals */
+  .modal-dialog {
+    margin: 0.5rem !important;
+  }
+
+  .modal-body {
+    padding: 1rem !important;
+  }
+
+  /* Time Slots Grid */
+  .time-slots-grid {
+    grid-template-columns: repeat(auto-fill, minmax(55px, 1fr)) !important;
+    max-height: 120px !important;
+  }
+
+  .time-slots-grid .btn {
+    font-size: 0.65rem !important;
+    padding: 0.3rem 0.4rem !important;
+  }
+
+  /* Week Picker */
+  .week-day-cell {
+    min-width: 40px !important;
+    padding: 7px 3px !important;
+  }
+
+  .week-day-name {
+    font-size: 0.6rem !important;
+  }
+
+  .week-day-number {
+    font-size: 0.9rem !important;
+  }
+}
+
+/* Touch Optimization for all mobile */
+@media (max-width: 768px) {
+  /* Ensure all interactive elements have proper touch targets */
+  button,
+  .btn,
+  a,
+  input[type="checkbox"],
+  input[type="radio"],
+  .form-check-input {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Ensure proper touch feedback */
+  .btn:active,
+  button:active {
+    transform: scale(0.97);
+  }
+
+  /* Prevent text selection on interactive elements */
+  .btn,
+  .admin-nav-item,
+  .week-day-cell,
+  .day-cell-pro,
+  .calendar-day {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Smooth scrolling containers */
+  .modal-body,
+  .appointments-list,
+  .customer-dropdown,
+  .time-slots-grid,
+  .week-strip-container,
+  .admin-nav {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Hide scrollbars on mobile but keep functionality */
+  .admin-nav::-webkit-scrollbar,
+  .week-strip::-webkit-scrollbar,
+  .time-slots-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .admin-nav,
+  .week-strip,
+  .time-slots-grid {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  /* Fix sticky header overlap issues */
+  .admin-header {
+    z-index: 1000;
+  }
+
+  /* Ensure modals appear above everything */
+  .modal {
+    z-index: 1050 !important;
+  }
+
+  .modal-backdrop {
+    z-index: 1040 !important;
+  }
+}
+
+/* Landscape mode optimization for mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+  .modal-body {
+    max-height: calc(100vh - 100px) !important;
+  }
+
+  .booking-modal-body {
+    max-height: calc(100vh - 120px) !important;
+  }
+
+  .mobile-week-picker {
+    max-height: 150px;
+    overflow-y: auto;
+  }
+
+  .week-strip-container {
+    padding: 4px !important;
+  }
+
+  .week-day-cell {
+    padding: 4px 2px !important;
   }
 }
 
