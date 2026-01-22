@@ -317,13 +317,10 @@
                         </div>
                       </div>
                       <div v-else class="date-time-schedule">
-                        <!-- Week Navigation Row -->
-                        <div class="week-navigation-container">
-                          <button class="week-nav-arrow week-nav-prev" @click="navigateWeek('prev', 'dayView')">
-                            <i class="fas fa-chevron-left"></i>
-                          </button>
+                        <!-- Week Navigation Row - Swipeable -->
+                        <div class="week-navigation-container no-arrows">
                           <div
-                            class="week-navigation-row"
+                            class="week-navigation-row swipeable"
                             ref="dayViewWeekSlider"
                             @mousedown="startDrag($event, 'dayView')"
                             @mousemove="onDrag($event, 'dayView')"
@@ -334,7 +331,7 @@
                             @touchend="endDrag('dayView')"
                           >
                             <div
-                              v-for="day in dayViewWeekDays"
+                              v-for="day in extendedDayViewWeekDays"
                               :key="day.date"
                               @click="navigateToDayViewDate(day.date)"
                               class="week-day-cell"
@@ -347,9 +344,6 @@
                               <div class="week-day-number">{{ day.dayNumber }}</div>
                             </div>
                           </div>
-                          <button class="week-nav-arrow week-nav-next" @click="navigateWeek('next', 'dayView')">
-                            <i class="fas fa-chevron-right"></i>
-                          </button>
                           <div class="calendar-week-cell">
                             <div class="calendar-week-label">KW</div>
                             <div class="calendar-week-number">{{ dayViewCalendarWeek }}</div>
@@ -1478,13 +1472,10 @@
               </div>
             </div>
             <div v-else class="date-time-schedule">
-              <!-- Week Navigation Row -->
-              <div class="week-navigation-container">
-                <button class="week-nav-arrow week-nav-prev" @click="navigateWeek('prev', 'modal')">
-                  <i class="fas fa-chevron-left"></i>
-                </button>
+              <!-- Week Navigation Row - Swipeable -->
+              <div class="week-navigation-container no-arrows">
                 <div
-                  class="week-navigation-row"
+                  class="week-navigation-row swipeable"
                   ref="modalWeekSlider"
                   @mousedown="startDrag($event, 'modal')"
                   @mousemove="onDrag($event, 'modal')"
@@ -1495,7 +1486,7 @@
                   @touchend="endDrag('modal')"
                 >
                   <div
-                    v-for="day in weekDays"
+                    v-for="day in extendedWeekDays"
                     :key="day.date"
                     @click="navigateToDate(day.date)"
                     class="week-day-cell"
@@ -1508,9 +1499,6 @@
                     <div class="week-day-number">{{ day.dayNumber }}</div>
                   </div>
                 </div>
-                <button class="week-nav-arrow week-nav-next" @click="navigateWeek('next', 'modal')">
-                  <i class="fas fa-chevron-right"></i>
-                </button>
                 <div class="calendar-week-cell">
                   <div class="calendar-week-label">KW</div>
                   <div class="calendar-week-number">{{ calendarWeek }}</div>
@@ -2072,6 +2060,77 @@ export default {
       d.setUTCDate(d.getUTCDate() + 4 - dayNum)
       const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
       return Math.ceil((((d - yearStart) / 86400000) + 1) / 7)
+    },
+    // Extended week days for scrollable slider (3 weeks: prev, current, next)
+    extendedWeekDays() {
+      if (!this.dateDetailModal.dateString) return []
+
+      const selectedDate = new Date(this.dateDetailModal.dateString + 'T00:00:00')
+      const dayOfWeek = selectedDate.getDay()
+      const monday = new Date(selectedDate)
+      const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek
+      monday.setDate(selectedDate.getDate() + diff)
+
+      // Start from 2 weeks before
+      const startMonday = new Date(monday)
+      startMonday.setDate(monday.getDate() - 14)
+
+      const days = []
+      const dayKeys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+
+      // Generate 5 weeks of days (35 days) for smooth scrolling
+      for (let i = 0; i < 35; i++) {
+        const date = new Date(startMonday)
+        date.setDate(startMonday.getDate() + i)
+        const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+        const today = new Date()
+        const isToday = date.toDateString() === today.toDateString()
+        const dayIndex = i % 7
+
+        days.push({
+          date: dateStr,
+          dayName: this.$t(`booking.dayNames.${dayKeys[dayIndex]}`).toUpperCase() + '.',
+          dayNumber: date.getDate(),
+          isToday: isToday
+        })
+      }
+
+      return days
+    },
+    extendedDayViewWeekDays() {
+      if (!this.dayViewDate) return []
+
+      const selectedDate = new Date(this.dayViewDate + 'T00:00:00')
+      const dayOfWeek = selectedDate.getDay()
+      const monday = new Date(selectedDate)
+      const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek
+      monday.setDate(selectedDate.getDate() + diff)
+
+      // Start from 2 weeks before
+      const startMonday = new Date(monday)
+      startMonday.setDate(monday.getDate() - 14)
+
+      const days = []
+      const dayKeys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+
+      // Generate 5 weeks of days (35 days) for smooth scrolling
+      for (let i = 0; i < 35; i++) {
+        const date = new Date(startMonday)
+        date.setDate(startMonday.getDate() + i)
+        const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+        const today = new Date()
+        const isToday = date.toDateString() === today.toDateString()
+        const dayIndex = i % 7
+
+        days.push({
+          date: dateStr,
+          dayName: this.$t(`booking.dayNames.${dayKeys[dayIndex]}`).toUpperCase() + '.',
+          dayNumber: date.getDate(),
+          isToday: isToday
+        })
+      }
+
+      return days
     },
     // Edit modal week view computed properties
     editWeekDays() {
@@ -2970,6 +3029,10 @@ getTimeSlotsForDay(dayIndex) {
         this.showToast('Error loading date details', 'error')
       } finally {
         this.dateDetailModal.loading = false
+        // Scroll to active day after modal content loads
+        this.$nextTick(() => {
+          this.scrollToActiveDay('modal')
+        })
       }
     },
     closeDateDetailModal() {
@@ -3129,6 +3192,10 @@ getTimeSlotsForDay(dayIndex) {
         this.showToast('Error loading day view data', 'error')
       } finally {
         this.dayViewData.loading = false
+        // Scroll to active day after data loads
+        this.$nextTick(() => {
+          this.scrollToActiveDay('dayView')
+        })
       }
     },
     navigateDayView(direction) {
@@ -3197,15 +3264,21 @@ getTimeSlotsForDay(dayIndex) {
         slider.classList.remove('dragging')
       }
 
-      // Check for swipe to navigate week
-      if (this.dragState.isDragging && slider) {
-        const diff = this.dragState.scrollLeft - slider.scrollLeft
-        if (Math.abs(diff) > 80) {
-          this.navigateWeek(diff > 0 ? 'next' : 'prev', context)
-        }
-      }
-
       this.dragState = null
+    },
+    scrollToActiveDay(context) {
+      this.$nextTick(() => {
+        const slider = context === 'dayView' ? this.$refs.dayViewWeekSlider : this.$refs.modalWeekSlider
+        if (!slider) return
+
+        const activeCell = slider.querySelector('.week-day-cell.active')
+        if (activeCell) {
+          const sliderRect = slider.getBoundingClientRect()
+          const cellRect = activeCell.getBoundingClientRect()
+          const scrollOffset = cellRect.left - sliderRect.left - (sliderRect.width / 2) + (cellRect.width / 2)
+          slider.scrollBy({ left: scrollOffset, behavior: 'smooth' })
+        }
+      })
     },
     async toggleDayViewOffDate(event) {
       const isRestricted = event.target.checked
@@ -6617,6 +6690,16 @@ async setReminder(appointment) {
   gap: 6px;
 }
 
+/* No arrows variant - full width swipeable */
+.week-navigation-container.no-arrows {
+  padding: 8px;
+  gap: 8px;
+}
+
+.week-navigation-container.no-arrows .week-navigation-row {
+  flex: 1;
+}
+
 .week-nav-arrow {
   display: flex;
   align-items: center;
@@ -6662,6 +6745,11 @@ async setReminder(appointment) {
   padding: 2px;
 }
 
+.week-navigation-row.swipeable {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
 .week-navigation-row::-webkit-scrollbar {
   display: none;
 }
@@ -6669,14 +6757,16 @@ async setReminder(appointment) {
 .week-navigation-row.dragging {
   cursor: grabbing;
   scroll-behavior: auto;
+  scroll-snap-type: none;
 }
 
 .week-day-cell {
-  flex: 1;
-  min-width: 44px;
-  max-width: 56px;
+  flex: 0 0 auto;
+  min-width: 48px;
+  width: calc((100% - 28px) / 7); /* Fit 7 days in view minus KW cell */
+  max-width: 60px;
   text-align: center;
-  padding: 6px 4px;
+  padding: 8px 4px;
   cursor: pointer;
   border-radius: 10px;
   background: var(--bg-tertiary, white);
@@ -6685,6 +6775,9 @@ async setReminder(appointment) {
               background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
               box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  scroll-snap-align: start;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: pan-x;
 }
 
 .week-day-cell:hover {
@@ -7288,6 +7381,10 @@ async setReminder(appointment) {
     gap: 4px !important;
   }
 
+  .week-navigation-container.no-arrows {
+    padding: 8px 6px !important;
+  }
+
   .week-nav-arrow {
     width: 28px !important;
     height: 28px !important;
@@ -7302,10 +7399,15 @@ async setReminder(appointment) {
     gap: 3px !important;
   }
 
+  .week-navigation-row.swipeable {
+    padding: 4px 2px !important;
+  }
+
   .week-navigation-row .week-day-cell {
-    min-width: 40px !important;
-    max-width: 48px !important;
-    padding: 5px 3px !important;
+    min-width: 42px !important;
+    max-width: none !important;
+    flex: 0 0 auto !important;
+    padding: 6px 4px !important;
     border-radius: 8px !important;
   }
 
