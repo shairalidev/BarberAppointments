@@ -3871,7 +3871,7 @@ async setReminder(appointment) {
   top: 0;
   z-index: 100;
   width: 100%;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .admin-header-inner {
@@ -3883,7 +3883,7 @@ async setReminder(appointment) {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .admin-brand-section {
@@ -4063,6 +4063,7 @@ async setReminder(appointment) {
   padding: 0.5rem 0;
   border-radius: 12px;
   border: 1px solid var(--border-color, rgba(0,0,0,0.1));
+  z-index: 1050;
 }
 
 .logout-btn {
@@ -4483,7 +4484,7 @@ async setReminder(appointment) {
   .admin-header-inner {
     padding: 0.5rem 0.625rem;
     gap: 0.375rem;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .admin-brand-section {
