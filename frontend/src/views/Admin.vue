@@ -5,7 +5,7 @@
       <div class="admin-header-inner">
         <!-- Brand Logo -->
         <div class="admin-brand-section">
-          <img src="/logo.png" alt="Ates Barberos" class="admin-brand-logo">
+          <img :src="isDark ? '/logo.png' : '/logo1.png'" alt="Ates Barberos" class="admin-brand-logo">
         </div>
 
         <!-- Action Toolbar -->
@@ -17,26 +17,28 @@
           >
             {{ currentLocale === 'en' ? 'DE' : 'EN' }}
           </button>
-          <button
+          <div
             @click="toggleTheme"
-            :class="['toolbar-btn', 'theme-toggle', { active: isDark }]"
+            :class="['theme-switch', { active: isDark }]"
             :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
           >
-            <i class="fas fa-sun theme-toggle-icon sun-icon"></i>
-            <i class="fas fa-moon theme-toggle-icon moon-icon"></i>
-          </button>
+            <i class="fas fa-sun theme-switch-icon"></i>
+            <span class="theme-switch-slider"></span>
+            <i class="fas fa-moon theme-switch-icon"></i>
+          </div>
 
           <!-- Admin Account Dropdown -->
           <div class="dropdown">
             <button class="toolbar-btn admin-avatar-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
               <i class="fas fa-user-shield"></i>
             </button>
-            <ul class="dropdown-menu dropdown-menu-end shadow-lg">
+            <ul class="dropdown-menu dropdown-menu-end shadow-lg admin-dropdown">
               <li><h6 class="dropdown-header">{{ $t('admin.adminAccount') }}</h6></li>
               <li><hr class="dropdown-divider"></li>
               <li>
-                <button @click="logout" class="dropdown-item text-danger d-flex align-items-center">
-                  <i class="fas fa-sign-out-alt me-2"></i>{{ $t('admin.logout') }}
+                <button @click.stop="logout" type="button" class="logout-btn">
+                  <i class="fas fa-sign-out-alt"></i>
+                  <span>{{ $t('admin.logout') }}</span>
                 </button>
               </li>
             </ul>
@@ -316,20 +318,38 @@
                       </div>
                       <div v-else class="date-time-schedule">
                         <!-- Week Navigation Row -->
-                        <div class="week-navigation-row">
-                          <div 
-                            v-for="day in dayViewWeekDays" 
-                            :key="day.date"
-                            @click="navigateToDayViewDate(day.date)"
-                            class="week-day-cell"
-                            :class="{ 
-                              'active': day.date === dayViewDate,
-                              'today': day.isToday
-                            }"
+                        <div class="week-navigation-container">
+                          <button class="week-nav-arrow week-nav-prev" @click="navigateWeek('prev', 'dayView')">
+                            <i class="fas fa-chevron-left"></i>
+                          </button>
+                          <div
+                            class="week-navigation-row"
+                            ref="dayViewWeekSlider"
+                            @mousedown="startDrag($event, 'dayView')"
+                            @mousemove="onDrag($event, 'dayView')"
+                            @mouseup="endDrag('dayView')"
+                            @mouseleave="endDrag('dayView')"
+                            @touchstart="startDrag($event, 'dayView')"
+                            @touchmove="onDrag($event, 'dayView')"
+                            @touchend="endDrag('dayView')"
                           >
-                            <div class="week-day-name">{{ day.dayName }}</div>
-                            <div class="week-day-number">{{ day.dayNumber }}</div>
+                            <div
+                              v-for="day in dayViewWeekDays"
+                              :key="day.date"
+                              @click="navigateToDayViewDate(day.date)"
+                              class="week-day-cell"
+                              :class="{
+                                'active': day.date === dayViewDate,
+                                'today': day.isToday
+                              }"
+                            >
+                              <div class="week-day-name">{{ day.dayName }}</div>
+                              <div class="week-day-number">{{ day.dayNumber }}</div>
+                            </div>
                           </div>
+                          <button class="week-nav-arrow week-nav-next" @click="navigateWeek('next', 'dayView')">
+                            <i class="fas fa-chevron-right"></i>
+                          </button>
                           <div class="calendar-week-cell">
                             <div class="calendar-week-label">KW</div>
                             <div class="calendar-week-number">{{ dayViewCalendarWeek }}</div>
@@ -1459,20 +1479,38 @@
             </div>
             <div v-else class="date-time-schedule">
               <!-- Week Navigation Row -->
-              <div class="week-navigation-row">
-                <div 
-                  v-for="day in weekDays" 
-                  :key="day.date"
-                  @click="navigateToDate(day.date)"
-                  class="week-day-cell"
-                  :class="{ 
-                    'active': day.date === dateDetailModal.dateString,
-                    'today': day.isToday
-                  }"
+              <div class="week-navigation-container">
+                <button class="week-nav-arrow week-nav-prev" @click="navigateWeek('prev', 'modal')">
+                  <i class="fas fa-chevron-left"></i>
+                </button>
+                <div
+                  class="week-navigation-row"
+                  ref="modalWeekSlider"
+                  @mousedown="startDrag($event, 'modal')"
+                  @mousemove="onDrag($event, 'modal')"
+                  @mouseup="endDrag('modal')"
+                  @mouseleave="endDrag('modal')"
+                  @touchstart="startDrag($event, 'modal')"
+                  @touchmove="onDrag($event, 'modal')"
+                  @touchend="endDrag('modal')"
                 >
-                  <div class="week-day-name">{{ day.dayName }}</div>
-                  <div class="week-day-number">{{ day.dayNumber }}</div>
+                  <div
+                    v-for="day in weekDays"
+                    :key="day.date"
+                    @click="navigateToDate(day.date)"
+                    class="week-day-cell"
+                    :class="{
+                      'active': day.date === dateDetailModal.dateString,
+                      'today': day.isToday
+                    }"
+                  >
+                    <div class="week-day-name">{{ day.dayName }}</div>
+                    <div class="week-day-number">{{ day.dayNumber }}</div>
+                  </div>
                 </div>
+                <button class="week-nav-arrow week-nav-next" @click="navigateWeek('next', 'modal')">
+                  <i class="fas fa-chevron-right"></i>
+                </button>
                 <div class="calendar-week-cell">
                   <div class="calendar-week-label">KW</div>
                   <div class="calendar-week-number">{{ calendarWeek }}</div>
@@ -1552,6 +1590,7 @@ export default {
   },
   data() {
     return {
+      dragState: null,
       activeTab: 'calendar',
       appointments: [],
       customers: [],
@@ -3115,6 +3154,59 @@ getTimeSlotsForDay(dayIndex) {
     navigateToDayViewDate(date) {
       this.loadDayViewData(date)
     },
+    navigateWeek(direction, context) {
+      const days = direction === 'next' ? 7 : -7
+      if (context === 'dayView') {
+        const currentDate = new Date(this.dayViewDate)
+        currentDate.setDate(currentDate.getDate() + days)
+        this.loadDayViewData(currentDate.toISOString().split('T')[0])
+      } else if (context === 'modal') {
+        const currentDate = new Date(this.dateDetailModal.dateString)
+        currentDate.setDate(currentDate.getDate() + days)
+        this.openDateDetailModal(currentDate.toISOString().split('T')[0])
+      }
+    },
+    startDrag(event, context) {
+      const slider = context === 'dayView' ? this.$refs.dayViewWeekSlider : this.$refs.modalWeekSlider
+      if (!slider) return
+
+      this.dragState = {
+        isDragging: true,
+        startX: event.type.includes('touch') ? event.touches[0].pageX : event.pageX,
+        scrollLeft: slider.scrollLeft,
+        context
+      }
+      slider.classList.add('dragging')
+    },
+    onDrag(event, context) {
+      if (!this.dragState || !this.dragState.isDragging || this.dragState.context !== context) return
+
+      event.preventDefault()
+      const slider = context === 'dayView' ? this.$refs.dayViewWeekSlider : this.$refs.modalWeekSlider
+      if (!slider) return
+
+      const x = event.type.includes('touch') ? event.touches[0].pageX : event.pageX
+      const walk = (x - this.dragState.startX) * 1.5
+      slider.scrollLeft = this.dragState.scrollLeft - walk
+    },
+    endDrag(context) {
+      if (!this.dragState || this.dragState.context !== context) return
+
+      const slider = context === 'dayView' ? this.$refs.dayViewWeekSlider : this.$refs.modalWeekSlider
+      if (slider) {
+        slider.classList.remove('dragging')
+      }
+
+      // Check for swipe to navigate week
+      if (this.dragState.isDragging && slider) {
+        const diff = this.dragState.scrollLeft - slider.scrollLeft
+        if (Math.abs(diff) > 80) {
+          this.navigateWeek(diff > 0 ? 'next' : 'prev', context)
+        }
+      }
+
+      this.dragState = null
+    },
     async toggleDayViewOffDate(event) {
       const isRestricted = event.target.checked
       const date = this.dayViewDate
@@ -3807,35 +3899,137 @@ async setReminder(appointment) {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
 }
 
-/* Theme Toggle Button */
-.theme-toggle {
+/* Theme Toggle Switch - GPU Optimized */
+.theme-switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: var(--bg-tertiary);
+  border-radius: 24px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  will-change: background-color;
+  transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-switch:hover {
+  background: var(--bg-primary);
+}
+
+.theme-switch:active {
+  transform: scale(0.98);
+}
+
+.theme-switch-icon {
+  font-size: 0.85rem;
+  will-change: transform, opacity;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-switch-icon.fa-sun {
+  color: #f59e0b;
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+.theme-switch-icon.fa-moon {
+  color: #6366f1;
+  opacity: 0.5;
+  transform: scale(0.85);
+}
+
+.theme-switch.active .theme-switch-icon.fa-sun {
+  opacity: 0.5;
+  transform: scale(0.85);
+}
+
+.theme-switch.active .theme-switch-icon.fa-moon {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+.theme-switch-slider {
+  width: 44px;
+  height: 24px;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  border-radius: 12px;
   position: relative;
-  overflow: hidden;
+  will-change: background;
+  transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.theme-toggle-icon {
+.theme-switch-slider::before {
+  content: '';
   position: absolute;
-  transition: all 0.3s ease;
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+  top: 3px;
+  left: 3px;
+  will-change: transform;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-.theme-toggle .sun-icon {
-  opacity: 1;
-  transform: rotate(0deg);
+.theme-switch.active .theme-switch-slider {
+  background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
 }
 
-.theme-toggle .moon-icon {
-  opacity: 0;
-  transform: rotate(-90deg);
+.theme-switch.active .theme-switch-slider::before {
+  transform: translateX(20px);
 }
 
-.theme-toggle.active .sun-icon {
-  opacity: 0;
-  transform: rotate(90deg);
+/* Admin Dropdown & Logout Button - GPU Optimized */
+.admin-dropdown {
+  min-width: 200px;
+  padding: 0.5rem 0;
+  border-radius: 12px;
+  border: 1px solid var(--border-color, rgba(0,0,0,0.1));
 }
 
-.theme-toggle.active .moon-icon {
-  opacity: 1;
-  transform: rotate(0deg);
+.logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: calc(100% - 1rem);
+  margin: 0.5rem 0.5rem;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  will-change: transform, box-shadow;
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.35);
+}
+
+.logout-btn:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
+}
+
+.logout-btn i {
+  font-size: 1rem;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.logout-btn:hover i {
+  transform: translateX(-2px);
 }
 
 .bg-gradient-primary {
@@ -5077,14 +5271,29 @@ async setReminder(appointment) {
     font-size: 0.65rem !important;
   }
 
-  .action-toolbar .theme-toggle {
-    width: 28px !important;
-    height: 28px !important;
-    padding: 0.2rem !important;
-    font-size: 0.7rem !important;
+  .action-toolbar .theme-switch {
+    padding: 4px 6px !important;
+    gap: 4px !important;
   }
 
-  .action-toolbar .theme-toggle-icon {
+  .action-toolbar .theme-switch-slider {
+    width: 32px !important;
+    height: 18px !important;
+    border-radius: 9px !important;
+  }
+
+  .action-toolbar .theme-switch-slider::before {
+    width: 14px !important;
+    height: 14px !important;
+    top: 2px !important;
+    left: 2px !important;
+  }
+
+  .action-toolbar .theme-switch.active .theme-switch-slider::before {
+    transform: translateX(14px) !important;
+  }
+
+  .action-toolbar .theme-switch-icon {
     font-size: 0.7rem !important;
   }
 
@@ -6398,34 +6607,101 @@ async setReminder(appointment) {
   width: 100%;
 }
 
-/* Week Navigation Row */
+/* Week Navigation Container */
+.week-navigation-container {
+  display: flex;
+  align-items: center;
+  background: var(--bg-secondary, #f8f9fa);
+  border-bottom: 1px solid var(--border-color, #dee2e6);
+  padding: 8px;
+  gap: 6px;
+}
+
+.week-nav-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border: none;
+  border-radius: 8px;
+  background: var(--bg-tertiary, white);
+  color: var(--text-secondary, #6c757d);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.week-nav-arrow:hover {
+  background: var(--primary, #4a4a4a);
+  color: white;
+  transform: scale(1.05);
+}
+
+.week-nav-arrow:active {
+  transform: scale(0.95);
+}
+
+.week-nav-arrow i {
+  font-size: 0.75rem;
+}
+
+/* Week Navigation Row - Swipeable */
 .week-navigation-row {
   display: flex;
-  background: #f8f9fa;
-  border-bottom: 2px solid #dee2e6;
-  padding: 12px 8px;
+  flex: 1;
   gap: 4px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  cursor: grab;
+  user-select: none;
+  padding: 2px;
+}
+
+.week-navigation-row::-webkit-scrollbar {
+  display: none;
+}
+
+.week-navigation-row.dragging {
+  cursor: grabbing;
+  scroll-behavior: auto;
 }
 
 .week-day-cell {
   flex: 1;
+  min-width: 44px;
+  max-width: 56px;
   text-align: center;
-  padding: 8px 4px;
+  padding: 6px 4px;
   cursor: pointer;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-  background: white;
+  border-radius: 10px;
+  background: var(--bg-tertiary, white);
+  will-change: transform, background-color;
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+              background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .week-day-cell:hover {
-  background: #e9ecef;
-  transform: translateY(-2px);
+  background: var(--bg-primary, #e9ecef);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.week-day-cell:active {
+  transform: scale(0.97);
 }
 
 .week-day-cell.active {
-  background: linear-gradient(135deg, #4a4a4a 0%, #3a3a3a 100%);
+  background: linear-gradient(135deg, #4a4a4a 0%, #2d2d2d 100%);
   color: white;
   font-weight: 600;
+  box-shadow: 0 3px 10px rgba(74, 74, 74, 0.3);
 }
 
 .week-day-cell.active .week-day-name,
@@ -6434,44 +6710,54 @@ async setReminder(appointment) {
 }
 
 .week-day-cell.today:not(.active) {
-  border: 2px solid #28a745;
+  border: 2px solid #10b981;
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.week-day-cell.today:not(.active) .week-day-number {
+  color: #10b981;
 }
 
 .week-day-name {
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   font-weight: 600;
-  color: #6c757d;
+  color: var(--text-secondary, #6c757d);
   text-transform: uppercase;
-  margin-bottom: 4px;
+  letter-spacing: 0.3px;
+  margin-bottom: 2px;
 }
 
 .week-day-number {
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 700;
-  color: #212529;
+  color: var(--text-primary, #212529);
+  line-height: 1.2;
 }
 
 .calendar-week-cell {
-  min-width: 60px;
+  min-width: 42px;
   text-align: center;
-  padding: 8px 4px;
-  margin-left: 8px;
-  background: white;
-  border-radius: 6px;
+  padding: 6px 6px;
+  background: var(--bg-tertiary, white);
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border-left: 2px solid var(--border-color, #dee2e6);
+  margin-left: 2px;
 }
 
 .calendar-week-label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: #6c757d;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--text-secondary, #6c757d);
   text-transform: uppercase;
-  margin-bottom: 4px;
+  letter-spacing: 0.5px;
+  margin-bottom: 1px;
 }
 
 .calendar-week-number {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   font-weight: 700;
-  color: #212529;
+  color: var(--text-primary, #212529);
 }
 
 .schedule-header {
@@ -6997,30 +7283,51 @@ async setReminder(appointment) {
     -webkit-overflow-scrolling: touch;
   }
 
-  .week-navigation-row {
+  .week-navigation-container {
+    padding: 6px !important;
     gap: 4px !important;
-    padding: 0.5rem !important;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch;
+  }
+
+  .week-nav-arrow {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+  }
+
+  .week-nav-arrow i {
+    font-size: 0.65rem !important;
+  }
+
+  .week-navigation-row {
+    gap: 3px !important;
   }
 
   .week-navigation-row .week-day-cell {
-    min-width: 45px !important;
-    padding: 8px 6px !important;
-    font-size: 0.7rem !important;
+    min-width: 40px !important;
+    max-width: 48px !important;
+    padding: 5px 3px !important;
+    border-radius: 8px !important;
   }
 
   .week-day-name {
-    font-size: 0.6rem !important;
+    font-size: 0.55rem !important;
   }
 
   .week-day-number {
-    font-size: 1rem !important;
+    font-size: 0.9rem !important;
   }
 
   .calendar-week-cell {
-    min-width: 45px !important;
-    font-size: 0.65rem !important;
+    min-width: 36px !important;
+    padding: 5px 4px !important;
+  }
+
+  .calendar-week-label {
+    font-size: 0.5rem !important;
+  }
+
+  .calendar-week-number {
+    font-size: 0.8rem !important;
   }
 
   .schedule-header {
@@ -7109,21 +7416,49 @@ async setReminder(appointment) {
     left: 2px !important;
   }
 
+  .week-navigation-container {
+    padding: 4px !important;
+    gap: 3px !important;
+  }
+
+  .week-nav-arrow {
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    border-radius: 6px !important;
+  }
+
+  .week-nav-arrow i {
+    font-size: 0.6rem !important;
+  }
+
   .week-navigation-row .week-day-cell {
-    min-width: 38px !important;
-    padding: 6px 4px !important;
+    min-width: 34px !important;
+    max-width: 42px !important;
+    padding: 4px 2px !important;
+    border-radius: 6px !important;
   }
 
   .week-day-name {
-    font-size: 0.55rem !important;
+    font-size: 0.5rem !important;
   }
 
   .week-day-number {
-    font-size: 0.9rem !important;
+    font-size: 0.8rem !important;
   }
 
   .calendar-week-cell {
-    min-width: 38px !important;
+    min-width: 32px !important;
+    padding: 4px 3px !important;
+    border-radius: 6px !important;
+  }
+
+  .calendar-week-label {
+    font-size: 0.45rem !important;
+  }
+
+  .calendar-week-number {
+    font-size: 0.7rem !important;
   }
 
   .time-column {
