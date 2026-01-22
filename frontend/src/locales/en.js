@@ -249,7 +249,9 @@ export default {
     markAsOffDate: 'Mark as Off Date',
     dateMarkedAsOffDate: 'This date is marked as an off date',
     noAppointmentsOnOffDate: 'No appointments can be booked for this date.',
-    selectedDateTime: 'Selected Date & Time'
+    selectedDateTime: 'Selected Date & Time',
+    thisWeek: 'This Week',
+    nextWeek: 'Next Week'
   },
   common: {
     loading: 'Loading...',

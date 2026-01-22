@@ -246,7 +246,9 @@ export default {
     markAsOffDate: 'Als Ruhetag markieren',
     dateMarkedAsOffDate: 'Dieses Datum ist als Ruhetag markiert',
     noAppointmentsOnOffDate: 'Für dieses Datum können keine Termine gebucht werden.',
-    selectedDateTime: 'Ausgewähltes Datum & Uhrzeit'
+    selectedDateTime: 'Ausgewähltes Datum & Uhrzeit',
+    thisWeek: 'Diese Woche',
+    nextWeek: 'Nächste Woche'
   },
   common: {
     loading: 'Laden...',
