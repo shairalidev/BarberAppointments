@@ -1112,9 +1112,11 @@
                       <span class="input-group-text"><i class="fas fa-search"></i></span>
                       <input
                         v-model="bookingCustomerSearch"
-                        type="search"
+                        type="text"
                         class="form-control"
                         @focus="showCustomerDropdown = true"
+                        @input="showCustomerDropdown = true"
+                        autocomplete="off"
                       />
                       <button 
                         v-if="bookingCustomerSearch"
@@ -1130,13 +1132,16 @@
                     <div 
                       v-if="showCustomerDropdown && (bookingCustomerMatches.length || bookingCustomerSearch)"
                       class="customer-dropdown"
+                      @click.stop
+                      @touchstart.stop
                     >
                       <div v-if="bookingCustomerMatches.length" class="customer-list">
                         <div
                           v-for="customer in bookingCustomerMatches.slice(0, 8)"
                           :key="customer._id"
                           class="customer-item"
-                          @click="selectCustomerForBooking(customer)"
+                          @click.stop="selectCustomerForBooking(customer)"
+                          @touchstart.stop="selectCustomerForBooking(customer)"
                         >
                           <div class="customer-info">
                             <div class="customer-name">
@@ -1168,8 +1173,8 @@
                   <input v-model="bookingForm.customerPhone" type="tel" class="form-control" required>
                 </div>
                 <div class="col-12">
-                  <label class="form-label">{{ $t('admin.email') }} *</label>
-                  <input v-model="bookingForm.customerEmail" type="email" class="form-control" required>
+                  <label class="form-label">{{ $t('admin.email') }}</label>
+                  <input v-model="bookingForm.customerEmail" type="email" class="form-control">
                 </div>
                 <div class="col-12" v-if="bookingForm.totalPrice">
                   <div class="alert alert-success">
@@ -2120,7 +2125,10 @@ export default {
         const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
         const today = new Date()
         const isToday = date.toDateString() === today.toDateString()
-        const dayIndex = i % 7
+        // Calculate actual day of week (0=Sunday, 1=Monday, etc.)
+        const actualDayOfWeek = date.getDay()
+        // Convert to Monday-based index (0=Monday, 6=Sunday)
+        const dayIndex = actualDayOfWeek === 0 ? 6 : actualDayOfWeek - 1
 
         days.push({
           date: dateStr,
@@ -2461,11 +2469,6 @@ async quickBookAppointment() {
 
         if (!this.bookingForm.serviceId || !this.bookingForm.time) {
           this.showToast(this.$t('toast.selectTimeSlot'), 'warning')
-          return
-        }
-        
-        if (!this.bookingForm.customerEmail) {
-          this.showToast(this.$t('toast.emailRequired'), 'warning')
           return
         }
         
@@ -5147,6 +5150,17 @@ async setReminder(appointment) {
     margin-top: 1rem;
     padding-top: 0.75rem;
     border-top: 1px solid #f3f4f6;
+    position: relative;
+    z-index: 10;
+  }
+  
+  .appointment-actions .btn {
+    position: relative;
+    z-index: 10;
+    -webkit-appearance: none;
+    appearance: none;
+    touch-action: manipulation;
+    min-height: 44px;
   }
   
   /* Mobile Requests */
@@ -5884,9 +5898,10 @@ async setReminder(appointment) {
   border: 1px solid var(--border-color);
   border-radius: 8px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
+  z-index: 1060;
   max-height: 300px;
   overflow-y: auto;
+  margin-top: 0.25rem;
 }
 
 .customer-list {
@@ -5898,6 +5913,12 @@ async setReminder(appointment) {
   cursor: pointer;
   transition: background-color 0.2s;
   border-bottom: 1px solid var(--border-color);
+  position: relative;
+  z-index: 10;
+  -webkit-appearance: none;
+  appearance: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(107, 114, 128, 0.1);
 }
 
 .customer-item:last-child {
@@ -5905,6 +5926,10 @@ async setReminder(appointment) {
 }
 
 .customer-item:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.customer-item:active {
   background-color: var(--bg-tertiary);
 }
 
@@ -6911,6 +6936,21 @@ async setReminder(appointment) {
 .schedule-body {
   display: flex;
   flex-direction: column;
+  max-height: calc(100vh - 400px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+  .schedule-body {
+    max-height: calc(100vh - 300px);
+  }
+}
+
+@media (max-width: 576px) {
+  .schedule-body {
+    max-height: calc(100vh - 250px);
+  }
 }
 
 .schedule-row-wrapper {
@@ -6919,7 +6959,7 @@ async setReminder(appointment) {
 
 .schedule-row {
   display: flex;
-  min-height: 100px;
+  min-height: 50px;
 }
 
 .schedule-row.row-pink {
@@ -6935,8 +6975,8 @@ async setReminder(appointment) {
 }
 
 .time-column {
-  width: 80px;
-  padding: 12px;
+  width: 60px;
+  padding: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -6945,10 +6985,11 @@ async setReminder(appointment) {
   font-weight: 600;
   color: #495057;
   align-self: stretch;
+  font-size: 0.85rem;
 }
 
 .time-label {
-  font-size: 0.95rem;
+  font-size: 0.8rem;
 }
 
 .slots-column {
@@ -6959,8 +7000,8 @@ async setReminder(appointment) {
 
 .half-hour-slot {
   width: 100%;
-  padding: 8px;
-  min-height: 50px;
+  padding: 4px;
+  min-height: 25px;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -7133,7 +7174,7 @@ async setReminder(appointment) {
   
   .half-hour-slot {
     padding: 6px;
-    min-height: 40px;
+    min-height: 25px;
   }
   
   .half-hour-slot-header,
@@ -7143,7 +7184,7 @@ async setReminder(appointment) {
   }
   
   .schedule-row {
-    min-height: 80px;
+    min-height: 50px;
   }
   
   .appointment-block {
@@ -7173,7 +7214,7 @@ async setReminder(appointment) {
   }
   
   .schedule-row {
-    min-height: 80px;
+    min-height: 50px;
   }
 }
 
@@ -7199,7 +7240,7 @@ async setReminder(appointment) {
   
   .half-hour-slot {
     padding: 4px;
-    min-height: 35px;
+    min-height: 25px;
   }
   
   .half-hour-slot-header,
@@ -7209,7 +7250,7 @@ async setReminder(appointment) {
   }
   
   .schedule-row {
-    min-height: 70px;
+    min-height: 50px;
   }
   
   .appointment-block {
@@ -7251,7 +7292,7 @@ async setReminder(appointment) {
   }
   
   .schedule-row {
-    min-height: 70px;
+    min-height: 50px;
   }
   
   /* iOS Safari optimization */
@@ -7463,7 +7504,7 @@ async setReminder(appointment) {
   }
 
   .half-hour-slot {
-    min-height: 50px !important;
+    min-height: 25px !important;
   }
 
   .appointment-block {
@@ -8606,12 +8647,24 @@ select.booking-service-select {
     gap: 0.3rem;
   }
   
+  .modal-footer {
+    position: relative !important;
+    z-index: 10 !important;
+    background: var(--bg-primary) !important;
+    border-top: 1px solid var(--border-color) !important;
+  }
+  
   .modal-footer .btn {
     font-size: 0.7rem !important;
     padding: 0.3rem 0.5rem !important;
-    min-height: 34px !important;
+    min-height: 44px !important;
     flex: 1 1 auto;
     min-width: calc(50% - 0.15rem);
+    position: relative !important;
+    z-index: 10 !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    touch-action: manipulation !important;
   }
   
   /* Professional Date Picker */
@@ -9208,6 +9261,11 @@ select.booking-service-select {
     flex: 1;
     min-height: 44px;
     font-size: 0.95rem;
+    position: relative;
+    z-index: 10;
+    -webkit-appearance: none;
+    appearance: none;
+    touch-action: manipulation;
   }
 
   /* Form elements in modals */
@@ -9316,10 +9374,20 @@ select.booking-service-select {
 
   .modal-footer {
     padding: 0.5rem 0.75rem;
+    position: relative;
+    z-index: 10;
+    background: var(--bg-primary);
+    border-top: 1px solid var(--border-color);
   }
 
   .modal-footer .btn {
     font-size: 0.9rem;
+    position: relative;
+    z-index: 10;
+    -webkit-appearance: none;
+    appearance: none;
+    touch-action: manipulation;
+    min-height: 44px;
   }
 
   .modal-body .form-label {
@@ -9629,9 +9697,20 @@ select.booking-service-select {
     font-size: 0.7rem !important;
   }
 
+  .appointment-actions {
+    position: relative !important;
+    z-index: 10 !important;
+  }
+  
   .appointment-actions .btn {
     font-size: 0.65rem !important;
     padding: 0.3rem 0.4rem !important;
+    position: relative !important;
+    z-index: 10 !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    touch-action: manipulation !important;
+    min-height: 44px !important;
   }
 
   /* Customer Tab */
@@ -9786,7 +9865,7 @@ select.booking-service-select {
   }
 
   .half-hour-slot {
-    min-height: 35px !important;
+    min-height: 25px !important;
     padding: 4px !important;
   }
 
@@ -9873,9 +9952,20 @@ select.booking-service-select {
     padding: 0.75rem !important;
   }
 
+  .appointment-actions {
+    position: relative !important;
+    z-index: 10 !important;
+  }
+  
   .appointment-actions .btn {
     font-size: 0.7rem !important;
     padding: 0.35rem 0.5rem !important;
+    position: relative !important;
+    z-index: 10 !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    touch-action: manipulation !important;
+    min-height: 44px !important;
   }
 
   /* Modals */
