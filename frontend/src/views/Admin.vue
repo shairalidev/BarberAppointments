@@ -373,22 +373,23 @@
                                   :key="`${hour}-${index}`"
                                   class="half-hour-slot"
                                   :class="{ 
-                                    'has-appointment': slot.appointment,
+                                    'has-appointment': slot.isOccupied,
                                     'slot-first': index === 0,
-                                    'slot-second': index === 1
+                                    'slot-second': index === 1,
+                                    'slot-occupied': slot.isOccupied && !slot.showTime
                                   }"
                                   @click="handleSlotClick(slot, dayViewDate)"
                                 >
                                   <div 
-                                    v-if="slot.appointment" 
+                                    v-if="slot.isOccupied" 
                                     class="appointment-block" 
                                     :class="getAppointmentBlockClass(slot.appointment)"
-                                    @click.stop="slot.appointment.status === 'confirmed' ? openEditTimeModal(slot.appointment) : null"
+                                    @click.stop="slot.appointment && slot.appointment.status === 'confirmed' ? openEditTimeModal(slot.appointment) : null"
                                   >
-                                    <div class="appointment-content">
+                                    <div class="appointment-content" v-if="slot.showTime">
                                       <div class="appointment-customer">{{ slot.appointment.customerName }}</div>
                                       <div class="appointment-service">{{ getServiceNames(slot.appointment) }}</div>
-                                      <div class="appointment-time" v-if="slot.showTime">{{ formatAppointmentTime(slot.appointment) }}</div>
+                                      <div class="appointment-time">{{ formatAppointmentTime(slot.appointment) }}</div>
                                     </div>
                                   </div>
                                   <div v-else class="empty-slot">
@@ -3418,24 +3419,53 @@ getTimeSlotsForDay(dayIndex) {
     getDayViewHalfHourSlots(hour) {
       // Return two half-hour slots: :00 and :30
       const slots = [
-        { time: `${hour}:00`, appointment: null, showTime: false },
-        { time: `${hour}:30`, appointment: null, showTime: false }
+        { time: `${hour}:00`, appointment: null, showTime: false, isOccupied: false },
+        { time: `${hour}:30`, appointment: null, showTime: false, isOccupied: false }
       ]
       
-      // Find appointments that match these time slots
+      const currentHour = parseInt(hour.split(':')[0])
+      
+      // Process each appointment to determine which slots it occupies
       this.dayViewData.appointments.forEach(apt => {
+        if (!apt.time) return
+        
         const aptTime = apt.time || ''
         const aptHour = parseInt(aptTime.split(':')[0])
         const aptMinute = parseInt(aptTime.split(':')[1]) || 0
         const duration = apt.totalDuration || 30
         
-        // Check if appointment starts at :00 or :30 of this hour
-        if (aptHour === parseInt(hour.split(':')[0])) {
-          if (aptMinute === 0) {
-            slots[0].appointment = apt
+        // Calculate appointment start and end in minutes from midnight
+        const aptStartMinutes = aptHour * 60 + aptMinute
+        const aptEndMinutes = aptStartMinutes + duration
+        
+        // Calculate slot times in minutes from midnight
+        const slot0Minutes = currentHour * 60 + 0   // :00 slot
+        const slot30Minutes = currentHour * 60 + 30 // :30 slot
+        const slot0EndMinutes = slot0Minutes + 30   // :00 slot ends at :30
+        const slot30EndMinutes = slot30Minutes + 30 // :30 slot ends at next hour :00
+        
+        // Check if appointment overlaps with the :00 slot (9:00 - 9:30)
+        // Overlap exists if: appointment starts before slot ends AND appointment ends after slot starts
+        const overlapsSlot0 = aptStartMinutes < slot0EndMinutes && aptEndMinutes > slot0Minutes
+        
+        // Check if appointment overlaps with the :30 slot (9:30 - 10:00)
+        const overlapsSlot30 = aptStartMinutes < slot30EndMinutes && aptEndMinutes > slot30Minutes
+        
+        // Mark slots as occupied if appointment overlaps
+        if (overlapsSlot0) {
+          slots[0].appointment = apt
+          slots[0].isOccupied = true
+          // Only show time on the first slot where appointment starts
+          if (aptStartMinutes === slot0Minutes) {
             slots[0].showTime = true
-          } else if (aptMinute === 30) {
-            slots[1].appointment = apt
+          }
+        }
+        
+        if (overlapsSlot30) {
+          slots[1].appointment = apt
+          slots[1].isOccupied = true
+          // Only show time on the first slot where appointment starts
+          if (aptStartMinutes === slot30Minutes) {
             slots[1].showTime = true
           }
         }
@@ -3444,8 +3474,8 @@ getTimeSlotsForDay(dayIndex) {
       return slots
     },
     async handleSlotClick(slot, date) {
-      // Only handle clicks on empty slots
-      if (!slot.appointment && date && slot.time) {
+      // Only handle clicks on empty slots (not occupied)
+      if (!slot.isOccupied && date && slot.time) {
         // Note: We don't check for conflicts here because we don't know the service duration yet.
         // The backend will validate availability when the service is selected and slots are fetched.
         // The day view shows appointments visually, so empty slots are available for booking.
@@ -7125,6 +7155,67 @@ async setReminder(appointment) {
 
 .half-hour-slot.has-appointment {
   padding: 4px;
+}
+
+.half-hour-slot.slot-occupied {
+  /* Slots that are occupied but don't show appointment details (continuation slots) */
+  padding: 0;
+  position: relative;
+}
+
+.half-hour-slot.slot-occupied .appointment-block {
+  width: 100%;
+  height: 100%;
+  min-height: 25px;
+  padding: 0;
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+/* Visual indicator for continuation slots */
+.half-hour-slot.slot-occupied::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(to right, 
+    rgba(16, 185, 129, 0.15) 0%, 
+    rgba(16, 185, 129, 0.1) 50%, 
+    rgba(16, 185, 129, 0.15) 100%);
+  border-left: 2px solid var(--success);
+  border-right: 2px solid var(--success);
+  pointer-events: none;
+}
+
+.half-hour-slot.slot-occupied.slot-first::before {
+  border-top: 2px solid var(--success);
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+.half-hour-slot.slot-occupied.slot-second::before {
+  border-bottom: 2px solid var(--success);
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+/* When both slots are occupied by same appointment, connect them visually */
+.half-hour-slot.slot-occupied.slot-first + .half-hour-slot.slot-occupied.slot-second::before {
+  border-top: none;
+}
+
+/* Ensure appointment block in continuation slots doesn't interfere */
+.half-hour-slot.slot-occupied .appointment-block {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.half-hour-slot.slot-occupied .appointment-content {
+  display: none;
 }
 
 .empty-slot {
