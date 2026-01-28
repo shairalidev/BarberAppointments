@@ -7098,6 +7098,15 @@ async setReminder(appointment) {
     background-color: rgba(165, 214, 167, 0.15) !important;
   }
   
+  /* Dark mode slot colors for mobile */
+  .dark-theme .half-hour-slot.slot-first {
+    background-color: rgba(185, 28, 28, 0.25) !important;
+  }
+  
+  .dark-theme .half-hour-slot.slot-second {
+    background-color: rgba(22, 163, 74, 0.25) !important;
+  }
+  
   .schedule-row {
     min-height: 100px !important;
     display: flex !important;
@@ -7163,7 +7172,7 @@ async setReminder(appointment) {
   width: 60px;
   padding: 6px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   border-right: 1px solid #dee2e6;
   background: #f8f9fa;
@@ -7230,6 +7239,15 @@ async setReminder(appointment) {
   flex: 1 1 50%;
   min-height: inherit;
   background-color: rgba(165, 214, 167, 0.15) !important;
+}
+
+/* Dark mode slot colors */
+.dark-theme .half-hour-slot.slot-first {
+  background-color: rgba(185, 28, 28, 0.25) !important;
+}
+
+.dark-theme .half-hour-slot.slot-second {
+  background-color: rgba(22, 163, 74, 0.25) !important;
 }
 
 .half-hour-slot.slot-left {
@@ -7555,6 +7573,15 @@ async setReminder(appointment) {
     flex: 1 1 50% !important;
     background-color: rgba(165, 214, 167, 0.15) !important;
     width: 100% !important;
+  }
+  
+  /* Dark mode slot colors for tablet */
+  .dark-theme .half-hour-slot.slot-first {
+    background-color: rgba(185, 28, 28, 0.25) !important;
+  }
+  
+  .dark-theme .half-hour-slot.slot-second {
+    background-color: rgba(22, 163, 74, 0.25) !important;
   }
   
   /* Ensure empty slots are fully clickable */
@@ -9850,6 +9877,15 @@ select.booking-service-select {
       max-height: 55px !important;
       flex: 1 1 50% !important;
       background-color: rgba(165, 214, 167, 0.15) !important;
+    }
+    
+    /* Dark mode slot colors for small mobile */
+    .dark-theme .half-hour-slot.slot-first {
+      background-color: rgba(185, 28, 28, 0.25) !important;
+    }
+    
+    .dark-theme .half-hour-slot.slot-second {
+      background-color: rgba(22, 163, 74, 0.25) !important;
     }
     
     .schedule-row {
