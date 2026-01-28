@@ -2656,19 +2656,14 @@ async quickBookAppointment() {
               this.bookingForm.time = previouslySelectedTime
             }
           } else {
-            // If booking from slot click, ALWAYS keep the selected time
-            // The slot was empty when clicked, so it should be available
-            if (isFromSlotClick) {
-              this.bookingForm.time = previouslySelectedTime
-              // Also add it to available slots to prevent validation errors
-              if (!this.availableSlots.includes(previouslySelectedTime)) {
-                this.availableSlots.push(previouslySelectedTime)
-                this.availableSlots.sort()
-              }
-            } else {
-              // For regular booking, keep it selected so user can see what they chose
-              this.bookingForm.time = previouslySelectedTime
-            }
+            // The selected time is not in the available slots list from backend
+            // This means the backend calculated it as unavailable (likely due to overlap)
+            // Keep it selected but backend will validate on submit
+            // The backend's buildDailyAvailability correctly checks overlaps:
+            // - If appointment is 9:00-9:15, then 9:30 should be available for 30min service
+            // - If appointment is 9:00-9:30, then 9:30 is NOT available
+            this.bookingForm.time = previouslySelectedTime
+            // Don't show error here - let backend handle validation on submit
           }
         }
       } catch (error) {
@@ -3451,31 +3446,9 @@ getTimeSlotsForDay(dayIndex) {
     async handleSlotClick(slot, date) {
       // Only handle clicks on empty slots
       if (!slot.appointment && date && slot.time) {
-        // Check if this slot conflicts with any existing appointment
-        const slotTime = slot.time
-        const slotHour = parseInt(slotTime.split(':')[0])
-        const slotMinute = parseInt(slotTime.split(':')[1]) || 0
-        const slotTimeMinutes = slotHour * 60 + slotMinute
-        
-        // Check if any appointment overlaps with this slot
-        const hasConflict = this.dayViewData.appointments.some(apt => {
-          if (!apt.time) return false
-          const aptTime = apt.time
-          const aptHour = parseInt(aptTime.split(':')[0])
-          const aptMinute = parseInt(aptTime.split(':')[1]) || 0
-          const aptTimeMinutes = aptHour * 60 + aptMinute
-          const aptDuration = apt.totalDuration || 30
-          const aptEndMinutes = aptTimeMinutes + aptDuration
-          
-          // Check if slot time falls within the appointment time range
-          // Slot is blocked if it's between appointment start and end (exclusive of start, inclusive of end)
-          return slotTimeMinutes >= aptTimeMinutes && slotTimeMinutes < aptEndMinutes
-        })
-        
-        if (hasConflict) {
-          this.showToast('This time slot conflicts with an existing appointment', 'warning')
-          return
-        }
+        // Note: We don't check for conflicts here because we don't know the service duration yet.
+        // The backend will validate availability when the service is selected and slots are fetched.
+        // The day view shows appointments visually, so empty slots are available for booking.
         
         // Normalize time format - remove seconds if present (e.g., "14:00:30" -> "14:00")
         const normalizedTime = slot.time.split(':').slice(0, 2).join(':')
