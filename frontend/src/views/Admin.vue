@@ -387,8 +387,10 @@
                                     @click.stop="slot.appointment && slot.appointment.status === 'confirmed' ? openEditTimeModal(slot.appointment) : null"
                                   >
                                     <div class="appointment-content" v-if="slot.showTime">
-                                      <div class="appointment-customer">{{ slot.appointment.customerName }}</div>
-                                      <div class="appointment-service">{{ getServiceNames(slot.appointment) }}</div>
+                                      <div class="appointment-left">
+                                        <div class="appointment-customer">{{ slot.appointment.customerName }}</div>
+                                        <div class="appointment-service">{{ getServiceNames(slot.appointment) }}</div>
+                                      </div>
                                       <div class="appointment-time">{{ formatAppointmentTime(slot.appointment) }}</div>
                                     </div>
                                   </div>
@@ -1142,9 +1144,7 @@
                     <div 
                       v-if="showCustomerDropdown"
                       class="customer-dropdown"
-                      @click.stop=""
-                      @touchstart.stop=""
-                      @mousedown.stop=""
+                      @click.stop
                       style="position: absolute; z-index: 1070; transform: translateZ(0); -webkit-transform: translateZ(0); pointer-events: auto;"
                     >
                       <div v-if="bookingCustomerMatches.length > 0" class="customer-list">
@@ -1152,10 +1152,10 @@
                           v-for="customer in bookingCustomerMatches.slice(0, 8)"
                           :key="customer._id"
                           class="customer-item"
-                          @click.stop="selectCustomerForBooking(customer)"
-                          @touchstart.stop="selectCustomerForBooking(customer)"
-                          @touchend.stop="selectCustomerForBooking(customer)"
-                          style="position: relative; z-index: 10; touch-action: manipulation; -webkit-tap-highlight-color: rgba(107, 114, 128, 0.2); cursor: pointer;"
+                          @click="selectCustomerForBooking(customer)"
+                          @touchstart="handleCustomerTouchStart($event, customer)"
+                          @touchend="handleCustomerTouchEnd($event, customer)"
+                          style="position: relative; z-index: 10; touch-action: pan-y; -webkit-tap-highlight-color: rgba(107, 114, 128, 0.2); cursor: pointer;"
                         >
                           <div class="customer-info">
                             <div class="customer-name">
@@ -1557,8 +1557,10 @@
                     >
                       <div v-if="slot.appointment" class="appointment-block" :class="getAppointmentBlockClass(slot.appointment)">
                         <div class="appointment-content">
-                          <div class="appointment-customer">{{ slot.appointment.customerName }}</div>
-                          <div class="appointment-service">{{ getServiceNames(slot.appointment) }}</div>
+                          <div class="appointment-left">
+                            <div class="appointment-customer">{{ slot.appointment.customerName }}</div>
+                            <div class="appointment-service">{{ getServiceNames(slot.appointment) }}</div>
+                          </div>
                           <div class="appointment-time" v-if="slot.showTime">{{ formatAppointmentTime(slot.appointment) }}</div>
                         </div>
                       </div>
@@ -1680,6 +1682,7 @@ export default {
       },
       bookingCustomerSearch: '',
       showCustomerDropdown: false,
+      customerTouchStart: null,
       dateDetailModal: {
         show: false,
         date: null,
@@ -3849,6 +3852,32 @@ async setReminder(appointment) {
       this.showCustomerDropdown = false
       this.bookingCustomerSearch = customer.name
     },
+    handleCustomerTouchStart(event, customer) {
+      // Store touch start position and time for scroll detection
+      this.customerTouchStart = {
+        x: event.touches[0].clientX,
+        y: event.touches[0].clientY,
+        time: Date.now(),
+        customer: customer
+      }
+    },
+    handleCustomerTouchEnd(event, customer) {
+      if (!this.customerTouchStart || this.customerTouchStart.customer !== customer) {
+        return
+      }
+      
+      const touchEnd = event.changedTouches[0]
+      const deltaX = Math.abs(touchEnd.clientX - this.customerTouchStart.x)
+      const deltaY = Math.abs(touchEnd.clientY - this.customerTouchStart.y)
+      const deltaTime = Date.now() - this.customerTouchStart.time
+      
+      // Only select if it was a tap (small movement, short duration) and not a scroll
+      if (deltaX < 10 && deltaY < 10 && deltaTime < 300) {
+        this.selectCustomerForBooking(customer)
+      }
+      
+      this.customerTouchStart = null
+    },
     clearCustomerSearch() {
       this.bookingCustomerSearch = ''
       this.showCustomerDropdown = false
@@ -4876,16 +4905,31 @@ async setReminder(appointment) {
 }
 
 .time-slots-grid.mobile-optimized {
-  grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-  gap: 10px;
-  max-height: 250px;
+  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  gap: 6px;
+  max-height: 200px;
   -webkit-overflow-scrolling: touch;
 }
 
 .time-slots-grid.mobile-optimized .btn.time-slot-btn {
-  min-height: 44px;
-  font-size: 0.9rem;
+  min-height: 36px;
+  font-size: 0.75rem;
   font-weight: 500;
+  padding: 4px 8px;
+}
+
+@media (max-width: 576px) {
+  .time-slots-grid.mobile-optimized {
+    grid-template-columns: repeat(auto-fill, minmax(55px, 1fr));
+    gap: 5px;
+    max-height: 180px;
+  }
+  
+  .time-slots-grid.mobile-optimized .btn.time-slot-btn {
+    min-height: 32px;
+    font-size: 0.7rem;
+    padding: 3px 6px;
+  }
 }
 
 /* Week Date Picker for Edit Modal */
@@ -5072,9 +5116,20 @@ async setReminder(appointment) {
 
 .appointment-content {
   display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  margin-bottom: 0.5rem;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 2px 4px;
+}
+
+.appointment-left {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  gap: 2px;
 }
 
 .appointment-time {
@@ -7098,13 +7153,13 @@ async setReminder(appointment) {
     background-color: rgba(165, 214, 167, 0.15) !important;
   }
   
-  /* Dark mode slot colors for mobile */
+  /* Dark mode slot colors for mobile - lighter */
   .dark-theme .half-hour-slot.slot-first {
-    background-color: rgba(185, 28, 28, 0.25) !important;
+    background-color: rgba(239, 154, 154, 0.1) !important;
   }
   
   .dark-theme .half-hour-slot.slot-second {
-    background-color: rgba(22, 163, 74, 0.25) !important;
+    background-color: rgba(165, 214, 167, 0.1) !important;
   }
   
   .schedule-row {
@@ -7241,13 +7296,13 @@ async setReminder(appointment) {
   background-color: rgba(165, 214, 167, 0.15) !important;
 }
 
-/* Dark mode slot colors */
+/* Dark mode slot colors - lighter for better visibility */
 .dark-theme .half-hour-slot.slot-first {
-  background-color: rgba(185, 28, 28, 0.25) !important;
+  background-color: rgba(239, 154, 154, 0.1) !important;
 }
 
 .dark-theme .half-hour-slot.slot-second {
-  background-color: rgba(22, 163, 74, 0.25) !important;
+  background-color: rgba(165, 214, 167, 0.1) !important;
 }
 
 .half-hour-slot.slot-left {
@@ -7332,7 +7387,7 @@ async setReminder(appointment) {
   height: 100%;
   min-height: inherit;
   background: transparent;
-  border: 1px dashed #e9ecef;
+  border: none;
   border-radius: 4px;
   display: flex;
   align-items: center;
@@ -7345,8 +7400,6 @@ async setReminder(appointment) {
 
 .empty-slot:hover {
   background-color: rgba(16, 185, 129, 0.05);
-  border-color: var(--success);
-  border-style: solid;
 }
 
 .empty-slot-hint {
@@ -7427,23 +7480,28 @@ async setReminder(appointment) {
 
 .appointment-customer {
   font-weight: 600;
-  font-size: 0.9rem;
-  line-height: 1.2;
+  font-size: 0.65rem;
+  line-height: 1.1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .appointment-service {
-  font-size: 0.75rem;
-  opacity: 0.9;
-  line-height: 1.2;
+  font-size: 0.55rem;
+  opacity: 0.85;
+  line-height: 1.1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .appointment-time {
-  font-size: 0.7rem;
+  font-size: 0.6rem;
   opacity: 0.8;
-  margin-top: auto;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 /* Responsive adjustments */
@@ -7487,13 +7545,17 @@ async setReminder(appointment) {
   }
   
   .appointment-customer {
-    font-size: 0.7rem;
-    line-height: 1.2;
+    font-size: 0.6rem;
+    line-height: 1.1;
   }
   
   .appointment-service {
-    font-size: 0.65rem;
+    font-size: 0.5rem;
     line-height: 1.1;
+  }
+  
+  .appointment-time {
+    font-size: 0.55rem;
   }
   
   .empty-slot-hint {
@@ -7575,13 +7637,13 @@ async setReminder(appointment) {
     width: 100% !important;
   }
   
-  /* Dark mode slot colors for tablet */
+  /* Dark mode slot colors for tablet - lighter */
   .dark-theme .half-hour-slot.slot-first {
-    background-color: rgba(185, 28, 28, 0.25) !important;
+    background-color: rgba(239, 154, 154, 0.1) !important;
   }
   
   .dark-theme .half-hour-slot.slot-second {
-    background-color: rgba(22, 163, 74, 0.25) !important;
+    background-color: rgba(165, 214, 167, 0.1) !important;
   }
   
   /* Ensure empty slots are fully clickable */
@@ -7621,21 +7683,21 @@ async setReminder(appointment) {
   }
   
   .appointment-customer {
-    font-size: 0.7rem;
-    line-height: 1.2;
+    font-size: 0.6rem;
+    line-height: 1.1;
   }
   
   .appointment-service {
-    font-size: 0.65rem;
+    font-size: 0.5rem;
     line-height: 1.1;
   }
   
   .appointment-time {
-    font-size: 0.6rem;
+    font-size: 0.55rem;
   }
   
   .empty-slot {
-    border-width: 2px;
+    border: none !important;
     min-height: 100% !important;
     height: 100% !important;
   }
@@ -7879,16 +7941,16 @@ async setReminder(appointment) {
   }
 
   .appointment-customer {
-    font-size: 0.75rem !important;
+    font-size: 0.6rem !important;
     font-weight: 600;
   }
 
   .appointment-service {
-    font-size: 0.65rem !important;
+    font-size: 0.5rem !important;
   }
 
   .appointment-time {
-    font-size: 0.6rem !important;
+    font-size: 0.55rem !important;
   }
 }
 
@@ -9879,13 +9941,13 @@ select.booking-service-select {
       background-color: rgba(165, 214, 167, 0.15) !important;
     }
     
-    /* Dark mode slot colors for small mobile */
+    /* Dark mode slot colors for small mobile - lighter */
     .dark-theme .half-hour-slot.slot-first {
-      background-color: rgba(185, 28, 28, 0.25) !important;
+      background-color: rgba(239, 154, 154, 0.1) !important;
     }
     
     .dark-theme .half-hour-slot.slot-second {
-      background-color: rgba(22, 163, 74, 0.25) !important;
+      background-color: rgba(165, 214, 167, 0.1) !important;
     }
     
     .schedule-row {
