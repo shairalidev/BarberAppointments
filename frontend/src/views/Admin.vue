@@ -123,7 +123,7 @@
               </div>
               <div class="d-flex gap-2 justify-content-center flex-wrap">
                 <button @click="calendarViewMode === 'calendar' ? goToToday() : goToTodayDayView()" class="btn btn-primary btn-sm">{{ $t('admin.today') }}</button>
-                <button @click="showBookingModal = true" class="btn btn-success btn-sm">
+                <button @click="openBookingModal" class="btn btn-success btn-sm">
                   <i class="fas fa-plus me-1"></i>{{ $t('admin.bookAppointment') }}
                 </button>
                 <!-- Toggle Button for Mobile -->
@@ -188,7 +188,7 @@
                         {{ calendarViewMode === 'calendar' ? $t('admin.calendar') : $t('admin.dayView') }}
                       </h5>
                       <div class="d-flex gap-2">
-                        <button @click="showBookingModal = true" class="btn btn-sm btn-success">
+                        <button @click="openBookingModal" class="btn btn-sm btn-success">
                           <i class="fas fa-plus me-1"></i>{{ $t('admin.bookAppointment') }}
                         </button>
                         <!-- Toggle Button -->
@@ -1130,12 +1130,12 @@
                     
                     <!-- Customer Dropdown -->
                     <div 
-                      v-if="showCustomerDropdown && (bookingCustomerMatches.length || bookingCustomerSearch)"
+                      v-if="showCustomerDropdown"
                       class="customer-dropdown"
                       @click.stop
                       @touchstart.stop
                     >
-                      <div v-if="bookingCustomerMatches.length" class="customer-list">
+                      <div v-if="bookingCustomerMatches.length > 0" class="customer-list">
                         <div
                           v-for="customer in bookingCustomerMatches.slice(0, 8)"
                           :key="customer._id"
@@ -1158,8 +1158,11 @@
                           </div>
                         </div>
                       </div>
-                      <div v-else-if="bookingCustomerSearch && !bookingCustomerMatches.length" class="no-results">
+                      <div v-else-if="bookingCustomerSearch && bookingCustomerMatches.length === 0" class="no-results">
                         <i class="fas fa-user-slash me-2"></i>{{ $t('admin.noCustomersFound') }}
+                      </div>
+                      <div v-else-if="!bookingCustomerSearch && customers.length === 0" class="no-results">
+                        <i class="fas fa-info-circle me-2"></i>{{ $t('admin.noCustomersAvailable') || 'No customers available' }}
                       </div>
                     </div>
                   </div>
@@ -1719,7 +1722,8 @@ export default {
       )
     },
     bookingCustomerMatches() {
-      const term = this.bookingCustomerSearch.toLowerCase().trim()
+      if (!this.customers || this.customers.length === 0) return []
+      const term = this.bookingCustomerSearch ? this.bookingCustomerSearch.toLowerCase().trim() : ''
       if (!term) return this.customers.slice(0, 8)
       return this.customers.filter(c =>
         c.name?.toLowerCase().includes(term) ||
@@ -2543,6 +2547,13 @@ async quickBookAppointment() {
       this.availableSlots = []
       this.bookingCustomerSearch = ''
       this.showCustomerDropdown = false
+    },
+    openBookingModal() {
+      // Ensure customers are loaded when opening booking modal
+      if (this.customers.length === 0) {
+        this.fetchCustomers()
+      }
+      this.showBookingModal = true
     },
     closeBookingModal() {
       this.showBookingModal = false
@@ -3388,7 +3399,7 @@ getTimeSlotsForDay(dayIndex) {
       
       return slots
     },
-    handleSlotClick(slot, date) {
+    async handleSlotClick(slot, date) {
       // Only handle clicks on empty slots
       if (!slot.appointment && date && slot.time) {
         // Normalize time format - remove seconds if present (e.g., "14:00:30" -> "14:00")
@@ -3405,7 +3416,10 @@ getTimeSlotsForDay(dayIndex) {
 
         // Mark that this booking is from a slot click (hide calendar/time in modal)
         this.bookingFromSlotClick = true
-
+        // Ensure customers are loaded before opening modal
+        if (this.customers.length === 0) {
+          await this.fetchCustomers()
+        }
         // Open the booking modal
         this.showBookingModal = true
 
@@ -3740,6 +3754,10 @@ async setReminder(appointment) {
       this.bookingForm.customerName = customer.name
       this.bookingForm.customerPhone = customer.phone
       this.bookingForm.customerEmail = customer.email || ''
+      // Ensure customers are loaded before opening modal
+      if (this.customers.length === 0) {
+        this.fetchCustomers()
+      }
       this.showBookingModal = true
     },
     selectCustomerForBooking(customer) {

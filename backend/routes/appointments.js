@@ -205,10 +205,10 @@ router.post('/', async (req, res) => {
       status: requestedStatus
     } = req.body;
 
-    if (!customerName || !customerPhone || !customerEmail || !barberId || !services?.length || !date || !time) {
+    if (!customerName || !customerPhone || !barberId || !services?.length || !date || !time) {
       return res.status(400).json({ 
         message: 'Missing required fields',
-        required: ['customerName', 'customerPhone', 'customerEmail', 'barberId', 'services', 'date', 'time']
+        required: ['customerName', 'customerPhone', 'barberId', 'services', 'date', 'time']
       });
     }
 
@@ -453,13 +453,7 @@ router.put('/:id', async (req, res) => {
   try {
     const { sendEmail, responseMessage, timeChangeMessage, ...update } = req.body;
     
-    // Validate email if it's being updated
-    if (update.customerEmail !== undefined && !update.customerEmail) {
-      return res.status(400).json({ 
-        message: 'Email is required',
-        required: ['customerEmail']
-      });
-    }
+    // Email is optional, no validation needed
     
     // Get the current appointment
     const currentAppointment = await Appointment.findById(req.params.id)

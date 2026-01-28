@@ -4,7 +4,7 @@ const appointmentSchema = new mongoose.Schema({
   customer: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer' },
   customerName: { type: String, required: true },
   customerPhone: { type: String, required: true },
-  customerEmail: { type: String, required: true },
+  customerEmail: { type: String },
   notes: { type: String },
   marketingOptIn: { type: Boolean, default: true },
   barberId: { type: mongoose.Schema.Types.ObjectId, ref: 'Barber', required: true },
