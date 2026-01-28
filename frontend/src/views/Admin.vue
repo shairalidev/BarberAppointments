@@ -1074,7 +1074,13 @@
                     <i class="fas fa-cut me-2 text-primary"></i>{{ $t('admin.service') }}
                   </label>
                   <div class="service-select-container">
-                    <select v-model="bookingForm.serviceId" @change="updateBookingPrice" class="form-select booking-service-select" required>
+                    <select 
+                      v-model="bookingForm.serviceId" 
+                      @change="updateBookingPrice" 
+                      class="form-select booking-service-select" 
+                      required
+                      style="font-size: 16px;"
+                    >
                       <option value="">{{ $t('admin.selectService') }}</option>
                       <option v-for="service in activeServices" :key="service._id" :value="service._id">
                         {{ service.name }} - {{ formatCurrency(service.price) }}
@@ -8162,6 +8168,7 @@ async setReminder(appointment) {
   overflow: hidden !important;
   padding-left: 0 !important;
   padding-right: 0 !important;
+  margin-bottom: 0.5rem !important;
 }
 
 .service-select-container {
@@ -8182,6 +8189,10 @@ select.booking-service-select {
   text-overflow: ellipsis !important;
   position: relative !important;
   display: block !important;
+  font-size: 0.875rem !important;
+  padding: 0.5rem 2rem 0.5rem 0.75rem !important;
+  min-height: 38px !important;
+  line-height: 1.4 !important;
 }
 
 .booking-service-select option {
@@ -8189,7 +8200,8 @@ select.booking-service-select {
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 100%;
-  padding: 0.3rem 0.5rem;
+  padding: 0.4rem 0.5rem;
+  font-size: 0.875rem;
 }
 
 /* Prevent select dropdown from overflowing - Base */
@@ -8242,19 +8254,30 @@ select.booking-service-select {
     max-width: 100% !important;
   }
   
-  /* Service Selector - Normal size on desktop */
+  /* Service Selector - Compact size on desktop */
+  .service-selector-wrapper {
+    margin-bottom: 0.75rem !important;
+  }
+  
+  .service-selector-wrapper .form-label {
+    font-size: 0.8rem !important;
+    margin-bottom: 0.4rem !important;
+  }
+  
   .booking-service-select,
   select.booking-service-select {
-    font-size: 0.875rem !important;
-    padding: 0.5rem 2rem 0.5rem 0.75rem !important;
-    min-height: 40px !important;
+    font-size: 0.85rem !important;
+    padding: 0.45rem 1.8rem 0.45rem 0.7rem !important;
+    min-height: 38px !important;
     max-width: 100% !important;
     width: 100% !important;
+    line-height: 1.4 !important;
   }
   
   .booking-service-select option {
-    font-size: 0.875rem !important;
+    font-size: 0.8rem !important;
     padding: 0.4rem 0.6rem !important;
+    line-height: 1.4 !important;
   }
   
   /* Form labels - Normal size */
@@ -8345,31 +8368,41 @@ select.booking-service-select {
     margin: 0.5rem !important;
   }
   
-  /* Service Selector - Make smaller and prevent overflow */
+  /* Service Selector - Compact on tablet */
+  .service-selector-wrapper {
+    margin-bottom: 0.5rem !important;
+  }
+  
+  .service-selector-wrapper .form-label {
+    font-size: 0.75rem !important;
+    margin-bottom: 0.35rem !important;
+  }
+  
   .modal-body .booking-service-select,
   .modal-body .form-select-lg,
   .modal-body select.form-select-lg,
   .modal-body select.booking-service-select {
     font-size: 0.8rem !important;
-    padding: 0.4rem 0.6rem !important;
-    min-height: 38px !important;
+    padding: 0.4rem 1.6rem 0.4rem 0.55rem !important;
+    min-height: 36px !important;
     max-width: 100% !important;
     width: 100% !important;
     box-sizing: border-box !important;
     overflow: hidden;
     text-overflow: ellipsis;
-    line-height: 1.3;
+    line-height: 1.35;
     white-space: nowrap;
   }
   
-  /* Service selector options - smaller font */
+  /* Service selector options - optimized font */
   .modal-body .booking-service-select option,
   .modal-body .form-select-lg option {
     font-size: 0.75rem !important;
-    padding: 0.3rem 0.4rem !important;
+    padding: 0.35rem 0.5rem !important;
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
+    line-height: 1.4 !important;
   }
   
   /* Form labels - smaller */
@@ -8566,7 +8599,21 @@ select.booking-service-select {
     overflow: hidden !important;
   }
   
-  /* Service Selector - Extra small on mobile and prevent overflow */
+  /* Service Selector - Compact on mobile */
+  .service-selector-wrapper {
+    margin-bottom: 0.4rem !important;
+  }
+  
+  .service-selector-wrapper .form-label {
+    font-size: 0.7rem !important;
+    margin-bottom: 0.3rem !important;
+  }
+  
+  .service-selector-wrapper .form-label i {
+    font-size: 0.65rem !important;
+    margin-right: 0.3rem !important;
+  }
+  
   .booking-modal-body .booking-service-select,
   .booking-modal-body select.booking-service-select,
   .modal-body .booking-service-select,
@@ -8574,35 +8621,39 @@ select.booking-service-select {
   .modal-body select.form-select-lg,
   .modal-body select.booking-service-select,
   .modal-body .col-12 select.booking-service-select,
-  .modal-body .col-12 .booking-service-select {
-    font-size: 0.7rem !important;
-    padding: 0.3rem 1.8rem 0.3rem 0.45rem !important;
-    min-height: 34px !important;
+  .modal-body .col-12 .booking-service-select,
+  .service-selector-wrapper select.booking-service-select {
+    font-size: 0.75rem !important;
+    padding: 0.4rem 1.6rem 0.4rem 0.5rem !important;
+    min-height: 36px !important;
     max-width: 100% !important;
     width: 100% !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    line-height: 1.2 !important;
+    line-height: 1.3 !important;
     white-space: nowrap !important;
     -webkit-appearance: none !important;
     appearance: none !important;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E") !important;
     background-repeat: no-repeat !important;
-    background-position: right 0.4rem center !important;
-    background-size: 0.65rem !important;
+    background-position: right 0.5rem center !important;
+    background-size: 0.7rem !important;
     border-radius: 0.375rem !important;
+    touch-action: manipulation !important;
   }
   
-  /* Service selector options - smaller font */
+  /* Service selector options - optimized font */
   .modal-body .booking-service-select option,
-  .modal-body .form-select-lg option {
-    font-size: 0.65rem !important;
-    padding: 0.25rem 0.35rem !important;
+  .modal-body .form-select-lg option,
+  .service-selector-wrapper select.booking-service-select option {
+    font-size: 0.7rem !important;
+    padding: 0.35rem 0.5rem !important;
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    line-height: 1.4 !important;
   }
   
   /* Form labels - smaller */
@@ -9438,8 +9489,15 @@ select.booking-service-select {
 
   /* Service selection */
   .service-select-container .form-select {
-    background-size: 20px;
-    padding-right: 2.5rem;
+    background-size: 18px;
+    padding-right: 2rem;
+    font-size: 0.8rem !important;
+    min-height: 36px !important;
+  }
+  
+  .service-select-container .form-select option {
+    font-size: 0.75rem !important;
+    padding: 0.4rem 0.5rem !important;
   }
 }
 
@@ -9555,6 +9613,31 @@ select.booking-service-select {
     .week-day-cell,
     .time-slot-btn {
       touch-action: manipulation;
+    }
+    
+    /* Service selector iOS Safari optimization */
+    .service-selector-wrapper {
+      margin-bottom: 0.5rem !important;
+    }
+    
+    .service-selector-wrapper .form-label {
+      font-size: 0.7rem !important;
+      margin-bottom: 0.3rem !important;
+    }
+    
+    .booking-service-select,
+    select.booking-service-select {
+      font-size: 16px !important; /* Prevent zoom on iOS */
+      padding: 0.4rem 1.6rem 0.4rem 0.5rem !important;
+      min-height: 36px !important;
+      touch-action: manipulation !important;
+      -webkit-appearance: none !important;
+      appearance: none !important;
+    }
+    
+    .booking-service-select option {
+      font-size: 0.75rem !important;
+      padding: 0.35rem 0.5rem !important;
     }
 
     /* Booking modal specific iOS Safari fixes */
