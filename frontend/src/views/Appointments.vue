@@ -1475,14 +1475,71 @@ export default {
 
 /* iOS and Android specific optimizations */
 @supports (-webkit-touch-callout: none) {
-  .service-card, .day-card, .slot-button {
+  .service-card, .day-card, .slot-button, .calendar-day, .week-day {
     -webkit-tap-highlight-color: rgba(107, 114, 128, 0.1);
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
   }
   
   input, select, textarea {
     -webkit-appearance: none;
     appearance: none;
     border-radius: 8px;
+    font-size: 16px !important; /* Prevent zoom on iOS */
+  }
+  
+  /* Calendar touch optimizations */
+  .calendar-day,
+  .week-day {
+    min-height: 44px;
+    -webkit-tap-highlight-color: rgba(16, 185, 129, 0.2);
+  }
+  
+  /* Service cards */
+  .service-card-new {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+  
+  /* Time slot buttons */
+  .slot-button {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+  
+  /* Smooth scrolling */
+  .booking-page {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Form inputs */
+  .form-control,
+  .form-select {
+    font-size: 16px !important;
+    min-height: 44px;
+  }
+  
+  /* Buttons */
+  .btn {
+    -webkit-appearance: none;
+    appearance: none;
+    touch-action: manipulation;
+    min-height: 44px;
+  }
+  
+  /* Prevent double-tap zoom */
+  .calendar-wrapper,
+  .slot-grid,
+  .service-card-new {
+    touch-action: manipulation;
+  }
+  
+  /* Viewport height fix */
+  .booking-page {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
   }
 }
 
@@ -1728,6 +1785,7 @@ export default {
 @media (max-width: 768px) {
   .service-card-new {
     padding: 8px 10px;
+    min-height: 44px;
   }
   
   .service-name {
@@ -1752,6 +1810,7 @@ export default {
   
   .day-card {
     padding: 8px;
+    min-height: 44px;
   }
   
   .day-card .day-number {
@@ -1765,6 +1824,8 @@ export default {
   .icon-button {
     width: 36px;
     height: 36px;
+    min-width: 44px;
+    min-height: 44px;
   }
   
   .calendar-grid-month {
@@ -1777,7 +1838,7 @@ export default {
   }
   
   .calendar-day {
-    min-height: 32px;
+    min-height: 44px;
     border-radius: 5px;
     padding: 3px;
   }
@@ -1792,6 +1853,29 @@ export default {
   
   .calendar-wrapper h5 {
     font-size: 0.7rem !important;
+  }
+  
+  /* iOS Safari specific mobile optimizations */
+  .form-control,
+  .form-select {
+    font-size: 16px !important;
+    min-height: 44px;
+  }
+  
+  .btn {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+  
+  /* Prevent pull-to-refresh */
+  .booking-page {
+    overscroll-behavior-y: contain;
+  }
+  
+  /* Safe area support */
+  .booking-page {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
   }
 }
 </style>

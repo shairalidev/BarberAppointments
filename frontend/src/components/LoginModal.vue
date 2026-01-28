@@ -163,4 +163,65 @@ export default {
   transform: translateY(-1px);
   box-shadow: 0 8px 20px rgba(107, 114, 128, 0.3);
 }
+
+/* iOS Safari Optimizations */
+@supports (-webkit-touch-callout: none) {
+  /* Prevent zoom on input focus */
+  .form-control {
+    font-size: 16px !important;
+    min-height: 44px;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  
+  .btn {
+    -webkit-appearance: none;
+    appearance: none;
+    touch-action: manipulation;
+    min-height: 44px;
+    -webkit-tap-highlight-color: rgba(107, 114, 128, 0.2);
+  }
+  
+  /* Modal safe area support */
+  .modal-dialog {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  /* Input group */
+  .input-group-text {
+    min-height: 44px;
+  }
+  
+  /* Prevent text selection */
+  .btn,
+  .form-label {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
+@media (max-width: 576px) {
+  /* Mobile iOS Safari fixes */
+  .modal-content {
+    max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-height: calc(-webkit-fill-available - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  }
+  
+  .form-control {
+    font-size: 16px !important;
+    min-height: 44px;
+  }
+  
+  .btn {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+  
+  /* Prevent double-tap zoom */
+  .form-control,
+  .btn {
+    touch-action: manipulation;
+  }
+}
 </style>

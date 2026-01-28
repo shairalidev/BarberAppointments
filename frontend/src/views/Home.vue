@@ -220,8 +220,12 @@ export default {
 .hero-section {
   position: relative;
   min-height: 100vh;
+  min-height: -webkit-fill-available;
   background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
   overflow: hidden;
+  /* Safe area support */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .hero-section::before {
@@ -489,11 +493,51 @@ export default {
   .btn {
     -webkit-appearance: none;
     appearance: none;
-    -webkit-tap-highlight-color: transparent;
+    -webkit-tap-highlight-color: rgba(107, 114, 128, 0.2);
+    touch-action: manipulation;
+    min-height: 44px;
   }
   
   .touch-friendly {
     -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+    touch-action: manipulation;
+  }
+  
+  /* Prevent zoom on inputs */
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+  
+  /* Smooth scrolling */
+  .home {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Gallery images */
+  .gallery-item {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  
+  /* Service cards */
+  .service-card,
+  .feature-card {
+    -webkit-tap-highlight-color: rgba(107, 114, 128, 0.1);
+    touch-action: manipulation;
+  }
+  
+  /* Hero section viewport fix */
+  .hero-section {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+  
+  .min-vh-90 {
+    min-height: 90vh;
+    min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
 }
 
@@ -545,6 +589,27 @@ export default {
   
   .display-6 {
     font-size: 1.75rem;
+  }
+  
+  /* iOS Safari specific mobile fixes */
+  .hero-section {
+    padding-top: max(1rem, env(safe-area-inset-top));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+  
+  .btn {
+    min-height: 44px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  
+  /* Prevent double-tap zoom */
+  .service-card,
+  .feature-card,
+  .gallery-item {
+    touch-action: manipulation;
   }
 }
 </style>

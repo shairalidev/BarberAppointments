@@ -425,4 +425,68 @@ export default {
     font-size: 0.75rem;
   }
 }
+
+/* iOS Safari Optimizations */
+@supports (-webkit-touch-callout: none) {
+  .navbar {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .nav-link,
+  .btn {
+    -webkit-appearance: none;
+    appearance: none;
+    touch-action: manipulation;
+    min-height: 44px;
+    -webkit-tap-highlight-color: rgba(107, 114, 128, 0.2);
+  }
+  
+  .navbar-toggler {
+    -webkit-appearance: none;
+    appearance: none;
+    touch-action: manipulation;
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .dropdown-menu {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .dropdown-item {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+  
+  /* Prevent text selection */
+  .nav-link,
+  .btn,
+  .brand-text {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Mobile iOS Safari fixes */
+  .navbar {
+    padding-top: max(0.5rem, env(safe-area-inset-top));
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+  
+  .mobile-actions .btn {
+    min-height: 44px;
+    touch-action: manipulation;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  
+  /* Prevent double-tap zoom */
+  .nav-link,
+  .btn,
+  .navbar-toggler {
+    touch-action: manipulation;
+  }
+}
 </style>

@@ -1123,8 +1123,9 @@
                         @focus="showCustomerDropdown = true"
                         @input="showCustomerDropdown = true"
                         @touchstart="showCustomerDropdown = true"
+                        @click="showCustomerDropdown = true"
                         autocomplete="off"
-                        style="font-size: 16px;"
+                        style="font-size: 16px; -webkit-appearance: none; appearance: none;"
                       />
                       <button 
                         v-if="bookingCustomerSearch"
@@ -1140,20 +1141,20 @@
                     <div 
                       v-if="showCustomerDropdown"
                       class="customer-dropdown"
-                      @click.stop.prevent
-                      @touchstart.stop.prevent
-                      @touchend.stop.prevent
-                      style="position: absolute; z-index: 1070; transform: translateZ(0); -webkit-transform: translateZ(0);"
+                      @click.stop=""
+                      @touchstart.stop=""
+                      @mousedown.stop=""
+                      style="position: absolute; z-index: 1070; transform: translateZ(0); -webkit-transform: translateZ(0); pointer-events: auto;"
                     >
                       <div v-if="bookingCustomerMatches.length > 0" class="customer-list">
                         <div
                           v-for="customer in bookingCustomerMatches.slice(0, 8)"
                           :key="customer._id"
                           class="customer-item"
-                          @click.stop.prevent="selectCustomerForBooking(customer)"
-                          @touchstart.stop.prevent="selectCustomerForBooking(customer)"
-                          @touchend.stop.prevent="selectCustomerForBooking(customer)"
-                          style="position: relative; z-index: 10; touch-action: manipulation; -webkit-tap-highlight-color: rgba(107, 114, 128, 0.2);"
+                          @click.stop="selectCustomerForBooking(customer)"
+                          @touchstart.stop="selectCustomerForBooking(customer)"
+                          @touchend.stop="selectCustomerForBooking(customer)"
+                          style="position: relative; z-index: 10; touch-action: manipulation; -webkit-tap-highlight-color: rgba(107, 114, 128, 0.2); cursor: pointer;"
                         >
                           <div class="customer-info">
                             <div class="customer-name">
@@ -1332,9 +1333,9 @@
 
     <!-- Edit Appointment Modal -->
     <div v-if="editTimeModal.show" class="modal fade show d-block edit-appointment-modal" style="background: rgba(0,0,0,0.5); z-index: 1050;" @click.self="closeEditTimeModal">
-      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="z-index: 1051;">
-        <div class="modal-content">
-          <div class="modal-header bg-gradient-primary text-white">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable edit-appointment-modal-dialog" style="z-index: 1051;">
+        <div class="modal-content edit-appointment-modal-content">
+          <div class="modal-header bg-gradient-primary text-white edit-appointment-modal-header">
             <h5 class="modal-title">
               <i class="fas fa-edit me-2"></i>{{ $t('admin.editAppointment') }}
             </h5>
@@ -9033,6 +9034,125 @@ select.booking-service-select {
 
 /* Edit Appointment Modal Mobile */
 @media (max-width: 768px) {
+  .edit-appointment-modal-dialog {
+    margin: 0.5rem !important;
+    max-width: calc(100% - 1rem) !important;
+  }
+  
+  .edit-appointment-modal-content {
+    max-height: calc(100vh - 1rem) !important;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .edit-appointment-modal-header {
+    padding: 0.75rem !important;
+    flex-shrink: 0;
+  }
+  
+  .edit-appointment-modal-header .modal-title {
+    font-size: 0.95rem !important;
+  }
+  
+  .edit-modal-body {
+    padding: 0.75rem !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    flex: 1;
+    min-height: 0;
+  }
+  
+  .current-appointment-info {
+    padding: 0.5rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+  
+  .current-appointment-info p {
+    font-size: 0.75rem !important;
+    margin-bottom: 0.3rem !important;
+  }
+  
+  .week-date-picker {
+    padding: 0.5rem !important;
+  }
+  
+  .week-nav-header {
+    margin-bottom: 0.5rem !important;
+    gap: 0.5rem !important;
+  }
+  
+  .week-nav-btn {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+  }
+  
+  .week-label {
+    font-size: 0.85rem !important;
+  }
+  
+  .week-days-grid {
+    gap: 4px !important;
+  }
+  
+  .week-date-picker .week-day-cell {
+    padding: 6px 4px !important;
+    min-height: 50px !important;
+    border-radius: 8px !important;
+  }
+  
+  .week-date-picker .week-day-cell .day-name {
+    font-size: 0.65rem !important;
+    margin-bottom: 2px !important;
+  }
+  
+  .week-date-picker .week-day-cell .day-number {
+    font-size: 1rem !important;
+  }
+  
+  .week-date-picker .week-day-cell .month-label {
+    font-size: 0.55rem !important;
+    margin-top: 2px !important;
+  }
+  
+  .time-slots-grid.mobile-optimized {
+    max-height: 150px !important;
+    gap: 6px !important;
+  }
+  
+  .time-slots-grid.mobile-optimized .btn.time-slot-btn {
+    font-size: 0.8rem !important;
+    padding: 0.4rem 0.5rem !important;
+    min-height: 40px !important;
+  }
+  
+  .edit-modal-body .form-label {
+    font-size: 0.85rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+  
+  .edit-modal-body textarea {
+    font-size: 0.85rem !important;
+    padding: 0.5rem !important;
+    rows: 2 !important;
+  }
+  
+  .edit-modal-body .form-control {
+    font-size: 0.85rem !important;
+  }
+  
+  .edit-appointment-modal .modal-footer {
+    padding: 0.5rem 0.75rem !important;
+    flex-shrink: 0;
+  }
+  
+  .edit-appointment-modal .modal-footer .btn {
+    font-size: 0.85rem !important;
+    padding: 0.5rem 1rem !important;
+  }
+  
   .available-slots-container {
     max-height: 120px !important;
     overflow-y: auto !important;
@@ -9046,6 +9166,112 @@ select.booking-service-select {
 }
 
 @media (max-width: 576px) {
+  .edit-appointment-modal-dialog {
+    margin: 0.25rem !important;
+    max-width: calc(100% - 0.5rem) !important;
+  }
+  
+  .edit-appointment-modal-content {
+    max-height: calc(100vh - 0.5rem) !important;
+  }
+  
+  .edit-appointment-modal-header {
+    padding: 0.5rem !important;
+  }
+  
+  .edit-appointment-modal-header .modal-title {
+    font-size: 0.85rem !important;
+  }
+  
+  .edit-modal-body {
+    padding: 0.5rem !important;
+  }
+  
+  .current-appointment-info {
+    padding: 0.4rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+  
+  .current-appointment-info p {
+    font-size: 0.7rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+  
+  .week-date-picker {
+    padding: 0.4rem !important;
+  }
+  
+  .week-nav-header {
+    margin-bottom: 0.4rem !important;
+    gap: 0.4rem !important;
+  }
+  
+  .week-nav-btn {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+  }
+  
+  .week-label {
+    font-size: 0.75rem !important;
+  }
+  
+  .week-days-grid {
+    gap: 3px !important;
+  }
+  
+  .week-date-picker .week-day-cell {
+    padding: 4px 2px !important;
+    min-height: 45px !important;
+    border-radius: 6px !important;
+  }
+  
+  .week-date-picker .week-day-cell .day-name {
+    font-size: 0.6rem !important;
+    margin-bottom: 1px !important;
+  }
+  
+  .week-date-picker .week-day-cell .day-number {
+    font-size: 0.9rem !important;
+  }
+  
+  .week-date-picker .week-day-cell .month-label {
+    font-size: 0.5rem !important;
+    margin-top: 1px !important;
+  }
+  
+  .time-slots-grid.mobile-optimized {
+    max-height: 120px !important;
+    gap: 4px !important;
+  }
+  
+  .time-slots-grid.mobile-optimized .btn.time-slot-btn {
+    font-size: 0.75rem !important;
+    padding: 0.3rem 0.4rem !important;
+    min-height: 36px !important;
+  }
+  
+  .edit-modal-body .form-label {
+    font-size: 0.8rem !important;
+    margin-bottom: 0.4rem !important;
+  }
+  
+  .edit-modal-body textarea {
+    font-size: 0.8rem !important;
+    padding: 0.4rem !important;
+    rows: 2 !important;
+  }
+  
+  .edit-appointment-modal .modal-footer {
+    padding: 0.4rem 0.5rem !important;
+  }
+  
+  .edit-appointment-modal .modal-footer .btn {
+    font-size: 0.8rem !important;
+    padding: 0.4rem 0.75rem !important;
+  }
+  
   .available-slots-container {
     max-height: 100px !important;
   }
@@ -9585,6 +9811,7 @@ select.booking-service-select {
     .customer-search-container {
       position: relative !important;
       z-index: 1070 !important;
+      isolation: isolate !important;
     }
     
     .customer-dropdown {
@@ -9594,6 +9821,8 @@ select.booking-service-select {
       -webkit-transform: translateZ(0) !important;
       will-change: transform !important;
       -webkit-overflow-scrolling: touch !important;
+      pointer-events: auto !important;
+      -webkit-touch-callout: none !important;
     }
     
     .customer-item {
@@ -9604,6 +9833,32 @@ select.booking-service-select {
       z-index: 10 !important;
       -webkit-user-select: none !important;
       user-select: none !important;
+      pointer-events: auto !important;
+      cursor: pointer !important;
+    }
+    
+    /* Ensure modal doesn't block dropdown */
+    .booking-modal-body {
+      overflow: visible !important;
+      position: relative !important;
+    }
+    
+    .booking-modal-body .customer-search-container {
+      overflow: visible !important;
+      position: relative !important;
+    }
+    
+    /* Force dropdown to be above modal content */
+    .booking-modal-content {
+      overflow: visible !important;
+    }
+    
+    .booking-modal-body .row {
+      overflow: visible !important;
+    }
+    
+    .booking-modal-body .col-12 {
+      overflow: visible !important;
     }
 
     /* Fix button tap delay */
@@ -9971,6 +10226,7 @@ select.booking-service-select {
     position: relative !important;
     z-index: 1070 !important;
     margin-bottom: 0.5rem;
+    isolation: isolate !important;
   }
 
   .booking-modal-body .customer-dropdown {
@@ -9981,6 +10237,8 @@ select.booking-service-select {
     -webkit-transform: translateZ(0) !important;
     will-change: transform !important;
     -webkit-overflow-scrolling: touch !important;
+    pointer-events: auto !important;
+    -webkit-touch-callout: none !important;
   }
 
   .booking-modal-body .customer-item {
@@ -9990,6 +10248,16 @@ select.booking-service-select {
     -webkit-tap-highlight-color: rgba(107, 114, 128, 0.2) !important;
     position: relative !important;
     z-index: 10 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
+  }
+  
+  /* Ensure modal body doesn't block dropdown */
+  .booking-modal-body {
+    overflow: visible !important;
+    position: relative !important;
   }
 
   .booking-modal-body .customer-name {

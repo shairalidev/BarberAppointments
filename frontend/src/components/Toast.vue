@@ -86,4 +86,51 @@ export default {
   background-color: var(--bg-secondary);
   color: var(--text-primary);
 }
+
+/* iOS Safari Optimizations */
+@supports (-webkit-touch-callout: none) {
+  .toast-container {
+    padding-top: env(safe-area-inset-top);
+    padding-right: env(safe-area-inset-right);
+  }
+  
+  .toast {
+    -webkit-overflow-scrolling: touch;
+    touch-action: manipulation;
+  }
+  
+  .btn-close {
+    -webkit-appearance: none;
+    appearance: none;
+    touch-action: manipulation;
+    min-height: 44px;
+    min-width: 44px;
+    -webkit-tap-highlight-color: rgba(107, 114, 128, 0.2);
+  }
+  
+  /* Prevent text selection */
+  .toast-header,
+  .toast-body {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
+@media (max-width: 576px) {
+  .toast-container {
+    padding: 0.5rem;
+    padding-top: max(0.5rem, env(safe-area-inset-top));
+    padding-right: max(0.5rem, env(safe-area-inset-right));
+  }
+  
+  .toast {
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+  }
+  
+  .btn-close {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
 </style>
