@@ -456,14 +456,8 @@ export default {
     await this.testApiConnectivity()
     await Promise.all([this.fetchServices(), this.fetchBarbers()])
 
-    const today = new Date()
-    today.setHours(0, 0, 0, 0) // Ensure we're working with midnight to avoid timezone issues
-    this.currentWeekStart = this.getStartOfWeek(today)
-    this.currentWeekStartDate = this.getMondayOfWeek(today)
-    
-    // Set selected date to today (current date) instead of finding first available
-    // This ensures we always start with the current date
-    this.selectedDate = this.formatDateValue(today)
+    // Always reset to today's date on page load/refresh
+    this.resetDateToToday()
     
     // Close month dropdown when clicking outside
     document.addEventListener('click', this.closeMonthDropdown)
@@ -675,8 +669,42 @@ export default {
         this.handleAvailabilityRefresh()
       }, 300)
     },
+    resetDateToToday() {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0) // Ensure we're working with midnight to avoid timezone issues
+      this.selectedDate = this.formatDateValue(today)
+      this.currentWeekStart = this.getStartOfWeek(today)
+      this.currentWeekStartDate = this.getMondayOfWeek(today)
+      this.currentMonth = today.getMonth()
+      this.currentYear = today.getFullYear()
+      // Clear selected time when resetting date
+      this.selectedTime = ''
+      this.availableTimes = []
+    },
+    validateAndResetDate() {
+      // If no date is selected, set to today
+      if (!this.selectedDate) {
+        this.resetDateToToday()
+        return
+      }
+
+      // Check if selected date is in the past
+      const selectedDateObj = new Date(this.selectedDate)
+      selectedDateObj.setHours(0, 0, 0, 0)
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+
+      if (selectedDateObj < today) {
+        // Date is in the past, reset to today
+        this.resetDateToToday()
+      }
+    },
     async handleAvailabilityRefresh() {
       if (this.currentStep < 2) return
+      
+      // Validate date before refreshing availability
+      this.validateAndResetDate()
+      
       this.selectedTime = ''
 
       if (!this.selectedDate || !this.selectedBarber) {
@@ -741,6 +769,9 @@ export default {
     goToStep(step) {
       this.currentStep = step
       if (step === 2) {
+        // Validate and reset date to today if it's invalid or in the past
+        this.validateAndResetDate()
+        // Refresh availability after ensuring date is valid
         this.handleAvailabilityRefresh()
       }
     },
@@ -869,12 +900,8 @@ export default {
     },
     resetFlow() {
       this.selectedServices = []
-      const today = new Date()
-      today.setHours(0, 0, 0, 0) // Ensure we're working with midnight to avoid timezone issues
-      this.selectedDate = this.formatDateValue(today)
-      this.currentWeekStart = this.getStartOfWeek(today)
-      this.currentWeekStartDate = this.getMondayOfWeek(today)
-      this.selectedTime = ''
+      // Use the resetDateToToday method to ensure consistency
+      this.resetDateToToday()
       this.currentStep = 1
       this.availableTimes = []
       this.dateOffset = 0 // Reset to first page
