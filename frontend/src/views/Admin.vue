@@ -378,7 +378,7 @@
                                     'slot-second': index === 1,
                                     'slot-occupied': slot.isOccupied && !slot.showTime
                                   }"
-                                  @click.stop.prevent="handleSlotClick($event, slot, dayViewDate)"
+                                  @click.stop.prevent="handleSlotClick($event, slot, dayViewDate, hour, index)"
                                 >
                                   <div 
                                     v-if="slot.isOccupied" 
@@ -3473,7 +3473,7 @@ getTimeSlotsForDay(dayIndex) {
       
       return slots
     },
-    async handleSlotClick(event, slot, date) {
+    async handleSlotClick(event, slot, date, hour, index) {
       // Prevent event bubbling
       if (event && event.stopPropagation) {
         event.stopPropagation()
@@ -3484,8 +3484,11 @@ getTimeSlotsForDay(dayIndex) {
         return
       }
       
-      // Normalize time format - remove seconds if present (e.g., "14:00:30" -> "14:00")
-      const normalizedTime = slot.time.split(':').slice(0, 2).join(':')
+      // Use hour and index to determine the correct time slot to avoid closure/reference issues
+      // This ensures we always get the correct slot even if Vue reuses slot objects
+      const hourValue = hour ? parseInt(hour.split(':')[0]) : parseInt(slot.time.split(':')[0])
+      const minuteValue = index === 0 ? 0 : 30
+      const normalizedTime = `${hourValue.toString().padStart(2, '0')}:${minuteValue.toString().padStart(2, '0')}`
 
       // Set the booking form with the selected date and time
       this.bookingForm.date = date
