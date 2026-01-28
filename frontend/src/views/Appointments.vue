@@ -457,16 +457,16 @@ export default {
     await Promise.all([this.fetchServices(), this.fetchBarbers()])
 
     const today = new Date()
-    this.selectedDate = this.formatDateValue(today)
+    today.setHours(0, 0, 0, 0) // Ensure we're working with midnight to avoid timezone issues
     this.currentWeekStart = this.getStartOfWeek(today)
     this.currentWeekStartDate = this.getMondayOfWeek(today)
     
-    // Ensure we start with today or the first available future date
-    const firstAvailable = this.findFirstAvailableDate(new Date(this.currentWeekStart))
+    // Set selected date to today (current date) instead of finding first available
+    // This ensures we always start with the current date
+    this.selectedDate = this.formatDateValue(today)
     
     // Close month dropdown when clicking outside
     document.addEventListener('click', this.closeMonthDropdown)
-    this.selectedDate = firstAvailable
   },
   
   beforeUnmount() {
@@ -870,8 +870,10 @@ export default {
     resetFlow() {
       this.selectedServices = []
       const today = new Date()
+      today.setHours(0, 0, 0, 0) // Ensure we're working with midnight to avoid timezone issues
       this.selectedDate = this.formatDateValue(today)
       this.currentWeekStart = this.getStartOfWeek(today)
+      this.currentWeekStartDate = this.getMondayOfWeek(today)
       this.selectedTime = ''
       this.currentStep = 1
       this.availableTimes = []
