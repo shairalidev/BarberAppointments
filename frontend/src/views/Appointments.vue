@@ -314,7 +314,9 @@ export default {
       ]
     },
     weekDays() {
-      const today = new Date()
+      // Create today's date using local time components (iOS Safari fix)
+      const now = new Date()
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
       today.setHours(0, 0, 0, 0)
       
       // Get start of current week (Monday)
@@ -327,6 +329,7 @@ export default {
       for (let i = 0; i < 7; i++) {
         const date = new Date(weekStart)
         date.setDate(weekStart.getDate() + i)
+        date.setHours(0, 0, 0, 0)
         const value = this.formatDateValue(date)
         const isPast = date < today && !this.isSameDay(date, today)
         
@@ -352,7 +355,9 @@ export default {
       return `${startStr} - ${endStr}`
     },
     monthDays() {
-      const today = new Date()
+      // Create today's date using local time components (iOS Safari fix)
+      const now = new Date()
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
       today.setHours(0, 0, 0, 0)
       
       const firstDay = new Date(this.currentYear, this.currentMonth, 1)
@@ -367,6 +372,7 @@ export default {
       // Previous month days
       for (let i = startDay - 1; i >= 0; i--) {
         const date = new Date(this.currentYear, this.currentMonth - 1, prevLastDay.getDate() - i)
+        date.setHours(0, 0, 0, 0)
         const value = this.formatDateValue(date)
         const isPast = date < today && !this.isSameDay(date, today)
         
@@ -383,6 +389,7 @@ export default {
       // Current month days
       for (let i = 1; i <= lastDay.getDate(); i++) {
         const date = new Date(this.currentYear, this.currentMonth, i)
+        date.setHours(0, 0, 0, 0)
         const value = this.formatDateValue(date)
         const isPast = date < today && !this.isSameDay(date, today)
         
@@ -401,6 +408,7 @@ export default {
       let nextDayCount = 1
       while (days.length < totalSlots) {
         const date = new Date(this.currentYear, this.currentMonth + 1, nextDayCount)
+        date.setHours(0, 0, 0, 0)
         const value = this.formatDateValue(date)
         const isPast = date < today && !this.isSameDay(date, today)
         
@@ -461,30 +469,80 @@ export default {
     
     // Close month dropdown when clicking outside
     document.addEventListener('click', this.closeMonthDropdown)
+    
+    // iOS Safari: Reset date when page becomes visible (handles tab switching, app switching)
+    document.addEventListener('visibilitychange', this.handleVisibilityChange)
+    
+    // iOS Safari: Also reset on page focus (additional safeguard)
+    window.addEventListener('focus', this.handlePageFocus)
   },
   
   beforeUnmount() {
     // Clean up timeout when component is destroyed
     clearTimeout(this.availabilityTimeout)
     document.removeEventListener('click', this.closeMonthDropdown)
+    document.removeEventListener('visibilitychange', this.handleVisibilityChange)
+    window.removeEventListener('focus', this.handlePageFocus)
   },
   methods: {
+    // iOS Safari compatible date parsing - parses YYYY-MM-DD format as local time
+    parseDateString(dateString) {
+      if (!dateString) return null
+      // If it's already a Date object, return it
+      if (dateString instanceof Date) {
+        const d = new Date(dateString)
+        d.setHours(0, 0, 0, 0)
+        return d
+      }
+      // Parse YYYY-MM-DD format explicitly as local time (iOS Safari fix)
+      const parts = dateString.split('-')
+      if (parts.length === 3) {
+        const year = parseInt(parts[0], 10)
+        const month = parseInt(parts[1], 10) - 1 // Month is 0-indexed
+        const day = parseInt(parts[2], 10)
+        const date = new Date(year, month, day)
+        date.setHours(0, 0, 0, 0)
+        return date
+      }
+      // Fallback to standard parsing
+      const parsedDate = new Date(dateString)
+      parsedDate.setHours(0, 0, 0, 0)
+      return parsedDate
+    },
     formatDateValue(date) {
-      const parsedDate = new Date(date)
+      // Handle both Date objects and date strings
+      const parsedDate = date instanceof Date ? date : this.parseDateString(date)
+      if (!parsedDate) {
+        // Fallback: create today's date
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        const year = today.getFullYear()
+        const month = String(today.getMonth() + 1).padStart(2, '0')
+        const day = String(today.getDate()).padStart(2, '0')
+        return `${year}-${month}-${day}`
+      }
       const year = parsedDate.getFullYear()
       const month = String(parsedDate.getMonth() + 1).padStart(2, '0')
       const day = String(parsedDate.getDate()).padStart(2, '0')
       return `${year}-${month}-${day}`
     },
     getStartOfWeek(date) {
-      const parsedDate = new Date(date)
+      const parsedDate = date instanceof Date ? date : this.parseDateString(date)
+      if (!parsedDate) {
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        parsedDate = today
+      }
       const day = parsedDate.getDay()
       const diff = day === 0 ? -6 : 1 - day
       parsedDate.setDate(parsedDate.getDate() + diff)
       return this.formatDateValue(parsedDate)
     },
     getMondayOfWeek(date) {
-      const d = new Date(date)
+      const d = date instanceof Date ? new Date(date) : this.parseDateString(date)
+      if (!d) {
+        d = new Date()
+      }
       const day = d.getDay()
       const diff = day === 0 ? -6 : 1 - day // Monday = 1, Sunday = 0 -> -6
       d.setDate(d.getDate() + diff)
@@ -492,11 +550,19 @@ export default {
       return d
     },
     navigateWeek(direction) {
+      if (!this.currentWeekStartDate) {
+        this.resetDateToToday()
+        return
+      }
+      
       const newWeekStart = new Date(this.currentWeekStartDate)
       newWeekStart.setDate(newWeekStart.getDate() + (direction * 7))
+      newWeekStart.setHours(0, 0, 0, 0)
       
       // Don't allow going before current week
-      const today = new Date()
+      const now = new Date()
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      today.setHours(0, 0, 0, 0)
       const currentMonday = this.getMondayOfWeek(today)
       if (newWeekStart < currentMonday) {
         return
@@ -515,7 +581,10 @@ export default {
     },
     isCurrentWeek() {
       if (!this.currentWeekStartDate) return true
-      const today = new Date()
+      // Create today's date using local time components (iOS Safari fix)
+      const now = new Date()
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      today.setHours(0, 0, 0, 0)
       const currentMonday = this.getMondayOfWeek(today)
       return this.currentWeekStartDate.getTime() === currentMonday.getTime()
     },
@@ -650,18 +719,25 @@ export default {
       }
     },
     selectDate(date) {
-      // Prevent selecting past dates
-      const selectedDate = new Date(date)
-      selectedDate.setHours(0, 0, 0, 0)
-      const today = new Date()
+      // Parse date using iOS Safari compatible method
+      const selectedDate = this.parseDateString(date)
+      if (!selectedDate) {
+        return
+      }
+
+      // Create today's date using local time components (iOS Safari fix)
+      const now = new Date()
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
       today.setHours(0, 0, 0, 0)
       
+      // Prevent selecting past dates
       if (selectedDate < today) {
         return
       }
       
-      this.selectedDate = date
-      this.currentWeekStart = this.getStartOfWeek(date)
+      // Format and set the selected date
+      this.selectedDate = this.formatDateValue(selectedDate)
+      this.currentWeekStart = this.getStartOfWeek(selectedDate)
       this.selectedTime = ''
       // Debounce availability refresh to prevent excessive API calls
       clearTimeout(this.availabilityTimeout)
@@ -669,9 +745,25 @@ export default {
         this.handleAvailabilityRefresh()
       }, 300)
     },
+    handleVisibilityChange() {
+      // When page becomes visible again (iOS Safari: tab switch, app switch)
+      if (!document.hidden) {
+        // Validate and reset date to ensure it's current
+        this.validateAndResetDate()
+      }
+    },
+    handlePageFocus() {
+      // Additional safeguard for iOS Safari: reset date when window regains focus
+      this.validateAndResetDate()
+    },
     resetDateToToday() {
-      const today = new Date()
-      today.setHours(0, 0, 0, 0) // Ensure we're working with midnight to avoid timezone issues
+      // Create today's date using local time components (iOS Safari fix)
+      // This ensures we get the correct local date regardless of timezone
+      const now = new Date()
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      today.setHours(0, 0, 0, 0)
+      
+      // Set all date-related properties
       this.selectedDate = this.formatDateValue(today)
       this.currentWeekStart = this.getStartOfWeek(today)
       this.currentWeekStartDate = this.getMondayOfWeek(today)
@@ -680,6 +772,9 @@ export default {
       // Clear selected time when resetting date
       this.selectedTime = ''
       this.availableTimes = []
+      
+      // Force Vue reactivity update for iOS Safari
+      this.$forceUpdate()
     },
     validateAndResetDate() {
       // If no date is selected, set to today
@@ -688,12 +783,19 @@ export default {
         return
       }
 
-      // Check if selected date is in the past
-      const selectedDateObj = new Date(this.selectedDate)
-      selectedDateObj.setHours(0, 0, 0, 0)
-      const today = new Date()
+      // Parse selected date using iOS Safari compatible method
+      const selectedDateObj = this.parseDateString(this.selectedDate)
+      if (!selectedDateObj) {
+        this.resetDateToToday()
+        return
+      }
+
+      // Create today's date using local time components (iOS Safari fix)
+      const now = new Date()
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
       today.setHours(0, 0, 0, 0)
 
+      // Compare dates
       if (selectedDateObj < today) {
         // Date is in the past, reset to today
         this.resetDateToToday()
