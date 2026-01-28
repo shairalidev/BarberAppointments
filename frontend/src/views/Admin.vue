@@ -358,7 +358,7 @@
                         </div>
                         <div class="schedule-body">
                           <div 
-                            v-for="(hour, hourIndex) in timeSlots" 
+                            v-for="(hour, hourIndex) in dayViewHourSlots" 
                             :key="hour"
                             class="schedule-row-wrapper"
                             :class="{ 'row-pink': hourIndex % 2 === 0, 'row-green': hourIndex % 2 === 1 }"
@@ -379,7 +379,6 @@
                                     'slot-occupied': slot.isOccupied && !slot.showTime
                                   }"
                                   @click.stop.prevent="handleSlotClick($event, slot, dayViewDate)"
-                                  style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(16, 185, 129, 0.3); position: relative; z-index: 1; min-height: 50px; flex: 1 1 50%;"
                                 >
                                   <div 
                                     v-if="slot.isOccupied" 
@@ -1541,7 +1540,7 @@
               </div>
               <div class="schedule-body">
                 <div 
-                  v-for="(hour, hourIndex) in timeSlots" 
+                  v-for="(hour, hourIndex) in dayViewHourSlots" 
                   :key="hour"
                   class="schedule-row"
                   :class="{ 'row-pink': hourIndex % 2 === 0, 'row-green': hourIndex % 2 === 1 }"
@@ -1998,7 +1997,7 @@ export default {
       const monthName = this.$t(`booking.monthNames.${monthKeys[date.getMonth()]}`)
       return `${dayName}, ${monthName} ${date.getDate()}, ${date.getFullYear()}`
     },
-    timeSlots() {
+    dayViewHourSlots() {
       // Generate time slots from 9:00 to 17:00 (9 AM to 5 PM)
       const slots = []
       for (let hour = 9; hour <= 17; hour++) {
@@ -3492,24 +3491,23 @@ getTimeSlotsForDay(dayIndex) {
       this.bookingForm.date = date
       this.bookingForm.time = normalizedTime
 
-        // Set the booking calendar to show the selected date's month
-        const selectedDate = new Date(date)
-        this.bookingCalendarMonth = selectedDate.getMonth()
-        this.bookingCalendarYear = selectedDate.getFullYear()
+      // Set the booking calendar to show the selected date's month
+      const selectedDate = new Date(date)
+      this.bookingCalendarMonth = selectedDate.getMonth()
+      this.bookingCalendarYear = selectedDate.getFullYear()
 
-        // Mark that this booking is from a slot click (hide calendar/time in modal)
-        this.bookingFromSlotClick = true
-        // Ensure customers are loaded before opening modal
-        if (this.customers.length === 0) {
-          await this.fetchCustomers()
-        }
-        // Open the booking modal
-        this.showBookingModal = true
-
-        // Don't fetch available slots when opening from slot click
-        // The time is already selected and guaranteed to be available
-        // Slots will be fetched when service is selected if needed
+      // Mark that this booking is from a slot click (hide calendar/time in modal)
+      this.bookingFromSlotClick = true
+      // Ensure customers are loaded before opening modal
+      if (this.customers.length === 0) {
+        await this.fetchCustomers()
       }
+      // Open the booking modal
+      this.showBookingModal = true
+
+      // Don't fetch available slots when opening from slot click
+      // The time is already selected and guaranteed to be available
+      // Slots will be fetched when service is selected if needed
     },
     getServiceNames(appointment) {
       if (!appointment.services) {
@@ -7209,6 +7207,7 @@ async setReminder(appointment) {
   user-select: none;
   flex: 1 1 50%;
   box-sizing: border-box;
+  z-index: 1;
 }
 
 .half-hour-slot.slot-first {
