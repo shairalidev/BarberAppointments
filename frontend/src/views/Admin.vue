@@ -7085,12 +7085,17 @@ async setReminder(appointment) {
   }
   
   /* CRITICAL: Both slots must be EQUAL size */
-  .half-hour-slot.slot-first,
+  .half-hour-slot.slot-first {
+    min-height: 50px !important;
+    height: 50px !important;
+    flex: 1 1 50% !important;
+    background-color: rgba(239, 154, 154, 0.15) !important;
+  }
   .half-hour-slot.slot-second {
     min-height: 50px !important;
     height: 50px !important;
     flex: 1 1 50% !important;
-    background-color: transparent !important;
+    background-color: rgba(165, 214, 167, 0.15) !important;
   }
   
   .schedule-row {
@@ -7217,14 +7222,14 @@ async setReminder(appointment) {
   border-top: none;
   flex: 1 1 50%;
   min-height: inherit;
-  background-color: transparent !important;
+  background-color: rgba(239, 154, 154, 0.15) !important;
 }
 
 .half-hour-slot.slot-second {
   border-bottom: none;
   flex: 1 1 50%;
   min-height: inherit;
-  background-color: transparent !important;
+  background-color: rgba(165, 214, 167, 0.15) !important;
 }
 
 .half-hour-slot.slot-left {
@@ -7534,14 +7539,21 @@ async setReminder(appointment) {
     overflow: hidden;
   }
   
-  /* CRITICAL: Both slots MUST be EQUAL size - remove colored backgrounds */
-  .half-hour-slot.slot-first,
+  /* CRITICAL: Both slots MUST be EQUAL size */
+  .half-hour-slot.slot-first {
+    min-height: 50px !important;
+    height: 50px !important;
+    max-height: 50px !important;
+    flex: 1 1 50% !important;
+    background-color: rgba(239, 154, 154, 0.15) !important;
+    width: 100% !important;
+  }
   .half-hour-slot.slot-second {
     min-height: 50px !important;
     height: 50px !important;
     max-height: 50px !important;
     flex: 1 1 50% !important;
-    background-color: transparent !important;
+    background-color: rgba(165, 214, 167, 0.15) !important;
     width: 100% !important;
   }
   
@@ -9825,13 +9837,19 @@ select.booking-service-select {
       overflow: hidden;
     }
     
-    .half-hour-slot.slot-first,
+    .half-hour-slot.slot-first {
+      min-height: 55px !important;
+      height: 55px !important;
+      max-height: 55px !important;
+      flex: 1 1 50% !important;
+      background-color: rgba(239, 154, 154, 0.15) !important;
+    }
     .half-hour-slot.slot-second {
       min-height: 55px !important;
       height: 55px !important;
       max-height: 55px !important;
       flex: 1 1 50% !important;
-      background-color: transparent !important;
+      background-color: rgba(165, 214, 167, 0.15) !important;
     }
     
     .schedule-row {
