@@ -1107,7 +1107,7 @@
                     <span><i class="fas fa-users me-2"></i>{{ $t('admin.existingCustomers') }}</span>
                     <small class="text-muted">{{ $t('admin.selectToPrefill') }}</small>
                   </label>
-                  <div class="customer-search-container">
+                  <div class="customer-search-container" style="position: relative; z-index: 1070;">
                     <div class="input-group mb-2">
                       <span class="input-group-text"><i class="fas fa-search"></i></span>
                       <input
@@ -1116,7 +1116,9 @@
                         class="form-control"
                         @focus="showCustomerDropdown = true"
                         @input="showCustomerDropdown = true"
+                        @touchstart="showCustomerDropdown = true"
                         autocomplete="off"
+                        style="font-size: 16px;"
                       />
                       <button 
                         v-if="bookingCustomerSearch"
@@ -1132,16 +1134,20 @@
                     <div 
                       v-if="showCustomerDropdown"
                       class="customer-dropdown"
-                      @click.stop
-                      @touchstart.stop
+                      @click.stop.prevent
+                      @touchstart.stop.prevent
+                      @touchend.stop.prevent
+                      style="position: absolute; z-index: 1070; transform: translateZ(0); -webkit-transform: translateZ(0);"
                     >
                       <div v-if="bookingCustomerMatches.length > 0" class="customer-list">
                         <div
                           v-for="customer in bookingCustomerMatches.slice(0, 8)"
                           :key="customer._id"
                           class="customer-item"
-                          @click.stop="selectCustomerForBooking(customer)"
-                          @touchstart.stop="selectCustomerForBooking(customer)"
+                          @click.stop.prevent="selectCustomerForBooking(customer)"
+                          @touchstart.stop.prevent="selectCustomerForBooking(customer)"
+                          @touchend.stop.prevent="selectCustomerForBooking(customer)"
+                          style="position: relative; z-index: 10; touch-action: manipulation; -webkit-tap-highlight-color: rgba(107, 114, 128, 0.2);"
                         >
                           <div class="customer-info">
                             <div class="customer-name">
@@ -1319,8 +1325,8 @@
     </div>
 
     <!-- Edit Appointment Modal -->
-    <div v-if="editTimeModal.show" class="modal fade show d-block edit-appointment-modal" style="background: rgba(0,0,0,0.5);" @click.self="closeEditTimeModal">
-      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div v-if="editTimeModal.show" class="modal fade show d-block edit-appointment-modal" style="background: rgba(0,0,0,0.5); z-index: 1050;" @click.self="closeEditTimeModal">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="z-index: 1051;">
         <div class="modal-content">
           <div class="modal-header bg-gradient-primary text-white">
             <h5 class="modal-title">
@@ -1331,7 +1337,7 @@
           <div class="modal-body edit-modal-body">
             <div v-if="editTimeModal.appointment" class="mb-3 current-appointment-info">
               <p class="mb-1"><strong>{{ $t('admin.customer') }}:</strong> {{ editTimeModal.appointment.customerName }}</p>
-              <p class="mb-1"><strong>{{ $t('admin.currentDate') }}:</strong> {{ new Date(editTimeModal.appointment.date).toLocaleDateString() }}</p>
+              <p class="mb-1"><strong>{{ $t('admin.currentDate') }}:</strong> {{ formatEditModalCurrentDate }}</p>
               <p class="mb-0"><strong>{{ $t('admin.currentTime') }}:</strong> {{ editTimeModal.appointment.time }}</p>
             </div>
 
@@ -1345,7 +1351,8 @@
                 <div class="week-nav-header">
                   <button
                     type="button"
-                    @click="changeEditWeek(-1)"
+                    @click.stop="changeEditWeek(-1)"
+                    @touchstart.stop="changeEditWeek(-1)"
                     class="week-nav-btn"
                     :disabled="isEditWeekMin"
                   >
@@ -1356,7 +1363,8 @@
                   </div>
                   <button
                     type="button"
-                    @click="changeEditWeek(1)"
+                    @click.stop="changeEditWeek(1)"
+                    @touchstart.stop="changeEditWeek(1)"
                     class="week-nav-btn"
                   >
                     <i class="fas fa-chevron-right"></i>
@@ -1368,7 +1376,8 @@
                   <div
                     v-for="day in editWeekDays"
                     :key="day.date"
-                    @click="selectEditDate(day)"
+                    @click.stop="selectEditDate(day)"
+                    @touchstart.stop="selectEditDate(day)"
                     :class="['week-day-cell', {
                       'today': day.isToday,
                       'selected': day.date === editTimeModal.newDate,
@@ -1391,7 +1400,8 @@
                   v-for="slot in editTimeModal.availableTimes"
                   :key="slot"
                   type="button"
-                  @click="editTimeModal.newTime = slot"
+                  @click.stop="editTimeModal.newTime = slot"
+                  @touchstart.stop="editTimeModal.newTime = slot"
                   :class="['btn', 'btn-sm', 'time-slot-btn', editTimeModal.newTime === slot ? 'btn-primary' : 'btn-outline-primary']"
                 >
                   {{ slot }}
@@ -1412,9 +1422,9 @@
               <small class="text-muted">{{ $t('admin.messageWillBeSent') }}</small>
             </div>
           </div>
-          <div class="modal-footer">
-            <button @click="closeEditTimeModal" class="btn btn-secondary">{{ $t('common.cancel') }}</button>
-            <button @click="updateAppointmentTime" class="btn btn-primary" :disabled="!editTimeModal.newTime || !editTimeModal.newDate">
+          <div class="modal-footer" style="position: relative; z-index: 10; background: var(--bg-primary); border-top: 1px solid var(--border-color);">
+            <button @click.stop="closeEditTimeModal" @touchstart.stop="closeEditTimeModal" class="btn btn-secondary" style="position: relative; z-index: 10; -webkit-appearance: none; appearance: none; touch-action: manipulation; min-height: 44px;">{{ $t('common.cancel') }}</button>
+            <button @click.stop="updateAppointmentTime" @touchstart.stop="updateAppointmentTime" class="btn btn-primary" :disabled="!editTimeModal.newTime || !editTimeModal.newDate" style="position: relative; z-index: 10; -webkit-appearance: none; appearance: none; touch-action: manipulation; min-height: 44px;">
               <i class="fas fa-save me-2"></i>{{ $t('admin.updateAppointment') }}
             </button>
           </div>
@@ -2153,15 +2163,26 @@ export default {
       const startDate = new Date(today)
       startDate.setDate(today.getDate() + (this.editTimeModal.weekOffset * 7))
 
+      // Find Monday of the week containing startDate
+      const dayOfWeek = startDate.getDay()
+      const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek
+      const monday = new Date(startDate)
+      monday.setDate(startDate.getDate() + mondayOffset)
+
       const days = []
       const dayKeys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 
       for (let i = 0; i < 7; i++) {
-        const date = new Date(startDate)
-        date.setDate(startDate.getDate() + i)
+        const date = new Date(monday)
+        date.setDate(monday.getDate() + i)
         const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
         const isPast = date < today
         const isToday = date.toDateString() === today.toDateString()
+
+        // Calculate actual day of week (0=Sunday, 1=Monday, etc.)
+        const actualDayOfWeek = date.getDay()
+        // Convert to Monday-based index (0=Monday, 6=Sunday)
+        const dayIndex = actualDayOfWeek === 0 ? 6 : actualDayOfWeek - 1
 
         // Check if date is restricted
         const isOffDate = this.restrictions.some(restriction => {
@@ -2178,7 +2199,7 @@ export default {
 
         days.push({
           date: dateStr,
-          dayName: this.$t(`booking.dayNames.${dayKeys[i]}`),
+          dayName: this.$t(`booking.dayNames.${dayKeys[dayIndex]}`),
           dayNumber: date.getDate(),
           isToday,
           isPast,
@@ -2213,6 +2234,15 @@ export default {
     },
     isEditWeekMin() {
       return this.editTimeModal.weekOffset === 0
+    },
+    formatEditModalCurrentDate() {
+      if (!this.editTimeModal.appointment || !this.editTimeModal.appointment.date) return ''
+      const date = new Date(this.editTimeModal.appointment.date)
+      const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
+      const monthKeys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+      const dayName = this.$t(`booking.dayNamesFull.${dayKeys[date.getDay()]}`)
+      const monthName = this.$t(`booking.monthNames.${monthKeys[date.getMonth()]}`)
+      return `${dayName}, ${monthName} ${date.getDate()}, ${date.getFullYear()}`
     },
     dayViewAppointments() {
       if (!this.dayViewDate) return []
@@ -2657,6 +2687,14 @@ async quickBookAppointment() {
       this.editTimeModal.message = ''
       this.editTimeModal.show = true
       this.editTimeModal.availableTimes = []
+      
+      // Calculate weekOffset to show the week containing the appointment date
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const aptDate = new Date(appointmentDate + 'T00:00:00')
+      const diffTime = aptDate - today
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+      this.editTimeModal.weekOffset = Math.floor(diffDays / 7)
       
       // Fetch available time slots for this appointment
       await this.fetchEditModalAvailableTimes()
@@ -4826,6 +4864,8 @@ async setReminder(appointment) {
   border-radius: 8px;
   width: 40px;
   height: 40px;
+  min-width: 44px;
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4833,6 +4873,12 @@ async setReminder(appointment) {
   cursor: pointer;
   transition: all 0.2s;
   flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+  -webkit-appearance: none;
+  appearance: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(107, 114, 128, 0.1);
 }
 
 .week-nav-btn:hover:not(:disabled) {
@@ -4879,6 +4925,13 @@ async setReminder(appointment) {
   align-items: center;
   justify-content: center;
   color: var(--text-primary);
+  z-index: 10;
+  -webkit-appearance: none;
+  appearance: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(107, 114, 128, 0.1);
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .week-date-picker .week-day-cell:hover:not(.past):not(.off-date) {
@@ -5905,6 +5958,8 @@ async setReminder(appointment) {
 /* Customer Search Dropdown */
 .customer-search-container {
   position: relative;
+  z-index: 1070;
+  isolation: isolate;
 }
 
 .customer-dropdown {
@@ -5916,10 +5971,13 @@ async setReminder(appointment) {
   border: 1px solid var(--border-color);
   border-radius: 8px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  z-index: 1060;
+  z-index: 1070;
   max-height: 300px;
   overflow-y: auto;
   margin-top: 0.25rem;
+  -webkit-overflow-scrolling: touch;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
 .customer-list {
@@ -5937,6 +5995,11 @@ async setReminder(appointment) {
   appearance: none;
   touch-action: manipulation;
   -webkit-tap-highlight-color: rgba(107, 114, 128, 0.1);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .customer-item:last-child {
@@ -8596,14 +8659,29 @@ select.booking-service-select {
     min-height: 34px !important;
   }
   
+  .modal-body .customer-search-container {
+    position: relative !important;
+    z-index: 1070 !important;
+  }
+  
   .modal-body .customer-dropdown {
-    max-height: 150px !important;
+    max-height: 200px !important;
     overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
+    -webkit-overflow-scrolling: touch !important;
+    z-index: 1070 !important;
+    position: absolute !important;
+    transform: translateZ(0) !important;
+    -webkit-transform: translateZ(0) !important;
+    will-change: transform !important;
   }
   
   .modal-body .customer-item {
-    padding: 0.35rem 0.4rem !important;
+    padding: 0.5rem 0.6rem !important;
+    min-height: 44px !important;
+    position: relative !important;
+    z-index: 10 !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: rgba(107, 114, 128, 0.2) !important;
   }
   
   .modal-body .customer-name {
@@ -9444,6 +9522,31 @@ select.booking-service-select {
     .schedule-body {
       -webkit-overflow-scrolling: touch;
     }
+    
+    /* Customer dropdown iOS Safari fixes */
+    .customer-search-container {
+      position: relative !important;
+      z-index: 1070 !important;
+    }
+    
+    .customer-dropdown {
+      z-index: 1070 !important;
+      position: absolute !important;
+      transform: translateZ(0) !important;
+      -webkit-transform: translateZ(0) !important;
+      will-change: transform !important;
+      -webkit-overflow-scrolling: touch !important;
+    }
+    
+    .customer-item {
+      min-height: 44px !important;
+      touch-action: manipulation !important;
+      -webkit-tap-highlight-color: rgba(107, 114, 128, 0.2) !important;
+      position: relative !important;
+      z-index: 10 !important;
+      -webkit-user-select: none !important;
+      user-select: none !important;
+    }
 
     /* Fix button tap delay */
     .modal-body .btn,
@@ -9782,15 +9885,28 @@ select.booking-service-select {
   }
 
   .booking-modal-body .customer-search-container {
+    position: relative !important;
+    z-index: 1070 !important;
     margin-bottom: 0.5rem;
   }
 
   .booking-modal-body .customer-dropdown {
     max-height: 200px !important;
+    z-index: 1070 !important;
+    position: absolute !important;
+    transform: translateZ(0) !important;
+    -webkit-transform: translateZ(0) !important;
+    will-change: transform !important;
+    -webkit-overflow-scrolling: touch !important;
   }
 
   .booking-modal-body .customer-item {
     padding: 0.5rem !important;
+    min-height: 44px !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: rgba(107, 114, 128, 0.2) !important;
+    position: relative !important;
+    z-index: 10 !important;
   }
 
   .booking-modal-body .customer-name {
