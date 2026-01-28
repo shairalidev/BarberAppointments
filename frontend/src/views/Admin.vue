@@ -1334,14 +1334,14 @@
     <!-- Edit Appointment Modal -->
     <div v-if="editTimeModal.show" class="modal fade show d-block edit-appointment-modal" style="background: rgba(0,0,0,0.5); z-index: 1050;" @click.self="closeEditTimeModal">
       <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable edit-appointment-modal-dialog" style="z-index: 1051;">
-        <div class="modal-content edit-appointment-modal-content">
-          <div class="modal-header bg-gradient-primary text-white edit-appointment-modal-header">
+        <div class="modal-content edit-appointment-modal-content" @click.stop>
+          <div class="modal-header bg-gradient-primary text-white edit-appointment-modal-header" style="position: relative; z-index: 1052;">
             <h5 class="modal-title">
               <i class="fas fa-edit me-2"></i>{{ $t('admin.editAppointment') }}
             </h5>
-            <button @click="closeEditTimeModal" class="btn-close btn-close-white"></button>
+            <button @click.stop="closeEditTimeModal" @touchstart.stop="closeEditTimeModal" class="btn-close btn-close-white" style="position: relative; z-index: 1053;"></button>
           </div>
-          <div class="modal-body edit-modal-body">
+          <div class="modal-body edit-modal-body" style="overflow-y: auto; max-height: calc(100vh - 250px);">
             <div v-if="editTimeModal.appointment" class="mb-3 current-appointment-info">
               <p class="mb-1"><strong>{{ $t('admin.customer') }}:</strong> {{ editTimeModal.appointment.customerName }}</p>
               <p class="mb-1"><strong>{{ $t('admin.currentDate') }}:</strong> {{ formatEditModalCurrentDate }}</p>
@@ -1402,7 +1402,7 @@
 
             <div class="mb-3">
               <label class="form-label fw-semibold">{{ $t('admin.selectNewTime') }}</label>
-              <div v-if="editTimeModal.availableTimes.length" class="time-slots-grid mobile-optimized">
+              <div v-if="editTimeModal.availableTimes.length" class="time-slots-grid mobile-optimized" style="max-height: 200px; overflow-y: auto;">
                 <button
                   v-for="slot in editTimeModal.availableTimes"
                   :key="slot"
@@ -1429,9 +1429,9 @@
               <small class="text-muted">{{ $t('admin.messageWillBeSent') }}</small>
             </div>
           </div>
-          <div class="modal-footer" style="position: relative; z-index: 10; background: var(--bg-primary); border-top: 1px solid var(--border-color);">
-            <button @click.stop="closeEditTimeModal" @touchstart.stop="closeEditTimeModal" class="btn btn-secondary" style="position: relative; z-index: 10; -webkit-appearance: none; appearance: none; touch-action: manipulation; min-height: 44px;">{{ $t('common.cancel') }}</button>
-            <button @click.stop="updateAppointmentTime" @touchstart.stop="updateAppointmentTime" class="btn btn-primary" :disabled="!editTimeModal.newTime || !editTimeModal.newDate" style="position: relative; z-index: 10; -webkit-appearance: none; appearance: none; touch-action: manipulation; min-height: 44px;">
+          <div class="modal-footer" style="position: sticky; bottom: 0; z-index: 1052; background: var(--bg-primary); border-top: 1px solid var(--border-color); flex-shrink: 0;">
+            <button @click.stop.prevent="closeEditTimeModal" @touchstart.stop.prevent="closeEditTimeModal" @mousedown.stop.prevent="closeEditTimeModal" class="btn btn-secondary" style="position: relative; z-index: 1053; -webkit-appearance: none; appearance: none; touch-action: manipulation; min-height: 44px;">{{ $t('common.cancel') }}</button>
+            <button @click.stop.prevent="updateAppointmentTime" @touchstart.stop.prevent="updateAppointmentTime" @mousedown.stop.prevent="updateAppointmentTime" class="btn btn-primary" :disabled="!editTimeModal.newTime || !editTimeModal.newDate" style="position: relative; z-index: 1053; -webkit-appearance: none; appearance: none; touch-action: manipulation; min-height: 44px;">
               <i class="fas fa-save me-2"></i>{{ $t('admin.updateAppointment') }}
             </button>
           </div>
@@ -2755,6 +2755,10 @@ async quickBookAppointment() {
       this.editTimeModal.message = ''
       this.editTimeModal.availableTimes = []
       this.editTimeModal.weekOffset = 0
+      // Force update to ensure modal closes
+      this.$nextTick(() => {
+        this.$forceUpdate()
+      })
     },
     changeEditWeek(offset) {
       this.editTimeModal.weekOffset += offset
@@ -3447,6 +3451,32 @@ getTimeSlotsForDay(dayIndex) {
     async handleSlotClick(slot, date) {
       // Only handle clicks on empty slots
       if (!slot.appointment && date && slot.time) {
+        // Check if this slot conflicts with any existing appointment
+        const slotTime = slot.time
+        const slotHour = parseInt(slotTime.split(':')[0])
+        const slotMinute = parseInt(slotTime.split(':')[1]) || 0
+        const slotTimeMinutes = slotHour * 60 + slotMinute
+        
+        // Check if any appointment overlaps with this slot
+        const hasConflict = this.dayViewData.appointments.some(apt => {
+          if (!apt.time) return false
+          const aptTime = apt.time
+          const aptHour = parseInt(aptTime.split(':')[0])
+          const aptMinute = parseInt(aptTime.split(':')[1]) || 0
+          const aptTimeMinutes = aptHour * 60 + aptMinute
+          const aptDuration = apt.totalDuration || 30
+          const aptEndMinutes = aptTimeMinutes + aptDuration
+          
+          // Check if slot time falls within the appointment time range
+          // Slot is blocked if it's between appointment start and end (exclusive of start, inclusive of end)
+          return slotTimeMinutes >= aptTimeMinutes && slotTimeMinutes < aptEndMinutes
+        })
+        
+        if (hasConflict) {
+          this.showToast('This time slot conflicts with an existing appointment', 'warning')
+          return
+        }
+        
         // Normalize time format - remove seconds if present (e.g., "14:00:30" -> "14:00")
         const normalizedTime = slot.time.split(':').slice(0, 2).join(':')
 
@@ -8985,6 +9015,34 @@ select.booking-service-select {
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
   }
+  
+  /* Edit Appointment Modal - Desktop */
+  .edit-appointment-modal-content {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 2rem);
+    overflow: hidden;
+  }
+  
+  .edit-appointment-modal-header {
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1052;
+  }
+  
+  .edit-appointment-modal .modal-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 1052;
+    flex-shrink: 0;
+    background: var(--bg-primary);
+  }
+  
+  .time-slots-grid.mobile-optimized {
+    max-height: 200px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 
   .current-appointment-info {
     background: var(--bg-secondary);
@@ -9044,11 +9102,14 @@ select.booking-service-select {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    position: relative;
   }
   
   .edit-appointment-modal-header {
     padding: 0.75rem !important;
     flex-shrink: 0;
+    position: relative;
+    z-index: 1052;
   }
   
   .edit-appointment-modal-header .modal-title {
@@ -9061,6 +9122,22 @@ select.booking-service-select {
     -webkit-overflow-scrolling: touch;
     flex: 1;
     min-height: 0;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .edit-appointment-modal .modal-footer {
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 1052 !important;
+    flex-shrink: 0 !important;
+    background: var(--bg-primary) !important;
+  }
+  
+  .time-slots-grid.mobile-optimized {
+    max-height: 200px !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
   }
   
   .current-appointment-info {
@@ -9146,11 +9223,17 @@ select.booking-service-select {
   .edit-appointment-modal .modal-footer {
     padding: 0.5rem 0.75rem !important;
     flex-shrink: 0;
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 1052 !important;
+    background: var(--bg-primary) !important;
   }
   
   .edit-appointment-modal .modal-footer .btn {
     font-size: 0.85rem !important;
     padding: 0.5rem 1rem !important;
+    position: relative;
+    z-index: 1053;
   }
   
   .available-slots-container {
