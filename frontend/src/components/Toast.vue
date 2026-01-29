@@ -65,6 +65,13 @@ export default {
 </script>
 
 <style scoped>
+/* Toast container should not block interactions */
+.toast-container {
+  pointer-events: none !important;
+  z-index: 9999;
+}
+
+/* Only toast items should be interactive */
 .toast {
   border-radius: 12px;
   box-shadow: var(--shadow-lg);
@@ -72,6 +79,13 @@ export default {
   margin-bottom: 12px;
   background-color: var(--bg-secondary);
   color: var(--text-primary);
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 10000;
+}
+
+.toast * {
+  pointer-events: auto !important;
 }
 
 .toast-header {

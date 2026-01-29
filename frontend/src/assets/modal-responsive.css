@@ -9,6 +9,29 @@ button, .btn, a, input, select, textarea {
   pointer-events: auto !important;
 }
 
+/* CRITICAL: Toast containers should not block page interactions */
+.Vue-Toastification__container,
+.Vue-Toastification__container.top-right,
+.Vue-Toastification__container.bottom-right,
+.toast-container {
+  pointer-events: none !important;
+}
+
+/* Only toast items themselves should be interactive */
+.Vue-Toastification__toast,
+.toast-container .toast,
+.toast {
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 10000;
+}
+
+.Vue-Toastification__toast *,
+.toast-container .toast *,
+.toast * {
+  pointer-events: auto !important;
+}
+
 /* Only block interactions on modal overlay when modal is shown */
 .modal.responsive-modal.show,
 .responsive-modal.show.d-block {

@@ -6058,6 +6058,13 @@ async setReminder(appointment) {
 }
 
 /* Professional Toast Notifications */
+/* Toast container should not block page interactions */
+.toast-container {
+  pointer-events: none !important;
+  z-index: 9999;
+}
+
+/* Only toast items should be interactive */
 .toast {
   min-width: 300px;
   border: none;
@@ -6066,6 +6073,13 @@ async setReminder(appointment) {
   backdrop-filter: blur(10px);
   margin-bottom: 0.75rem;
   animation: slideInRight 0.3s ease-out;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 10000;
+}
+
+.toast * {
+  pointer-events: auto !important;
 }
 
 .toast-success {
@@ -6208,10 +6222,15 @@ async setReminder(appointment) {
 .toast .btn-close {
   filter: brightness(0) invert(1);
   opacity: 0.8;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  position: relative;
+  z-index: 10001;
 }
 
 .toast .btn-close:hover {
   opacity: 1;
+  pointer-events: auto !important;
 }
 
 @keyframes slideInRight {
@@ -6870,6 +6889,15 @@ async setReminder(appointment) {
     right: 0;
     top: auto;
     bottom: 1rem;
+    pointer-events: none !important;
+  }
+  
+  .toast-container .toast {
+    pointer-events: auto !important;
+  }
+  
+  .toast-container .toast * {
+    pointer-events: auto !important;
   }
 }
 

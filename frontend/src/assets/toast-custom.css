@@ -1,4 +1,16 @@
 /* Custom Toast Styles */
+/* CRITICAL: Toast container should not block page interactions */
+.Vue-Toastification__container {
+  pointer-events: none !important;
+  z-index: 9999 !important;
+}
+
+.Vue-Toastification__container.top-right,
+.Vue-Toastification__container.bottom-right {
+  pointer-events: none !important;
+}
+
+/* Only toast items themselves should be interactive */
 .Vue-Toastification__toast {
   border-radius: 16px !important;
   padding: 16px 20px !important;
@@ -7,6 +19,13 @@
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 15px;
   min-height: 64px;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 10000;
+}
+
+.Vue-Toastification__toast * {
+  pointer-events: auto !important;
 }
 
 .Vue-Toastification__toast--success {
@@ -38,10 +57,15 @@
   color: white !important;
   opacity: 0.8 !important;
   font-size: 20px !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  position: relative;
+  z-index: 10001;
 }
 
 .Vue-Toastification__close-button:hover {
   opacity: 1 !important;
+  pointer-events: auto !important;
 }
 
 .Vue-Toastification__icon {
