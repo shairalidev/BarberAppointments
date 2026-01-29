@@ -891,25 +891,25 @@
     </div>
 
     <!-- Response Modal -->
-    <div v-if="responseModal.show" class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" @click.self="responseModal.show = false">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
+    <div v-if="responseModal.show" class="modal fade show d-block responsive-modal" style="background: rgba(0,0,0,0.5);" @click.self="responseModal.show = false">
+      <div class="modal-dialog modal-dialog-centered responsive-modal-dialog">
+        <div class="modal-content responsive-modal-content">
+          <div class="modal-header responsive-modal-header">
             <h5 class="modal-title">
               <i :class="responseModal.status === 'confirmed' ? 'fas fa-check-circle text-success' : 'fas fa-times-circle text-danger'"></i>
               {{ responseModal.status === 'confirmed' ? $t('admin.acceptBooking') : $t('admin.rejectBooking') }}
             </h5>
-            <button @click="responseModal.show = false" class="btn-close"></button>
+            <button @click="responseModal.show = false" class="btn-close" aria-label="Close"></button>
           </div>
-          <div class="modal-body">
+          <div class="modal-body responsive-modal-body">
             <p><strong>{{ $t('admin.customer') }}:</strong> {{ responseModal.appointment?.customerName }}</p>
             <p><strong>{{ $t('booking.date') }}:</strong> {{ formatDate(responseModal.appointment?.date) }} {{ $t('common.at') }} {{ responseModal.appointment?.time }}</p>
             <div class="mb-3">
               <label class="form-label">{{ $t('admin.messageToCustomer') }}</label>
-              <textarea v-model="responseModal.message" class="form-control" rows="3"></textarea>
+              <textarea v-model="responseModal.message" class="form-control" rows="3" :placeholder="$t('admin.messageToCustomer')"></textarea>
             </div>
           </div>
-          <div class="modal-footer">
+          <div class="modal-footer responsive-modal-footer">
             <button @click="responseModal.show = false" class="btn btn-secondary">{{ $t('common.cancel') }}</button>
             <button @click="respondToAppointment" :class="responseModal.status === 'confirmed' ? 'btn btn-success' : 'btn btn-danger'">
               {{ responseModal.status === 'confirmed' ? $t('admin.acceptAndNotify') : $t('admin.rejectAndNotify') }}
@@ -920,14 +920,14 @@
     </div>
 
     <!-- Booking Modal -->
-    <div v-if="showBookingModal" class="modal fade show d-block booking-modal-overlay" style="background: rgba(0,0,0,0.5);" @click.self="closeBookingModal">
-      <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable booking-modal-dialog">
-        <div class="modal-content booking-modal-content">
-          <div class="modal-header bg-gradient-primary text-white">
+    <div v-if="showBookingModal" class="modal fade show d-block booking-modal-overlay responsive-modal" style="background: rgba(0,0,0,0.5);" @click.self="closeBookingModal">
+      <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable booking-modal-dialog responsive-modal-dialog">
+        <div class="modal-content booking-modal-content responsive-modal-content">
+          <div class="modal-header bg-gradient-primary text-white responsive-modal-header">
             <h5 class="modal-title"><i class="fas fa-plus me-2"></i>{{ $t('admin.bookNewAppointment') }}</h5>
-            <button @click="closeBookingModal" class="btn-close btn-close-white"></button>
+            <button @click="closeBookingModal" class="btn-close btn-close-white" aria-label="Close"></button>
           </div>
-          <div class="modal-body booking-modal-body">
+          <div class="modal-body booking-modal-body responsive-modal-body">
             <form @submit.prevent="quickBookAppointment">
               <div class="row g-3">
 
@@ -1201,7 +1201,7 @@
               </div>
             </form>
           </div>
-          <div class="modal-footer">
+          <div class="modal-footer responsive-modal-footer">
             <button @click="closeBookingModal" class="btn btn-secondary">{{ $t('common.cancel') }}</button>
             <button @click="quickBookAppointment" class="btn btn-success" :disabled="!bookingForm.time">
               <i class="fas fa-check me-2"></i>{{ $t('admin.bookAppointment') }}
@@ -1212,17 +1212,17 @@
     </div>
 
     <!-- Customer Modal -->
-    <div v-if="showCustomerModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" @click.self="closeCustomerModal">
-      <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header bg-gradient-primary text-white">
+    <div v-if="showCustomerModal" class="modal fade show d-block responsive-modal" style="background: rgba(0,0,0,0.5);" @click.self="closeCustomerModal">
+      <div class="modal-dialog modal-lg modal-dialog-centered responsive-modal-dialog">
+        <div class="modal-content responsive-modal-content">
+          <div class="modal-header bg-gradient-primary text-white responsive-modal-header">
             <h5 class="modal-title">
               <i class="fas fa-user-edit me-2"></i>{{ customerForm._id ? $t('admin.editCustomer') : $t('admin.addCustomer') }}
             </h5>
-            <button @click="closeCustomerModal" class="btn-close btn-close-white"></button>
+            <button @click="closeCustomerModal" class="btn-close btn-close-white" aria-label="Close"></button>
           </div>
           <form @submit.prevent="saveCustomer">
-            <div class="modal-body">
+            <div class="modal-body responsive-modal-body">
               <div class="row g-3">
                 <div class="col-md-4">
                   <label class="form-label">{{ $t('admin.customerName') }}</label>
@@ -1250,7 +1250,7 @@
                 </div>
               </div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer responsive-modal-footer">
               <button type="button" @click="closeCustomerModal" class="btn btn-outline-secondary">
                 {{ $t('common.cancel') }}
               </button>
@@ -1264,21 +1264,21 @@
     </div>
 
     <!-- Delete Customer Modal -->
-    <div v-if="showDeleteCustomerModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" @click.self="closeDeleteCustomerModal">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header border-0">
+    <div v-if="showDeleteCustomerModal" class="modal fade show d-block responsive-modal" style="background: rgba(0,0,0,0.5);" @click.self="closeDeleteCustomerModal">
+      <div class="modal-dialog modal-dialog-centered responsive-modal-dialog">
+        <div class="modal-content responsive-modal-content">
+          <div class="modal-header border-0 responsive-modal-header">
             <h5 class="modal-title">
               <i class="fas fa-trash text-danger me-2"></i>{{ $t('admin.deleteCustomer') }}
             </h5>
-            <button @click="closeDeleteCustomerModal" class="btn-close"></button>
+            <button @click="closeDeleteCustomerModal" class="btn-close" aria-label="Close"></button>
           </div>
-          <div class="modal-body">
+          <div class="modal-body responsive-modal-body">
             <p class="mb-0">
               {{ $t('admin.deleteCustomerConfirm', { name: customerToDelete?.name || '' }) }}
             </p>
           </div>
-          <div class="modal-footer border-0">
+          <div class="modal-footer border-0 responsive-modal-footer">
             <button @click="closeDeleteCustomerModal" class="btn btn-outline-secondary">
               {{ $t('common.cancel') }}
             </button>
@@ -1292,16 +1292,16 @@
 
 
     <!-- Cancel Appointment Modal -->
-    <div v-if="cancelModal.show" class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" @click.self="closeCancelModal">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header bg-danger text-white">
+    <div v-if="cancelModal.show" class="modal fade show d-block responsive-modal" style="background: rgba(0,0,0,0.5);" @click.self="closeCancelModal">
+      <div class="modal-dialog modal-dialog-centered responsive-modal-dialog">
+        <div class="modal-content responsive-modal-content">
+          <div class="modal-header bg-danger text-white responsive-modal-header">
             <h5 class="modal-title">
               <i class="fas fa-times-circle me-2"></i>{{ $t('admin.reject') }} Appointment
             </h5>
-            <button @click="closeCancelModal" class="btn-close btn-close-white"></button>
+            <button @click="closeCancelModal" class="btn-close btn-close-white" aria-label="Close"></button>
           </div>
-          <div class="modal-body">
+          <div class="modal-body responsive-modal-body">
             <div v-if="cancelModal.appointment" class="mb-3">
               <p class="mb-1"><strong>Customer:</strong> {{ cancelModal.appointment.customerName }}</p>
               <p class="mb-1"><strong>Date & Time:</strong> {{ formatDate(cancelModal.appointment.date) }} at {{ cancelModal.appointment.time }}</p>
@@ -1322,7 +1322,7 @@
               <small class="text-muted">This message will be sent to the customer via email.</small>
             </div>
           </div>
-          <div class="modal-footer">
+          <div class="modal-footer responsive-modal-footer">
             <button @click="closeCancelModal" class="btn btn-secondary">{{ $t('common.cancel') }}</button>
             <button @click="confirmCancelAppointment" class="btn btn-danger">
               <i class="fas fa-times me-2"></i>{{ $t('admin.reject') }} Appointment
@@ -1333,16 +1333,16 @@
     </div>
 
     <!-- Edit Appointment Modal -->
-    <div v-if="editTimeModal.show" class="modal fade show d-block edit-appointment-modal" style="background: rgba(0,0,0,0.5); z-index: 1050;" @click.self="closeEditTimeModal">
-      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable edit-appointment-modal-dialog" style="z-index: 1051;">
-        <div class="modal-content edit-appointment-modal-content" @click.stop>
-          <div class="modal-header bg-gradient-primary text-white edit-appointment-modal-header" style="position: relative; z-index: 1052;">
+    <div v-if="editTimeModal.show" class="modal fade show d-block edit-appointment-modal responsive-modal" style="background: rgba(0,0,0,0.5); z-index: 1050;" @click.self="closeEditTimeModal">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable edit-appointment-modal-dialog responsive-modal-dialog" style="z-index: 1051;">
+        <div class="modal-content edit-appointment-modal-content responsive-modal-content" @click.stop>
+          <div class="modal-header bg-gradient-primary text-white edit-appointment-modal-header responsive-modal-header" style="position: relative; z-index: 1052;">
             <h5 class="modal-title">
               <i class="fas fa-edit me-2"></i>{{ $t('admin.editAppointment') }}
             </h5>
-            <button @click.stop="closeEditTimeModal" @touchstart.stop="closeEditTimeModal" class="btn-close btn-close-white" style="position: relative; z-index: 1053;"></button>
+            <button @click.stop="closeEditTimeModal" @touchstart.stop="closeEditTimeModal" class="btn-close btn-close-white" aria-label="Close" style="position: relative; z-index: 1053;"></button>
           </div>
-          <div class="modal-body edit-modal-body" style="overflow-y: auto; max-height: calc(100vh - 250px);">
+          <div class="modal-body edit-modal-body responsive-modal-body" style="overflow-y: auto;">
             <div v-if="editTimeModal.appointment" class="mb-3 current-appointment-info">
               <p class="mb-1"><strong>{{ $t('admin.customer') }}:</strong> {{ editTimeModal.appointment.customerName }}</p>
               <p class="mb-1"><strong>{{ $t('admin.currentDate') }}:</strong> {{ formatEditModalCurrentDate }}</p>
@@ -1430,9 +1430,9 @@
               <small class="text-muted">{{ $t('admin.messageWillBeSent') }}</small>
             </div>
           </div>
-          <div class="modal-footer" style="position: sticky; bottom: 0; z-index: 1052; background: var(--bg-primary); border-top: 1px solid var(--border-color); flex-shrink: 0;">
-            <button @click.stop.prevent="closeEditTimeModal" @touchstart.stop.prevent="closeEditTimeModal" @mousedown.stop.prevent="closeEditTimeModal" class="btn btn-secondary" style="position: relative; z-index: 1053; -webkit-appearance: none; appearance: none; touch-action: manipulation; min-height: 44px;">{{ $t('common.cancel') }}</button>
-            <button @click.stop.prevent="updateAppointmentTime" @touchstart.stop.prevent="updateAppointmentTime" @mousedown.stop.prevent="updateAppointmentTime" class="btn btn-primary" :disabled="!editTimeModal.newTime || !editTimeModal.newDate" style="position: relative; z-index: 1053; -webkit-appearance: none; appearance: none; touch-action: manipulation; min-height: 44px;">
+          <div class="modal-footer responsive-modal-footer" style="position: sticky; bottom: 0; z-index: 1052; background: var(--bg-primary); border-top: 1px solid var(--border-color); flex-shrink: 0;">
+            <button @click.stop.prevent="closeEditTimeModal" @touchstart.stop.prevent="closeEditTimeModal" @mousedown.stop.prevent="closeEditTimeModal" class="btn btn-secondary" style="position: relative; z-index: 1053; -webkit-appearance: none; appearance: none; touch-action: manipulation;">{{ $t('common.cancel') }}</button>
+            <button @click.stop.prevent="updateAppointmentTime" @touchstart.stop.prevent="updateAppointmentTime" @mousedown.stop.prevent="updateAppointmentTime" class="btn btn-primary" :disabled="!editTimeModal.newTime || !editTimeModal.newDate" style="position: relative; z-index: 1053; -webkit-appearance: none; appearance: none; touch-action: manipulation;">
               <i class="fas fa-save me-2"></i>{{ $t('admin.updateAppointment') }}
             </button>
           </div>
@@ -1441,10 +1441,10 @@
     </div>
 
     <!-- Date Detail Modal -->
-    <div v-if="dateDetailModal.show" class="modal fade show d-block date-detail-modal" style="background: rgba(0,0,0,0.5);" @click.self="closeDateDetailModal">
-      <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable date-detail-modal-dialog" style="max-width: 95%;">
-        <div class="modal-content">
-          <div class="modal-header bg-gradient-primary text-white">
+    <div v-if="dateDetailModal.show" class="modal fade show d-block date-detail-modal responsive-modal" style="background: rgba(0,0,0,0.5);" @click.self="closeDateDetailModal">
+      <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable date-detail-modal-dialog responsive-modal-dialog" style="max-width: 95%;">
+        <div class="modal-content responsive-modal-content">
+          <div class="modal-header bg-gradient-primary text-white responsive-modal-header">
             <div class="d-flex align-items-center justify-content-between w-100">
               <div>
                 <h5 class="modal-title mb-0">

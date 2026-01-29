@@ -9,6 +9,7 @@ import Toast from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
 import './assets/toast-custom.css'
 import './assets/theme.css'
+import './assets/modal-responsive.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import * as bootstrap from 'bootstrap'
 

@@ -1,14 +1,14 @@
 <template>
-  <div class="modal fade" id="loginModal" tabindex="-1" ref="loginModal">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content border-0 shadow-lg">
-        <div class="modal-header border-0 pb-0">
+  <div class="modal fade responsive-modal" id="loginModal" tabindex="-1" ref="loginModal">
+    <div class="modal-dialog modal-dialog-centered responsive-modal-dialog">
+      <div class="modal-content border-0 shadow-lg responsive-modal-content">
+        <div class="modal-header border-0 responsive-modal-header">
           <h5 class="modal-title fw-bold text-primary">
             <i class="fas fa-shield-alt me-2"></i>{{ $t('login.adminLogin') }}
           </h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body p-4">
+        <div class="modal-body responsive-modal-body">
           <form @submit.prevent="login">
             <div class="mb-3">
               <label class="form-label fw-semibold">{{ $t('login.username') }}</label>
@@ -22,6 +22,8 @@
                   class="form-control border-start-0 ps-0" 
                   :placeholder="$t('login.enterUsername')"
                   required
+                  autocomplete="username"
+                  inputmode="text"
                 >
               </div>
             </div>
@@ -37,11 +39,13 @@
                   class="form-control border-start-0 border-end-0 ps-0" 
                   :placeholder="$t('login.enterPassword')"
                   required
+                  autocomplete="current-password"
                 >
                 <button 
                   type="button" 
                   class="btn btn-outline-secondary border-start-0"
                   @click="showPassword = !showPassword"
+                  :aria-label="showPassword ? 'Hide password' : 'Show password'"
                 >
                   <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
                 </button>
@@ -66,6 +70,9 @@
               {{ $t('login.defaultCredentials') }}
             </small>
           </div>
+        </div>
+        <div class="modal-footer responsive-modal-footer d-none">
+          <!-- Footer space for mobile layout consistency -->
         </div>
       </div>
     </div>
@@ -94,7 +101,13 @@ export default {
       this.credentials = { username: '', password: '' }
       const modalEl = this.$refs.loginModal
       const modal = window.bootstrap.Modal.getOrCreateInstance(modalEl)
+      // Add body class to prevent scroll
+      document.body.classList.add('modal-open')
       modal.show()
+      // Remove body class when modal is hidden
+      modalEl.addEventListener('hidden.bs.modal', () => {
+        document.body.classList.remove('modal-open')
+      }, { once: true })
     },
     hide() {
       const modalEl = this.$refs.loginModal
@@ -124,12 +137,7 @@ export default {
 </script>
 
 <style scoped>
-.modal-content {
-  border-radius: 16px;
-  background-color: var(--bg-secondary);
-  color: var(--text-primary);
-}
-
+/* Component-specific styles - responsive styles are in modal-responsive.css */
 .input-group-text {
   border-radius: 8px 0 0 8px;
   background-color: var(--bg-tertiary);
@@ -158,70 +166,33 @@ export default {
   transition: all 0.2s;
 }
 
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
   background: var(--primary-hover);
   transform: translateY(-1px);
   box-shadow: 0 8px 20px rgba(107, 114, 128, 0.3);
 }
 
-/* iOS Safari Optimizations */
-@supports (-webkit-touch-callout: none) {
-  /* Prevent zoom on input focus */
-  .form-control {
-    font-size: 16px !important;
-    min-height: 44px;
-    -webkit-appearance: none;
-    appearance: none;
-  }
-  
-  .btn {
-    -webkit-appearance: none;
-    appearance: none;
-    touch-action: manipulation;
-    min-height: 44px;
-    -webkit-tap-highlight-color: rgba(107, 114, 128, 0.2);
-  }
-  
-  /* Modal safe area support */
-  .modal-dialog {
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  
-  /* Input group */
-  .input-group-text {
-    min-height: 44px;
-  }
-  
-  /* Prevent text selection */
-  .btn,
-  .form-label {
-    -webkit-user-select: none;
-    user-select: none;
-  }
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-@media (max-width: 576px) {
-  /* Mobile iOS Safari fixes */
-  .modal-content {
-    max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-    max-height: calc(-webkit-fill-available - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-  }
-  
-  .form-control {
-    font-size: 16px !important;
-    min-height: 44px;
-  }
-  
-  .btn {
-    min-height: 44px;
-    touch-action: manipulation;
-  }
-  
-  /* Prevent double-tap zoom */
-  .form-control,
-  .btn {
-    touch-action: manipulation;
+/* Input group adjustments */
+.input-group {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+}
+
+.input-group .btn {
+  border-radius: 0 8px 8px 0;
+  min-height: 48px;
+}
+
+@media (max-width: 575.98px) {
+  .input-group .btn {
+    min-height: 48px;
+    padding: 0.75rem;
   }
 }
 </style>
