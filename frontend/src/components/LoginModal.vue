@@ -100,10 +100,42 @@ export default {
       this.error = ''
       this.credentials = { username: '', password: '' }
       const modalEl = this.$refs.loginModal
-      const modal = window.bootstrap.Modal.getOrCreateInstance(modalEl)
+      
+      // Ensure modal element is visible and interactive
+      modalEl.style.pointerEvents = 'auto'
+      modalEl.style.zIndex = '1055'
+      
+      const modal = window.bootstrap.Modal.getOrCreateInstance(modalEl, {
+        backdrop: true,
+        keyboard: true,
+        focus: true
+      })
+      
       // Add body class to prevent scroll
       document.body.classList.add('modal-open')
+      
+      // Ensure modal dialog and content are interactive after showing
+      modalEl.addEventListener('shown.bs.modal', () => {
+        const dialog = modalEl.querySelector('.modal-dialog')
+        const content = modalEl.querySelector('.modal-content')
+        if (dialog) {
+          dialog.style.pointerEvents = 'auto'
+          dialog.style.zIndex = '1056'
+        }
+        if (content) {
+          content.style.pointerEvents = 'auto'
+          content.style.zIndex = '1057'
+        }
+        
+        // Focus on username input
+        const usernameInput = modalEl.querySelector('input[type="text"]')
+        if (usernameInput) {
+          setTimeout(() => usernameInput.focus(), 100)
+        }
+      }, { once: true })
+      
       modal.show()
+      
       // Remove body class when modal is hidden
       modalEl.addEventListener('hidden.bs.modal', () => {
         document.body.classList.remove('modal-open')
@@ -138,12 +170,34 @@ export default {
 
 <style scoped>
 /* Component-specific styles - responsive styles are in modal-responsive.css */
+
+/* CRITICAL: Ensure modal is always clickable */
+#loginModal.show {
+  pointer-events: auto !important;
+  z-index: 1055 !important;
+}
+
+#loginModal.show .modal-dialog {
+  pointer-events: auto !important;
+  z-index: 1056 !important;
+  position: relative;
+}
+
+#loginModal.show .modal-content {
+  pointer-events: auto !important;
+  z-index: 1057 !important;
+  position: relative;
+}
+
 .input-group-text {
   border-radius: 8px 0 0 8px;
   background-color: var(--bg-tertiary);
   border-color: var(--border-color);
   color: var(--text-secondary);
   pointer-events: auto !important;
+  position: relative;
+  z-index: 10;
+  cursor: text;
 }
 
 .form-control {
@@ -153,7 +207,10 @@ export default {
   color: var(--text-primary);
   pointer-events: auto !important;
   position: relative;
-  z-index: 1;
+  z-index: 10;
+  cursor: text;
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 .form-control:focus {
@@ -162,6 +219,7 @@ export default {
   background-color: var(--bg-secondary);
   color: var(--text-primary);
   pointer-events: auto !important;
+  z-index: 11;
 }
 
 .btn-primary {
@@ -169,6 +227,10 @@ export default {
   background: var(--primary);
   border: none;
   transition: all 0.2s;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 10;
+  cursor: pointer;
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -187,6 +249,9 @@ export default {
   display: flex;
   align-items: stretch;
   width: 100%;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 10;
 }
 
 .input-group .btn {
@@ -194,17 +259,43 @@ export default {
   min-height: 48px;
   pointer-events: auto !important;
   position: relative;
-  z-index: 1;
+  z-index: 11;
+  cursor: pointer;
 }
 
 /* Ensure modal content is interactive */
 .modal-content,
 .responsive-modal-content {
   pointer-events: auto !important;
+  position: relative;
+  z-index: 1057 !important;
 }
 
-.modal-content * {
+.modal-content *,
+.responsive-modal-content * {
   pointer-events: auto !important;
+}
+
+/* Ensure form is interactive */
+form {
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 10;
+}
+
+/* Ensure labels are clickable */
+label {
+  pointer-events: auto !important;
+  cursor: pointer;
+  position: relative;
+  z-index: 10;
+}
+
+/* Ensure alert is visible and interactive */
+.alert {
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 10;
 }
 
 @media (max-width: 575.98px) {

@@ -1302,6 +1302,53 @@ body.modal-open * {
   pointer-events: auto !important;
 }
 
+/* CRITICAL: Fix Bootstrap modal backdrop blocking clicks */
+.modal-backdrop {
+  z-index: 1040 !important;
+  pointer-events: auto !important;
+}
+
+/* Ensure modal dialog and content are above backdrop and clickable */
+.modal.show .modal-dialog,
+.modal.show .responsive-modal-dialog,
+.modal.responsive-modal.show .modal-dialog,
+.modal.responsive-modal.show .responsive-modal-dialog {
+  z-index: 1055 !important;
+  pointer-events: auto !important;
+  position: relative !important;
+}
+
+.modal.show .modal-content,
+.modal.show .responsive-modal-content,
+.modal.responsive-modal.show .modal-content,
+.modal.responsive-modal.show .responsive-modal-content {
+  z-index: 1056 !important;
+  pointer-events: auto !important;
+  position: relative !important;
+}
+
+/* Ensure login modal specifically is clickable */
+#loginModal.show .modal-dialog,
+#loginModal.show .modal-content,
+#loginModal.show .responsive-modal-dialog,
+#loginModal.show .responsive-modal-content {
+  z-index: 1055 !important;
+  pointer-events: auto !important;
+}
+
+#loginModal.show input,
+#loginModal.show button,
+#loginModal.show .btn,
+#loginModal.show .form-control,
+#loginModal.show .input-group,
+#loginModal.show .input-group-text,
+#loginModal.show label,
+#loginModal.show * {
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1;
+}
+
 @media (max-width: 575.98px) {
   body.modal-open {
     position: fixed;
