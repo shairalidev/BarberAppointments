@@ -1122,10 +1122,10 @@
                         v-model="bookingCustomerSearch"
                         type="text"
                         class="form-control"
-                        @focus="showCustomerDropdown = true"
-                        @input="showCustomerDropdown = true"
-                        @touchstart="showCustomerDropdown = true"
-                        @click="showCustomerDropdown = true"
+                        @focus="handleCustomerSearchFocus"
+                        @input="handleCustomerSearchInput"
+                        @touchstart="handleCustomerSearchFocus"
+                        @click="handleCustomerSearchFocus"
                         autocomplete="off"
                         style="font-size: 16px; -webkit-appearance: none; appearance: none;"
                       />
@@ -2588,10 +2588,10 @@ async quickBookAppointment() {
       this.bookingCustomerSearch = ''
       this.showCustomerDropdown = false
     },
-    openBookingModal() {
+    async openBookingModal() {
       // Ensure customers are loaded when opening booking modal
       if (this.customers.length === 0) {
-        this.fetchCustomers()
+        await this.fetchCustomers()
       }
       this.showBookingModal = true
     },
@@ -2647,13 +2647,28 @@ async quickBookAppointment() {
         const normalizedSelectedTime = normalizeTime(previouslySelectedTime)
         const normalizedAvailableSlots = this.availableSlots.map(normalizeTime)
 
+        // If booking from slot click, always preserve the exact time that was clicked
+        // Don't let backend availability override it - backend will validate on submit
+        if (isFromSlotClick && previouslySelectedTime) {
+          // Ensure the time format is normalized but keep the original value
+          this.bookingForm.time = previouslySelectedTime
+          return
+        }
+
         // If we had a previously selected time, try to match it with available slots
         if (normalizedSelectedTime) {
           if (normalizedAvailableSlots.includes(normalizedSelectedTime)) {
             // Find the exact format from available slots to match API format
             const matchingSlot = this.availableSlots.find(slot => normalizeTime(slot) === normalizedSelectedTime)
             if (matchingSlot) {
-              this.bookingForm.time = matchingSlot
+              // Verify the normalized time matches exactly before updating (prevents wrong matches)
+              const matchedNormalized = normalizeTime(matchingSlot)
+              if (matchedNormalized === normalizedSelectedTime) {
+                this.bookingForm.time = matchingSlot
+              } else {
+                // Keep the original format if normalization doesn't match exactly
+                this.bookingForm.time = previouslySelectedTime
+              }
             } else {
               // Keep the original format if no exact match found
               this.bookingForm.time = previouslySelectedTime
@@ -3486,11 +3501,24 @@ getTimeSlotsForDay(dayIndex) {
         return
       }
       
-      // Use hour and index to determine the correct time slot to avoid closure/reference issues
-      // This ensures we always get the correct slot even if Vue reuses slot objects
-      const hourValue = hour ? parseInt(hour.split(':')[0]) : parseInt(slot.time.split(':')[0])
-      const minuteValue = index === 0 ? 0 : 30
-      const normalizedTime = `${hourValue.toString().padStart(2, '0')}:${minuteValue.toString().padStart(2, '0')}`
+      // Use slot.time directly as it's already correctly set to the exact time (e.g., "9:30" or "09:30")
+      // Normalize the time format to ensure consistent format (HH:MM)
+      let normalizedTime = slot.time
+      if (normalizedTime) {
+        const parts = normalizedTime.split(':')
+        if (parts.length >= 2) {
+          const hourPart = parts[0].padStart(2, '0')
+          const minutePart = parts[1].padStart(2, '0')
+          normalizedTime = `${hourPart}:${minutePart}`
+        }
+      }
+      
+      // Fallback: Use hour and index if slot.time is not available (shouldn't happen, but safety check)
+      if (!normalizedTime || normalizedTime === 'undefined:undefined') {
+        const hourValue = hour ? parseInt(hour.split(':')[0]) : parseInt(slot.time.split(':')[0])
+        const minuteValue = index === 0 ? 0 : 30
+        normalizedTime = `${hourValue.toString().padStart(2, '0')}:${minuteValue.toString().padStart(2, '0')}`
+      }
 
       // Set the booking form with the selected date and time
       this.bookingForm.date = date
@@ -3835,14 +3863,14 @@ async setReminder(appointment) {
         this.closeDeleteCustomerModal()
       }
     },
-    prefillBookingFromCustomer(customer) {
+    async prefillBookingFromCustomer(customer) {
       this.bookingForm.customerId = customer._id
       this.bookingForm.customerName = customer.name
       this.bookingForm.customerPhone = customer.phone
       this.bookingForm.customerEmail = customer.email || ''
       // Ensure customers are loaded before opening modal
       if (this.customers.length === 0) {
-        this.fetchCustomers()
+        await this.fetchCustomers()
       }
       this.showBookingModal = true
     },
@@ -3876,6 +3904,20 @@ async setReminder(appointment) {
       }
       
       this.customerTouchStart = null
+    },
+    async handleCustomerSearchFocus() {
+      this.showCustomerDropdown = true
+      // Ensure customers are loaded when user focuses on search
+      if (this.customers.length === 0) {
+        await this.fetchCustomers()
+      }
+    },
+    async handleCustomerSearchInput() {
+      this.showCustomerDropdown = true
+      // Ensure customers are loaded when user types
+      if (this.customers.length === 0) {
+        await this.fetchCustomers()
+      }
     },
     clearCustomerSearch() {
       this.bookingCustomerSearch = ''
@@ -8310,10 +8352,13 @@ async setReminder(appointment) {
 
 .off-date-toggle-mobile {
   text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .off-date-toggle-label-mobile {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
@@ -8325,6 +8370,8 @@ async setReminder(appointment) {
   transition: all 0.2s ease;
   font-size: 0.8rem;
   color: var(--text-primary);
+  width: auto;
+  max-width: fit-content;
 }
 
 .off-date-toggle-label-mobile:active {
@@ -8363,6 +8410,8 @@ async setReminder(appointment) {
     padding: 0.35rem 0.5rem;
     font-size: 0.75rem;
     gap: 0.35rem;
+    width: auto;
+    max-width: fit-content;
   }
   
   .toggle-slider-mobile {
