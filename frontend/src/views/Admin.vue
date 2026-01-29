@@ -2370,6 +2370,8 @@ export default {
   },
   beforeUnmount() {
     document.removeEventListener('click', this.handleClickOutside)
+    // Reset body overflow when component is destroyed
+    document.body.style.overflow = ''
   },
   watch: {
     'bookingForm.date'() {
@@ -2380,6 +2382,14 @@ export default {
     },
     customerSearch() {
       this.fetchCustomers()
+    },
+    showMobileNav(newVal) {
+      // Prevent body scroll when mobile nav is open
+      if (newVal) {
+        document.body.style.overflow = 'hidden'
+      } else {
+        document.body.style.overflow = ''
+      }
     }
   },
   methods: {
@@ -4177,6 +4187,8 @@ async setReminder(appointment) {
   display: none;
   min-width: 36px;
   min-height: 36px;
+  position: relative;
+  z-index: 1002;
 }
 
 @media (max-width: 991.98px) {
@@ -4184,6 +4196,7 @@ async setReminder(appointment) {
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
+    pointer-events: auto !important;
   }
   
   .desktop-toolbar-controls {
@@ -4523,10 +4536,12 @@ async setReminder(appointment) {
   display: none;
   opacity: 0;
   transition: opacity 0.3s ease;
+  pointer-events: none;
 }
 
 .mobile-nav-overlay.show {
   opacity: 1;
+  pointer-events: auto;
 }
 
 @media (max-width: 991.98px) {
@@ -4541,9 +4556,10 @@ async setReminder(appointment) {
     z-index: 1060;
     padding: 1rem 0.5rem !important;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-    transition: left 0.3s ease;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    will-change: left;
   }
   
   .admin-nav-container.mobile-nav-open {
@@ -4556,6 +4572,7 @@ async setReminder(appointment) {
   
   .mobile-nav-overlay.show {
     display: block !important;
+    pointer-events: auto;
   }
   
   .admin-nav {
