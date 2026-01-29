@@ -143,6 +143,7 @@ export default {
   background-color: var(--bg-tertiary);
   border-color: var(--border-color);
   color: var(--text-secondary);
+  pointer-events: auto !important;
 }
 
 .form-control {
@@ -150,6 +151,9 @@ export default {
   background-color: var(--bg-secondary);
   border-color: var(--border-color);
   color: var(--text-primary);
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1;
 }
 
 .form-control:focus {
@@ -157,6 +161,7 @@ export default {
   border-color: var(--primary);
   background-color: var(--bg-secondary);
   color: var(--text-primary);
+  pointer-events: auto !important;
 }
 
 .btn-primary {
@@ -187,6 +192,19 @@ export default {
 .input-group .btn {
   border-radius: 0 8px 8px 0;
   min-height: 48px;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure modal content is interactive */
+.modal-content,
+.responsive-modal-content {
+  pointer-events: auto !important;
+}
+
+.modal-content * {
+  pointer-events: auto !important;
 }
 
 @media (max-width: 575.98px) {

@@ -62,6 +62,18 @@ button, .btn, a, input, select, textarea {
   margin: 0;
   overflow: hidden;
   animation: fadeIn 0.2s ease-out;
+  pointer-events: auto;
+}
+
+/* Modal overlay should allow clicks on modal content but block background */
+.modal.show .modal-dialog,
+.modal.show .responsive-modal-dialog {
+  pointer-events: auto !important;
+}
+
+.modal.show .modal-content,
+.modal.show .responsive-modal-content {
+  pointer-events: auto !important;
 }
 
 /* CRITICAL: Hide responsive-modal when not shown - Bootstrap modals */
@@ -112,7 +124,7 @@ button, .btn, a, input, select, textarea {
   padding: 0;
   z-index: calc(var(--modal-z-index) + 1);
   transition: transform var(--modal-transition);
-  pointer-events: auto;
+  pointer-events: auto !important;
 }
 
 /* Only animate when modal is shown */
@@ -120,6 +132,7 @@ button, .btn, a, input, select, textarea {
 .modal.show .responsive-modal-dialog,
 .responsive-modal.show .responsive-modal-dialog {
   animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: auto !important;
 }
 
 @keyframes slideUp {
@@ -149,7 +162,88 @@ button, .btn, a, input, select, textarea {
   overflow: hidden;
   color: var(--text-primary);
   will-change: transform;
-  pointer-events: auto;
+  pointer-events: auto !important;
+}
+
+/* Ensure all form elements inside modal are interactive */
+.modal-content *,
+.responsive-modal-content *,
+.booking-modal-content *,
+.edit-appointment-modal-content *,
+.date-detail-modal-content * {
+  pointer-events: auto !important;
+}
+
+/* All input types */
+.modal-content input,
+.modal-content textarea,
+.modal-content select,
+.modal-content button,
+.modal-content .btn,
+.modal-content label,
+.modal-content .form-check-input,
+.modal-content .form-check-label,
+.modal-content .form-control,
+.modal-content .form-select,
+.responsive-modal-content input,
+.responsive-modal-content textarea,
+.responsive-modal-content select,
+.responsive-modal-content button,
+.responsive-modal-content .btn,
+.responsive-modal-content label,
+.responsive-modal-content .form-check-input,
+.responsive-modal-content .form-check-label,
+.responsive-modal-content .form-control,
+.responsive-modal-content .form-select,
+.booking-modal-content input,
+.booking-modal-content textarea,
+.booking-modal-content select,
+.booking-modal-content button,
+.booking-modal-content .btn,
+.booking-modal-content label,
+.booking-modal-content .form-control,
+.booking-modal-content .form-select,
+.booking-modal-content .customer-item,
+.booking-modal-content .time-slots-grid .btn,
+.edit-appointment-modal-content input,
+.edit-appointment-modal-content textarea,
+.edit-appointment-modal-content select,
+.edit-appointment-modal-content button,
+.edit-appointment-modal-content .btn,
+.edit-appointment-modal-content .time-slot-btn,
+.edit-appointment-modal-content .week-day-cell,
+.date-detail-modal-content input,
+.date-detail-modal-content textarea,
+.date-detail-modal-content select,
+.date-detail-modal-content button,
+.date-detail-modal-content .btn,
+.date-detail-modal-content .off-date-toggle-input,
+.date-detail-modal-content .day-cell-pro,
+.date-detail-modal-content .week-day-cell {
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1;
+}
+
+/* Interactive elements */
+.modal-content a,
+.modal-content [role="button"],
+.modal-content [tabindex],
+.responsive-modal-content a,
+.responsive-modal-content [role="button"],
+.responsive-modal-content [tabindex],
+.booking-modal-content a,
+.booking-modal-content [role="button"],
+.booking-modal-content [tabindex],
+.edit-appointment-modal-content a,
+.edit-appointment-modal-content [role="button"],
+.edit-appointment-modal-content [tabindex],
+.date-detail-modal-content a,
+.date-detail-modal-content [role="button"],
+.date-detail-modal-content [tabindex] {
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1;
 }
 
 /* Modal Header - Sticky on mobile */
@@ -165,6 +259,14 @@ button, .btn, a, input, select, textarea {
   background-color: var(--bg-secondary);
   min-height: var(--modal-header-height-mobile);
   flex-shrink: 0;
+  pointer-events: auto !important;
+}
+
+.modal-header .btn-close,
+.responsive-modal-header .btn-close {
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 2;
 }
 
 .modal-header .modal-title,
@@ -221,6 +323,80 @@ button, .btn, a, input, select, textarea {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   max-height: calc(100vh - var(--modal-header-height-mobile) - var(--modal-footer-height-mobile));
+  pointer-events: auto !important;
+}
+
+/* Ensure form elements in modal body are fully interactive */
+.modal-body form,
+.responsive-modal-body form,
+.booking-modal-body form,
+.edit-modal-body form {
+  pointer-events: auto !important;
+}
+
+.modal-body input,
+.modal-body textarea,
+.modal-body select,
+.modal-body button,
+.modal-body .btn,
+.modal-body label,
+.modal-body .form-check-input,
+.modal-body .form-check-label,
+.modal-body .input-group,
+.modal-body .input-group-text,
+.modal-body .alert,
+.modal-body .time-slots-grid,
+.modal-body .time-slots-grid .btn,
+.modal-body .customer-dropdown,
+.modal-body .customer-item,
+.modal-body .week-day-cell,
+.modal-body .day-cell-pro,
+.responsive-modal-body input,
+.responsive-modal-body textarea,
+.responsive-modal-body select,
+.responsive-modal-body button,
+.responsive-modal-body .btn,
+.responsive-modal-body label,
+.responsive-modal-body .form-check-input,
+.responsive-modal-body .form-check-label,
+.responsive-modal-body .input-group,
+.responsive-modal-body .input-group-text,
+.responsive-modal-body .alert,
+.responsive-modal-body .time-slots-grid,
+.responsive-modal-body .time-slots-grid .btn,
+.responsive-modal-body .customer-dropdown,
+.responsive-modal-body .customer-item,
+.responsive-modal-body .week-day-cell,
+.responsive-modal-body .day-cell-pro,
+.booking-modal-body input,
+.booking-modal-body textarea,
+.booking-modal-body select,
+.booking-modal-body button,
+.booking-modal-body .btn,
+.booking-modal-body label,
+.booking-modal-body .form-control,
+.booking-modal-body .form-select,
+.booking-modal-body .input-group,
+.booking-modal-body .input-group-text,
+.booking-modal-body .customer-search-container,
+.booking-modal-body .customer-dropdown,
+.booking-modal-body .customer-item,
+.booking-modal-body .time-slots-grid,
+.booking-modal-body .time-slots-grid .btn,
+.booking-modal-body .service-select-container,
+.booking-modal-body .booking-service-select,
+.edit-modal-body input,
+.edit-modal-body textarea,
+.edit-modal-body select,
+.edit-modal-body button,
+.edit-modal-body .btn,
+.edit-modal-body label,
+.edit-modal-body .time-slot-btn,
+.edit-modal-body .week-day-cell,
+.edit-modal-body .week-nav-btn {
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1;
 }
 
 /* Modal Footer - Sticky on mobile */
@@ -238,6 +414,7 @@ button, .btn, a, input, select, textarea {
   min-height: var(--modal-footer-height-mobile);
   gap: 0.75rem;
   flex-shrink: 0;
+  pointer-events: auto !important;
 }
 
 .modal-footer .btn,
@@ -252,6 +429,9 @@ button, .btn, a, input, select, textarea {
   appearance: none;
   touch-action: manipulation;
   transition: all 0.2s ease;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 2;
 }
 
 /* ==============================================
@@ -922,6 +1102,7 @@ button, .btn, a, input, select, textarea {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   background-color: var(--bg-secondary);
   z-index: calc(var(--modal-z-index) + 10);
+  pointer-events: auto !important;
 }
 
 @media (max-width: 575.98px) {
@@ -931,6 +1112,7 @@ button, .btn, a, input, select, textarea {
     left: 1rem !important;
     right: 1rem !important;
     width: calc(100% - 2rem) !important;
+    pointer-events: auto !important;
   }
 }
 
@@ -943,6 +1125,9 @@ button, .btn, a, input, select, textarea {
   display: flex;
   align-items: center;
   touch-action: manipulation;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 11;
 }
 
 .customer-item:active,
@@ -955,23 +1140,31 @@ button, .btn, a, input, select, textarea {
   width: 100%;
   max-width: 100%;
   overflow: hidden;
+  pointer-events: auto !important;
 }
 
 .service-select-container {
   width: 100%;
   max-width: 100%;
+  pointer-events: auto !important;
 }
 
-.service-select-container .form-select {
+.service-select-container .form-select,
+.service-select-container .booking-service-select {
   width: 100%;
   font-size: 16px;
   min-height: 48px;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1;
 }
 
 @media (max-width: 575.98px) {
-  .service-select-container .form-select {
+  .service-select-container .form-select,
+  .service-select-container .booking-service-select {
     font-size: 16px;
     min-height: 48px;
+    pointer-events: auto !important;
   }
 }
 
@@ -981,18 +1174,30 @@ button, .btn, a, input, select, textarea {
   grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
   gap: 0.5rem;
   margin-top: 0.5rem;
+  pointer-events: auto !important;
+}
+
+.time-slots-grid .btn,
+.time-slots-grid .time-slot-btn {
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1;
+  cursor: pointer;
 }
 
 @media (max-width: 575.98px) {
   .time-slots-grid {
     grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
     gap: 0.5rem;
+    pointer-events: auto !important;
   }
 
-  .time-slots-grid .btn {
+  .time-slots-grid .btn,
+  .time-slots-grid .time-slot-btn {
     min-height: 44px;
     font-size: 0.875rem;
     padding: 0.5rem 0.75rem;
+    pointer-events: auto !important;
   }
 }
 
@@ -1003,12 +1208,48 @@ button, .btn, a, input, select, textarea {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
+  pointer-events: auto !important;
 }
 
 .week-strip-container {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
+  pointer-events: auto !important;
+}
+
+.week-day-cell,
+.day-cell-pro {
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1;
+  cursor: pointer;
+}
+
+.week-nav-btn,
+.month-nav-btn {
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1;
+  cursor: pointer;
+}
+
+/* Toggle switches and checkboxes */
+.off-date-toggle-input,
+.form-check-input,
+input[type="checkbox"],
+input[type="radio"] {
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1;
+  cursor: pointer;
+}
+
+.off-date-toggle-label,
+.form-check-label,
+label {
+  pointer-events: auto !important;
+  cursor: pointer;
 }
 
 /* Prevent body scroll when modal is open - but allow interactions */
@@ -1024,6 +1265,20 @@ body.modal-open * {
   pointer-events: auto;
 }
 
+/* CRITICAL: Ensure ALL modal content is interactive */
+.modal.show .modal-content *,
+.modal.show .responsive-modal-content *,
+.modal.show .booking-modal-content *,
+.modal.show .edit-appointment-modal-content *,
+.modal.show .date-detail-modal-content *,
+.responsive-modal.show .modal-content *,
+.responsive-modal.show .responsive-modal-content *,
+.responsive-modal.show .booking-modal-content *,
+.responsive-modal.show .edit-appointment-modal-content *,
+.responsive-modal.show .date-detail-modal-content * {
+  pointer-events: auto !important;
+}
+
 @media (max-width: 575.98px) {
   body.modal-open {
     position: fixed;
@@ -1036,5 +1291,20 @@ body.modal-open * {
   
   body.modal-open * {
     pointer-events: auto;
+  }
+  
+  /* Extra mobile-specific modal interaction rules */
+  .modal.show .modal-content,
+  .modal.show .responsive-modal-content,
+  .responsive-modal.show .modal-content,
+  .responsive-modal.show .responsive-modal-content {
+    pointer-events: auto !important;
+  }
+  
+  .modal.show .modal-content > *,
+  .modal.show .responsive-modal-content > *,
+  .responsive-modal.show .modal-content > *,
+  .responsive-modal.show .responsive-modal-content > * {
+    pointer-events: auto !important;
   }
 }
