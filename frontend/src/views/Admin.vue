@@ -10,49 +10,51 @@
 
         <!-- Action Toolbar -->
         <div class="admin-toolbar">
-          <button
-            @click="toggleLanguage"
-            class="toolbar-btn toolbar-btn-outline"
-            :title="currentLocale === 'en' ? 'Switch to German' : 'Switch to English'"
-          >
-            {{ currentLocale === 'en' ? 'DE' : 'EN' }}
-          </button>
-          <div
-            @click="toggleTheme"
-            :class="['theme-switch', { active: isDark }]"
-            :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
-          >
-            <i class="fas fa-sun theme-switch-icon"></i>
-            <span class="theme-switch-slider"></span>
-            <i class="fas fa-moon theme-switch-icon"></i>
+          <!-- Desktop Only Controls -->
+          <div class="desktop-toolbar-controls d-none d-lg-flex align-items-center gap-2">
+            <button
+              @click="toggleLanguage"
+              class="toolbar-btn toolbar-btn-outline"
+              :title="currentLocale === 'en' ? 'Switch to German' : 'Switch to English'"
+            >
+              {{ currentLocale === 'en' ? 'DE' : 'EN' }}
+            </button>
+            <div
+              @click="toggleTheme"
+              :class="['theme-switch', { active: isDark }]"
+              :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+            >
+              <i class="fas fa-sun theme-switch-icon"></i>
+              <span class="theme-switch-slider"></span>
+              <i class="fas fa-moon theme-switch-icon"></i>
+            </div>
+            <!-- Admin Account Dropdown -->
+            <div class="dropdown">
+              <button class="toolbar-btn admin-avatar-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-user-shield"></i>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end shadow-lg admin-dropdown">
+                <li><h6 class="dropdown-header">{{ $t('admin.adminAccount') }}</h6></li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <button @click.stop="logout" type="button" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>{{ $t('admin.logout') }}</span>
+                  </button>
+                </li>
+              </ul>
+            </div>
           </div>
 
           <!-- Mobile Menu Button -->
           <button 
-            class="toolbar-btn mobile-menu-btn d-lg-none" 
+            class="toolbar-btn mobile-menu-btn" 
             type="button"
             @click="toggleMobileNav"
-            :title="$t('admin.menu')"
+            title="Menu"
           >
             <i class="fas fa-bars"></i>
           </button>
-
-          <!-- Admin Account Dropdown -->
-          <div class="dropdown">
-            <button class="toolbar-btn admin-avatar-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="fas fa-user-shield"></i>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end shadow-lg admin-dropdown">
-              <li><h6 class="dropdown-header">{{ $t('admin.adminAccount') }}</h6></li>
-              <li><hr class="dropdown-divider"></li>
-              <li>
-                <button @click.stop="logout" type="button" class="logout-btn">
-                  <i class="fas fa-sign-out-alt"></i>
-                  <span>{{ $t('admin.logout') }}</span>
-                </button>
-              </li>
-            </ul>
-          </div>
         </div>
       </div>
     </div>
@@ -62,6 +64,41 @@
       <!-- Mobile Nav Overlay -->
       <div v-if="showMobileNav" class="mobile-nav-overlay" @click="showMobileNav = false"></div>
       <nav class="admin-nav" role="tablist" :class="{ 'mobile-nav-open': showMobileNav }">
+        <!-- Mobile Toolbar Controls -->
+        <div class="mobile-toolbar-controls d-lg-none">
+          <div class="mobile-control-item">
+            <button
+              @click="toggleLanguage"
+              class="mobile-control-btn"
+              :title="currentLocale === 'en' ? 'Switch to German' : 'Switch to English'"
+            >
+              <i class="fas fa-language"></i>
+              <span>{{ currentLocale === 'en' ? 'DE' : 'EN' }}</span>
+            </button>
+          </div>
+          <div class="mobile-control-item">
+            <button
+              @click="toggleTheme"
+              class="mobile-control-btn"
+              :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+            >
+              <i :class="isDark ? 'fas fa-sun' : 'fas fa-moon'"></i>
+              <span>{{ isDark ? 'Light Mode' : 'Dark Mode' }}</span>
+            </button>
+          </div>
+          <div class="mobile-control-item">
+            <button
+              @click.stop="logout"
+              class="mobile-control-btn mobile-logout-btn"
+            >
+              <i class="fas fa-sign-out-alt"></i>
+              <span>{{ $t('admin.logout') }}</span>
+            </button>
+          </div>
+        </div>
+        
+        <div class="mobile-nav-divider d-lg-none"></div>
+        
         <button
           @click="activeTab = 'calendar'; showMobileNav = false"
           :class="['admin-nav-item', { active: activeTab === 'calendar' }]"
@@ -1116,7 +1153,7 @@
                     <span><i class="fas fa-users me-2"></i>{{ $t('admin.existingCustomers') }}</span>
                     <small class="text-muted">{{ $t('admin.selectToPrefill') }}</small>
                   </label>
-                  <div class="customer-search-container" style="position: relative; z-index: 1070;">
+                  <div class="customer-search-container" style="position: relative; z-index: 1070;" @click.stop>
                     <div class="input-group mb-2">
                       <span class="input-group-text"><i class="fas fa-search"></i></span>
                       <input
@@ -1126,7 +1163,8 @@
                         @focus="handleCustomerSearchFocus"
                         @input="handleCustomerSearchInput"
                         @touchstart="handleCustomerSearchFocus"
-                        @click="handleCustomerSearchFocus"
+                        @click.stop="handleCustomerSearchFocus"
+                        @mousedown.stop
                         autocomplete="off"
                         style="font-size: 16px; -webkit-appearance: none; appearance: none;"
                       />
@@ -1177,6 +1215,9 @@
                       </div>
                       <div v-else-if="!bookingCustomerSearch && customers.length === 0" class="no-results">
                         <i class="fas fa-info-circle me-2"></i>{{ $t('admin.noCustomersAvailable') || 'No customers available' }}
+                      </div>
+                      <div v-else-if="!bookingCustomerSearch && bookingCustomerMatches.length === 0 && customers.length > 0" class="no-results">
+                        <i class="fas fa-spinner fa-spin me-2"></i>{{ $t('common.loading') || 'Loading...' }}
                       </div>
                     </div>
                   </div>
@@ -3907,18 +3948,22 @@ async setReminder(appointment) {
       this.customerTouchStart = null
     },
     async handleCustomerSearchFocus() {
-      this.showCustomerDropdown = true
       // Ensure customers are loaded when user focuses on search
       if (this.customers.length === 0) {
         await this.fetchCustomers()
       }
+      // Use nextTick to ensure dropdown shows after DOM updates
+      await this.$nextTick()
+      this.showCustomerDropdown = true
     },
     async handleCustomerSearchInput() {
-      this.showCustomerDropdown = true
       // Ensure customers are loaded when user types
       if (this.customers.length === 0) {
         await this.fetchCustomers()
       }
+      // Use nextTick to ensure dropdown shows after DOM updates
+      await this.$nextTick()
+      this.showCustomerDropdown = true
     },
     clearCustomerSearch() {
       this.bookingCustomerSearch = ''
@@ -3929,8 +3974,12 @@ async setReminder(appointment) {
       this.bookingForm.customerEmail = ''
     },
     handleClickOutside(event) {
-      const dropdown = event.target.closest('.customer-search-container')
-      if (!dropdown) {
+      // Check if click is inside customer search container or dropdown
+      const searchContainer = event.target.closest('.customer-search-container')
+      const dropdown = event.target.closest('.customer-dropdown')
+      const input = event.target.closest('input[type="text"]')
+      // Don't close if clicking inside the search container, dropdown, or the input itself
+      if (!searchContainer && !dropdown && !(input && input.closest('.customer-search-container'))) {
         this.showCustomerDropdown = false
       }
     },
@@ -4130,7 +4179,11 @@ async setReminder(appointment) {
 
 @media (max-width: 991.98px) {
   .mobile-menu-btn {
-    display: flex;
+    display: flex !important;
+  }
+  
+  .desktop-toolbar-controls {
+    display: none !important;
   }
 }
 
@@ -4502,6 +4555,70 @@ async setReminder(appointment) {
   
   .admin-nav-item i {
     margin-right: 0.75rem;
+  }
+  
+  /* Mobile Toolbar Controls in Slider */
+  .mobile-toolbar-controls {
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 0.5rem;
+  }
+  
+  .mobile-control-item {
+    margin-bottom: 0.5rem;
+  }
+  
+  .mobile-control-item:last-child {
+    margin-bottom: 0;
+  }
+  
+  .mobile-control-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+  }
+  
+  .mobile-control-btn:hover {
+    background: var(--bg-primary);
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+  
+  .mobile-control-btn:active {
+    transform: scale(0.98);
+  }
+  
+  .mobile-control-btn i {
+    font-size: 1rem;
+    width: 20px;
+    text-align: center;
+  }
+  
+  .mobile-logout-btn {
+    color: var(--danger, #ef4444);
+  }
+  
+  .mobile-logout-btn:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: var(--danger, #ef4444);
+    color: var(--danger, #ef4444);
+  }
+  
+  .mobile-nav-divider {
+    height: 1px;
+    background: var(--border-color);
+    margin: 0.75rem 0;
   }
 }
 
