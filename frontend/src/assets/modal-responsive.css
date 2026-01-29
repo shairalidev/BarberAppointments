@@ -4,6 +4,22 @@
    Similar to iOS/Android native modals and modern platforms
    ============================================== */
 
+/* CRITICAL: Ensure buttons and interactive elements always work */
+button, .btn, a, input, select, textarea {
+  pointer-events: auto !important;
+}
+
+/* Only block interactions on modal overlay when modal is shown */
+.modal.responsive-modal.show,
+.responsive-modal.show.d-block {
+  pointer-events: auto;
+}
+
+.modal.responsive-modal.show > *,
+.responsive-modal.show.d-block > * {
+  pointer-events: auto;
+}
+
 /* CSS Custom Properties for Modal System */
 :root {
   --modal-backdrop: rgba(0, 0, 0, 0.5);
@@ -25,9 +41,11 @@
    ============================================== */
 
 /* Modal Overlay - Full screen on mobile */
+/* Only apply when modal is actually shown */
 .modal.fade.show.d-block,
 .modal.show.d-block,
-.responsive-modal {
+.modal.responsive-modal.show.d-block,
+.responsive-modal.show {
   position: fixed;
   top: 0;
   left: 0;
@@ -44,6 +62,32 @@
   margin: 0;
   overflow: hidden;
   animation: fadeIn 0.2s ease-out;
+}
+
+/* CRITICAL: Hide responsive-modal when not shown - Bootstrap modals */
+.modal.responsive-modal:not(.show) {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  position: static !important;
+  z-index: -1 !important;
+}
+
+/* Ensure responsive-modal only blocks when actually shown */
+.responsive-modal:not(.show):not(.d-block) {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  position: static !important;
+  z-index: -1 !important;
+}
+
+/* Only apply overlay styles when modal is actually visible */
+.modal.responsive-modal.show,
+.responsive-modal.show.d-block {
+  pointer-events: auto;
+  position: fixed !important;
 }
 
 @keyframes fadeIn {
@@ -68,6 +112,13 @@
   padding: 0;
   z-index: calc(var(--modal-z-index) + 1);
   transition: transform var(--modal-transition);
+  pointer-events: auto;
+}
+
+/* Only animate when modal is shown */
+.modal.show .modal-dialog,
+.modal.show .responsive-modal-dialog,
+.responsive-modal.show .responsive-modal-dialog {
   animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -98,6 +149,7 @@
   overflow: hidden;
   color: var(--text-primary);
   will-change: transform;
+  pointer-events: auto;
 }
 
 /* Modal Header - Sticky on mobile */
@@ -211,7 +263,8 @@
   /* Full-screen overlay */
   .modal.fade.show.d-block,
   .modal.show.d-block,
-  .responsive-modal {
+  .modal.responsive-modal.show.d-block,
+  .responsive-modal.show {
     align-items: flex-end;
     padding: 0;
     background: var(--modal-backdrop-blur);
@@ -958,12 +1011,17 @@
   overscroll-behavior-x: contain;
 }
 
-/* Prevent body scroll when modal is open */
+/* Prevent body scroll when modal is open - but allow interactions */
 body.modal-open {
   overflow: hidden;
   position: fixed;
   width: 100%;
   height: 100%;
+  pointer-events: auto;
+}
+
+body.modal-open * {
+  pointer-events: auto;
 }
 
 @media (max-width: 575.98px) {
@@ -973,5 +1031,10 @@ body.modal-open {
     width: 100%;
     height: 100%;
     height: 100dvh;
+    pointer-events: auto;
+  }
+  
+  body.modal-open * {
+    pointer-events: auto;
   }
 }
