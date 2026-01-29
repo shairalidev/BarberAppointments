@@ -62,7 +62,7 @@
     <!-- Navigation Tabs -->
     <div class="admin-nav-container" :class="{ 'mobile-nav-open': showMobileNav }">
       <!-- Mobile Nav Overlay -->
-      <div v-if="showMobileNav" class="mobile-nav-overlay" @click="showMobileNav = false"></div>
+      <div class="mobile-nav-overlay" :class="{ 'show': showMobileNav }" @click="showMobileNav = false"></div>
       <nav class="admin-nav" role="tablist" :class="{ 'mobile-nav-open': showMobileNav }">
         <!-- Mobile Toolbar Controls -->
         <div class="mobile-toolbar-controls d-lg-none">
@@ -4094,7 +4094,7 @@ async setReminder(appointment) {
   border-bottom: 1px solid var(--border-color);
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 1000;
   width: 100%;
   overflow: visible;
 }
@@ -4175,15 +4175,25 @@ async setReminder(appointment) {
 
 .mobile-menu-btn {
   display: none;
+  min-width: 36px;
+  min-height: 36px;
 }
 
 @media (max-width: 991.98px) {
   .mobile-menu-btn {
     display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   
   .desktop-toolbar-controls {
     display: none !important;
+  }
+  
+  /* Ensure button is visible and clickable */
+  .admin-toolbar {
+    position: relative;
+    z-index: 1001;
   }
 }
 
@@ -4509,23 +4519,31 @@ async setReminder(appointment) {
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 1040;
+  z-index: 1055;
   display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-@media (max-width: 767.98px) {
+.mobile-nav-overlay.show {
+  opacity: 1;
+}
+
+@media (max-width: 991.98px) {
   .admin-nav-container {
     position: fixed;
     top: 0;
     left: -100%;
     width: 280px;
+    max-width: 85vw;
     height: 100vh;
     background: var(--bg-secondary);
-    z-index: 1050;
+    z-index: 1060;
     padding: 1rem 0.5rem !important;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
     transition: left 0.3s ease;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
   
   .admin-nav-container.mobile-nav-open {
@@ -4533,7 +4551,11 @@ async setReminder(appointment) {
   }
   
   .mobile-nav-overlay {
-    display: block;
+    z-index: 1055;
+  }
+  
+  .mobile-nav-overlay.show {
+    display: block !important;
   }
   
   .admin-nav {
