@@ -309,7 +309,14 @@ body {
   color: var(--text-primary);
 }
 
+/* Modal styles are now handled by modal-responsive.css */
+/* Base modal content theming */
 .modal-content {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.responsive-modal-content {
   background-color: var(--bg-secondary);
   color: var(--text-primary);
 }

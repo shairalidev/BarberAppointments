@@ -99,37 +99,36 @@
           <div v-if="activeTab === 'calendar'" class="calendar-tab">
             <!-- Mobile Calendar Controls -->
             <div class="mobile-calendar-controls d-lg-none">
-              <div class="d-flex justify-content-between align-items-center mb-2">
+              <div class="d-flex align-items-center gap-1 flex-nowrap">
                 <!-- Calendar View Navigation -->
                 <template v-if="calendarViewMode === 'calendar'">
-                  <button @click="changeMonth(-1)" class="btn btn-outline-primary btn-sm">
+                  <button @click="changeMonth(-1)" class="btn btn-outline-primary btn-sm mobile-cal-btn">
                     <i class="fas fa-chevron-left"></i>
                   </button>
-                  <h6 class="mb-0 fw-bold">{{ currentMonthYear }}</h6>
-                  <button @click="changeMonth(1)" class="btn btn-outline-primary btn-sm">
+                  <h6 class="mb-0 fw-bold mobile-cal-title flex-grow-1 text-center">{{ currentMonthYear }}</h6>
+                  <button @click="changeMonth(1)" class="btn btn-outline-primary btn-sm mobile-cal-btn">
                     <i class="fas fa-chevron-right"></i>
                   </button>
                 </template>
                 <!-- Day View Navigation -->
                 <template v-else>
-                  <button @click="navigateDayView(-1)" class="btn btn-outline-primary btn-sm">
+                  <button @click="navigateDayView(-1)" class="btn btn-outline-primary btn-sm mobile-cal-btn">
                     <i class="fas fa-chevron-left"></i>
                   </button>
-                  <h6 class="mb-0 fw-bold">{{ formatDayViewDate }}</h6>
-                  <button @click="navigateDayView(1)" class="btn btn-outline-primary btn-sm">
+                  <h6 class="mb-0 fw-bold mobile-cal-title flex-grow-1 text-center">{{ formatDayViewDate }}</h6>
+                  <button @click="navigateDayView(1)" class="btn btn-outline-primary btn-sm mobile-cal-btn">
                     <i class="fas fa-chevron-right"></i>
                   </button>
                 </template>
-              </div>
-              <div class="d-flex gap-2 justify-content-center flex-wrap">
-                <button @click="calendarViewMode === 'calendar' ? goToToday() : goToTodayDayView()" class="btn btn-primary btn-sm">{{ $t('admin.today') }}</button>
-                <button @click="openBookingModal" class="btn btn-success btn-sm">
-                  <i class="fas fa-plus me-1"></i>{{ $t('admin.bookAppointment') }}
+                <!-- Action Buttons -->
+                <button @click="calendarViewMode === 'calendar' ? goToToday() : goToTodayDayView()" class="btn btn-primary btn-sm mobile-cal-btn">
+                  <i class="fas fa-calendar-day"></i>
                 </button>
-                <!-- Toggle Button for Mobile -->
-                <button @click="toggleCalendarView" class="btn btn-sm" :class="calendarViewMode === 'calendar' ? 'btn-outline-secondary' : 'btn-secondary'">
-                  <i :class="[calendarViewMode === 'calendar' ? 'fas fa-calendar-day' : 'fas fa-calendar-alt', 'me-1']"></i>
-                  {{ calendarViewMode === 'calendar' ? $t('admin.dayView') : $t('admin.calendar') }}
+                <button @click="openBookingModal" class="btn btn-success btn-sm mobile-cal-btn">
+                  <i class="fas fa-plus"></i>
+                </button>
+                <button @click="toggleCalendarView" class="btn btn-sm mobile-cal-btn" :class="calendarViewMode === 'calendar' ? 'btn-outline-secondary' : 'btn-secondary'">
+                  <i :class="calendarViewMode === 'calendar' ? 'fas fa-calendar-day' : 'fas fa-calendar-alt'"></i>
                 </button>
               </div>
               <!-- Mobile Off-Date Toggle - Calendar View -->
@@ -891,7 +890,7 @@
     </div>
 
     <!-- Response Modal -->
-    <div v-if="responseModal.show" class="modal fade show d-block responsive-modal" style="background: rgba(0,0,0,0.5);" @click.self="responseModal.show = false">
+    <div v-if="responseModal.show" class="modal fade show d-block responsive-modal" @click.self="responseModal.show = false">
       <div class="modal-dialog modal-dialog-centered responsive-modal-dialog">
         <div class="modal-content responsive-modal-content">
           <div class="modal-header responsive-modal-header">
@@ -920,7 +919,7 @@
     </div>
 
     <!-- Booking Modal -->
-    <div v-if="showBookingModal" class="modal fade show d-block booking-modal-overlay responsive-modal" style="background: rgba(0,0,0,0.5);" @click.self="closeBookingModal">
+    <div v-if="showBookingModal" class="modal fade show d-block booking-modal-overlay responsive-modal" @click.self="closeBookingModal">
       <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable booking-modal-dialog responsive-modal-dialog">
         <div class="modal-content booking-modal-content responsive-modal-content">
           <div class="modal-header bg-gradient-primary text-white responsive-modal-header">
@@ -1212,7 +1211,7 @@
     </div>
 
     <!-- Customer Modal -->
-    <div v-if="showCustomerModal" class="modal fade show d-block responsive-modal" style="background: rgba(0,0,0,0.5);" @click.self="closeCustomerModal">
+    <div v-if="showCustomerModal" class="modal fade show d-block responsive-modal" @click.self="closeCustomerModal">
       <div class="modal-dialog modal-lg modal-dialog-centered responsive-modal-dialog">
         <div class="modal-content responsive-modal-content">
           <div class="modal-header bg-gradient-primary text-white responsive-modal-header">
@@ -1441,8 +1440,8 @@
     </div>
 
     <!-- Date Detail Modal -->
-    <div v-if="dateDetailModal.show" class="modal fade show d-block date-detail-modal responsive-modal" style="background: rgba(0,0,0,0.5);" @click.self="closeDateDetailModal">
-      <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable date-detail-modal-dialog responsive-modal-dialog" style="max-width: 95%;">
+    <div v-if="dateDetailModal.show" class="modal fade show d-block date-detail-modal responsive-modal" @click.self="closeDateDetailModal">
+      <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable date-detail-modal-dialog responsive-modal-dialog">
         <div class="modal-content responsive-modal-content">
           <div class="modal-header bg-gradient-primary text-white responsive-modal-header">
             <div class="d-flex align-items-center justify-content-between w-100">
@@ -1480,11 +1479,11 @@
                     </span>
                   </label>
                 </div>
-                <button @click="closeDateDetailModal" class="btn-close btn-close-white"></button>
+                <button @click="closeDateDetailModal" class="btn-close btn-close-white" aria-label="Close"></button>
               </div>
             </div>
           </div>
-          <div class="modal-body p-0" style="max-height: 70vh; overflow-y: auto;">
+          <div class="modal-body p-0 responsive-modal-body">
             <div v-if="dateDetailModal.loading" class="text-center p-5">
               <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Loading...</span>
@@ -1571,7 +1570,7 @@
               </div>
             </div>
           </div>
-          <div class="modal-footer">
+          <div class="modal-footer responsive-modal-footer">
             <button @click="closeDateDetailModal" class="btn btn-secondary">
               <i class="fas fa-times me-2"></i>{{ $t('common.close') }}
             </button>
@@ -4396,6 +4395,13 @@ async setReminder(appointment) {
   padding: 0 0.5rem 0.75rem;
 }
 
+/* Hide navigation on mobile devices */
+@media (max-width: 767.98px) {
+  .admin-nav-container {
+    display: none !important;
+  }
+}
+
 .admin-nav {
   display: flex;
   background: var(--bg-secondary);
@@ -4658,7 +4664,7 @@ async setReminder(appointment) {
   }
 
   .admin-nav-container {
-    padding: 0 0.25rem 0.5rem;
+    display: none !important;
   }
 
   .admin-nav {
@@ -4723,6 +4729,10 @@ async setReminder(appointment) {
     width: 28px;
     height: 28px;
     font-size: 0.65rem;
+  }
+
+  .admin-nav-container {
+    display: none !important;
   }
 
   .admin-nav-item {
@@ -5227,56 +5237,64 @@ async setReminder(appointment) {
   /* Mobile Calendar */
   .mobile-calendar-controls {
     background: var(--bg-secondary);
-    border-radius: 10px;
-    padding: 0.75rem 0.5rem;
+    border-radius: 8px;
+    padding: 0.375rem 0.375rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     border: 1px solid var(--border-color);
-    margin-bottom: 0.75rem !important;
+    margin-bottom: 0.5rem !important;
     width: 100%;
     max-width: 100%;
   }
   
-  .mobile-calendar-controls .d-flex.justify-content-between {
-    margin-bottom: 0.75rem;
+  .mobile-calendar-controls > .d-flex {
+    gap: 0.25rem !important;
+    align-items: center;
+    flex-wrap: nowrap;
+    overflow: hidden;
   }
   
-  .mobile-calendar-controls h6 {
-    font-size: 0.9rem;
-    padding: 0 0.5rem;
+  .mobile-calendar-controls .mobile-cal-title {
+    font-size: 0.75rem;
+    padding: 0 0.25rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: calc(100% - 100px);
+    min-width: 0;
+    flex-shrink: 1;
   }
   
-  .mobile-calendar-controls .btn-sm {
-    min-width: 36px;
-    height: 36px;
-    padding: 0.375rem 0.5rem;
-    font-size: 0.8rem;
+  .mobile-calendar-controls .mobile-cal-btn {
+    min-width: 28px;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    font-size: 0.7rem;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+    border-radius: 6px;
+  }
+  
+  .mobile-calendar-controls .mobile-cal-btn i {
+    font-size: 0.7rem;
+    margin: 0 !important;
+  }
+  
+  .mobile-calendar-controls .btn-sm {
+    min-width: 28px;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
   }
   
   .mobile-calendar-controls .btn-sm i {
-    font-size: 0.75rem;
-  }
-  
-  .mobile-calendar-controls .d-flex.gap-2 {
-    gap: 0.5rem !important;
-    flex-wrap: wrap;
-  }
-  
-  .mobile-calendar-controls .d-flex.gap-2 .btn-sm {
-    flex: 1;
-    min-width: auto;
-    font-size: 0.75rem;
-    padding: 0.4rem 0.5rem;
-  }
-  
-  .mobile-calendar-controls .d-flex.gap-2 .btn-sm i {
-    margin-right: 0.25rem;
+    font-size: 0.7rem;
   }
   
   .calendar-day {
@@ -5707,45 +5725,59 @@ async setReminder(appointment) {
   }
   
   .mobile-calendar-controls {
-    padding: 0.5rem 0.375rem;
+    padding: 0.375rem 0.375rem;
     border-radius: 8px;
     margin-bottom: 0.5rem !important;
   }
   
-  .mobile-calendar-controls .d-flex.justify-content-between {
-    margin-bottom: 0.5rem;
+  .mobile-calendar-controls > .d-flex {
+    gap: 0.25rem !important;
+    align-items: center;
+    flex-wrap: nowrap;
+    overflow: hidden;
   }
   
-  .mobile-calendar-controls h6 {
-    font-size: 0.8rem;
+  .mobile-calendar-controls .mobile-cal-title {
+    font-size: 0.7rem;
     padding: 0 0.25rem;
-    max-width: calc(100% - 80px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    flex-shrink: 1;
+  }
+  
+  .mobile-calendar-controls .mobile-cal-btn {
+    min-width: 26px;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    font-size: 0.65rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 5px;
+  }
+  
+  .mobile-calendar-controls .mobile-cal-btn i {
+    font-size: 0.65rem;
+    margin: 0 !important;
   }
   
   .mobile-calendar-controls .btn-sm {
-    min-width: 32px;
-    height: 32px;
-    padding: 0.25rem 0.375rem;
-    font-size: 0.7rem;
+    min-width: 26px;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    font-size: 0.65rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
   }
   
   .mobile-calendar-controls .btn-sm i {
-    font-size: 0.65rem;
-  }
-  
-  .mobile-calendar-controls .d-flex.gap-2 {
-    gap: 0.375rem !important;
-  }
-  
-  .mobile-calendar-controls .d-flex.gap-2 .btn-sm {
-    font-size: 0.7rem;
-    padding: 0.3rem 0.4rem;
-    flex: 1 1 auto;
-    min-width: 0;
-  }
-  
-  .mobile-calendar-controls .d-flex.gap-2 .btn-sm i {
-    margin-right: 0.2rem;
     font-size: 0.65rem;
   }
   
@@ -8889,23 +8921,49 @@ select.booking-service-select {
   }
   
   .modal-body {
-    padding: 0.4rem !important;
-    max-height: calc(100vh - 7rem) !important;
+    padding: 0.75rem !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch;
     max-width: 100%;
     box-sizing: border-box;
   }
-  
-  .modal-body .row {
-    margin-left: 0 !important;
-    margin-right: 0 !important;
+
+  /* Booking Modal Body - Mobile Optimization */
+  .booking-modal-body {
+    padding: 0.75rem !important;
+    padding-bottom: 1rem !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+    box-sizing: border-box;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .booking-modal-body form {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1;
   }
   
-  .modal-body .col-12 {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
+  .modal-body .row,
+  .booking-modal-body .row {
+    margin-left: -0.25rem !important;
+    margin-right: -0.25rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+  
+  .modal-body .col-12,
+  .modal-body .col-md-6,
+  .booking-modal-body .col-12,
+  .booking-modal-body .col-md-6 {
+    padding-left: 0.25rem !important;
+    padding-right: 0.25rem !important;
     max-width: 100% !important;
     overflow: hidden !important;
     width: 100% !important;
@@ -10418,9 +10476,35 @@ select.booking-service-select {
     .booking-modal-body {
       flex: 1;
       overflow-y: auto;
+      overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
-      max-height: calc(100vh - 150px);
-      max-height: calc(-webkit-fill-available - 150px);
+      overscroll-behavior: contain;
+      min-height: 0;
+      padding: 0.75rem;
+      padding-bottom: 1rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .booking-modal-body form {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      flex: 1;
+    }
+
+    .booking-modal-body .row {
+      margin-left: -0.25rem;
+      margin-right: -0.25rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .booking-modal-body .row > [class*="col-"] {
+      padding-left: 0.25rem;
+      padding-right: 0.25rem;
+      max-width: 100%;
+      overflow: hidden;
+      box-sizing: border-box;
     }
 
     /* Week picker iOS fixes */

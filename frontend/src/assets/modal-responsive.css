@@ -256,6 +256,16 @@
     flex-direction: column;
     max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    overflow: hidden;
+  }
+
+  /* Booking Modal Content - Mobile */
+  .booking-modal-content {
+    height: 100%;
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 
   /* Sticky header */
@@ -297,28 +307,158 @@
     min-height: 0;
   }
 
+  /* Booking Modal Body - Mobile Optimization */
+  .booking-modal-body {
+    flex: 1;
+    padding: 0.75rem;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    max-height: none;
+    height: 0; /* Force flexbox to calculate height */
+    min-height: 0;
+    padding-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .booking-modal-body form {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .booking-modal-body .row {
+    margin-left: -0.25rem;
+    margin-right: -0.25rem;
+    margin-bottom: 0.5rem;
+    width: 100%;
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .booking-modal-body .row > [class*="col-"] {
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  .booking-modal-body .form-label {
+    font-size: 0.8rem;
+    margin-bottom: 0.4rem;
+    font-weight: 600;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .booking-modal-body .form-control,
+  .booking-modal-body .form-select {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    font-size: 16px;
+    min-height: 44px;
+    padding: 0.625rem 0.75rem;
+  }
+
+  .booking-modal-body .input-group {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    flex-wrap: nowrap;
+  }
+
+  .booking-modal-body .input-group .form-control {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .booking-modal-body .btn {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+    font-size: 0.9375rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .booking-modal-body .alert {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+    margin-bottom: 0.75rem;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .booking-modal-body .time-slots-grid {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .booking-modal-body .customer-search-container {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
   /* Sticky footer */
   .modal-footer,
   .responsive-modal-footer {
     position: sticky;
     bottom: 0;
     z-index: 10;
-    padding: 1rem;
-    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
-    min-height: calc(var(--modal-footer-height-mobile) + env(safe-area-inset-bottom));
+    padding: 0.75rem 1rem;
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+    min-height: calc(64px + env(safe-area-inset-bottom));
     border-top: 2px solid var(--border-color);
     background-color: var(--bg-secondary);
     box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.05);
     flex-direction: column;
+    flex-shrink: 0;
+    margin-top: auto;
   }
 
   .modal-footer .btn,
   .responsive-modal-footer .btn {
     width: 100%;
     flex: 1;
-    min-height: 48px;
-    font-size: 1rem;
-    padding: 0.75rem 1.5rem;
+    min-height: 44px;
+    font-size: 0.9375rem;
+    padding: 0.625rem 1rem;
+    margin-bottom: 0.5rem;
+    box-sizing: border-box;
+  }
+
+  .modal-footer .btn:last-child,
+  .responsive-modal-footer .btn:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Booking Modal Footer - Extra optimization */
+  .booking-modal-content .modal-footer,
+  .booking-modal-content .responsive-modal-footer {
+    padding: 0.75rem;
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+    gap: 0.5rem;
+  }
+
+  .booking-modal-content .modal-footer .btn,
+  .booking-modal-content .responsive-modal-footer .btn {
+    min-height: 44px;
+    padding: 0.625rem 1rem;
   }
 
   /* Form elements in modals */
@@ -634,6 +774,54 @@
 
 .booking-modal-dialog {
   max-width: 100%;
+  display: flex;
+  align-items: stretch;
+  min-height: 0;
+}
+
+.booking-modal-content {
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+  overflow: hidden;
+  min-height: 0;
+  width: 100%;
+}
+
+.booking-modal-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.booking-modal-body form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+  width: 100%;
+}
+
+.booking-modal-body .row {
+  margin-left: 0;
+  margin-right: 0;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 100%;
+}
+
+.booking-modal-body .row > [class*="col-"] {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 @media (min-width: 768px) {
