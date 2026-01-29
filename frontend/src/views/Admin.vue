@@ -27,6 +27,16 @@
             <i class="fas fa-moon theme-switch-icon"></i>
           </div>
 
+          <!-- Mobile Menu Button -->
+          <button 
+            class="toolbar-btn mobile-menu-btn d-lg-none" 
+            type="button"
+            @click="toggleMobileNav"
+            :title="$t('admin.menu')"
+          >
+            <i class="fas fa-bars"></i>
+          </button>
+
           <!-- Admin Account Dropdown -->
           <div class="dropdown">
             <button class="toolbar-btn admin-avatar-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -48,10 +58,12 @@
     </div>
 
     <!-- Navigation Tabs -->
-    <div class="admin-nav-container">
-      <nav class="admin-nav" role="tablist">
+    <div class="admin-nav-container" :class="{ 'mobile-nav-open': showMobileNav }">
+      <!-- Mobile Nav Overlay -->
+      <div v-if="showMobileNav" class="mobile-nav-overlay" @click="showMobileNav = false"></div>
+      <nav class="admin-nav" role="tablist" :class="{ 'mobile-nav-open': showMobileNav }">
         <button
-          @click="activeTab = 'calendar'"
+          @click="activeTab = 'calendar'; showMobileNav = false"
           :class="['admin-nav-item', { active: activeTab === 'calendar' }]"
           role="tab"
         >
@@ -59,7 +71,7 @@
           <span>{{ $t('admin.calendar') }}</span>
         </button>
         <button
-          @click="activeTab = 'customers'"
+          @click="activeTab = 'customers'; showMobileNav = false"
           :class="['admin-nav-item', { active: activeTab === 'customers' }]"
           role="tab"
         >
@@ -67,7 +79,7 @@
           <span>{{ $t('admin.customers') }}</span>
         </button>
         <button
-          @click="activeTab = 'services'"
+          @click="activeTab = 'services'; showMobileNav = false"
           :class="['admin-nav-item', { active: activeTab === 'services' }]"
           role="tab"
         >
@@ -75,7 +87,7 @@
           <span>{{ $t('admin.services') }}</span>
         </button>
         <button
-          @click="activeTab = 'timeslots'"
+          @click="activeTab = 'timeslots'; showMobileNav = false"
           :class="['admin-nav-item', { active: activeTab === 'timeslots' }]"
           role="tab"
         >
@@ -83,7 +95,7 @@
           <span>{{ $t('admin.slots') }}</span>
         </button>
         <button
-          @click="activeTab = 'profile'"
+          @click="activeTab = 'profile'; showMobileNav = false"
           :class="['admin-nav-item', { active: activeTab === 'profile' }]"
           role="tab"
         >
@@ -130,12 +142,9 @@
                 <button @click="toggleCalendarView" class="btn btn-sm mobile-cal-btn" :class="calendarViewMode === 'calendar' ? 'btn-outline-secondary' : 'btn-secondary'">
                   <i :class="calendarViewMode === 'calendar' ? 'fas fa-calendar-day' : 'fas fa-calendar-alt'"></i>
                 </button>
-              </div>
-              <!-- Mobile Off-Date Toggle - Calendar View -->
-              <div v-if="calendarViewMode === 'calendar' && selectedCalendarDate" class="mobile-off-date-section mt-2">
-                <div class="off-date-toggle-mobile">
-                  <small class="text-muted mb-1 d-block">{{ formatSelectedDate }}</small>
-                  <label class="off-date-toggle-label-mobile" for="mobileCalendarOffDateToggle">
+                <!-- Mobile Off-Date Toggle - Calendar View -->
+                <template v-if="calendarViewMode === 'calendar' && selectedCalendarDate">
+                  <label class="off-date-toggle-mobile-tiny" for="mobileCalendarOffDateToggle" :title="isSelectedDateRestricted ? $t('admin.offDate') : $t('admin.markAsOffDate')">
                     <input 
                       class="off-date-toggle-input" 
                       type="checkbox" 
@@ -143,20 +152,15 @@
                       :checked="isSelectedDateRestricted"
                       @change="toggleCalendarOffDate"
                     >
-                    <span class="toggle-slider-mobile" :class="{ 'active': isSelectedDateRestricted }">
+                    <span class="toggle-slider-mobile-tiny" :class="{ 'active': isSelectedDateRestricted }">
                       <i v-if="isSelectedDateRestricted" class="fas fa-ban"></i>
                       <i v-else class="fas fa-calendar-check"></i>
                     </span>
-                    <span class="toggle-text-mobile">
-                      {{ isSelectedDateRestricted ? $t('admin.offDate') : $t('admin.markAsOffDate') }}
-                    </span>
                   </label>
-                </div>
-              </div>
-              <!-- Mobile Off-Date Toggle - Day View -->
-              <div v-if="calendarViewMode === 'day'" class="mobile-off-date-section mt-2">
-                <div class="off-date-toggle-mobile">
-                  <label class="off-date-toggle-label-mobile" for="mobileDayViewOffDateToggle">
+                </template>
+                <!-- Mobile Off-Date Toggle - Day View -->
+                <template v-if="calendarViewMode === 'day'">
+                  <label class="off-date-toggle-mobile-tiny" for="mobileDayViewOffDateToggle" :title="dayViewData.isRestricted ? $t('admin.offDate') : $t('admin.markAsOffDate')">
                     <input 
                       class="off-date-toggle-input" 
                       type="checkbox" 
@@ -164,15 +168,12 @@
                       :checked="dayViewData.isRestricted"
                       @change="toggleDayViewOffDate"
                     >
-                    <span class="toggle-slider-mobile" :class="{ 'active': dayViewData.isRestricted }">
+                    <span class="toggle-slider-mobile-tiny" :class="{ 'active': dayViewData.isRestricted }">
                       <i v-if="dayViewData.isRestricted" class="fas fa-ban"></i>
                       <i v-else class="fas fa-calendar-check"></i>
                     </span>
-                    <span class="toggle-text-mobile">
-                      {{ dayViewData.isRestricted ? $t('admin.offDate') : $t('admin.markAsOffDate') }}
-                    </span>
                   </label>
-                </div>
+                </template>
               </div>
             </div>
 
@@ -1682,6 +1683,7 @@ export default {
       bookingCustomerSearch: '',
       showCustomerDropdown: false,
       customerTouchStart: null,
+      showMobileNav: false,
       dateDetailModal: {
         show: false,
         date: null,
@@ -2340,6 +2342,9 @@ export default {
     }
   },
   methods: {
+    toggleMobileNav() {
+      this.showMobileNav = !this.showMobileNav
+    },
     async fetchData() {
       await Promise.all([
         this.fetchAppointments(),
@@ -3497,27 +3502,23 @@ getTimeSlotsForDay(dayIndex) {
       }
       
       // Only handle clicks on empty slots (not occupied)
-      if (!slot || !slot.time || slot.isOccupied || !date) {
+      if (!slot || slot.isOccupied || !date) {
         return
       }
       
-      // Use slot.time directly as it's already correctly set to the exact time (e.g., "9:30" or "09:30")
-      // Normalize the time format to ensure consistent format (HH:MM)
-      let normalizedTime = slot.time
-      if (normalizedTime) {
-        const parts = normalizedTime.split(':')
-        if (parts.length >= 2) {
-          const hourPart = parts[0].padStart(2, '0')
-          const minutePart = parts[1].padStart(2, '0')
-          normalizedTime = `${hourPart}:${minutePart}`
-        }
-      }
+      // Determine the correct time based on index (0 = :00, 1 = :30)
+      // This ensures we always get the correct half-hour slot
+      const hourValue = hour ? parseInt(hour.split(':')[0]) : (slot.time ? parseInt(slot.time.split(':')[0]) : 0)
+      const minuteValue = index === 0 ? 0 : 30
+      const normalizedTime = `${hourValue.toString().padStart(2, '0')}:${minuteValue.toString().padStart(2, '0')}`
       
-      // Fallback: Use hour and index if slot.time is not available (shouldn't happen, but safety check)
-      if (!normalizedTime || normalizedTime === 'undefined:undefined') {
-        const hourValue = hour ? parseInt(hour.split(':')[0]) : parseInt(slot.time.split(':')[0])
-        const minuteValue = index === 0 ? 0 : 30
-        normalizedTime = `${hourValue.toString().padStart(2, '0')}:${minuteValue.toString().padStart(2, '0')}`
+      // Verify the slot.time matches what we expect (safety check)
+      if (slot.time) {
+        const slotParts = slot.time.split(':')
+        const expectedMinute = index === 0 ? 0 : 30
+        if (slotParts.length >= 2 && parseInt(slotParts[1]) !== expectedMinute) {
+          console.warn(`Slot time mismatch: expected ${expectedMinute} but got ${slotParts[1]} for index ${index}`)
+        }
       }
 
       // Set the booking form with the selected date and time
@@ -4123,6 +4124,16 @@ async setReminder(appointment) {
   transform: scale(0.95);
 }
 
+.mobile-menu-btn {
+  display: none;
+}
+
+@media (max-width: 991.98px) {
+  .mobile-menu-btn {
+    display: flex;
+  }
+}
+
 .toolbar-btn-outline {
   background: transparent;
   border: 1.5px solid var(--primary);
@@ -4437,10 +4448,60 @@ async setReminder(appointment) {
   padding: 0 0.5rem 0.75rem;
 }
 
-/* Hide navigation on mobile devices */
+/* Mobile Navigation */
+.mobile-nav-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
+  display: none;
+}
+
 @media (max-width: 767.98px) {
   .admin-nav-container {
-    display: none !important;
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 280px;
+    height: 100vh;
+    background: var(--bg-secondary);
+    z-index: 1050;
+    padding: 1rem 0.5rem !important;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    transition: left 0.3s ease;
+    overflow-y: auto;
+  }
+  
+  .admin-nav-container.mobile-nav-open {
+    left: 0;
+  }
+  
+  .mobile-nav-overlay {
+    display: block;
+  }
+  
+  .admin-nav {
+    flex-direction: column;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+    gap: 0.5rem;
+  }
+  
+  .admin-nav-item {
+    width: 100%;
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    text-align: left;
+  }
+  
+  .admin-nav-item i {
+    margin-right: 0.75rem;
   }
 }
 
@@ -8401,6 +8462,50 @@ async setReminder(appointment) {
   font-size: 0.75rem;
 }
 
+/* Tiny mobile toggle - inline in flex container */
+.off-date-toggle-mobile-tiny {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  position: relative;
+}
+
+.off-date-toggle-mobile-tiny .off-date-toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider-mobile-tiny {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--bg-tertiary);
+  color: var(--success);
+  font-size: 0.7rem;
+  transition: all 0.2s ease;
+  border: 1px solid var(--border-color);
+}
+
+.toggle-slider-mobile-tiny.active {
+  background: var(--warning);
+  color: white;
+  border-color: var(--warning);
+}
+
+.toggle-slider-mobile-tiny:active {
+  transform: scale(0.95);
+}
+
 @media (max-width: 576px) {
   .mobile-off-date-section {
     padding: 0.35rem;
@@ -8417,7 +8522,13 @@ async setReminder(appointment) {
   .toggle-slider-mobile {
     width: 24px;
     height: 24px;
-    font-size: 0.75rem;
+  }
+  
+  /* Make tiny toggle even smaller on very small screens */
+  .toggle-slider-mobile-tiny {
+    width: 24px;
+    height: 24px;
+    font-size: 0.65rem;
   }
   
   .toggle-text-mobile {
