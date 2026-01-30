@@ -4920,16 +4920,7 @@ async setReminder(appointment) {
     font-size: 0.7rem;
   }
 
-  .admin-nav-container {
-    display: none !important;
-  }
-
-  .admin-nav {
-    padding: 0.2rem;
-    border-radius: 8px;
-    gap: 0.125rem;
-  }
-
+  /* Mobile nav items styling when in slider */
   .admin-nav-item {
     padding: 0.4rem 0.2rem;
     font-size: 0.6rem;
@@ -4988,10 +4979,7 @@ async setReminder(appointment) {
     font-size: 0.65rem;
   }
 
-  .admin-nav-container {
-    display: none !important;
-  }
-
+  /* Mobile nav slider uses fixed positioning, not hidden */
   .admin-nav-item {
     padding: 0.35rem 0.15rem;
     font-size: 0.55rem;
