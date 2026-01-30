@@ -59,10 +59,11 @@
       </div>
     </div>
 
+    <!-- Mobile Nav Overlay - Must be outside the nav container -->
+    <div class="mobile-nav-overlay" :class="{ 'show': showMobileNav }" @click="showMobileNav = false"></div>
+
     <!-- Navigation Tabs -->
     <div class="admin-nav-container" :class="{ 'mobile-nav-open': showMobileNav }">
-      <!-- Mobile Nav Overlay -->
-      <div class="mobile-nav-overlay" :class="{ 'show': showMobileNav }" @click="showMobileNav = false"></div>
       <nav class="admin-nav" role="tablist" :class="{ 'mobile-nav-open': showMobileNav }">
         <!-- Mobile Toolbar Controls -->
         <div class="mobile-toolbar-controls d-lg-none">
@@ -4524,7 +4525,7 @@ async setReminder(appointment) {
   padding: 0 0.5rem 0.75rem;
 }
 
-/* Mobile Navigation */
+/* Mobile Navigation Overlay - Outside container for proper positioning */
 .mobile-nav-overlay {
   position: fixed;
   top: 0;
@@ -4533,14 +4534,15 @@ async setReminder(appointment) {
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
   z-index: 1055;
-  display: none;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
   pointer-events: none;
 }
 
 .mobile-nav-overlay.show {
   opacity: 1;
+  visibility: visible;
   pointer-events: auto;
 }
 
@@ -4566,13 +4568,9 @@ async setReminder(appointment) {
     left: 0;
   }
   
-  .mobile-nav-overlay {
-    z-index: 1055;
-  }
-  
+  /* Overlay z-index for mobile - must be below nav container */
   .mobile-nav-overlay.show {
-    display: block !important;
-    pointer-events: auto;
+    z-index: 1055;
   }
   
   .admin-nav {
