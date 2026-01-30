@@ -993,7 +993,7 @@
                   </label>
 
                   <!-- Mobile Week View - Compact horizontal strip -->
-                  <div class="mobile-week-picker d-md-none">
+                  <div class="mobile-week-picker">
                     <!-- Week Navigation Header -->
                     <div class="week-picker-header">
                       <button
@@ -1045,7 +1045,7 @@
                   </div>
 
                   <!-- Desktop Full Calendar -->
-                  <div class="professional-date-picker d-none d-md-block">
+                  <div class="professional-date-picker desktop-only">
                     <!-- Month Navigation -->
                     <div class="date-picker-header-pro">
                       <button
