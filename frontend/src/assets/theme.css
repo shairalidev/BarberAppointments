@@ -610,3 +610,161 @@ body {
   opacity: 1;
   color: #f8fafc;
 }
+
+/* ========================================
+   ADVANCED MOBILE VIEWPORT UTILITIES
+   ======================================== */
+
+/* Dynamic viewport units support */
+@supports (height: 100dvh) {
+  .full-height {
+    height: 100dvh;
+  }
+
+  .min-full-height {
+    min-height: 100dvh;
+  }
+
+  .max-full-height {
+    max-height: 100dvh;
+  }
+}
+
+/* Fallback for browsers without dvh support */
+@supports not (height: 100dvh) {
+  .full-height {
+    height: 100vh;
+    height: -webkit-fill-available;
+  }
+
+  .min-full-height {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+
+  .max-full-height {
+    max-height: 100vh;
+    max-height: -webkit-fill-available;
+  }
+}
+
+/* Focus scroll behavior - prevents keyboard pushing content out of view */
+@media (max-width: 767px) {
+  /* Scroll to focused element with padding */
+  input:focus,
+  textarea:focus,
+  select:focus {
+    scroll-margin-top: 20px;
+    scroll-margin-bottom: 100px;
+  }
+
+  /* Prevent body scroll when modal is open */
+  body.modal-open {
+    overflow: hidden !important;
+    position: fixed !important;
+    width: 100% !important;
+    height: 100% !important;
+    height: 100dvh !important;
+    touch-action: none;
+    overscroll-behavior: none;
+  }
+
+  /* Allow modal content to scroll */
+  body.modal-open .modal-body,
+  body.modal-open .responsive-modal-body {
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Virtual keyboard handling */
+@media (max-width: 767px) {
+  /* Ensure inputs remain visible when keyboard is open */
+  .modal-body input:focus,
+  .modal-body textarea:focus,
+  .modal-body select:focus,
+  .responsive-modal-body input:focus,
+  .responsive-modal-body textarea:focus,
+  .responsive-modal-body select:focus {
+    position: relative;
+    z-index: 10;
+  }
+
+  /* Reduce motion for better performance on mobile */
+  @media (prefers-reduced-motion: no-preference) {
+    .modal-body,
+    .responsive-modal-body {
+      scroll-behavior: smooth;
+    }
+  }
+}
+
+/* Extra small screen text size adjustments */
+@media (max-width: 359px) {
+  html {
+    font-size: 14px;
+  }
+
+  .btn {
+    font-size: 0.8125rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  h5, .h5 {
+    font-size: 1rem;
+  }
+
+  h6, .h6 {
+    font-size: 0.875rem;
+  }
+
+  .form-label {
+    font-size: 0.75rem;
+  }
+}
+
+/* Small screen text adjustments */
+@media (min-width: 360px) and (max-width: 575px) {
+  html {
+    font-size: 15px;
+  }
+}
+
+/* Landscape mode optimizations */
+@media (max-height: 450px) and (orientation: landscape) {
+  .modal-header,
+  .responsive-modal-header {
+    padding: 0.5rem 0.75rem !important;
+    min-height: 40px !important;
+  }
+
+  .modal-footer,
+  .responsive-modal-footer {
+    padding: 0.5rem 0.75rem !important;
+    min-height: 48px !important;
+  }
+
+  .modal-body,
+  .responsive-modal-body {
+    padding: 0.5rem 0.75rem !important;
+  }
+
+  .form-label {
+    margin-bottom: 0.25rem;
+  }
+
+  .form-control,
+  .form-select {
+    min-height: 36px;
+    padding: 0.375rem 0.5rem;
+  }
+}
+
+/* Print styles */
+@media print {
+  .modal,
+  .responsive-modal,
+  .toast-container {
+    display: none !important;
+  }
+}

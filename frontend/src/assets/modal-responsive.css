@@ -1,166 +1,145 @@
 /* ==============================================
-   RESPONSIVE MODAL OPTIMIZATION SYSTEM
-   State-of-the-art modal optimization for all screen sizes
-   Similar to iOS/Android native modals and modern platforms
+   ADVANCED RESPONSIVE MODAL SYSTEM v2.0
+   Modern bottom-sheet pattern with perfect mobile support
+   Works on all screen sizes with fluid typography
    ============================================== */
 
-/* CRITICAL: Ensure buttons and interactive elements always work */
-button, .btn, a, input, select, textarea {
+/* ===== CSS Custom Properties (Design Tokens) ===== */
+:root {
+  /* Modal sizing */
+  --modal-z-index: 1050;
+  --modal-backdrop-z: 1040;
+  --modal-content-z: 1055;
+
+  /* Spacing - fluid with clamp */
+  --modal-padding-xs: clamp(0.75rem, 3vw, 1rem);
+  --modal-padding-sm: clamp(1rem, 4vw, 1.5rem);
+  --modal-padding-md: clamp(1.25rem, 5vw, 2rem);
+
+  /* Typography - fluid sizing */
+  --modal-title-size: clamp(1rem, 4vw, 1.25rem);
+  --modal-body-size: clamp(0.875rem, 3.5vw, 1rem);
+  --modal-label-size: clamp(0.75rem, 3vw, 0.875rem);
+  --modal-input-size: 16px; /* Fixed to prevent iOS zoom */
+
+  /* Touch targets */
+  --touch-target-min: 44px;
+  --touch-target-comfortable: 48px;
+
+  /* Borders & Radius */
+  --modal-radius-mobile: 20px 20px 0 0;
+  --modal-radius-tablet: 16px;
+  --modal-radius-desktop: 12px;
+
+  /* Transitions */
+  --modal-transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --modal-transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Backdrop */
+  --modal-backdrop-color: rgba(0, 0, 0, 0.6);
+  --modal-backdrop-blur: 8px;
+
+  /* Safe areas for notched devices */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* ===== CRITICAL: Pointer Events Management ===== */
+button, .btn, a, input, select, textarea,
+[role="button"], [tabindex]:not([tabindex="-1"]) {
   pointer-events: auto !important;
 }
 
-/* CRITICAL: Toast containers should not block page interactions */
+/* Toast containers - non-blocking */
 .Vue-Toastification__container,
-.Vue-Toastification__container.top-right,
-.Vue-Toastification__container.bottom-right,
 .toast-container {
   pointer-events: none !important;
 }
 
-/* Only toast items themselves should be interactive */
 .Vue-Toastification__toast,
-.toast-container .toast,
 .toast {
   pointer-events: auto !important;
-  position: relative;
   z-index: 10000;
 }
 
-.Vue-Toastification__toast *,
-.toast-container .toast *,
-.toast * {
-  pointer-events: auto !important;
+/* ===== Body Scroll Lock ===== */
+body.modal-open {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+  height: 100% !important;
+  height: 100dvh !important;
+  touch-action: none;
 }
 
-/* Only block interactions on modal overlay when modal is shown */
-.modal.responsive-modal.show,
-.responsive-modal.show.d-block {
-  pointer-events: auto;
+/* ===== Hidden Modal States ===== */
+.modal:not(.show),
+.modal.responsive-modal:not(.show),
+.responsive-modal:not(.show):not(.d-block) {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
 }
 
-.modal.responsive-modal.show > *,
-.responsive-modal.show.d-block > * {
-  pointer-events: auto;
-}
-
-/* CSS Custom Properties for Modal System */
-:root {
-  --modal-backdrop: rgba(0, 0, 0, 0.5);
-  --modal-backdrop-blur: rgba(0, 0, 0, 0.6);
-  --modal-border-radius-mobile: 0;
-  --modal-border-radius-tablet: 16px;
-  --modal-border-radius-desktop: 16px;
-  --modal-padding-mobile: 1rem;
-  --modal-padding-tablet: 1.5rem;
-  --modal-padding-desktop: 2rem;
-  --modal-header-height-mobile: 56px;
-  --modal-footer-height-mobile: 64px;
-  --modal-z-index: 1050;
-  --modal-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* ==============================================
-   BASE RESPONSIVE MODAL STYLES
-   ============================================== */
-
-/* Modal Overlay - Full screen on mobile */
-/* Only apply when modal is actually shown */
-.modal.fade.show.d-block,
+/* ===== BASE MODAL OVERLAY ===== */
 .modal.show.d-block,
+.modal.fade.show.d-block,
 .modal.responsive-modal.show.d-block,
-.responsive-modal.show {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+.responsive-modal.show,
+.responsive-modal.show.d-block {
+  position: fixed !important;
+  inset: 0;
   z-index: var(--modal-z-index);
-  display: flex;
-  align-items: center;
+  display: flex !important;
+  align-items: flex-end; /* Bottom sheet on mobile by default */
   justify-content: center;
-  background: var(--modal-backdrop);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: var(--modal-backdrop-color);
+  backdrop-filter: blur(var(--modal-backdrop-blur));
+  -webkit-backdrop-filter: blur(var(--modal-backdrop-blur));
   padding: 0;
   margin: 0;
   overflow: hidden;
-  animation: fadeIn 0.2s ease-out;
+  animation: modalFadeIn var(--modal-transition-fast) ease-out;
   pointer-events: auto;
 }
 
-/* Modal overlay should allow clicks on modal content but block background */
-.modal.show .modal-dialog,
-.modal.show .responsive-modal-dialog {
-  pointer-events: auto !important;
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.modal.show .modal-content,
-.modal.show .responsive-modal-content {
-  pointer-events: auto !important;
-}
-
-/* CRITICAL: Hide responsive-modal when not shown - Bootstrap modals */
-.modal.responsive-modal:not(.show) {
-  display: none !important;
-  pointer-events: none !important;
-  visibility: hidden !important;
-  position: static !important;
-  z-index: -1 !important;
-}
-
-/* Ensure responsive-modal only blocks when actually shown */
-.responsive-modal:not(.show):not(.d-block) {
-  display: none !important;
-  pointer-events: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  position: static !important;
-  z-index: -1 !important;
-}
-
-/* Only apply overlay styles when modal is actually visible */
-.modal.responsive-modal.show,
-.responsive-modal.show.d-block {
-  pointer-events: auto;
-  position: fixed !important;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-/* Modal Dialog - Responsive container */
+/* ===== MODAL DIALOG CONTAINER ===== */
 .modal-dialog,
-.responsive-modal-dialog {
+.responsive-modal-dialog,
+.booking-modal-dialog,
+.edit-appointment-modal-dialog,
+.date-detail-modal-dialog {
   position: relative;
   width: 100%;
-  max-width: 500px;
+  max-width: 100%;
   margin: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   padding: 0;
-  z-index: calc(var(--modal-z-index) + 1);
-  transition: transform var(--modal-transition);
+  display: flex;
+  flex-direction: column;
+  z-index: var(--modal-content-z);
   pointer-events: auto !important;
+
+  /* Full height on mobile with safe areas */
+  height: 95%;
+  height: 95dvh;
+  max-height: 95%;
+  max-height: 95dvh;
+
+  /* Animation */
+  animation: modalSlideUp var(--modal-transition-normal) ease-out;
 }
 
-/* Only animate when modal is shown */
-.modal.show .modal-dialog,
-.modal.show .responsive-modal-dialog,
-.responsive-modal.show .responsive-modal-dialog {
-  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  pointer-events: auto !important;
-}
-
-@keyframes slideUp {
+@keyframes modalSlideUp {
   from {
-    transform: translateY(20px);
+    transform: translateY(100%);
     opacity: 0;
   }
   to {
@@ -169,26 +148,31 @@ button, .btn, a, input, select, textarea {
   }
 }
 
-/* Modal Content - Full screen on mobile */
+/* ===== MODAL CONTENT BOX ===== */
 .modal-content,
-.responsive-modal-content {
+.responsive-modal-content,
+.booking-modal-content,
+.edit-appointment-modal-content,
+.date-detail-modal-content {
   position: relative;
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 100%;
-  background-color: var(--bg-secondary);
+  height: 100%;
+  max-height: 100%;
+  background-color: var(--bg-secondary, #fff);
   border: none;
-  border-radius: var(--modal-border-radius-mobile);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  outline: 0;
+  border-radius: var(--modal-radius-mobile);
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2);
   overflow: hidden;
-  color: var(--text-primary);
-  will-change: transform;
+  color: var(--text-primary, #1f2937);
   pointer-events: auto !important;
+
+  /* Prevent content overflow */
+  contain: layout style;
 }
 
-/* Ensure all form elements inside modal are interactive */
+/* All modal content children are interactive */
 .modal-content *,
 .responsive-modal-content *,
 .booking-modal-content *,
@@ -197,1184 +181,1479 @@ button, .btn, a, input, select, textarea {
   pointer-events: auto !important;
 }
 
-/* All input types */
-.modal-content input,
-.modal-content textarea,
-.modal-content select,
-.modal-content button,
-.modal-content .btn,
-.modal-content label,
-.modal-content .form-check-input,
-.modal-content .form-check-label,
-.modal-content .form-control,
-.modal-content .form-select,
-.responsive-modal-content input,
-.responsive-modal-content textarea,
-.responsive-modal-content select,
-.responsive-modal-content button,
-.responsive-modal-content .btn,
-.responsive-modal-content label,
-.responsive-modal-content .form-check-input,
-.responsive-modal-content .form-check-label,
-.responsive-modal-content .form-control,
-.responsive-modal-content .form-select,
-.booking-modal-content input,
-.booking-modal-content textarea,
-.booking-modal-content select,
-.booking-modal-content button,
-.booking-modal-content .btn,
-.booking-modal-content label,
-.booking-modal-content .form-control,
-.booking-modal-content .form-select,
-.booking-modal-content .customer-item,
-.booking-modal-content .time-slots-grid .btn,
-.edit-appointment-modal-content input,
-.edit-appointment-modal-content textarea,
-.edit-appointment-modal-content select,
-.edit-appointment-modal-content button,
-.edit-appointment-modal-content .btn,
-.edit-appointment-modal-content .time-slot-btn,
-.edit-appointment-modal-content .week-day-cell,
-.date-detail-modal-content input,
-.date-detail-modal-content textarea,
-.date-detail-modal-content select,
-.date-detail-modal-content button,
-.date-detail-modal-content .btn,
-.date-detail-modal-content .off-date-toggle-input,
-.date-detail-modal-content .day-cell-pro,
-.date-detail-modal-content .week-day-cell {
-  pointer-events: auto !important;
-  position: relative;
-  z-index: 1;
-}
-
-/* Interactive elements */
-.modal-content a,
-.modal-content [role="button"],
-.modal-content [tabindex],
-.responsive-modal-content a,
-.responsive-modal-content [role="button"],
-.responsive-modal-content [tabindex],
-.booking-modal-content a,
-.booking-modal-content [role="button"],
-.booking-modal-content [tabindex],
-.edit-appointment-modal-content a,
-.edit-appointment-modal-content [role="button"],
-.edit-appointment-modal-content [tabindex],
-.date-detail-modal-content a,
-.date-detail-modal-content [role="button"],
-.date-detail-modal-content [tabindex] {
-  pointer-events: auto !important;
-  position: relative;
-  z-index: 1;
-}
-
-/* Modal Header - Sticky on mobile */
+/* ===== MODAL HEADER ===== */
 .modal-header,
-.responsive-modal-header {
+.responsive-modal-header,
+.booking-modal-header,
+.edit-appointment-modal-header,
+.date-detail-modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--modal-padding-mobile);
-  border-bottom: 1px solid var(--border-color);
-  border-top-left-radius: inherit;
-  border-top-right-radius: inherit;
-  background-color: var(--bg-secondary);
-  min-height: var(--modal-header-height-mobile);
   flex-shrink: 0;
-  pointer-events: auto !important;
-}
+  padding: var(--modal-padding-xs);
+  padding-top: calc(var(--modal-padding-xs) + var(--safe-top));
+  min-height: calc(56px + var(--safe-top));
+  background-color: var(--bg-secondary, #fff);
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+  gap: 0.5rem;
+  z-index: 10;
 
-.modal-header .btn-close,
-.responsive-modal-header .btn-close {
-  pointer-events: auto !important;
+  /* Pull indicator for mobile bottom sheet */
   position: relative;
-  z-index: 2;
 }
 
+/* Pull indicator bar for mobile */
+.modal-header::before,
+.responsive-modal-header::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 4px;
+  background: var(--border-color, #d1d5db);
+  border-radius: 2px;
+  opacity: 0.6;
+}
+
+.modal-title,
 .modal-header .modal-title,
 .responsive-modal-header .modal-title {
   margin: 0;
-  font-size: 1.125rem;
+  font-size: var(--modal-title-size);
   font-weight: 600;
-  line-height: 1.5;
-  color: var(--text-primary);
+  line-height: 1.3;
+  color: inherit;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  padding-top: 8px; /* Space for pull indicator */
 }
 
-.modal-header .modal-title i,
-.responsive-modal-header .modal-title i {
-  font-size: 1rem;
+.modal-title i,
+.modal-header .modal-title i {
+  font-size: clamp(0.875rem, 3.5vw, 1rem);
+  flex-shrink: 0;
 }
 
+/* Close button */
 .modal-header .btn-close,
 .responsive-modal-header .btn-close {
-  padding: 0.5rem;
-  margin: -0.5rem -0.5rem -0.5rem auto;
-  min-width: 44px;
-  min-height: 44px;
+  padding: 0;
+  margin: 0;
+  margin-left: auto;
+  min-width: var(--touch-target-min);
+  min-height: var(--touch-target-min);
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  transition: background-color 0.2s;
-  -webkit-appearance: none;
-  appearance: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.1);
+  border: none;
+  cursor: pointer;
+  transition: background-color var(--modal-transition-fast);
+  -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  flex-shrink: 0;
+  margin-top: 4px; /* Align with title after pull indicator */
 }
 
 .modal-header .btn-close:hover,
-.responsive-modal-header .btn-close:hover {
-  background-color: var(--bg-tertiary);
+.modal-header .btn-close:active {
+  background: rgba(0, 0, 0, 0.15);
 }
 
-.modal-header .btn-close:active,
-.responsive-modal-header .btn-close:active {
-  background-color: var(--border-color);
+.modal-header .btn-close-white {
+  filter: invert(1);
 }
 
-/* Modal Body - Scrollable content */
+/* ===== MODAL BODY ===== */
 .modal-body,
-.responsive-modal-body {
-  position: relative;
+.responsive-modal-body,
+.booking-modal-body,
+.edit-modal-body,
+.date-detail-modal-body {
   flex: 1 1 auto;
-  padding: var(--modal-padding-mobile);
+  padding: var(--modal-padding-xs);
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  max-height: calc(100vh - var(--modal-header-height-mobile) - var(--modal-footer-height-mobile));
-  pointer-events: auto !important;
+  scroll-behavior: smooth;
+  min-height: 0; /* Important for flex container */
+
+  /* Font sizing */
+  font-size: var(--modal-body-size);
+  line-height: 1.5;
 }
 
-/* Ensure form elements in modal body are fully interactive */
-.modal-body form,
-.responsive-modal-body form,
-.booking-modal-body form,
-.edit-modal-body form {
-  pointer-events: auto !important;
+/* Scrollbar styling for modal body */
+.modal-body::-webkit-scrollbar,
+.responsive-modal-body::-webkit-scrollbar,
+.booking-modal-body::-webkit-scrollbar {
+  width: 4px;
 }
 
-.modal-body input,
-.modal-body textarea,
-.modal-body select,
-.modal-body button,
-.modal-body .btn,
-.modal-body label,
-.modal-body .form-check-input,
-.modal-body .form-check-label,
-.modal-body .input-group,
-.modal-body .input-group-text,
-.modal-body .alert,
-.modal-body .time-slots-grid,
-.modal-body .time-slots-grid .btn,
-.modal-body .customer-dropdown,
-.modal-body .customer-item,
-.modal-body .week-day-cell,
-.modal-body .day-cell-pro,
-.responsive-modal-body input,
-.responsive-modal-body textarea,
-.responsive-modal-body select,
-.responsive-modal-body button,
-.responsive-modal-body .btn,
-.responsive-modal-body label,
-.responsive-modal-body .form-check-input,
-.responsive-modal-body .form-check-label,
-.responsive-modal-body .input-group,
-.responsive-modal-body .input-group-text,
-.responsive-modal-body .alert,
-.responsive-modal-body .time-slots-grid,
-.responsive-modal-body .time-slots-grid .btn,
-.responsive-modal-body .customer-dropdown,
-.responsive-modal-body .customer-item,
-.responsive-modal-body .week-day-cell,
-.responsive-modal-body .day-cell-pro,
-.booking-modal-body input,
-.booking-modal-body textarea,
-.booking-modal-body select,
-.booking-modal-body button,
-.booking-modal-body .btn,
-.booking-modal-body label,
-.booking-modal-body .form-control,
-.booking-modal-body .form-select,
-.booking-modal-body .input-group,
-.booking-modal-body .input-group-text,
-.booking-modal-body .customer-search-container,
-.booking-modal-body .customer-dropdown,
-.booking-modal-body .customer-item,
-.booking-modal-body .time-slots-grid,
-.booking-modal-body .time-slots-grid .btn,
-.booking-modal-body .service-select-container,
-.booking-modal-body .booking-service-select,
-.edit-modal-body input,
-.edit-modal-body textarea,
-.edit-modal-body select,
-.edit-modal-body button,
-.edit-modal-body .btn,
-.edit-modal-body label,
-.edit-modal-body .time-slot-btn,
-.edit-modal-body .week-day-cell,
-.edit-modal-body .week-nav-btn {
-  pointer-events: auto !important;
-  position: relative;
-  z-index: 1;
+.modal-body::-webkit-scrollbar-thumb,
+.responsive-modal-body::-webkit-scrollbar-thumb,
+.booking-modal-body::-webkit-scrollbar-thumb {
+  background: var(--border-color, #d1d5db);
+  border-radius: 4px;
 }
 
-/* Modal Footer - Sticky on mobile */
+/* ===== MODAL FOOTER ===== */
 .modal-footer,
-.responsive-modal-footer {
+.responsive-modal-footer,
+.booking-modal-footer,
+.edit-appointment-modal-footer,
+.date-detail-modal-footer {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: flex-end;
-  padding: var(--modal-padding-mobile);
-  border-top: 1px solid var(--border-color);
-  border-bottom-left-radius: inherit;
-  border-bottom-right-radius: inherit;
-  background-color: var(--bg-secondary);
-  min-height: var(--modal-footer-height-mobile);
-  gap: 0.75rem;
+  justify-content: stretch;
   flex-shrink: 0;
-  pointer-events: auto !important;
+  padding: var(--modal-padding-xs);
+  padding-bottom: calc(var(--modal-padding-xs) + var(--safe-bottom));
+  min-height: calc(64px + var(--safe-bottom));
+  background-color: var(--bg-secondary, #fff);
+  border-top: 1px solid var(--border-color, #e5e7eb);
+  gap: 0.5rem;
+  z-index: 10;
 }
 
-.modal-footer .btn,
-.responsive-modal-footer .btn {
-  min-height: 44px;
-  min-width: 80px;
-  padding: 0.625rem 1.25rem;
-  font-size: 0.9375rem;
+/* Footer buttons - stack on mobile */
+.modal-footer > .btn,
+.responsive-modal-footer > .btn {
+  flex: 1 1 100%;
+  min-height: var(--touch-target-comfortable);
+  font-size: var(--modal-body-size);
   font-weight: 500;
-  border-radius: 8px;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Primary button first on mobile (reversed order visually) */
+.modal-footer {
+  flex-direction: column-reverse;
+}
+
+/* ===== FORM ELEMENTS IN MODALS ===== */
+.modal-body .form-label,
+.responsive-modal-body .form-label,
+.booking-modal-body .form-label {
+  display: block;
+  font-size: var(--modal-label-size);
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  color: var(--text-primary, #374151);
+}
+
+.modal-body .form-control,
+.modal-body .form-select,
+.responsive-modal-body .form-control,
+.responsive-modal-body .form-select,
+.booking-modal-body .form-control,
+.booking-modal-body .form-select {
+  width: 100%;
+  min-height: var(--touch-target-comfortable);
+  font-size: var(--modal-input-size) !important; /* Prevent iOS zoom */
+  padding: 0.625rem 0.875rem;
+  border: 2px solid var(--border-color, #d1d5db);
+  border-radius: 10px;
+  background-color: var(--bg-primary, #fff);
+  color: var(--text-primary, #1f2937);
+  transition: border-color var(--modal-transition-fast), box-shadow var(--modal-transition-fast);
   -webkit-appearance: none;
   appearance: none;
-  touch-action: manipulation;
-  transition: all 0.2s ease;
-  pointer-events: auto !important;
-  position: relative;
-  z-index: 2;
 }
 
-/* ==============================================
-   MOBILE OPTIMIZATIONS (< 576px)
-   Full-screen modals with safe area support
-   ============================================== */
-
-@media (max-width: 575.98px) {
-  /* Full-screen overlay */
-  .modal.fade.show.d-block,
-  .modal.show.d-block,
-  .modal.responsive-modal.show.d-block,
-  .responsive-modal.show {
-    align-items: flex-end;
-    padding: 0;
-    background: var(--modal-backdrop-blur);
-  }
-
-  /* Full-screen dialog */
-  .modal-dialog,
-  .responsive-modal-dialog {
-    max-width: 100%;
-    width: 100%;
-    height: 100%;
-    max-height: 100vh;
-    max-height: 100dvh; /* Dynamic viewport height */
-    margin: 0;
-    padding: 0;
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-    align-items: stretch;
-    animation: slideUpMobile 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  @keyframes slideUpMobile {
-    from {
-      transform: translateY(100%);
-    }
-    to {
-      transform: translateY(0);
-    }
-  }
-
-  /* Full-screen content */
-  .modal-content,
-  .responsive-modal-content {
-    height: 100%;
-    max-height: 100%;
-    border-radius: var(--modal-border-radius-mobile);
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-    display: flex;
-    flex-direction: column;
-    max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-    max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-    overflow: hidden;
-  }
-
-  /* Booking Modal Content - Mobile */
-  .booking-modal-content {
-    height: 100%;
-    max-height: 100%;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  /* Sticky header */
-  .modal-header,
-  .responsive-modal-header {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    padding: 1rem;
-    padding-top: calc(1rem + env(safe-area-inset-top));
-    min-height: calc(var(--modal-header-height-mobile) + env(safe-area-inset-top));
-    border-bottom: 2px solid var(--border-color);
-    background-color: var(--bg-secondary);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  }
-
-  .modal-header .modal-title,
-  .responsive-modal-header .modal-title {
-    font-size: 1.125rem;
-    font-weight: 600;
-  }
-
-  .modal-header .modal-title i,
-  .responsive-modal-header .modal-title i {
-    font-size: 1rem;
-  }
-
-  /* Scrollable body */
-  .modal-body,
-  .responsive-modal-body {
-    flex: 1;
-    padding: 1rem;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-    max-height: none;
-    height: 0; /* Force flexbox to calculate height */
-    min-height: 0;
-  }
-
-  /* Booking Modal Body - Mobile Optimization */
-  .booking-modal-body {
-    flex: 1;
-    padding: 0.75rem;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-    max-height: none;
-    height: 0; /* Force flexbox to calculate height */
-    min-height: 0;
-    padding-bottom: 1rem;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-  }
-
-  .booking-modal-body form {
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    flex: 1;
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .booking-modal-body .row {
-    margin-left: -0.25rem;
-    margin-right: -0.25rem;
-    margin-bottom: 0.5rem;
-    width: 100%;
-    max-width: 100%;
-    flex-wrap: wrap;
-  }
-
-  .booking-modal-body .row > [class*="col-"] {
-    padding-left: 0.25rem;
-    padding-right: 0.25rem;
-    max-width: 100%;
-    overflow: hidden;
-    box-sizing: border-box;
-    width: 100%;
-  }
-
-  .booking-modal-body .form-label {
-    font-size: 0.8rem;
-    margin-bottom: 0.4rem;
-    font-weight: 600;
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .booking-modal-body .form-control,
-  .booking-modal-body .form-select {
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-    font-size: 16px;
-    min-height: 44px;
-    padding: 0.625rem 0.75rem;
-  }
-
-  .booking-modal-body .input-group {
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-    flex-wrap: nowrap;
-  }
-
-  .booking-modal-body .input-group .form-control {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .booking-modal-body .btn {
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-    min-height: 44px;
-    padding: 0.75rem 1rem;
-    font-size: 0.9375rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .booking-modal-body .alert {
-    padding: 0.75rem;
-    font-size: 0.875rem;
-    margin-bottom: 0.75rem;
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-  }
-
-  .booking-modal-body .time-slots-grid {
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-  }
-
-  .booking-modal-body .customer-search-container {
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-  }
-
-  /* Sticky footer */
-  .modal-footer,
-  .responsive-modal-footer {
-    position: sticky;
-    bottom: 0;
-    z-index: 10;
-    padding: 0.75rem 1rem;
-    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
-    min-height: calc(64px + env(safe-area-inset-bottom));
-    border-top: 2px solid var(--border-color);
-    background-color: var(--bg-secondary);
-    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.05);
-    flex-direction: column;
-    flex-shrink: 0;
-    margin-top: auto;
-  }
-
-  .modal-footer .btn,
-  .responsive-modal-footer .btn {
-    width: 100%;
-    flex: 1;
-    min-height: 44px;
-    font-size: 0.9375rem;
-    padding: 0.625rem 1rem;
-    margin-bottom: 0.5rem;
-    box-sizing: border-box;
-  }
-
-  .modal-footer .btn:last-child,
-  .responsive-modal-footer .btn:last-child {
-    margin-bottom: 0;
-  }
-
-  /* Booking Modal Footer - Extra optimization */
-  .booking-modal-content .modal-footer,
-  .booking-modal-content .responsive-modal-footer {
-    padding: 0.75rem;
-    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
-    gap: 0.5rem;
-  }
-
-  .booking-modal-content .modal-footer .btn,
-  .booking-modal-content .responsive-modal-footer .btn {
-    min-height: 44px;
-    padding: 0.625rem 1rem;
-  }
-
-  /* Form elements in modals */
-  .modal-body .form-label,
-  .responsive-modal-body .form-label {
-    font-size: 0.875rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: var(--text-primary);
-  }
-
-  .modal-body .form-control,
-  .modal-body .form-select,
-  .responsive-modal-body .form-control,
-  .responsive-modal-body .form-select {
-    min-height: 48px;
-    font-size: 16px; /* Prevent iOS zoom */
-    padding: 0.75rem 1rem;
-    border-radius: 10px;
-    border: 2px solid var(--border-color);
-    -webkit-appearance: none;
-    appearance: none;
-  }
-
-  .modal-body textarea.form-control,
-  .responsive-modal-body textarea.form-control {
-    min-height: 100px;
-    font-size: 16px;
-    padding: 0.75rem 1rem;
-  }
-
-  .modal-body .input-group,
-  .responsive-modal-body .input-group {
-    min-height: 48px;
-  }
-
-  .modal-body .input-group-text,
-  .responsive-modal-body .input-group-text {
-    min-height: 48px;
-    padding: 0.75rem 1rem;
-    font-size: 16px;
-  }
-
-  /* Buttons in modal body */
-  .modal-body .btn,
-  .responsive-modal-body .btn {
-    min-height: 48px;
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    touch-action: manipulation;
-  }
-
-  .modal-body .btn-sm,
-  .responsive-modal-body .btn-sm {
-    min-height: 40px;
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-  }
-
-  /* Alerts in modals */
-  .modal-body .alert,
-  .responsive-modal-body .alert {
-    padding: 1rem;
-    border-radius: 10px;
-    font-size: 0.9375rem;
-    margin-bottom: 1rem;
-  }
-
-  /* Row spacing in modals */
-  .modal-body .row,
-  .responsive-modal-body .row {
-    margin-left: -0.5rem;
-    margin-right: -0.5rem;
-  }
-
-  .modal-body .row > [class*="col-"],
-  .responsive-modal-body .row > [class*="col-"] {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-  }
-
-  /* Special handling for large modals */
-  .modal-dialog.modal-lg,
-  .modal-dialog.modal-xl {
-    max-width: 100%;
-    width: 100%;
-  }
-}
-
-/* ==============================================
-   TABLET OPTIMIZATIONS (576px - 767px)
-   Centered modals with safe margins
-   ============================================== */
-
-@media (min-width: 576px) and (max-width: 767.98px) {
-  .modal-dialog,
-  .responsive-modal-dialog {
-    max-width: 90%;
-    margin: 1rem auto;
-    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-  }
-
-  .modal-content,
-  .responsive-modal-content {
-    border-radius: var(--modal-border-radius-tablet);
-    max-height: calc(100vh - 2rem);
-    max-height: calc(100dvh - 2rem);
-  }
-
-  .modal-header,
-  .responsive-modal-header {
-    padding: 1.25rem;
-    border-radius: var(--modal-border-radius-tablet) var(--modal-border-radius-tablet) 0 0;
-  }
-
-  .modal-body,
-  .responsive-modal-body {
-    padding: 1.25rem;
-    max-height: calc(100vh - 200px);
-    max-height: calc(100dvh - 200px);
-  }
-
-  .modal-footer,
-  .responsive-modal-footer {
-    padding: 1rem 1.25rem;
-    border-radius: 0 0 var(--modal-border-radius-tablet) var(--modal-border-radius-tablet);
-  }
-
-  .modal-footer .btn,
-  .responsive-modal-footer .btn {
-    min-height: 44px;
-    padding: 0.625rem 1.25rem;
-  }
-
-  .modal-body .form-control,
-  .modal-body .form-select,
-  .responsive-modal-body .form-control,
-  .responsive-modal-body .form-select {
-    min-height: 44px;
-    font-size: 16px;
-  }
-}
-
-/* ==============================================
-   DESKTOP OPTIMIZATIONS (> 768px)
-   Standard Bootstrap modal behavior with enhancements
-   ============================================== */
-
-@media (min-width: 768px) {
-  .modal-dialog,
-  .responsive-modal-dialog {
-    max-width: 500px;
-    margin: 1.75rem auto;
-  }
-
-  .modal-dialog.modal-lg,
-  .responsive-modal-dialog.modal-lg {
-    max-width: 800px;
-  }
-
-  .modal-dialog.modal-xl,
-  .responsive-modal-dialog.modal-xl {
-    max-width: 1140px;
-  }
-
-  .modal-content,
-  .responsive-modal-content {
-    border-radius: var(--modal-border-radius-desktop);
-    max-height: calc(100vh - 3.5rem);
-  }
-
-  .modal-header,
-  .responsive-modal-header {
-    padding: 1.5rem;
-  }
-
-  .modal-header .modal-title,
-  .responsive-modal-header .modal-title {
-    font-size: 1.25rem;
-  }
-
-  .modal-body,
-  .responsive-modal-body {
-    padding: 1.5rem;
-    max-height: calc(100vh - 300px);
-  }
-
-  .modal-footer,
-  .responsive-modal-footer {
-    padding: 1rem 1.5rem;
-  }
-
-  .modal-footer .btn,
-  .responsive-modal-footer .btn {
-    min-height: 44px;
-    padding: 0.625rem 1.5rem;
-  }
-}
-
-/* ==============================================
-   LANDSCAPE ORIENTATION OPTIMIZATIONS
-   ============================================== */
-
-@media (max-height: 500px) and (orientation: landscape) {
-  .modal-dialog,
-  .responsive-modal-dialog {
-    max-height: 100vh;
-    max-height: 100dvh;
-  }
-
-  .modal-content,
-  .responsive-modal-content {
-    max-height: 100vh;
-    max-height: 100dvh;
-  }
-
-  .modal-header,
-  .responsive-modal-header {
-    padding: 0.75rem 1rem;
-    min-height: 48px;
-  }
-
-  .modal-body,
-  .responsive-modal-body {
-    padding: 0.75rem 1rem;
-    max-height: calc(100vh - 120px);
-    max-height: calc(100dvh - 120px);
-  }
-
-  .modal-footer,
-  .responsive-modal-footer {
-    padding: 0.75rem 1rem;
-    min-height: 56px;
-  }
-
-  .modal-footer .btn,
-  .responsive-modal-footer .btn {
-    min-height: 40px;
-    padding: 0.5rem 1rem;
-  }
-}
-
-/* ==============================================
-   iOS SAFARI SPECIFIC FIXES
-   ============================================== */
-
-@supports (-webkit-touch-callout: none) {
-  @media (max-width: 767.98px) {
-    .modal-content,
-    .responsive-modal-content {
-      /* Use -webkit-fill-available for iOS */
-      max-height: -webkit-fill-available;
-    }
-
-    .modal-body,
-    .responsive-modal-body {
-      /* Prevent iOS bounce scroll */
-      overscroll-behavior-y: contain;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    /* Prevent text selection on touch */
-    .modal-header,
-    .modal-footer,
-    .responsive-modal-header,
-    .responsive-modal-footer {
-      -webkit-user-select: none;
-      user-select: none;
-    }
-
-    /* Better touch targets */
-    .modal-header .btn-close,
-    .modal-footer .btn,
-    .responsive-modal-header .btn-close,
-    .responsive-modal-footer .btn {
-      -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
-    }
-  }
-}
-
-/* ==============================================
-   ACCESSIBILITY IMPROVEMENTS
-   ============================================== */
-
-@media (prefers-reduced-motion: reduce) {
-  .modal-dialog,
-  .modal-content,
-  .responsive-modal-dialog,
-  .responsive-modal-content {
-    animation: none;
-    transition: none;
-  }
-}
-
-/* Focus management */
-.modal-content:focus {
+.modal-body .form-control:focus,
+.modal-body .form-select:focus,
+.responsive-modal-body .form-control:focus,
+.responsive-modal-body .form-select:focus,
+.booking-modal-body .form-control:focus,
+.booking-modal-body .form-select:focus {
+  border-color: var(--primary, #3b82f6);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
   outline: none;
 }
 
-.modal-content *:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
+.modal-body textarea.form-control,
+.responsive-modal-body textarea.form-control,
+.booking-modal-body textarea.form-control {
+  min-height: 80px;
+  resize: vertical;
 }
 
-/* ==============================================
-   SPECIFIC MODAL TYPE ENHANCEMENTS
-   ============================================== */
+/* Input groups */
+.modal-body .input-group,
+.responsive-modal-body .input-group,
+.booking-modal-body .input-group {
+  display: flex;
+  flex-wrap: nowrap;
+  min-height: var(--touch-target-comfortable);
+}
 
-/* Booking Modal - Large form */
+.modal-body .input-group-text,
+.responsive-modal-body .input-group-text,
+.booking-modal-body .input-group-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--touch-target-min);
+  padding: 0.5rem 0.75rem;
+  font-size: var(--modal-body-size);
+  background: var(--bg-tertiary, #f3f4f6);
+  border: 2px solid var(--border-color, #d1d5db);
+  border-right: none;
+  border-radius: 10px 0 0 10px;
+}
+
+.modal-body .input-group .form-control,
+.responsive-modal-body .input-group .form-control,
+.booking-modal-body .input-group .form-control {
+  border-radius: 0 10px 10px 0;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Buttons in modal body */
+.modal-body .btn,
+.responsive-modal-body .btn,
+.booking-modal-body .btn {
+  min-height: var(--touch-target-min);
+  font-size: var(--modal-body-size);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.modal-body .btn-sm,
+.responsive-modal-body .btn-sm,
+.booking-modal-body .btn-sm {
+  min-height: 36px;
+  font-size: var(--modal-label-size);
+  padding: 0.375rem 0.75rem;
+}
+
+/* Alerts */
+.modal-body .alert,
+.responsive-modal-body .alert,
+.booking-modal-body .alert {
+  padding: 0.75rem;
+  font-size: var(--modal-label-size);
+  border-radius: 10px;
+  margin-bottom: 0.75rem;
+}
+
+/* Row and column spacing */
+.modal-body .row,
+.responsive-modal-body .row,
+.booking-modal-body .row {
+  --bs-gutter-x: 0.75rem;
+  --bs-gutter-y: 0.75rem;
+  margin: 0 calc(var(--bs-gutter-x) * -0.5);
+}
+
+.modal-body .row > [class*="col"],
+.responsive-modal-body .row > [class*="col"],
+.booking-modal-body .row > [class*="col"] {
+  padding: 0 calc(var(--bs-gutter-x) * 0.5);
+  margin-bottom: var(--bs-gutter-y);
+}
+
+/* Form check (checkbox, radio) */
+.modal-body .form-check,
+.responsive-modal-body .form-check {
+  display: flex;
+  align-items: center;
+  min-height: var(--touch-target-min);
+  padding-left: 0;
+  gap: 0.5rem;
+}
+
+.modal-body .form-check-input,
+.responsive-modal-body .form-check-input {
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.modal-body .form-check-label,
+.responsive-modal-body .form-check-label {
+  font-size: var(--modal-body-size);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* ===== BOOKING MODAL SPECIFIC ===== */
 .booking-modal-overlay {
   z-index: var(--modal-z-index);
-}
-
-.booking-modal-dialog {
-  max-width: 100%;
-  display: flex;
-  align-items: stretch;
-  min-height: 0;
-}
-
-.booking-modal-content {
-  display: flex;
-  flex-direction: column;
-  max-height: 100%;
-  overflow: hidden;
-  min-height: 0;
-  width: 100%;
-}
-
-.booking-modal-body {
-  flex: 1 1 auto;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  position: relative;
 }
 
 .booking-modal-body form {
   display: flex;
   flex-direction: column;
-  min-height: 0;
-  flex: 1;
+  gap: 0;
   width: 100%;
 }
 
-.booking-modal-body .row {
-  margin-left: 0;
-  margin-right: 0;
-  flex-wrap: wrap;
+.booking-modal-body .row.g-3 {
+  --bs-gutter-y: 1rem;
+}
+
+/* Customer search container */
+.customer-search-container {
+  position: relative;
+  z-index: 100;
   width: 100%;
-  max-width: 100%;
 }
 
-.booking-modal-body .row > [class*="col-"] {
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-  max-width: 100%;
-  overflow: hidden;
-  box-sizing: border-box;
-}
-
-@media (min-width: 768px) {
-  .booking-modal-dialog {
-    max-width: 800px;
-  }
-}
-
-/* Edit Appointment Modal */
-.edit-appointment-modal {
-  z-index: var(--modal-z-index);
-}
-
-.edit-appointment-modal-dialog {
-  max-width: 100%;
-}
-
-@media (min-width: 768px) {
-  .edit-appointment-modal-dialog {
-    max-width: 600px;
-  }
-}
-
-/* Date Detail Modal */
-.date-detail-modal {
-  z-index: var(--modal-z-index);
-}
-
-.date-detail-modal-dialog {
-  max-width: 100%;
-}
-
-@media (min-width: 768px) {
-  .date-detail-modal-dialog {
-    max-width: 95%;
-  }
-}
-
-/* Customer Dropdown in Booking Modal */
+/* Customer dropdown */
 .customer-dropdown {
-  max-height: 300px;
+  position: absolute !important;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: min(250px, 40vh);
   overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  background-color: var(--bg-secondary);
-  z-index: calc(var(--modal-z-index) + 10);
+  background: var(--bg-secondary, #fff);
+  border: 2px solid var(--border-color, #d1d5db);
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 1100 !important;
   pointer-events: auto !important;
-}
-
-@media (max-width: 575.98px) {
-  .customer-dropdown {
-    max-height: 250px;
-    position: fixed !important;
-    left: 1rem !important;
-    right: 1rem !important;
-    width: calc(100% - 2rem) !important;
-    pointer-events: auto !important;
-  }
 }
 
 .customer-item {
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  min-height: var(--touch-target-min);
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
   cursor: pointer;
-  transition: background-color 0.2s;
-  min-height: 44px;
+  transition: background-color var(--modal-transition-fast);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  pointer-events: auto !important;
+}
+
+.customer-item:last-child {
+  border-bottom: none;
+}
+
+.customer-item:hover,
+.customer-item:active {
+  background: var(--bg-tertiary, #f3f4f6);
+}
+
+.customer-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.customer-name {
+  font-weight: 600;
+  font-size: var(--modal-body-size);
+  margin-bottom: 0.25rem;
   display: flex;
   align-items: center;
-  touch-action: manipulation;
-  pointer-events: auto !important;
-  position: relative;
-  z-index: 11;
+  gap: 0.5rem;
 }
 
-.customer-item:active,
-.customer-item:hover {
-  background-color: var(--bg-tertiary);
+.customer-details {
+  font-size: var(--modal-label-size);
+  color: var(--text-secondary, #6b7280);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
-/* Service Selector */
-.service-selector-wrapper {
-  width: 100%;
-  max-width: 100%;
-  overflow: hidden;
-  pointer-events: auto !important;
+.customer-stats {
+  margin-top: 0.25rem;
 }
 
+.customer-stats .badge {
+  font-size: 0.7rem;
+}
+
+.no-results {
+  padding: 1rem;
+  text-align: center;
+  color: var(--text-secondary, #6b7280);
+  font-size: var(--modal-label-size);
+}
+
+/* Service selector */
+.service-selector-wrapper,
 .service-select-container {
   width: 100%;
-  max-width: 100%;
-  pointer-events: auto !important;
 }
 
-.service-select-container .form-select,
-.service-select-container .booking-service-select {
+.booking-service-select {
   width: 100%;
-  font-size: 16px;
-  min-height: 48px;
-  pointer-events: auto !important;
-  position: relative;
-  z-index: 1;
+  font-size: var(--modal-input-size) !important;
 }
 
-@media (max-width: 575.98px) {
-  .service-select-container .form-select,
-  .service-select-container .booking-service-select {
-    font-size: 16px;
-    min-height: 48px;
-    pointer-events: auto !important;
-  }
-}
-
-/* Time Slots Grid */
+/* Time slots grid */
 .time-slots-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
   gap: 0.5rem;
-  margin-top: 0.5rem;
-  pointer-events: auto !important;
+  width: 100%;
+  padding: 0.25rem 0;
 }
 
 .time-slots-grid .btn,
 .time-slots-grid .time-slot-btn {
-  pointer-events: auto !important;
-  position: relative;
-  z-index: 1;
-  cursor: pointer;
+  min-height: var(--touch-target-min);
+  font-size: var(--modal-label-size);
+  padding: 0.5rem 0.25rem;
+  border-radius: 8px;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
-@media (max-width: 575.98px) {
-  .time-slots-grid {
-    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-    gap: 0.5rem;
-    pointer-events: auto !important;
-  }
-
-  .time-slots-grid .btn,
-  .time-slots-grid .time-slot-btn {
-    min-height: 44px;
-    font-size: 0.875rem;
-    padding: 0.5rem 0.75rem;
-    pointer-events: auto !important;
-  }
+.time-slots-grid.mobile-optimized {
+  max-height: 180px;
+  overflow-y: auto;
+  padding: 0.5rem;
+  background: var(--bg-tertiary, #f9fafb);
+  border-radius: 10px;
 }
 
-/* Week Picker Mobile */
+/* ===== WEEK PICKER (Mobile) ===== */
 .mobile-week-picker,
 .week-date-picker {
   width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: contain;
-  pointer-events: auto !important;
+  margin-bottom: 0.5rem;
+}
+
+.week-picker-header,
+.week-nav-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  margin-bottom: 0.5rem;
+}
+
+.week-range-display,
+.week-display {
+  font-size: var(--modal-body-size);
+  font-weight: 600;
+  text-align: center;
+  flex: 1;
+}
+
+.week-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+  border: 2px solid var(--border-color, #d1d5db);
+  border-radius: 10px;
+  background: var(--bg-primary, #fff);
+  color: var(--text-primary, #374151);
+  cursor: pointer;
+  transition: all var(--modal-transition-fast);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.week-nav-btn:hover:not(:disabled) {
+  background: var(--bg-tertiary, #f3f4f6);
+  border-color: var(--primary, #3b82f6);
+}
+
+.week-nav-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .week-strip-container {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: contain;
-  pointer-events: auto !important;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  margin: 0 -0.5rem;
+  padding: 0 0.5rem;
 }
 
-.week-day-cell,
-.day-cell-pro {
-  pointer-events: auto !important;
-  position: relative;
-  z-index: 1;
+.week-strip-container::-webkit-scrollbar {
+  display: none;
+}
+
+.week-strip {
+  display: flex;
+  gap: 0.375rem;
+  padding: 0.25rem 0;
+  min-width: max-content;
+}
+
+.week-day-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  height: 64px;
+  padding: 0.375rem;
+  border: 2px solid var(--border-color, #e5e7eb);
+  border-radius: 12px;
+  background: var(--bg-primary, #fff);
   cursor: pointer;
+  transition: all var(--modal-transition-fast);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
 }
 
-.week-nav-btn,
-.month-nav-btn {
-  pointer-events: auto !important;
-  position: relative;
-  z-index: 1;
-  cursor: pointer;
+.week-day-cell:hover:not(.past):not(.off-date) {
+  border-color: var(--primary, #3b82f6);
+  background: rgba(59, 130, 246, 0.05);
 }
 
-/* Toggle switches and checkboxes */
-.off-date-toggle-input,
-.form-check-input,
-input[type="checkbox"],
-input[type="radio"] {
-  pointer-events: auto !important;
-  position: relative;
-  z-index: 1;
-  cursor: pointer;
+.week-day-cell.selected {
+  background: var(--primary, #3b82f6);
+  border-color: var(--primary, #3b82f6);
+  color: #fff;
 }
 
-.off-date-toggle-label,
-.form-check-label,
-label {
-  pointer-events: auto !important;
-  cursor: pointer;
+.week-day-cell.today:not(.selected) {
+  border-color: var(--success, #10b981);
+  background: rgba(16, 185, 129, 0.1);
 }
 
-/* Prevent body scroll when modal is open - but allow interactions */
-body.modal-open {
-  overflow: hidden;
-  position: fixed;
+.week-day-cell.past,
+.week-day-cell.off-date {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: var(--bg-tertiary, #f3f4f6);
+}
+
+.week-day-cell.off-date {
+  text-decoration: line-through;
+}
+
+.week-day-name {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.7;
+}
+
+.week-day-number {
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.week-selected-date {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  font-size: var(--modal-label-size);
+  color: var(--success, #10b981);
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: 8px;
+}
+
+/* Week days grid for edit modal */
+.week-days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.week-days-grid .week-day-cell {
+  min-width: unset;
+  height: 56px;
+  padding: 0.25rem;
+}
+
+.week-days-grid .day-name {
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.week-days-grid .day-number {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.week-days-grid .month-label {
+  font-size: 0.55rem;
+  opacity: 0.6;
+}
+
+/* ===== DESKTOP CALENDAR ===== */
+.professional-date-picker {
   width: 100%;
-  height: 100%;
-  pointer-events: auto;
 }
 
-body.modal-open * {
-  pointer-events: auto;
+.date-picker-header-pro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  margin-bottom: 0.5rem;
 }
 
-/* CRITICAL: Ensure ALL modal content is interactive */
-.modal.show .modal-content *,
-.modal.show .responsive-modal-content *,
-.modal.show .booking-modal-content *,
-.modal.show .edit-appointment-modal-content *,
-.modal.show .date-detail-modal-content *,
-.responsive-modal.show .modal-content *,
-.responsive-modal.show .responsive-modal-content *,
-.responsive-modal.show .booking-modal-content *,
-.responsive-modal.show .edit-appointment-modal-content *,
-.responsive-modal.show .date-detail-modal-content * {
-  pointer-events: auto !important;
+.month-year-display {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
 }
 
-/* CRITICAL: Fix Bootstrap modal backdrop blocking clicks */
-.modal-backdrop {
-  z-index: 1040 !important;
-  pointer-events: auto !important;
+.month-name {
+  font-size: var(--modal-body-size);
 }
 
-/* Ensure modal dialog and content are above backdrop and clickable */
-.modal.show .modal-dialog,
-.modal.show .responsive-modal-dialog,
-.modal.responsive-modal.show .modal-dialog,
-.modal.responsive-modal.show .responsive-modal-dialog {
-  z-index: 1055 !important;
-  pointer-events: auto !important;
-  position: relative !important;
+.year-badge {
+  font-size: var(--modal-label-size);
+  padding: 0.125rem 0.5rem;
+  background: var(--bg-tertiary, #f3f4f6);
+  border-radius: 4px;
 }
 
-.modal.show .modal-content,
-.modal.show .responsive-modal-content,
-.modal.responsive-modal.show .modal-content,
-.modal.responsive-modal.show .responsive-modal-content {
-  z-index: 1056 !important;
-  pointer-events: auto !important;
-  position: relative !important;
+.month-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border-color, #d1d5db);
+  border-radius: 8px;
+  background: var(--bg-primary, #fff);
+  cursor: pointer;
+  transition: all var(--modal-transition-fast);
 }
 
-/* Ensure login modal specifically is clickable */
-#loginModal.show .modal-dialog,
-#loginModal.show .modal-content,
-#loginModal.show .responsive-modal-dialog,
-#loginModal.show .responsive-modal-content {
-  z-index: 1055 !important;
-  pointer-events: auto !important;
+.month-nav-btn:hover:not(:disabled) {
+  background: var(--bg-tertiary, #f3f4f6);
 }
 
-#loginModal.show input,
-#loginModal.show button,
-#loginModal.show .btn,
-#loginModal.show .form-control,
-#loginModal.show .input-group,
-#loginModal.show .input-group-text,
-#loginModal.show label,
-#loginModal.show * {
-  pointer-events: auto !important;
+.calendar-container-pro {
+  width: 100%;
+}
+
+.weekdays-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.125rem;
+  margin-bottom: 0.25rem;
+}
+
+.weekday-cell-pro {
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-secondary, #6b7280);
+  padding: 0.25rem;
+}
+
+.calendar-grid-pro {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.125rem;
+}
+
+.day-cell-pro {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all var(--modal-transition-fast);
   position: relative;
-  z-index: 1;
+  font-size: var(--modal-label-size);
+  font-weight: 500;
 }
 
-@media (max-width: 575.98px) {
-  body.modal-open {
-    position: fixed;
-    overflow: hidden;
-    width: 100%;
+.day-cell-pro:hover:not(.past):not(.off-date):not(.other-month) {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.day-cell-pro.selected {
+  background: var(--primary, #3b82f6);
+  color: #fff;
+}
+
+.day-cell-pro.today:not(.selected) {
+  border: 2px solid var(--success, #10b981);
+}
+
+.day-cell-pro.other-month {
+  opacity: 0.3;
+}
+
+.day-cell-pro.past,
+.day-cell-pro.off-date {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.selected-date-pro {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  margin-top: 0.75rem;
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: 10px;
+}
+
+.selected-date-icon {
+  color: var(--success, #10b981);
+  font-size: 1.25rem;
+}
+
+.selected-date-label {
+  font-size: var(--modal-label-size);
+  color: var(--text-secondary, #6b7280);
+}
+
+.selected-date-value {
+  font-size: var(--modal-body-size);
+  font-weight: 600;
+}
+
+/* ===== DATE DETAIL MODAL ===== */
+.date-detail-modal-dialog {
+  height: 98%;
+  height: 98dvh;
+  max-height: 98%;
+  max-height: 98dvh;
+}
+
+.date-detail-modal .modal-header {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-bottom: 0.75rem;
+}
+
+.date-detail-modal .modal-body {
+  padding: 0;
+}
+
+/* Off date toggle */
+.off-date-toggle-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.off-date-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-switch-container {
+  position: relative;
+  display: inline-flex;
+}
+
+.off-date-toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 26px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 13px;
+  transition: background var(--modal-transition-fast);
+  cursor: pointer;
+}
+
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 22px;
+  height: 22px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform var(--modal-transition-fast);
+}
+
+.toggle-slider.active {
+  background: var(--warning, #f59e0b);
+}
+
+.toggle-slider.active::before {
+  transform: translateX(22px);
+}
+
+.toggle-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.7rem;
+  opacity: 0.6;
+}
+
+.toggle-label-text {
+  font-size: var(--modal-label-size);
+  white-space: nowrap;
+}
+
+/* Week navigation in date detail modal */
+.week-navigation-container {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+  background: var(--bg-tertiary, #f9fafb);
+}
+
+.week-navigation-row {
+  display: flex;
+  flex: 1;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  cursor: grab;
+}
+
+.week-navigation-row::-webkit-scrollbar {
+  display: none;
+}
+
+.week-navigation-row.swipeable:active {
+  cursor: grabbing;
+}
+
+.week-navigation-row .week-day-cell {
+  flex: 0 0 auto;
+  min-width: 56px;
+  height: auto;
+  padding: 0.5rem 0.25rem;
+  border: none;
+  border-radius: 0;
+  border-right: 1px solid var(--border-color, #e5e7eb);
+  background: transparent;
+}
+
+.week-navigation-row .week-day-cell.active {
+  background: var(--primary, #3b82f6);
+  color: #fff;
+}
+
+.week-navigation-row .week-day-cell.today:not(.active) {
+  background: rgba(16, 185, 129, 0.15);
+}
+
+.calendar-week-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  padding: 0.5rem;
+  background: var(--bg-secondary, #fff);
+  border-left: 1px solid var(--border-color, #e5e7eb);
+}
+
+.calendar-week-label {
+  font-size: 0.6rem;
+  font-weight: 600;
+  opacity: 0.6;
+}
+
+.calendar-week-number {
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+/* Schedule view */
+.date-time-schedule {
+  width: 100%;
+  overflow: hidden;
+}
+
+.schedule-header {
+  display: flex;
+  background: var(--bg-tertiary, #f3f4f6);
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.time-column-header {
+  width: 60px;
+  flex-shrink: 0;
+  padding: 0.5rem;
+  font-size: var(--modal-label-size);
+  font-weight: 600;
+  text-align: center;
+}
+
+.slots-column-header {
+  flex: 1;
+  display: flex;
+}
+
+.half-hour-slot-header {
+  flex: 1;
+  padding: 0.5rem;
+  font-size: var(--modal-label-size);
+  text-align: center;
+  border-left: 1px solid var(--border-color, #e5e7eb);
+}
+
+.schedule-body {
+  overflow-y: auto;
+  max-height: calc(100% - 100px);
+}
+
+.schedule-row {
+  display: flex;
+  min-height: 50px;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+}
+
+.schedule-row.row-pink {
+  background: rgba(236, 72, 153, 0.03);
+}
+
+.schedule-row.row-green {
+  background: rgba(16, 185, 129, 0.03);
+}
+
+.time-column {
+  width: 60px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary, #f9fafb);
+  border-right: 1px solid var(--border-color, #e5e7eb);
+}
+
+.time-label {
+  font-size: var(--modal-label-size);
+  font-weight: 600;
+  color: var(--text-secondary, #6b7280);
+}
+
+.slots-column {
+  flex: 1;
+  display: flex;
+}
+
+.half-hour-slot {
+  flex: 1;
+  padding: 0.25rem;
+  border-left: 1px solid var(--border-color, #e5e7eb);
+  min-height: 50px;
+}
+
+.appointment-block {
+  height: 100%;
+  padding: 0.375rem;
+  border-radius: 6px;
+  background: var(--primary, #3b82f6);
+  color: #fff;
+  font-size: 0.7rem;
+  overflow: hidden;
+}
+
+.appointment-block.status-pending {
+  background: var(--warning, #f59e0b);
+}
+
+.appointment-block.status-confirmed {
+  background: var(--success, #10b981);
+}
+
+.appointment-block.status-cancelled {
+  background: var(--danger, #ef4444);
+  opacity: 0.6;
+}
+
+.appointment-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.25rem;
+  height: 100%;
+}
+
+.appointment-customer {
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.appointment-service {
+  font-size: 0.65rem;
+  opacity: 0.9;
+}
+
+.appointment-time {
+  font-size: 0.6rem;
+  opacity: 0.8;
+  white-space: nowrap;
+}
+
+.empty-slot {
+  height: 100%;
+  min-height: 40px;
+}
+
+/* ===== EDIT APPOINTMENT MODAL ===== */
+.edit-appointment-modal-dialog {
+  height: 90%;
+  height: 90dvh;
+}
+
+.current-appointment-info {
+  padding: 0.75rem;
+  background: var(--bg-tertiary, #f9fafb);
+  border-radius: 10px;
+  font-size: var(--modal-body-size);
+}
+
+.current-appointment-info p {
+  margin-bottom: 0.25rem;
+}
+
+.current-appointment-info p:last-child {
+  margin-bottom: 0;
+}
+
+/* ===== CANCEL MODAL ===== */
+/* Compact styling for confirmation modals */
+
+/* ===========================================
+   TABLET OPTIMIZATIONS (576px - 767px)
+   =========================================== */
+@media (min-width: 576px) and (max-width: 767.98px) {
+  .modal.show.d-block,
+  .modal.fade.show.d-block,
+  .responsive-modal.show {
+    align-items: center;
+    padding: 1rem;
+  }
+
+  .modal-dialog,
+  .responsive-modal-dialog,
+  .booking-modal-dialog,
+  .edit-appointment-modal-dialog {
+    height: auto;
+    max-height: calc(100dvh - 2rem);
+    max-width: 90%;
+    animation: modalScaleIn var(--modal-transition-normal) ease-out;
+  }
+
+  .date-detail-modal-dialog {
+    max-width: 95%;
+    height: calc(100dvh - 2rem);
+    max-height: calc(100dvh - 2rem);
+  }
+
+  @keyframes modalScaleIn {
+    from {
+      transform: scale(0.95);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .modal-content,
+  .responsive-modal-content {
+    border-radius: var(--modal-radius-tablet);
+    max-height: 100%;
+    height: auto;
+  }
+
+  /* Remove pull indicator on tablet */
+  .modal-header::before,
+  .responsive-modal-header::before {
+    display: none;
+  }
+
+  .modal-title,
+  .modal-header .modal-title {
+    padding-top: 0;
+  }
+
+  .modal-header .btn-close {
+    margin-top: 0;
+  }
+
+  .modal-footer {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+
+  .modal-footer > .btn {
+    flex: 0 1 auto;
+    min-width: 100px;
+  }
+
+  /* Time slots grid - wider on tablet */
+  .time-slots-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+}
+
+/* ===========================================
+   DESKTOP OPTIMIZATIONS (768px+)
+   =========================================== */
+@media (min-width: 768px) {
+  :root {
+    --modal-padding-xs: 1.25rem;
+    --modal-padding-sm: 1.5rem;
+  }
+
+  .modal.show.d-block,
+  .modal.fade.show.d-block,
+  .responsive-modal.show {
+    align-items: center;
+    padding: 2rem;
+  }
+
+  .modal-dialog,
+  .responsive-modal-dialog {
+    height: auto;
+    max-height: calc(100vh - 4rem);
+    max-width: 500px;
+    animation: modalScaleIn var(--modal-transition-normal) ease-out;
+  }
+
+  .modal-dialog.modal-lg,
+  .responsive-modal-dialog.modal-lg,
+  .booking-modal-dialog {
+    max-width: 800px;
+  }
+
+  .modal-dialog.modal-xl,
+  .responsive-modal-dialog.modal-xl,
+  .date-detail-modal-dialog {
+    max-width: 1140px;
+    max-height: calc(100vh - 4rem);
+    height: calc(100vh - 4rem);
+  }
+
+  .edit-appointment-modal-dialog {
+    max-width: 600px;
+    height: auto;
+    max-height: calc(100vh - 4rem);
+  }
+
+  .modal-content,
+  .responsive-modal-content {
+    border-radius: var(--modal-radius-desktop);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Remove pull indicator on desktop */
+  .modal-header::before,
+  .responsive-modal-header::before {
+    display: none;
+  }
+
+  .modal-title,
+  .modal-header .modal-title {
+    padding-top: 0;
+  }
+
+  .modal-header .btn-close {
+    margin-top: 0;
+    border-radius: 8px;
+    background: transparent;
+  }
+
+  .modal-header .btn-close:hover {
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  .modal-body {
+    max-height: calc(100vh - 250px);
+  }
+
+  .modal-footer {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+
+  .modal-footer > .btn {
+    flex: 0 1 auto;
+    min-width: 120px;
+  }
+
+  /* Time slots grid - even wider on desktop */
+  .time-slots-grid {
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  }
+
+  /* Customer dropdown - wider */
+  .customer-dropdown {
+    max-height: 300px;
+  }
+
+  /* Week day cells larger on desktop */
+  .week-day-cell {
+    min-width: 56px;
+    height: 72px;
+  }
+
+  .week-days-grid .week-day-cell {
+    height: 64px;
+  }
+}
+
+/* ===========================================
+   LANDSCAPE ORIENTATION (Small height)
+   =========================================== */
+@media (max-height: 500px) and (orientation: landscape) {
+  .modal-dialog,
+  .responsive-modal-dialog {
     height: 100%;
     height: 100dvh;
-    pointer-events: auto;
+    max-height: 100%;
+    max-height: 100dvh;
   }
-  
-  body.modal-open * {
-    pointer-events: auto;
+
+  .modal-content,
+  .responsive-modal-content {
+    border-radius: 0;
   }
-  
-  /* Extra mobile-specific modal interaction rules */
-  .modal.show .modal-content,
-  .modal.show .responsive-modal-content,
-  .responsive-modal.show .modal-content,
-  .responsive-modal.show .responsive-modal-content {
-    pointer-events: auto !important;
+
+  .modal-header,
+  .responsive-modal-header {
+    padding: 0.5rem 1rem;
+    min-height: 44px;
   }
-  
-  .modal.show .modal-content > *,
-  .modal.show .responsive-modal-content > *,
-  .responsive-modal.show .modal-content > *,
-  .responsive-modal.show .responsive-modal-content > * {
-    pointer-events: auto !important;
+
+  .modal-header::before,
+  .responsive-modal-header::before {
+    display: none;
+  }
+
+  .modal-body,
+  .responsive-modal-body {
+    padding: 0.5rem 1rem;
+  }
+
+  .modal-footer,
+  .responsive-modal-footer {
+    padding: 0.5rem 1rem;
+    min-height: 52px;
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+
+  .modal-footer > .btn {
+    flex: 0 1 auto;
+    min-height: 40px;
+    min-width: 80px;
+  }
+
+  /* Compact week picker in landscape */
+  .week-day-cell {
+    min-width: 44px;
+    height: 52px;
+  }
+
+  .time-slots-grid {
+    max-height: 120px;
+    overflow-y: auto;
+  }
+}
+
+/* ===========================================
+   EXTRA SMALL SCREENS (< 360px)
+   =========================================== */
+@media (max-width: 359.98px) {
+  :root {
+    --modal-padding-xs: 0.625rem;
+    --modal-title-size: 0.9375rem;
+    --modal-body-size: 0.8125rem;
+    --modal-label-size: 0.6875rem;
+  }
+
+  .modal-header .modal-title {
+    font-size: 0.9375rem;
+  }
+
+  .week-day-cell {
+    min-width: 40px;
+    height: 56px;
+  }
+
+  .week-day-name {
+    font-size: 0.6rem;
+  }
+
+  .week-day-number {
+    font-size: 1rem;
+  }
+
+  .time-slots-grid {
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 0.375rem;
+  }
+
+  .time-slots-grid .btn {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.25rem;
+  }
+}
+
+/* ===========================================
+   iOS SAFARI SPECIFIC FIXES
+   =========================================== */
+@supports (-webkit-touch-callout: none) {
+  /* Use -webkit-fill-available for proper height on iOS */
+  .modal-dialog,
+  .responsive-modal-dialog {
+    max-height: -webkit-fill-available;
+  }
+
+  .modal-content,
+  .responsive-modal-content {
+    max-height: -webkit-fill-available;
+  }
+
+  /* Prevent iOS bounce scroll */
+  .modal-body,
+  .responsive-modal-body {
+    overscroll-behavior-y: contain;
+  }
+
+  /* Prevent text selection on touch */
+  .modal-header,
+  .modal-footer {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Better touch feedback */
+  .btn,
+  .week-day-cell,
+  .day-cell-pro,
+  .customer-item,
+  .time-slot-btn {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* ===========================================
+   ACCESSIBILITY & REDUCED MOTION
+   =========================================== */
+@media (prefers-reduced-motion: reduce) {
+  .modal-dialog,
+  .modal-content,
+  .responsive-modal-dialog,
+  .responsive-modal-content,
+  .toggle-slider,
+  .toggle-slider::before,
+  .week-day-cell,
+  .day-cell-pro {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Focus visible for keyboard navigation */
+.modal-content *:focus-visible {
+  outline: 2px solid var(--primary, #3b82f6);
+  outline-offset: 2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .modal-content,
+  .responsive-modal-content {
+    border: 2px solid var(--text-primary, #1f2937);
+  }
+
+  .week-day-cell,
+  .day-cell-pro {
+    border-width: 2px;
+  }
+}
+
+/* ===========================================
+   DARK THEME SUPPORT
+   =========================================== */
+.dark-theme .modal-content,
+.dark-theme .responsive-modal-content {
+  background-color: var(--bg-secondary, #1f2937);
+  color: var(--text-primary, #f9fafb);
+}
+
+.dark-theme .modal-header::before {
+  background: var(--border-color, #374151);
+}
+
+.dark-theme .customer-dropdown {
+  background: var(--bg-secondary, #1f2937);
+  border-color: var(--border-color, #374151);
+}
+
+.dark-theme .customer-item:hover,
+.dark-theme .customer-item:active {
+  background: var(--bg-tertiary, #374151);
+}
+
+.dark-theme .week-day-cell {
+  background: var(--bg-secondary, #1f2937);
+  border-color: var(--border-color, #374151);
+}
+
+.dark-theme .week-day-cell:hover:not(.past):not(.off-date) {
+  background: rgba(59, 130, 246, 0.15);
+}
+
+.dark-theme .toggle-slider {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* ===========================================
+   PRINT STYLES (Hide modals in print)
+   =========================================== */
+@media print {
+  .modal,
+  .responsive-modal {
+    display: none !important;
   }
 }

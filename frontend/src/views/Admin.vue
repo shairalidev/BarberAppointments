@@ -1115,12 +1115,11 @@
                     <i class="fas fa-cut me-2 text-primary"></i>{{ $t('admin.service') }}
                   </label>
                   <div class="service-select-container">
-                    <select 
-                      v-model="bookingForm.serviceId" 
-                      @change="updateBookingPrice" 
-                      class="form-select booking-service-select" 
+                    <select
+                      v-model="bookingForm.serviceId"
+                      @change="updateBookingPrice"
+                      class="form-select booking-service-select"
                       required
-                      style="font-size: 16px;"
                     >
                       <option value="">{{ $t('admin.selectService') }}</option>
                       <option v-for="service in activeServices" :key="service._id" :value="service._id">
@@ -1154,7 +1153,7 @@
                     <span><i class="fas fa-users me-2"></i>{{ $t('admin.existingCustomers') }}</span>
                     <small class="text-muted">{{ $t('admin.selectToPrefill') }}</small>
                   </label>
-                  <div class="customer-search-container" style="position: relative; z-index: 1070;" @click.stop>
+                  <div class="customer-search-container" @click.stop>
                     <div class="input-group mb-2">
                       <span class="input-group-text"><i class="fas fa-search"></i></span>
                       <input
@@ -1167,7 +1166,6 @@
                         @click.stop="handleCustomerSearchFocus"
                         @mousedown.stop
                         autocomplete="off"
-                        style="font-size: 16px; -webkit-appearance: none; appearance: none;"
                       />
                       <button 
                         v-if="bookingCustomerSearch"
@@ -1180,11 +1178,10 @@
                     </div>
                     
                     <!-- Customer Dropdown -->
-                    <div 
+                    <div
                       v-if="showCustomerDropdown"
                       class="customer-dropdown"
                       @click.stop
-                      style="position: absolute; z-index: 1070; transform: translateZ(0); -webkit-transform: translateZ(0); pointer-events: auto;"
                     >
                       <div v-if="bookingCustomerMatches.length > 0" class="customer-list">
                         <div
@@ -1194,7 +1191,6 @@
                           @click="selectCustomerForBooking(customer)"
                           @touchstart="handleCustomerTouchStart($event, customer)"
                           @touchend="handleCustomerTouchEnd($event, customer)"
-                          style="position: relative; z-index: 10; touch-action: pan-y; -webkit-tap-highlight-color: rgba(107, 114, 128, 0.2); cursor: pointer;"
                         >
                           <div class="customer-info">
                             <div class="customer-name">
@@ -1306,7 +1302,7 @@
     </div>
 
     <!-- Delete Customer Modal -->
-    <div v-if="showDeleteCustomerModal" class="modal fade show d-block responsive-modal" style="background: rgba(0,0,0,0.5);" @click.self="closeDeleteCustomerModal">
+    <div v-if="showDeleteCustomerModal" class="modal fade show d-block responsive-modal" @click.self="closeDeleteCustomerModal">
       <div class="modal-dialog modal-dialog-centered responsive-modal-dialog">
         <div class="modal-content responsive-modal-content">
           <div class="modal-header border-0 responsive-modal-header">
@@ -1334,7 +1330,7 @@
 
 
     <!-- Cancel Appointment Modal -->
-    <div v-if="cancelModal.show" class="modal fade show d-block responsive-modal" style="background: rgba(0,0,0,0.5);" @click.self="closeCancelModal">
+    <div v-if="cancelModal.show" class="modal fade show d-block responsive-modal" @click.self="closeCancelModal">
       <div class="modal-dialog modal-dialog-centered responsive-modal-dialog">
         <div class="modal-content responsive-modal-content">
           <div class="modal-header bg-danger text-white responsive-modal-header">
@@ -1375,16 +1371,16 @@
     </div>
 
     <!-- Edit Appointment Modal -->
-    <div v-if="editTimeModal.show" class="modal fade show d-block edit-appointment-modal responsive-modal" style="background: rgba(0,0,0,0.5); z-index: 1050;" @click.self="closeEditTimeModal">
-      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable edit-appointment-modal-dialog responsive-modal-dialog" style="z-index: 1051;">
+    <div v-if="editTimeModal.show" class="modal fade show d-block edit-appointment-modal responsive-modal" @click.self="closeEditTimeModal">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable edit-appointment-modal-dialog responsive-modal-dialog">
         <div class="modal-content edit-appointment-modal-content responsive-modal-content" @click.stop>
-          <div class="modal-header bg-gradient-primary text-white edit-appointment-modal-header responsive-modal-header" style="position: relative; z-index: 1052;">
+          <div class="modal-header bg-gradient-primary text-white edit-appointment-modal-header responsive-modal-header">
             <h5 class="modal-title">
               <i class="fas fa-edit me-2"></i>{{ $t('admin.editAppointment') }}
             </h5>
-            <button @click.stop="closeEditTimeModal" @touchstart.stop="closeEditTimeModal" class="btn-close btn-close-white" aria-label="Close" style="position: relative; z-index: 1053;"></button>
+            <button @click.stop="closeEditTimeModal" @touchstart.stop="closeEditTimeModal" class="btn-close btn-close-white" aria-label="Close"></button>
           </div>
-          <div class="modal-body edit-modal-body responsive-modal-body" style="overflow-y: auto;">
+          <div class="modal-body edit-modal-body responsive-modal-body">
             <div v-if="editTimeModal.appointment" class="mb-3 current-appointment-info">
               <p class="mb-1"><strong>{{ $t('admin.customer') }}:</strong> {{ editTimeModal.appointment.customerName }}</p>
               <p class="mb-1"><strong>{{ $t('admin.currentDate') }}:</strong> {{ formatEditModalCurrentDate }}</p>
@@ -1445,7 +1441,7 @@
 
             <div class="mb-3">
               <label class="form-label fw-semibold">{{ $t('admin.selectNewTime') }}</label>
-              <div v-if="editTimeModal.availableTimes.length" class="time-slots-grid mobile-optimized" style="max-height: 200px; overflow-y: auto;">
+              <div v-if="editTimeModal.availableTimes.length" class="time-slots-grid mobile-optimized">
                 <button
                   v-for="slot in editTimeModal.availableTimes"
                   :key="slot"
@@ -1472,9 +1468,9 @@
               <small class="text-muted">{{ $t('admin.messageWillBeSent') }}</small>
             </div>
           </div>
-          <div class="modal-footer responsive-modal-footer" style="position: sticky; bottom: 0; z-index: 1052; background: var(--bg-primary); border-top: 1px solid var(--border-color); flex-shrink: 0;">
-            <button @click.stop.prevent="closeEditTimeModal" @touchstart.stop.prevent="closeEditTimeModal" @mousedown.stop.prevent="closeEditTimeModal" class="btn btn-secondary" style="position: relative; z-index: 1053; -webkit-appearance: none; appearance: none; touch-action: manipulation;">{{ $t('common.cancel') }}</button>
-            <button @click.stop.prevent="updateAppointmentTime" @touchstart.stop.prevent="updateAppointmentTime" @mousedown.stop.prevent="updateAppointmentTime" class="btn btn-primary" :disabled="!editTimeModal.newTime || !editTimeModal.newDate" style="position: relative; z-index: 1053; -webkit-appearance: none; appearance: none; touch-action: manipulation;">
+          <div class="modal-footer responsive-modal-footer">
+            <button @click.stop.prevent="closeEditTimeModal" class="btn btn-secondary">{{ $t('common.cancel') }}</button>
+            <button @click.stop.prevent="updateAppointmentTime" class="btn btn-primary" :disabled="!editTimeModal.newTime || !editTimeModal.newDate">
               <i class="fas fa-save me-2"></i>{{ $t('admin.updateAppointment') }}
             </button>
           </div>
