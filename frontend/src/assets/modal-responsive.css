@@ -172,6 +172,45 @@ body.modal-open {
   contain: layout style;
 }
 
+/* ===== DESKTOP MODAL ADJUSTMENTS ===== */
+@media (min-width: 992px) {
+  .responsive-modal.show,
+  .modal.show.d-block {
+    align-items: center; /* center modals on larger screens */
+  }
+
+  .responsive-modal-dialog,
+  .modal-dialog {
+    max-width: 900px;
+    height: auto;
+    max-height: 90vh;
+    margin: auto;
+  }
+
+  .responsive-modal-content,
+  .modal-content {
+    border-radius: var(--modal-radius-desktop, 12px);
+  }
+}
+
+/* Ensure week date picker doesn't overflow and is scrollable on small screens */
+.week-date-picker {
+  max-width: 100%;
+  overflow: auto;
+  box-sizing: border-box;
+}
+
+@media (max-width: 576px) {
+  .week-date-picker {
+    padding: 0.6rem;
+  }
+
+  .week-date-picker .week-day-cell {
+    min-height: 56px;
+    padding: 8px 6px;
+  }
+}
+
 /* All modal content children are interactive */
 .modal-content *,
 .responsive-modal-content *,

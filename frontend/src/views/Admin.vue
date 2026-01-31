@@ -2969,7 +2969,8 @@ async quickBookAppointment() {
       return today >= firstDay && today <= lastDay
     },
     selectBookingDate(date) {
-      const selectedDate = new Date(date)
+      // Parse date-only strings as local midnight to avoid timezone shifts
+      const selectedDate = new Date(date + 'T00:00:00')
       const today = new Date()
       today.setHours(0, 0, 0, 0)
       selectedDate.setHours(0, 0, 0, 0)
