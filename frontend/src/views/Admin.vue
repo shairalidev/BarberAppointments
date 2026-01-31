@@ -2408,6 +2408,16 @@ export default {
         document.body.classList.add('modal-open')
         // Apply top offset so body doesn't jump to top when fixed
         document.body.style.top = `-${this._savedScrollY}px`
+
+        // Prevent background touch gestures on iOS while allowing modal internal scroll
+        this._modalTouchHandler = (e) => {
+          // allow touches inside modal content
+          const inside = !!e.target.closest('.responsive-modal-content') || !!e.target.closest('.modal-content')
+          if (!inside) {
+            e.preventDefault()
+          }
+        }
+        document.addEventListener('touchmove', this._modalTouchHandler, { passive: false })
       } else {
         // Release lock and restore scroll position
         document.body.classList.remove('modal-open')
@@ -2415,6 +2425,12 @@ export default {
         const y = this._savedScrollY || 0
         window.scrollTo(0, y)
         this._savedScrollY = null
+
+        // Remove touch handler
+        if (this._modalTouchHandler) {
+          document.removeEventListener('touchmove', this._modalTouchHandler)
+          this._modalTouchHandler = null
+        }
       }
     }
   },

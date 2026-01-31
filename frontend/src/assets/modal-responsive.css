@@ -362,6 +362,21 @@ body.modal-open {
   line-height: 1.5;
 }
 
+/* Specific booking modal body constraints to ensure scrolling works on mobile (iOS Safari) */
+.booking-modal-body {
+  max-height: calc(100dvh - 160px); /* leave space for header/footer and safe area */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: auto;
+  min-height: 0;
+}
+
+/* Small adjustment for narrow screens */
+@media (max-width: 480px) {
+  .booking-modal-body {
+    max-height: calc(100dvh - 140px);
+  }
+}
 /* Scrollbar styling for modal body */
 .modal-body::-webkit-scrollbar,
 .responsive-modal-body::-webkit-scrollbar,
