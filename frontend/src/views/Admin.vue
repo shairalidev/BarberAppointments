@@ -1044,9 +1044,9 @@
                     </div>
                   </div>
 
-                  <!-- Desktop Full Calendar -->
+                  <!-- Desktop Week Picker (compact) -->
                   <div class="professional-date-picker desktop-only">
-                    <!-- Month Navigation -->
+                    <!-- Month Navigation (kept for context) -->
                     <div class="date-picker-header-pro">
                       <button
                         type="button"
@@ -1070,28 +1070,22 @@
                       </button>
                     </div>
 
-                    <!-- Calendar Grid -->
-                    <div class="calendar-container-pro">
-                      <div class="weekdays-row">
-                        <div v-for="day in calendarDayNames" :key="day" class="weekday-cell-pro">
-                          {{ day }}
-                        </div>
-                      </div>
-                      <div class="calendar-grid-pro">
+                    <!-- Compact Week Strip (desktop) -->
+                    <div class="week-strip-container desktop-week-strip">
+                      <div class="week-strip">
                         <div
-                          v-for="day in bookingCalendarDays"
+                          v-for="day in bookingWeekDays"
                           :key="day.date"
                           @click="selectBookingDate(day.date)"
-                          :class="['day-cell-pro', {
-                            'other-month': !day.isCurrentMonth,
+                          :class="['week-day-cell', {
                             'today': day.isToday,
                             'selected': day.date === bookingForm.date,
                             'past': day.isPast,
                             'off-date': day.isOffDate
                           }]"
                         >
-                          <span class="day-number-pro">{{ day.dayNumber }}</span>
-                          <span v-if="day.isToday && !day.isSelected" class="today-indicator"></span>
+                          <span class="week-day-name">{{ day.dayName }}</span>
+                          <span class="week-day-number">{{ day.dayNumber }}</span>
                         </div>
                       </div>
                     </div>
@@ -1784,7 +1778,8 @@ export default {
     bookingCustomerMatches() {
       if (!this.customers || this.customers.length === 0) return []
       const term = this.bookingCustomerSearch ? this.bookingCustomerSearch.toLowerCase().trim() : ''
-      if (!term) return this.customers.slice(0, 8)
+      // Don't show any suggestions when the user hasn't typed anything
+      if (!term) return []
       return this.customers.filter(c =>
         c.name?.toLowerCase().includes(term) ||
         c.phone?.toLowerCase().includes(term) ||
@@ -2002,7 +1997,7 @@ export default {
     },
     formatBookingSelectedDate() {
       if (!this.bookingForm.date) return ''
-      const date = new Date(this.bookingForm.date)
+      const date = new Date(this.bookingForm.date + 'T00:00:00')
       return date.toLocaleDateString('de-DE', {
         weekday: 'long',
         year: 'numeric',
@@ -2387,6 +2382,14 @@ export default {
       } else {
         document.body.style.overflow = ''
       }
+    },
+    showBookingModal(newVal) {
+      // Lock background scroll while a modal is open
+      if (newVal) {
+        document.body.style.overflow = 'hidden'
+      } else {
+        document.body.style.overflow = ''
+      }
     }
   },
   methods: {
@@ -2570,7 +2573,7 @@ async quickBookAppointment() {
         }
         
         // Prevent booking for past dates
-        const selectedDate = new Date(this.bookingForm.date)
+        const selectedDate = new Date(this.bookingForm.date + 'T00:00:00')
         const today = new Date()
         today.setHours(0, 0, 0, 0)
         selectedDate.setHours(0, 0, 0, 0)
@@ -2685,9 +2688,8 @@ async quickBookAppointment() {
           }
         })
 
-        this.availableSlots = response.data.availableTimes || []
-
-        // Normalize time formats for comparison (handle both "9:00" and "09:00")
+        // Collect slots and normalize format, remove duplicates and sort
+        const slots = response.data.availableTimes || []
         const normalizeTime = (time) => {
           if (!time) return ''
           const parts = time.split(':')
@@ -2696,6 +2698,9 @@ async quickBookAppointment() {
           }
           return time
         }
+        const normalizedUnique = [...new Set(slots.map(normalizeTime).filter(Boolean))]
+        normalizedUnique.sort((a, b) => a.localeCompare(b))
+        this.availableSlots = normalizedUnique
 
         const normalizedSelectedTime = normalizeTime(previouslySelectedTime)
         const normalizedAvailableSlots = this.availableSlots.map(normalizeTime)
@@ -3962,7 +3967,8 @@ async setReminder(appointment) {
       }
       // Use nextTick to ensure dropdown shows after DOM updates
       await this.$nextTick()
-      this.showCustomerDropdown = true
+      // Only show dropdown if user has typed something
+      this.showCustomerDropdown = !!(this.bookingCustomerSearch && this.bookingCustomerSearch.trim().length > 0)
     },
     async handleCustomerSearchInput() {
       // Ensure customers are loaded when user types
@@ -3971,7 +3977,8 @@ async setReminder(appointment) {
       }
       // Use nextTick to ensure dropdown shows after DOM updates
       await this.$nextTick()
-      this.showCustomerDropdown = true
+      // Only show dropdown when there is a non-empty search term
+      this.showCustomerDropdown = !!(this.bookingCustomerSearch && this.bookingCustomerSearch.trim().length > 0)
     },
     clearCustomerSearch() {
       this.bookingCustomerSearch = ''

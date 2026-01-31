@@ -304,8 +304,20 @@ body.modal-open {
   background: rgba(0, 0, 0, 0.15);
 }
 
+/* Ensure white close button is always visible on dark headers */
 .modal-header .btn-close-white {
-  filter: invert(1);
+  filter: none; /* avoid unreliable inversion */
+  color: #fff; /* ensure SVG that uses currentColor is white */
+  opacity: 1;
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 2l12 12M14 2L2 14'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* Use a lighter hover on white close for contrast with dark headers */
+.modal-header .btn-close-white:hover,
+.modal-header .btn-close-white:active {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 /* ===== MODAL BODY ===== */
