@@ -656,6 +656,28 @@ body.modal-open {
   .booking-modal-body .alert-info .d-flex.gap-3 span {
     font-size: var(--modal-body-size);
   }
+
+  /* Modal footer buttons: show side-by-side and smaller on mobile */
+  .modal-footer,
+  .responsive-modal-footer {
+    flex-direction: row; /* place buttons left and right */
+    justify-content: space-between; /* spread buttons */
+    gap: 0.5rem;
+  }
+
+  .modal-footer > .btn,
+  .responsive-modal-footer > .btn {
+    flex: 0 1 48%; /* allow two buttons to sit side-by-side */
+    min-height: 40px;
+    font-size: 0.9rem; /* slightly smaller on mobile */
+    padding: 0.4rem 0.6rem; /* reduce padding for compact buttons */
+  }
+
+  /* If there are more than two buttons, allow wrapping while keeping them compact */
+  .modal-footer > .btn + .btn,
+  .responsive-modal-footer > .btn + .btn {
+    margin-left: 0.3rem;
+  }
 }
 
 /* Customer search container */
