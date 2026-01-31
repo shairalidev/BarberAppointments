@@ -2349,6 +2349,18 @@ export default {
         
         return slots
       }
+    },
+    // Returns true if any modal is currently open
+    isAnyModalOpen() {
+      return !!(
+        this.showBookingModal ||
+        this.showCustomerModal ||
+        this.showDeleteCustomerModal ||
+        (this.cancelModal && this.cancelModal.show) ||
+        (this.editTimeModal && this.editTimeModal.show) ||
+        (this.responseModal && this.responseModal.show) ||
+        (this.dateDetailModal && this.dateDetailModal.show)
+      )
     }
   },
   async mounted() {
@@ -2362,9 +2374,11 @@ export default {
   },
   beforeUnmount() {
     document.removeEventListener('click', this.handleClickOutside)
-    // Reset body overflow when component is destroyed
+    // Reset body overflow and modal class when component is destroyed
     document.body.style.overflow = ''
+    document.body.classList.remove('modal-open')
   },
+
   watch: {
     'bookingForm.date'() {
       this.fetchAvailableSlots()
@@ -2383,12 +2397,12 @@ export default {
         document.body.style.overflow = ''
       }
     },
-    showBookingModal(newVal) {
-      // Lock background scroll while a modal is open
+    isAnyModalOpen(newVal) {
+      // Toggle class that has comprehensive modal-open behavior (position fixed, touch-action) defined in CSS
       if (newVal) {
-        document.body.style.overflow = 'hidden'
+        document.body.classList.add('modal-open')
       } else {
-        document.body.style.overflow = ''
+        document.body.classList.remove('modal-open')
       }
     }
   },
