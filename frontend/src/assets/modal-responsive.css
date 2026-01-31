@@ -150,6 +150,9 @@ body.modal-open {
   height: 95dvh;
   max-height: 95%;
   max-height: 95dvh;
+  /* Safari mobile fix */
+  max-height: -webkit-fill-available;
+  min-height: 0;
 
   /* Animation */
   animation: modalSlideUp var(--modal-transition-normal) ease-out;
@@ -190,6 +193,8 @@ body.modal-open {
   contain: layout style;
   /* Ensure proper flex layout for Safari */
   min-height: 0;
+  /* Safari mobile fix */
+  max-height: -webkit-fill-available;
 }
 
 /* ===== DESKTOP MODAL ADJUSTMENTS ===== */
@@ -370,22 +375,81 @@ body.modal-open {
 
 /* Specific booking modal body constraints to ensure scrolling works on mobile (iOS Safari) */
 .booking-modal-body {
-  max-height: calc(100dvh - 160px); /* leave space for header/footer and safe area */
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
   overflow-y: auto !important;
   overflow-x: hidden !important;
   -webkit-overflow-scrolling: touch !important;
   touch-action: pan-y !important; /* Allow vertical scrolling, prevent horizontal */
-  min-height: 0;
-  position: relative;
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-  will-change: scroll-position;
+  position: relative !important;
+  transform: translateZ(0) !important;
+  -webkit-transform: translateZ(0) !important;
+  will-change: scroll-position !important;
+  overscroll-behavior-y: contain !important;
+  overscroll-behavior-x: none !important;
+}
+
+/* Ensure form inside booking modal body allows scrolling */
+.booking-modal-body form {
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  overflow: visible !important;
+}
+
+.booking-modal-body form > .row {
+  flex: 0 0 auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
 }
 
 /* Small adjustment for narrow screens */
 @media (max-width: 480px) {
   .booking-modal-body {
-    max-height: calc(100dvh - 140px);
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+  }
+}
+
+/* Safari Mobile Specific Fixes */
+@supports (-webkit-touch-callout: none) {
+  .booking-modal-dialog {
+    height: 95dvh !important;
+    max-height: 95dvh !important;
+    min-height: 0 !important;
+  }
+  
+  .booking-modal-content {
+    height: 100% !important;
+    max-height: 100% !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  .booking-modal-body {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y !important;
+    position: relative !important;
+    transform: translateZ(0) !important;
+    -webkit-transform: translateZ(0) !important;
+    will-change: scroll-position !important;
+  }
+  
+  .booking-modal-body form {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
   }
 }
 /* Scrollbar styling for modal body */
@@ -602,8 +666,32 @@ body.modal-open {
   z-index: var(--modal-z-index);
 }
 
+.booking-modal-dialog {
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+  height: 95dvh !important;
+  max-height: 95dvh !important;
+  /* Safari mobile fix */
+  max-height: -webkit-fill-available !important;
+}
+
+.booking-modal-content {
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  /* Safari mobile fix */
+  max-height: -webkit-fill-available !important;
+}
+
 .booking-modal-body {
   padding: var(--modal-padding-xs) !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
 }
 
 .booking-modal-body form {
@@ -611,6 +699,9 @@ body.modal-open {
   flex-direction: column;
   gap: 0;
   width: 100%;
+  min-height: 0;
+  height: auto;
+  overflow: visible;
 }
 
 .booking-modal-body .row.g-3 {

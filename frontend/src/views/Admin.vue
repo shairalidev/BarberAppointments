@@ -9329,21 +9329,30 @@ select.booking-service-select {
     touch-action: pan-y !important;
     max-width: 100%;
     box-sizing: border-box;
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    transform: translateZ(0);
-    -webkit-transform: translateZ(0);
-    will-change: scroll-position;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    position: relative !important;
+    transform: translateZ(0) !important;
+    -webkit-transform: translateZ(0) !important;
+    will-change: scroll-position !important;
   }
 
   .booking-modal-body form {
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    flex: 1;
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    height: auto !important;
+    flex: 0 1 auto !important;
+    overflow: visible !important;
+  }
+  
+  .booking-modal-body form > .row {
+    flex: 0 0 auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
   }
   
   .modal-body .row,
@@ -10847,7 +10856,7 @@ select.booking-service-select {
 
     /* Booking modal specific iOS Safari fixes */
     .booking-modal-overlay {
-      position: fixed;
+      position: fixed !important;
       top: 0;
       left: 0;
       right: 0;
@@ -10857,36 +10866,57 @@ select.booking-service-select {
     }
 
     .booking-modal-dialog {
-      max-height: calc(100% - 1rem);
-      max-height: calc(-webkit-fill-available - 1rem);
+      display: flex !important;
+      flex-direction: column !important;
+      height: 95dvh !important;
+      max-height: 95dvh !important;
+      max-height: -webkit-fill-available !important;
+      min-height: 0 !important;
       margin: 0.5rem;
     }
 
     .booking-modal-content {
-      max-height: calc(100vh - 1rem);
-      max-height: calc(-webkit-fill-available - 1rem);
-      display: flex;
-      flex-direction: column;
+      display: flex !important;
+      flex-direction: column !important;
+      height: 100% !important;
+      max-height: 100% !important;
+      max-height: -webkit-fill-available !important;
+      min-height: 0 !important;
     }
 
     .booking-modal-body {
-      flex: 1;
-      overflow-y: auto;
-      overflow-x: hidden;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior: contain;
-      min-height: 0;
+      flex: 1 1 auto !important;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      -webkit-overflow-scrolling: touch !important;
+      touch-action: pan-y !important;
+      overscroll-behavior-y: contain !important;
+      overscroll-behavior-x: none !important;
+      min-height: 0 !important;
+      max-height: none !important;
       padding: 0.75rem;
       padding-bottom: 1rem;
-      display: flex;
-      flex-direction: column;
+      display: flex !important;
+      flex-direction: column !important;
+      position: relative !important;
+      transform: translateZ(0) !important;
+      -webkit-transform: translateZ(0) !important;
+      will-change: scroll-position !important;
     }
 
     .booking-modal-body form {
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-      flex: 1;
+      display: flex !important;
+      flex-direction: column !important;
+      min-height: 0 !important;
+      height: auto !important;
+      flex: 0 1 auto !important;
+      overflow: visible !important;
+    }
+    
+    .booking-modal-body form > .row {
+      flex: 0 0 auto !important;
+      min-height: 0 !important;
+      overflow: visible !important;
     }
 
     .booking-modal-body .row {
@@ -11240,9 +11270,14 @@ select.booking-service-select {
   
   /* Ensure modal body can scroll while dropdown is visible */
   .booking-modal-body {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
     position: relative !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y !important;
   }
   
   /* Allow dropdown to appear above modal body */
