@@ -8769,14 +8769,21 @@ async setReminder(appointment) {
     -webkit-overflow-scrolling: touch;
   }
   
-  .modal-footer {
+  .modal-footer,
+  .responsive-modal-footer {
     padding: 0.5rem 0.75rem !important;
     gap: 0.5rem !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
   }
   
-  .modal-footer .btn {
+  .modal-footer .btn,
+  .responsive-modal-footer .btn {
     padding: 0.4rem 0.75rem !important;
     font-size: 0.8rem !important;
+    flex: 0 1 auto;
+    min-height: 36px;
+    min-width: 70px;
   }
   
   /* Modal form elements */
@@ -8866,13 +8873,20 @@ async setReminder(appointment) {
     --bs-gutter-x: 0.35rem !important;
   }
   
-  .modal-footer {
+  .modal-footer,
+  .responsive-modal-footer {
     padding: 0.35rem 0.5rem !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
   }
   
-  .modal-footer .btn {
+  .modal-footer .btn,
+  .responsive-modal-footer .btn {
     padding: 0.35rem 0.5rem !important;
     font-size: 0.75rem !important;
+    flex: 0 1 auto;
+    min-height: 32px;
+    min-width: 60px;
   }
 }
 
@@ -9311,13 +9325,18 @@ select.booking-service-select {
     padding-bottom: 1rem !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
-    -webkit-overflow-scrolling: touch;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y !important;
     max-width: 100%;
     box-sizing: border-box;
     flex: 1;
     min-height: 0;
     display: flex;
     flex-direction: column;
+    position: relative;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    will-change: scroll-position;
   }
 
   .booking-modal-body form {
@@ -9563,25 +9582,26 @@ select.booking-service-select {
   }
   
   /* Modal footer buttons */
-  .modal-footer {
+  .modal-footer,
+  .responsive-modal-footer {
     padding: 0.4rem 0.5rem !important;
-    flex-wrap: wrap;
-    gap: 0.3rem;
-  }
-  
-  .modal-footer {
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+    flex-direction: row !important;
+    justify-content: space-between !important;
     position: relative !important;
     z-index: 10 !important;
     background: var(--bg-primary) !important;
     border-top: 1px solid var(--border-color) !important;
   }
   
-  .modal-footer .btn {
+  .modal-footer .btn,
+  .responsive-modal-footer .btn {
     font-size: 0.7rem !important;
     padding: 0.3rem 0.5rem !important;
-    min-height: 44px !important;
-    flex: 1 1 auto;
-    min-width: calc(50% - 0.15rem);
+    min-height: 36px !important;
+    flex: 0 1 auto;
+    min-width: 60px;
     position: relative !important;
     z-index: 10 !important;
     -webkit-appearance: none !important;
@@ -11164,13 +11184,21 @@ select.booking-service-select {
     padding: 0.75rem !important;
   }
 
-  .modal-footer {
+  .modal-footer,
+  .responsive-modal-footer {
     padding: 0.5rem 0.75rem !important;
     gap: 0.5rem !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
   }
 
-  .modal-footer .btn {
-    flex: 1;
+  .modal-footer .btn,
+  .responsive-modal-footer .btn {
+    flex: 0 1 auto;
+    min-height: 36px;
+    font-size: 0.8rem;
+    padding: 0.4rem 0.75rem;
+    min-width: 70px;
   }
 
   /* Booking Modal Specific */
@@ -11210,10 +11238,19 @@ select.booking-service-select {
     user-select: none !important;
   }
   
-  /* Ensure modal body doesn't block dropdown */
+  /* Ensure modal body can scroll while dropdown is visible */
   .booking-modal-body {
-    overflow: visible !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
     position: relative !important;
+  }
+  
+  /* Allow dropdown to appear above modal body */
+  .booking-modal-body .customer-search-container {
+    position: relative !important;
+    z-index: 1070 !important;
+    margin-bottom: 0.5rem;
+    isolation: isolate !important;
   }
 
   .booking-modal-body .customer-name {

@@ -186,8 +186,10 @@ body.modal-open {
   color: var(--text-primary, #1f2937);
   pointer-events: auto !important;
 
-  /* Prevent content overflow */
+  /* Prevent content overflow but allow body scrolling */
   contain: layout style;
+  /* Ensure proper flex layout for Safari */
+  min-height: 0;
 }
 
 /* ===== DESKTOP MODAL ADJUSTMENTS ===== */
@@ -356,6 +358,10 @@ body.modal-open {
   overscroll-behavior: contain;
   scroll-behavior: smooth;
   min-height: 0; /* Important for flex container */
+  position: relative; /* For Safari mobile scrolling */
+  transform: translateZ(0); /* Force hardware acceleration for Safari */
+  -webkit-transform: translateZ(0);
+  will-change: scroll-position; /* Optimize scrolling performance */
 
   /* Font sizing */
   font-size: var(--modal-body-size);
@@ -365,10 +371,15 @@ body.modal-open {
 /* Specific booking modal body constraints to ensure scrolling works on mobile (iOS Safari) */
 .booking-modal-body {
   max-height: calc(100dvh - 160px); /* leave space for header/footer and safe area */
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  touch-action: auto;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-y !important; /* Allow vertical scrolling, prevent horizontal */
   min-height: 0;
+  position: relative;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: scroll-position;
 }
 
 /* Small adjustment for narrow screens */
@@ -411,25 +422,28 @@ body.modal-open {
   z-index: 10;
 }
 
-/* Footer buttons - stack on mobile */
+/* Footer buttons - side by side for all screen sizes */
+.modal-footer,
+.responsive-modal-footer {
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
 .modal-footer > .btn,
 .responsive-modal-footer > .btn {
-  flex: 1 1 100%;
-  min-height: var(--touch-target-comfortable);
-  font-size: var(--modal-body-size);
+  flex: 0 1 auto;
+  min-height: 40px;
+  font-size: 0.875rem;
   font-weight: 500;
-  border-radius: 10px;
-  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-/* Primary button first on mobile (reversed order visually) */
-.modal-footer {
-  flex-direction: column-reverse;
+  min-width: 80px;
 }
 
 /* ===== FORM ELEMENTS IN MODALS ===== */
@@ -657,26 +671,22 @@ body.modal-open {
     font-size: var(--modal-body-size);
   }
 
-  /* Modal footer buttons: show side-by-side and smaller on mobile */
+  /* Modal footer buttons: smaller on mobile */
   .modal-footer,
   .responsive-modal-footer {
-    flex-direction: row; /* place buttons left and right */
-    justify-content: space-between; /* spread buttons */
+    flex-direction: row !important;
+    justify-content: space-between !important;
     gap: 0.5rem;
+    padding: 0.5rem !important;
   }
 
   .modal-footer > .btn,
   .responsive-modal-footer > .btn {
-    flex: 0 1 48%; /* allow two buttons to sit side-by-side */
-    min-height: 40px;
-    font-size: 0.9rem; /* slightly smaller on mobile */
-    padding: 0.4rem 0.6rem; /* reduce padding for compact buttons */
-  }
-
-  /* If there are more than two buttons, allow wrapping while keeping them compact */
-  .modal-footer > .btn + .btn,
-  .responsive-modal-footer > .btn + .btn {
-    margin-left: 0.3rem;
+    flex: 0 1 auto;
+    min-height: 36px;
+    font-size: 0.8rem;
+    padding: 0.4rem 0.75rem;
+    min-width: 70px;
   }
 }
 
@@ -685,6 +695,7 @@ body.modal-open {
   position: relative;
   z-index: 100;
   width: 100%;
+  isolation: isolate; /* Create new stacking context for Safari */
 }
 
 /* Customer dropdown */
@@ -704,6 +715,11 @@ body.modal-open {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   z-index: 1100 !important;
   pointer-events: auto !important;
+  transform: translateZ(0); /* Force hardware acceleration for Safari */
+  -webkit-transform: translateZ(0);
+  will-change: transform;
+  -webkit-touch-callout: none; /* Prevent iOS callout menu */
+  touch-action: pan-y; /* Allow vertical scrolling */
 }
 
 .customer-item {
@@ -716,8 +732,12 @@ body.modal-open {
   cursor: pointer;
   transition: background-color var(--modal-transition-fast);
   touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
+  -webkit-tap-highlight-color: rgba(107, 114, 128, 0.2); /* Show tap feedback on Safari */
   pointer-events: auto !important;
+  -webkit-user-select: none; /* Prevent text selection on Safari */
+  user-select: none;
+  position: relative;
+  z-index: 10;
 }
 
 .customer-item:last-child {
