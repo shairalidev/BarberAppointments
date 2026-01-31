@@ -2377,6 +2377,10 @@ export default {
     // Reset body overflow and modal class when component is destroyed
     document.body.style.overflow = ''
     document.body.classList.remove('modal-open')
+    // restore previous scroll position when unmounting
+    const y = this._savedScrollY || 0
+    window.scrollTo(0, y)
+    this._savedScrollY = null
   },
 
   watch: {
@@ -2398,11 +2402,19 @@ export default {
       }
     },
     isAnyModalOpen(newVal) {
-      // Toggle class that has comprehensive modal-open behavior (position fixed, touch-action) defined in CSS
       if (newVal) {
+        // Save current scroll position and lock background
+        this._savedScrollY = window.scrollY || window.pageYOffset || 0
         document.body.classList.add('modal-open')
+        // Apply top offset so body doesn't jump to top when fixed
+        document.body.style.top = `-${this._savedScrollY}px`
       } else {
+        // Release lock and restore scroll position
         document.body.classList.remove('modal-open')
+        document.body.style.top = ''
+        const y = this._savedScrollY || 0
+        window.scrollTo(0, y)
+        this._savedScrollY = null
       }
     }
   },

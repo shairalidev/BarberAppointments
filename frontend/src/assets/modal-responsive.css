@@ -71,7 +71,25 @@ body.modal-open {
   width: 100% !important;
   height: 100% !important;
   height: 100dvh !important;
+  /* touch-action intentionally removed to allow modal content scrolling on iOS/Safari */
+}
+
+/* Prevent background gestures while allowing modal content to scroll */
+.modal.show.d-block,
+.modal.fade.show.d-block,
+.modal.responsive-modal.show.d-block,
+.responsive-modal.show,
+.responsive-modal.show.d-block {
   touch-action: none;
+}
+
+/* Allow modal content to handle touch scrolling (iOS Safari fix) */
+.responsive-modal .responsive-modal-content,
+.responsive-modal .responsive-modal-body,
+.modal.show .modal-content,
+.modal.show .modal-body {
+  touch-action: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* ===== Hidden Modal States ===== */
