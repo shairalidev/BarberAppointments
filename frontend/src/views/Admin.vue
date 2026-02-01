@@ -7475,15 +7475,20 @@ async setReminder(appointment) {
 }
 
 @media (max-width: 768px) {
+  /* Hide schedule header in day view on mobile */
+  .date-time-schedule .schedule-header {
+    display: none !important;
+  }
+  
   .schedule-body {
     max-height: calc(100vh - 300px);
   }
   
-  /* Increase touch targets for mobile - EQUAL SIZE SLOTS */
+  /* Narrow slots for mobile - EQUAL SIZE SLOTS */
   .half-hour-slot {
-    min-height: 50px !important;
-    height: 50px !important;
-    padding: 8px 6px !important;
+    min-height: 35px !important;
+    height: 35px !important;
+    padding: 3px 4px !important;
     touch-action: manipulation;
     -webkit-tap-highlight-color: rgba(16, 185, 129, 0.3);
     flex: 1 1 50% !important;
@@ -7492,14 +7497,14 @@ async setReminder(appointment) {
   
   /* CRITICAL: Both slots must be EQUAL size */
   .half-hour-slot.slot-first {
-    min-height: 50px !important;
-    height: 50px !important;
+    min-height: 35px !important;
+    height: 35px !important;
     flex: 1 1 50% !important;
     background-color: rgba(239, 154, 154, 0.15) !important;
   }
   .half-hour-slot.slot-second {
-    min-height: 50px !important;
-    height: 50px !important;
+    min-height: 35px !important;
+    height: 35px !important;
     flex: 1 1 50% !important;
     background-color: rgba(165, 214, 167, 0.15) !important;
   }
@@ -7514,13 +7519,13 @@ async setReminder(appointment) {
   }
   
   .schedule-row {
-    min-height: 100px !important;
+    min-height: 70px !important;
     display: flex !important;
     align-items: stretch !important;
   }
   
   .schedule-row-wrapper {
-    min-height: 100px !important;
+    min-height: 70px !important;
   }
   
   .slots-column {
@@ -7532,18 +7537,45 @@ async setReminder(appointment) {
   .empty-slot {
     min-height: 100% !important;
     height: 100% !important;
-    padding: 8px !important;
+    padding: 3px !important;
   }
   
   .half-hour-slot.slot-occupied {
-    min-height: 50px !important;
-    height: 50px !important;
+    min-height: 35px !important;
+    height: 35px !important;
     padding: 0 !important;
   }
   
   .half-hour-slot.slot-occupied .appointment-block {
-    min-height: 50px !important;
-    height: 50px !important;
+    min-height: 35px !important;
+    height: 35px !important;
+    padding: 2px 4px !important;
+  }
+  
+  /* Smaller fonts for appointment content in mobile */
+  .appointment-customer {
+    font-size: 0.5rem !important;
+    line-height: 1.0 !important;
+    font-weight: 600;
+  }
+  
+  .appointment-service {
+    font-size: 0.4rem !important;
+    line-height: 1.0 !important;
+  }
+  
+  .appointment-time {
+    font-size: 0.4rem !important;
+    line-height: 1.0 !important;
+  }
+  
+  .empty-slot-hint {
+    font-size: 0.5rem !important;
+    padding: 2px !important;
+  }
+  
+  .empty-slot-hint i {
+    font-size: 0.7rem !important;
   }
 }
 
@@ -7952,14 +7984,14 @@ async setReminder(appointment) {
     flex-direction: column !important;
     gap: 0 !important;
     flex: 1 !important;
-    min-height: 100px !important;
+    min-height: 70px !important;
   }
   
   .half-hour-slot {
-    padding: 8px 4px !important;
-    min-height: 50px !important;
-    height: 50px !important;
-    max-height: 50px !important;
+    padding: 3px 4px !important;
+    min-height: 35px !important;
+    height: 35px !important;
+    max-height: 35px !important;
     touch-action: manipulation;
     -webkit-tap-highlight-color: rgba(16, 185, 129, 0.3);
     -webkit-appearance: none;
@@ -7972,17 +8004,17 @@ async setReminder(appointment) {
   
   /* CRITICAL: Both slots MUST be EQUAL size */
   .half-hour-slot.slot-first {
-    min-height: 50px !important;
-    height: 50px !important;
-    max-height: 50px !important;
+    min-height: 35px !important;
+    height: 35px !important;
+    max-height: 35px !important;
     flex: 1 1 50% !important;
     background-color: rgba(239, 154, 154, 0.15) !important;
     width: 100% !important;
   }
   .half-hour-slot.slot-second {
-    min-height: 50px !important;
-    height: 50px !important;
-    max-height: 50px !important;
+    min-height: 35px !important;
+    height: 35px !important;
+    max-height: 35px !important;
     flex: 1 1 50% !important;
     background-color: rgba(165, 214, 167, 0.15) !important;
     width: 100% !important;
@@ -8001,7 +8033,7 @@ async setReminder(appointment) {
   .half-hour-slot .empty-slot {
     min-height: 100% !important;
     height: 100% !important;
-    padding: 8px !important;
+    padding: 3px !important;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -8018,33 +8050,35 @@ async setReminder(appointment) {
   }
   
   .schedule-row {
-    min-height: 100px !important;
+    min-height: 70px !important;
     display: flex !important;
     align-items: stretch !important;
   }
   
   .schedule-row-wrapper {
-    min-height: 100px !important;
+    min-height: 70px !important;
   }
   
   .appointment-block {
-    padding: 6px;
+    padding: 2px 4px !important;
     min-height: 100%;
     height: 100%;
   }
   
   .appointment-customer {
-    font-size: 0.6rem;
-    line-height: 1.1;
+    font-size: 0.5rem !important;
+    line-height: 1.0 !important;
+    font-weight: 600;
   }
   
   .appointment-service {
-    font-size: 0.5rem;
-    line-height: 1.1;
+    font-size: 0.4rem !important;
+    line-height: 1.0 !important;
   }
   
   .appointment-time {
-    font-size: 0.55rem;
+    font-size: 0.4rem !important;
+    line-height: 1.0 !important;
   }
   
   .empty-slot {
@@ -8054,12 +8088,12 @@ async setReminder(appointment) {
   }
   
   .empty-slot-hint {
-    font-size: 0.7rem;
-    padding: 4px;
+    font-size: 0.5rem !important;
+    padding: 2px !important;
   }
   
   .empty-slot-hint i {
-    font-size: 1rem;
+    font-size: 0.7rem !important;
   }
   
   .empty-slot-hint span {
@@ -8073,14 +8107,15 @@ async setReminder(appointment) {
   
   /* Ensure slots are tappable even when occupied */
   .half-hour-slot.slot-occupied {
-    min-height: 50px !important;
-    height: 50px !important;
+    min-height: 35px !important;
+    height: 35px !important;
     padding: 0 !important;
   }
   
   .half-hour-slot.slot-occupied .appointment-block {
-    min-height: 50px !important;
-    height: 50px !important;
+    min-height: 35px !important;
+    height: 35px !important;
+    padding: 2px 4px !important;
   }
 }
 
@@ -11378,16 +11413,64 @@ select.booking-service-select {
   }
 
   .half-hour-slot {
-    min-height: 25px !important;
-    padding: 4px !important;
+    min-height: 30px !important;
+    height: 30px !important;
+    padding: 2px 3px !important;
+  }
+  
+  .half-hour-slot.slot-first,
+  .half-hour-slot.slot-second {
+    min-height: 30px !important;
+    height: 30px !important;
+  }
+  
+  .half-hour-slot.slot-occupied {
+    min-height: 30px !important;
+    height: 30px !important;
+    padding: 0 !important;
+  }
+  
+  .half-hour-slot.slot-occupied .appointment-block {
+    min-height: 30px !important;
+    height: 30px !important;
+    padding: 2px 3px !important;
+  }
+  
+  .schedule-row {
+    min-height: 60px !important;
+  }
+  
+  .schedule-row-wrapper {
+    min-height: 60px !important;
   }
 
   .appointment-customer {
-    font-size: 0.6rem !important;
+    font-size: 0.45rem !important;
+    line-height: 1.0 !important;
+    font-weight: 600;
   }
 
   .appointment-service {
-    font-size: 0.55rem !important;
+    font-size: 0.35rem !important;
+    line-height: 1.0 !important;
+  }
+  
+  .appointment-time {
+    font-size: 0.35rem !important;
+    line-height: 1.0 !important;
+  }
+  
+  .empty-slot {
+    padding: 2px !important;
+  }
+  
+  .empty-slot-hint {
+    font-size: 0.45rem !important;
+    padding: 2px !important;
+  }
+  
+  .empty-slot-hint i {
+    font-size: 0.6rem !important;
   }
 
   /* Off Date Toggle */
