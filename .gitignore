@@ -12,7 +12,7 @@ backend/.env
 backend/.env.*
 frontend/.env
 frontend/.env.*
-
+.zip*
 # Build outputs
 dist/
 build/
