@@ -2369,6 +2369,14 @@ export default {
     this.watchBookingFormChanges()
     this.loadAdminProfile()
     
+    // When in day view, load current day and scroll week strip to selected date
+    if (this.calendarViewMode === 'day' && this.dayViewDate) {
+      await this.loadDayViewData(this.dayViewDate)
+      this.$nextTick(() => {
+        this.scrollToActiveDay('dayView', true)
+      })
+    }
+    
     // Close dropdown when clicking outside
     document.addEventListener('click', this.handleClickOutside)
   },
@@ -3443,7 +3451,7 @@ getTimeSlotsForDay(dayIndex) {
 
       this.dragState = null
     },
-    scrollToActiveDay(context) {
+    scrollToActiveDay(context, instant = false) {
       this.$nextTick(() => {
         const slider = context === 'dayView' ? this.$refs.dayViewWeekSlider : this.$refs.modalWeekSlider
         if (!slider) return
@@ -3453,7 +3461,11 @@ getTimeSlotsForDay(dayIndex) {
           const sliderRect = slider.getBoundingClientRect()
           const cellRect = activeCell.getBoundingClientRect()
           const scrollOffset = cellRect.left - sliderRect.left - (sliderRect.width / 2) + (cellRect.width / 2)
-          slider.scrollBy({ left: scrollOffset, behavior: 'smooth' })
+          if (instant) {
+            slider.scrollLeft = slider.scrollLeft + scrollOffset
+          } else {
+            slider.scrollBy({ left: scrollOffset, behavior: 'smooth' })
+          }
         }
       })
     },
