@@ -7582,27 +7582,46 @@ async setReminder(appointment) {
   }
   
   /* Smaller fonts for appointment content in mobile */
+  .appointment-content {
+    gap: 1px !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    overflow: hidden !important;
+  }
+
+  .appointment-left {
+    min-width: 0 !important;
+    overflow: hidden !important;
+    gap: 0 !important;
+  }
+
   .appointment-customer {
-    font-size: 0.5rem !important;
-    line-height: 1.0 !important;
+    font-size: 0.45rem !important;
+    line-height: 1.1 !important;
     font-weight: 600;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
   }
-  
+
   .appointment-service {
-    font-size: 0.4rem !important;
-    line-height: 1.0 !important;
+    font-size: 0.35rem !important;
+    line-height: 1.1 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
   }
-  
+
   .appointment-time {
-    font-size: 0.4rem !important;
+    font-size: 0.35rem !important;
     line-height: 1.0 !important;
   }
-  
+
   .empty-slot-hint {
     font-size: 0.5rem !important;
     padding: 2px !important;
   }
-  
+
   .empty-slot-hint i {
     font-size: 0.7rem !important;
   }
@@ -7871,13 +7890,14 @@ async setReminder(appointment) {
   width: 100%;
   height: 100%;
   border-radius: 6px;
-  padding: 8px;
+  padding: 2px 4px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
 .appointment-block:hover {
@@ -7919,34 +7939,49 @@ async setReminder(appointment) {
 
 .appointment-content {
   display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.appointment-left {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 1px;
 }
 
 .appointment-customer {
   font-weight: 600;
-  font-size: 0.65rem;
-  line-height: 1.1;
+  font-size: 0.55rem;
+  line-height: 1.15;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .appointment-service {
-  font-size: 0.55rem;
+  font-size: 0.45rem;
   opacity: 0.85;
-  line-height: 1.1;
+  line-height: 1.15;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .appointment-time {
-  font-size: 0.6rem;
+  font-size: 0.45rem;
   opacity: 0.8;
   white-space: nowrap;
   flex-shrink: 0;
   margin-left: auto;
+  line-height: 1;
 }
 
 /* Responsive adjustments */
@@ -7986,35 +8021,39 @@ async setReminder(appointment) {
   }
   
   .appointment-block {
-    padding: 4px;
+    padding: 2px 3px;
   }
-  
+
+  .appointment-content {
+    gap: 1px;
+  }
+
   .appointment-customer {
-    font-size: 0.6rem;
-    line-height: 1.1;
-  }
-  
-  .appointment-service {
     font-size: 0.5rem;
     line-height: 1.1;
   }
-  
-  .appointment-time {
-    font-size: 0.55rem;
+
+  .appointment-service {
+    font-size: 0.4rem;
+    line-height: 1.1;
   }
-  
+
+  .appointment-time {
+    font-size: 0.4rem;
+  }
+
   .empty-slot-hint {
     font-size: 0.65rem;
   }
-  
+
   .empty-slot-hint i {
     font-size: 0.85rem;
   }
-  
+
   .schedule-row-wrapper {
     border-bottom: 1px solid #e9ecef;
   }
-  
+
   .schedule-row {
     min-height: 50px;
   }
@@ -8142,51 +8181,71 @@ async setReminder(appointment) {
   }
   
   .appointment-block {
-    padding: 2px 4px !important;
+    padding: 1px 3px !important;
     min-height: 100%;
     height: 100%;
+    overflow: hidden !important;
   }
-  
+
+  .appointment-content {
+    gap: 1px !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    overflow: hidden !important;
+  }
+
+  .appointment-left {
+    min-width: 0 !important;
+    overflow: hidden !important;
+    gap: 0 !important;
+  }
+
   .appointment-customer {
-    font-size: 0.5rem !important;
-    line-height: 1.0 !important;
+    font-size: 0.45rem !important;
+    line-height: 1.1 !important;
     font-weight: 600;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
   }
-  
+
   .appointment-service {
-    font-size: 0.4rem !important;
-    line-height: 1.0 !important;
+    font-size: 0.35rem !important;
+    line-height: 1.1 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
   }
-  
+
   .appointment-time {
-    font-size: 0.4rem !important;
+    font-size: 0.35rem !important;
     line-height: 1.0 !important;
   }
-  
+
   .empty-slot {
     border: none !important;
     min-height: 100% !important;
     height: 100% !important;
   }
-  
+
   .empty-slot-hint {
     font-size: 0.5rem !important;
     padding: 2px !important;
   }
-  
+
   .empty-slot-hint i {
     font-size: 0.7rem !important;
   }
-  
+
   .empty-slot-hint span {
     display: none !important;
   }
-  
+
   /* iOS Safari optimization */
   .schedule-body {
     -webkit-overflow-scrolling: touch;
   }
-  
+
   /* Ensure slots are tappable even when occupied */
   .half-hour-slot.slot-occupied {
     min-height: 35px !important;
@@ -8404,21 +8463,25 @@ async setReminder(appointment) {
   }
 
   .appointment-block {
-    font-size: 0.7rem !important;
-    padding: 4px 6px !important;
+    font-size: 0.6rem !important;
+    padding: 2px 3px !important;
+  }
+
+  .appointment-content {
+    gap: 1px !important;
   }
 
   .appointment-customer {
-    font-size: 0.6rem !important;
+    font-size: 0.48rem !important;
     font-weight: 600;
   }
 
   .appointment-service {
-    font-size: 0.5rem !important;
+    font-size: 0.38rem !important;
   }
 
   .appointment-time {
-    font-size: 0.55rem !important;
+    font-size: 0.38rem !important;
   }
 }
 
@@ -10552,9 +10615,45 @@ select.booking-service-select {
       min-height: 55px !important;
       height: 55px !important;
       max-height: 55px !important;
+      overflow: hidden !important;
+      padding: 2px 3px !important;
+    }
+
+    .appointment-content {
+      gap: 1px !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      overflow: hidden !important;
+    }
+
+    .appointment-left {
+      min-width: 0 !important;
+      overflow: hidden !important;
+      gap: 0 !important;
+    }
+
+    .appointment-customer {
+      font-size: 0.42rem !important;
+      line-height: 1.1 !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      white-space: nowrap !important;
+    }
+
+    .appointment-service {
+      font-size: 0.34rem !important;
+      line-height: 1.1 !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      white-space: nowrap !important;
+    }
+
+    .appointment-time {
+      font-size: 0.34rem !important;
+      line-height: 1.0 !important;
     }
   }
-  
+
   .calendar-grid,
   .mobile-nav {
     -webkit-overflow-scrolling: touch;
@@ -11543,31 +11642,55 @@ select.booking-service-select {
     height: 60px !important;
   }
 
+  .appointment-block {
+    overflow: hidden !important;
+    padding: 1px 2px !important;
+  }
+
+  .appointment-content {
+    gap: 0 !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    overflow: hidden !important;
+  }
+
+  .appointment-left {
+    min-width: 0 !important;
+    overflow: hidden !important;
+    gap: 0 !important;
+  }
+
   .appointment-customer {
-    font-size: 0.45rem !important;
-    line-height: 1.0 !important;
+    font-size: 0.4rem !important;
+    line-height: 1.1 !important;
     font-weight: 600;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
   }
 
   .appointment-service {
-    font-size: 0.35rem !important;
-    line-height: 1.0 !important;
+    font-size: 0.3rem !important;
+    line-height: 1.1 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
   }
-  
+
   .appointment-time {
-    font-size: 0.35rem !important;
+    font-size: 0.3rem !important;
     line-height: 1.0 !important;
   }
-  
+
   .empty-slot {
     padding: 2px !important;
   }
-  
+
   .empty-slot-hint {
     font-size: 0.45rem !important;
     padding: 2px !important;
   }
-  
+
   .empty-slot-hint i {
     font-size: 0.6rem !important;
   }
