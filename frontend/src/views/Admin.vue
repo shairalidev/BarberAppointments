@@ -1451,7 +1451,7 @@
                 <i class="fas fa-info-circle me-2"></i>{{ $t('admin.loadingAvailableSlots') }}
               </div>
             </div>
-            <div class="mb-0">
+            <div class="mb-3">
               <label class="form-label fw-semibold">{{ $t('admin.messageOptional') }}</label>
               <textarea
                 v-model="editTimeModal.message"
@@ -1461,17 +1461,16 @@
               ></textarea>
               <small class="text-muted">{{ $t('admin.messageWillBeSent') }}</small>
             </div>
+
           </div>
           <div class="modal-footer responsive-modal-footer d-flex justify-content-between">
+            <button @click.stop.prevent="closeEditTimeModal" class="btn btn-secondary">{{ $t('common.cancel') }}</button>
             <button @click.stop.prevent="cancelFromEditModal" class="btn btn-danger">
               <i class="fas fa-ban me-2"></i>{{ $t('admin.cancelAppointment') || 'Cancel Appointment' }}
             </button>
-            <div>
-              <button @click.stop.prevent="closeEditTimeModal" class="btn btn-secondary me-2">{{ $t('common.cancel') }}</button>
-              <button @click.stop.prevent="updateAppointmentTime" class="btn btn-primary" :disabled="!editTimeModal.newTime || !editTimeModal.newDate">
-                <i class="fas fa-save me-2"></i>{{ $t('admin.updateAppointment') }}
-              </button>
-            </div>
+            <button @click.stop.prevent="updateAppointmentTime" class="btn btn-primary" :disabled="!editTimeModal.newTime || !editTimeModal.newDate">
+              <i class="fas fa-save me-2"></i>{{ $t('admin.updateAppointment') }}
+            </button>
           </div>
         </div>
       </div>
