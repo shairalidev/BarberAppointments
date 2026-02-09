@@ -1462,11 +1462,16 @@
               <small class="text-muted">{{ $t('admin.messageWillBeSent') }}</small>
             </div>
           </div>
-          <div class="modal-footer responsive-modal-footer">
-            <button @click.stop.prevent="closeEditTimeModal" class="btn btn-secondary">{{ $t('common.cancel') }}</button>
-            <button @click.stop.prevent="updateAppointmentTime" class="btn btn-primary" :disabled="!editTimeModal.newTime || !editTimeModal.newDate">
-              <i class="fas fa-save me-2"></i>{{ $t('admin.updateAppointment') }}
+          <div class="modal-footer responsive-modal-footer d-flex justify-content-between">
+            <button @click.stop.prevent="cancelFromEditModal" class="btn btn-danger">
+              <i class="fas fa-ban me-2"></i>{{ $t('admin.cancelAppointment') || 'Cancel Appointment' }}
             </button>
+            <div>
+              <button @click.stop.prevent="closeEditTimeModal" class="btn btn-secondary me-2">{{ $t('common.cancel') }}</button>
+              <button @click.stop.prevent="updateAppointmentTime" class="btn btn-primary" :disabled="!editTimeModal.newTime || !editTimeModal.newDate">
+                <i class="fas fa-save me-2"></i>{{ $t('admin.updateAppointment') }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -2879,6 +2884,13 @@ async quickBookAppointment() {
       // Force update to ensure modal closes
       this.$nextTick(() => {
         this.$forceUpdate()
+      })
+    },
+    cancelFromEditModal() {
+      const appointment = this.editTimeModal.appointment
+      this.closeEditTimeModal()
+      this.$nextTick(() => {
+        this.openCancelModal(appointment)
       })
     },
     changeEditWeek(offset) {
@@ -7501,7 +7513,7 @@ async setReminder(appointment) {
     min-height: 35px !important;
     height: 35px !important;
     max-height: 35px !important;
-    padding: 3px 4px !important;
+    padding: 1px 2px !important;
     touch-action: manipulation;
     -webkit-tap-highlight-color: rgba(16, 185, 129, 0.3);
     flex: 0 0 35px !important;
@@ -7572,27 +7584,31 @@ async setReminder(appointment) {
     max-height: 35px !important;
     flex: 0 0 35px !important;
     -webkit-flex: 0 0 35px !important;
-    padding: 0 !important;
+    padding: 0 1px !important;
   }
   
   .half-hour-slot.slot-occupied .appointment-block {
     min-height: 35px !important;
     height: 35px !important;
-    padding: 2px 4px !important;
+    padding: 1px 3px !important;
+    width: 100% !important;
+    border-radius: 4px !important;
   }
-  
+
   /* Smaller fonts for appointment content in mobile */
   .appointment-content {
-    gap: 1px !important;
+    gap: 0 !important;
     flex-direction: row !important;
     align-items: center !important;
     overflow: hidden !important;
+    width: 100% !important;
   }
 
   .appointment-left {
     min-width: 0 !important;
     overflow: hidden !important;
     gap: 0 !important;
+    flex: 1 !important;
   }
 
   .appointment-customer {
@@ -8065,20 +8081,20 @@ async setReminder(appointment) {
   }
   
   .time-column {
-    width: 45px;
-    padding: 4px 2px;
+    width: 38px;
+    padding: 4px 1px;
   }
-  
+
   .time-column-header {
-    width: 45px;
-    padding: 4px 2px;
-    font-size: 0.65rem;
+    width: 38px;
+    padding: 4px 1px;
+    font-size: 0.6rem;
   }
-  
+
   .time-label {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
   }
-  
+
   /* CRITICAL: Ensure slots-column uses flexbox properly (Safari/iOS) */
   .slots-column {
     display: flex !important;
@@ -8089,10 +8105,10 @@ async setReminder(appointment) {
     min-height: 70px !important;
     height: 70px !important;
   }
-  
+
   /* Safari/iOS: fixed height so both slots equal */
   .half-hour-slot {
-    padding: 3px 4px !important;
+    padding: 1px 2px !important;
     min-height: 35px !important;
     height: 35px !important;
     max-height: 35px !important;
@@ -8181,27 +8197,31 @@ async setReminder(appointment) {
   }
   
   .appointment-block {
-    padding: 1px 3px !important;
+    padding: 1px 2px !important;
     min-height: 100%;
     height: 100%;
     overflow: hidden !important;
+    width: 100% !important;
+    border-radius: 4px !important;
   }
 
   .appointment-content {
-    gap: 1px !important;
+    gap: 0 !important;
     flex-direction: row !important;
     align-items: center !important;
     overflow: hidden !important;
+    width: 100% !important;
   }
 
   .appointment-left {
     min-width: 0 !important;
     overflow: hidden !important;
     gap: 0 !important;
+    flex: 1 !important;
   }
 
   .appointment-customer {
-    font-size: 0.45rem !important;
+    font-size: 0.5rem !important;
     line-height: 1.1 !important;
     font-weight: 600;
     overflow: hidden !important;
@@ -8210,7 +8230,7 @@ async setReminder(appointment) {
   }
 
   .appointment-service {
-    font-size: 0.35rem !important;
+    font-size: 0.4rem !important;
     line-height: 1.1 !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
@@ -8218,7 +8238,7 @@ async setReminder(appointment) {
   }
 
   .appointment-time {
-    font-size: 0.35rem !important;
+    font-size: 0.4rem !important;
     line-height: 1.0 !important;
   }
 
@@ -8250,13 +8270,14 @@ async setReminder(appointment) {
   .half-hour-slot.slot-occupied {
     min-height: 35px !important;
     height: 35px !important;
-    padding: 0 !important;
+    padding: 0 1px !important;
   }
-  
+
   .half-hour-slot.slot-occupied .appointment-block {
     min-height: 35px !important;
     height: 35px !important;
-    padding: 2px 4px !important;
+    padding: 1px 3px !important;
+    width: 100% !important;
   }
 }
 
@@ -8449,9 +8470,9 @@ async setReminder(appointment) {
   }
 
   .time-column {
-    width: 50px !important;
-    font-size: 0.75rem !important;
-    padding: 0 4px !important;
+    width: 42px !important;
+    font-size: 0.7rem !important;
+    padding: 0 2px !important;
   }
 
   .time-label {
@@ -8464,11 +8485,13 @@ async setReminder(appointment) {
 
   .appointment-block {
     font-size: 0.6rem !important;
-    padding: 2px 3px !important;
+    padding: 1px 2px !important;
+    width: 100% !important;
   }
 
   .appointment-content {
-    gap: 1px !important;
+    gap: 0 !important;
+    width: 100% !important;
   }
 
   .appointment-customer {
@@ -8565,11 +8588,12 @@ async setReminder(appointment) {
   }
 
   .time-column {
-    width: 42px !important;
+    width: 36px !important;
+    padding: 0 1px !important;
   }
 
   .time-label {
-    font-size: 0.65rem !important;
+    font-size: 0.6rem !important;
   }
 
   .appointment-customer {
@@ -10526,24 +10550,24 @@ select.booking-service-select {
   
   @media (max-width: 768px) {
     .half-hour-slot {
-      min-height: 50px !important;
-      padding: 10px 6px !important;
+      min-height: 35px !important;
+      padding: 1px 2px !important;
     }
-    
+
     .half-hour-slot.slot-first,
     .half-hour-slot.slot-second {
-      min-height: 50px !important;
+      min-height: 35px !important;
     }
-    
+
     .schedule-row {
-      min-height: 100px !important;
+      min-height: 70px !important;
     }
-    
+
     .empty-slot {
-      min-height: 40px !important;
-      padding: 8px !important;
+      min-height: 100% !important;
+      padding: 3px !important;
     }
-    
+
     /* Ensure slots are fully tappable */
     .half-hour-slot,
     .half-hour-slot .empty-slot,
@@ -10552,88 +10576,97 @@ select.booking-service-select {
       z-index: 1;
     }
   }
-  
+
   @media (max-width: 576px) {
     /* CRITICAL: Both slots EQUAL size on small mobile */
     .slots-column {
-      min-height: 110px !important;
+      min-height: 70px !important;
+      height: 70px !important;
     }
-    
+
     .half-hour-slot {
-      min-height: 55px !important;
-      height: 55px !important;
-      max-height: 55px !important;
-      padding: 10px 8px !important;
-      flex: 1 1 50% !important;
+      min-height: 35px !important;
+      height: 35px !important;
+      max-height: 35px !important;
+      padding: 1px 2px !important;
+      flex: 0 0 35px !important;
+      -webkit-flex: 0 0 35px !important;
       box-sizing: border-box;
       overflow: hidden;
     }
-    
+
     .half-hour-slot.slot-first {
-      min-height: 55px !important;
-      height: 55px !important;
-      max-height: 55px !important;
-      flex: 1 1 50% !important;
+      min-height: 35px !important;
+      height: 35px !important;
+      max-height: 35px !important;
+      flex: 0 0 35px !important;
+      -webkit-flex: 0 0 35px !important;
       background-color: rgba(239, 154, 154, 0.15) !important;
     }
     .half-hour-slot.slot-second {
-      min-height: 55px !important;
-      height: 55px !important;
-      max-height: 55px !important;
-      flex: 1 1 50% !important;
+      min-height: 35px !important;
+      height: 35px !important;
+      max-height: 35px !important;
+      flex: 0 0 35px !important;
+      -webkit-flex: 0 0 35px !important;
       background-color: rgba(165, 214, 167, 0.15) !important;
     }
-    
+
     /* Dark mode slot colors for small mobile - lighter */
     .dark-theme .half-hour-slot.slot-first {
       background-color: rgba(239, 154, 154, 0.1) !important;
     }
-    
+
     .dark-theme .half-hour-slot.slot-second {
       background-color: rgba(165, 214, 167, 0.1) !important;
     }
-    
+
     .schedule-row {
-      min-height: 110px !important;
+      min-height: 70px !important;
+      height: 70px !important;
       display: flex !important;
       align-items: stretch !important;
     }
-    
+
     .empty-slot {
       min-height: 100% !important;
       height: 100% !important;
-      padding: 10px !important;
+      padding: 3px !important;
     }
-    
+
     .half-hour-slot.slot-occupied {
-      min-height: 55px !important;
-      height: 55px !important;
-      max-height: 55px !important;
+      min-height: 35px !important;
+      height: 35px !important;
+      max-height: 35px !important;
+      padding: 0 1px !important;
     }
-    
+
     .half-hour-slot.slot-occupied .appointment-block {
-      min-height: 55px !important;
-      height: 55px !important;
-      max-height: 55px !important;
+      min-height: 35px !important;
+      height: 35px !important;
+      max-height: 35px !important;
       overflow: hidden !important;
-      padding: 2px 3px !important;
+      padding: 1px 3px !important;
+      width: 100% !important;
     }
 
     .appointment-content {
-      gap: 1px !important;
+      gap: 0 !important;
       flex-direction: row !important;
       align-items: center !important;
       overflow: hidden !important;
+      width: 100% !important;
     }
 
     .appointment-left {
       min-width: 0 !important;
       overflow: hidden !important;
       gap: 0 !important;
+      flex: 1 !important;
     }
 
     .appointment-customer {
-      font-size: 0.42rem !important;
+      font-size: 0.5rem !important;
       line-height: 1.1 !important;
       overflow: hidden !important;
       text-overflow: ellipsis !important;
@@ -10641,7 +10674,7 @@ select.booking-service-select {
     }
 
     .appointment-service {
-      font-size: 0.34rem !important;
+      font-size: 0.4rem !important;
       line-height: 1.1 !important;
       overflow: hidden !important;
       text-overflow: ellipsis !important;
@@ -11585,66 +11618,68 @@ select.booking-service-select {
   }
 
   .time-column {
-    width: 42px !important;
-    padding: 4px 2px !important;
+    width: 36px !important;
+    padding: 4px 1px !important;
   }
 
   .time-label {
-    font-size: 0.7rem !important;
+    font-size: 0.65rem !important;
   }
 
   /* Safari/iOS: fixed slot height so both equal */
   .half-hour-slot {
-    min-height: 30px !important;
-    height: 30px !important;
-    max-height: 30px !important;
-    padding: 2px 3px !important;
-    flex: 0 0 30px !important;
-    -webkit-flex: 0 0 30px !important;
+    min-height: 35px !important;
+    height: 35px !important;
+    max-height: 35px !important;
+    padding: 1px 2px !important;
+    flex: 0 0 35px !important;
+    -webkit-flex: 0 0 35px !important;
   }
-  
+
   .half-hour-slot.slot-first,
   .half-hour-slot.slot-second {
-    min-height: 30px !important;
-    height: 30px !important;
-    max-height: 30px !important;
-    flex: 0 0 30px !important;
-    -webkit-flex: 0 0 30px !important;
+    min-height: 35px !important;
+    height: 35px !important;
+    max-height: 35px !important;
+    flex: 0 0 35px !important;
+    -webkit-flex: 0 0 35px !important;
   }
-  
+
   .half-hour-slot.slot-occupied {
-    min-height: 30px !important;
-    height: 30px !important;
-    max-height: 30px !important;
-    flex: 0 0 30px !important;
-    -webkit-flex: 0 0 30px !important;
-    padding: 0 !important;
+    min-height: 35px !important;
+    height: 35px !important;
+    max-height: 35px !important;
+    flex: 0 0 35px !important;
+    -webkit-flex: 0 0 35px !important;
+    padding: 0 1px !important;
   }
-  
+
   .half-hour-slot.slot-occupied .appointment-block {
-    min-height: 30px !important;
-    height: 30px !important;
-    padding: 2px 3px !important;
+    min-height: 35px !important;
+    height: 35px !important;
+    padding: 1px 3px !important;
+    width: 100% !important;
   }
-  
+
   .schedule-row {
-    min-height: 60px !important;
-    height: 60px !important;
+    min-height: 70px !important;
+    height: 70px !important;
   }
-  
+
   .schedule-row-wrapper {
-    min-height: 60px !important;
-    height: 60px !important;
+    min-height: 70px !important;
+    height: 70px !important;
   }
-  
+
   .slots-column {
-    min-height: 60px !important;
-    height: 60px !important;
+    min-height: 70px !important;
+    height: 70px !important;
   }
 
   .appointment-block {
     overflow: hidden !important;
     padding: 1px 2px !important;
+    width: 100% !important;
   }
 
   .appointment-content {
@@ -11652,6 +11687,7 @@ select.booking-service-select {
     flex-direction: row !important;
     align-items: center !important;
     overflow: hidden !important;
+    width: 100% !important;
   }
 
   .appointment-left {
