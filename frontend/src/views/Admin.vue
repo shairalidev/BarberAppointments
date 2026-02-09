@@ -1433,7 +1433,7 @@
               </div>
             </div>
 
-            <div class="mb-3">
+            <div class="mb-2 flex-grow-1" style="min-height: 0; overflow-y: auto;">
               <label class="form-label fw-semibold">{{ $t('admin.selectNewTime') }}</label>
               <div v-if="editTimeModal.availableTimes.length" class="time-slots-grid mobile-optimized">
                 <button
@@ -1451,12 +1451,12 @@
                 <i class="fas fa-info-circle me-2"></i>{{ $t('admin.loadingAvailableSlots') }}
               </div>
             </div>
-            <div class="mb-3">
+            <div class="mb-0 flex-shrink-0">
               <label class="form-label fw-semibold">{{ $t('admin.messageOptional') }}</label>
               <textarea
                 v-model="editTimeModal.message"
                 class="form-control"
-                rows="3"
+                rows="2"
                 :placeholder="$t('admin.addNoteAboutChange')"
               ></textarea>
               <small class="text-muted">{{ $t('admin.messageWillBeSent') }}</small>
@@ -1464,12 +1464,12 @@
 
           </div>
           <div class="modal-footer responsive-modal-footer d-flex justify-content-between">
-            <button @click.stop.prevent="closeEditTimeModal" class="btn btn-secondary">{{ $t('common.cancel') }}</button>
-            <button @click.stop.prevent="cancelFromEditModal" class="btn btn-danger">
-              <i class="fas fa-ban me-2"></i>{{ $t('admin.cancelAppointment') }}
+            <button @click.stop.prevent="closeEditTimeModal" class="btn btn-secondary btn-sm">{{ $t('common.cancel') }}</button>
+            <button @click.stop.prevent="cancelFromEditModal" class="btn btn-danger btn-sm">
+              <i class="fas fa-ban me-1"></i>{{ $t('admin.cancelAppointment') }}
             </button>
-            <button @click.stop.prevent="updateAppointmentTime" class="btn btn-primary" :disabled="!editTimeModal.newTime || !editTimeModal.newDate">
-              <i class="fas fa-save me-2"></i>{{ $t('admin.updateAppointment') }}
+            <button @click.stop.prevent="updateAppointmentTime" class="btn btn-primary btn-sm" :disabled="!editTimeModal.newTime || !editTimeModal.newDate">
+              <i class="fas fa-save me-1"></i>{{ $t('admin.updateAppointment') }}
             </button>
           </div>
         </div>
@@ -3353,9 +3353,10 @@ getTimeSlotsForDay(dayIndex) {
     },
     async loadDayViewData(date) {
       if (!date) return
-      
+
       this.dayViewData.loading = true
       this.dayViewDate = date
+      this.selectedCalendarDate = date
       
       try {
         // Check if date is restricted
@@ -9990,6 +9991,8 @@ select.booking-service-select {
     max-height: calc(100vh - 200px) !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
   }
   
   /* Edit Appointment Modal - Desktop */
