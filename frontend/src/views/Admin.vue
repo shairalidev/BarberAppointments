@@ -150,6 +150,38 @@
             <!-- Mobile Calendar Controls -->
             <div class="mobile-calendar-controls d-lg-none">
               <div class="d-flex align-items-center gap-1 flex-nowrap">
+                <!-- Mobile Off-Date Toggle - Calendar View -->
+                <template v-if="calendarViewMode === 'calendar' && selectedCalendarDate">
+                  <label class="off-date-toggle-mobile-tiny" for="mobileCalendarOffDateToggle" :title="isSelectedDateRestricted ? $t('admin.offDate') : $t('admin.markAsOffDate')">
+                    <input
+                      class="off-date-toggle-input"
+                      type="checkbox"
+                      id="mobileCalendarOffDateToggle"
+                      :checked="isSelectedDateRestricted"
+                      @change="toggleCalendarOffDate"
+                    >
+                    <span class="toggle-slider-mobile-tiny" :class="{ 'active': isSelectedDateRestricted }">
+                      <i v-if="isSelectedDateRestricted" class="fas fa-ban"></i>
+                      <i v-else class="fas fa-calendar-check"></i>
+                    </span>
+                  </label>
+                </template>
+                <!-- Mobile Off-Date Toggle - Day View -->
+                <template v-if="calendarViewMode === 'day'">
+                  <label class="off-date-toggle-mobile-tiny" for="mobileDayViewOffDateToggle" :title="dayViewData.isRestricted ? $t('admin.offDate') : $t('admin.markAsOffDate')">
+                    <input
+                      class="off-date-toggle-input"
+                      type="checkbox"
+                      id="mobileDayViewOffDateToggle"
+                      :checked="dayViewData.isRestricted"
+                      @change="toggleDayViewOffDate"
+                    >
+                    <span class="toggle-slider-mobile-tiny" :class="{ 'active': dayViewData.isRestricted }">
+                      <i v-if="dayViewData.isRestricted" class="fas fa-ban"></i>
+                      <i v-else class="fas fa-calendar-check"></i>
+                    </span>
+                  </label>
+                </template>
                 <!-- Calendar View Navigation -->
                 <template v-if="calendarViewMode === 'calendar'">
                   <button @click="changeMonth(-1)" class="btn btn-outline-primary btn-sm mobile-cal-btn">
@@ -180,38 +212,6 @@
                 <button @click="toggleCalendarView" class="btn btn-sm mobile-cal-btn" :class="calendarViewMode === 'calendar' ? 'btn-outline-secondary' : 'btn-secondary'">
                   <i :class="calendarViewMode === 'calendar' ? 'fas fa-calendar-day' : 'fas fa-calendar-alt'"></i>
                 </button>
-                <!-- Mobile Off-Date Toggle - Calendar View -->
-                <template v-if="calendarViewMode === 'calendar' && selectedCalendarDate">
-                  <label class="off-date-toggle-mobile-tiny" for="mobileCalendarOffDateToggle" :title="isSelectedDateRestricted ? $t('admin.offDate') : $t('admin.markAsOffDate')">
-                    <input 
-                      class="off-date-toggle-input" 
-                      type="checkbox" 
-                      id="mobileCalendarOffDateToggle"
-                      :checked="isSelectedDateRestricted"
-                      @change="toggleCalendarOffDate"
-                    >
-                    <span class="toggle-slider-mobile-tiny" :class="{ 'active': isSelectedDateRestricted }">
-                      <i v-if="isSelectedDateRestricted" class="fas fa-ban"></i>
-                      <i v-else class="fas fa-calendar-check"></i>
-                    </span>
-                  </label>
-                </template>
-                <!-- Mobile Off-Date Toggle - Day View -->
-                <template v-if="calendarViewMode === 'day'">
-                  <label class="off-date-toggle-mobile-tiny" for="mobileDayViewOffDateToggle" :title="dayViewData.isRestricted ? $t('admin.offDate') : $t('admin.markAsOffDate')">
-                    <input 
-                      class="off-date-toggle-input" 
-                      type="checkbox" 
-                      id="mobileDayViewOffDateToggle"
-                      :checked="dayViewData.isRestricted"
-                      @change="toggleDayViewOffDate"
-                    >
-                    <span class="toggle-slider-mobile-tiny" :class="{ 'active': dayViewData.isRestricted }">
-                      <i v-if="dayViewData.isRestricted" class="fas fa-ban"></i>
-                      <i v-else class="fas fa-calendar-check"></i>
-                    </span>
-                  </label>
-                </template>
               </div>
             </div>
 
