@@ -78,6 +78,17 @@ router.put('/:id', async (req, res) => {
 // Delete customer
 router.delete('/:id', async (req, res) => {
   try {
+    const customer = await Customer.findById(req.params.id)
+    if (!customer) {
+      return res.status(404).json({ message: 'Customer not found' })
+    }
+
+    // Nullify customer reference in associated appointments to prevent broken refs
+    await Appointment.updateMany(
+      { customer: req.params.id },
+      { $unset: { customer: 1 } }
+    )
+
     await Customer.findByIdAndDelete(req.params.id)
     res.json({ message: 'Customer removed' })
   } catch (error) {

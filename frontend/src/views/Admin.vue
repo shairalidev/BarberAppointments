@@ -2583,7 +2583,6 @@ async updateAppointmentStatus(appointment, newStatus) {
       try {
         const newStatus = !service.active
         await axios.put(`${process.env.VUE_APP_API_URL}/services/${service._id}`, {
-          ...service,
           active: newStatus
         })
         await this.fetchServices()
@@ -2595,18 +2594,18 @@ async updateAppointmentStatus(appointment, newStatus) {
         )
       } catch (error) {
         console.error('Error toggling service status:', error)
-        this.showToast('Error updating service status', 'error')
+        this.showToast(this.$t('common.error'), 'error')
       }
     },
     async deleteService(id) {
-      if (confirm('Are you sure you want to delete this service?')) {
+      if (confirm(this.$t('toast.confirmDeleteService'))) {
         try {
           await axios.delete(`${process.env.VUE_APP_API_URL}/services/${id}`)
           await this.fetchServices()
-          this.showToast('Service deleted successfully', 'success')
+          this.showToast(this.$t('toast.serviceDeleted'), 'success')
         } catch (error) {
           console.error('Error deleting service:', error)
-          this.showToast('Error deleting service', 'error')
+          this.showToast(this.$t('common.error'), 'error')
         }
       }
     },
@@ -2621,11 +2620,16 @@ async quickBookAppointment() {
           return
         }
 
+        if (!this.bookingForm.customerName || !this.bookingForm.customerPhone) {
+          this.showToast(this.$t('toast.customerRequired'), 'warning')
+          return
+        }
+
         if (!this.bookingForm.serviceId || !this.bookingForm.time) {
           this.showToast(this.$t('toast.selectTimeSlot'), 'warning')
           return
         }
-        
+
         // Prevent booking for past dates
         const selectedDate = new Date(this.bookingForm.date + 'T00:00:00')
         const today = new Date()
@@ -2863,7 +2867,7 @@ async quickBookAppointment() {
         }
       } catch (error) {
         console.error('Error fetching available slots:', error)
-        this.showToast('Error loading available time slots', 'error')
+        this.showToast(this.$t('common.error'), 'error')
         this.editTimeModal.availableTimes = []
       }
     },
@@ -3053,7 +3057,7 @@ async quickBookAppointment() {
       })
       
       if (isOffDate) {
-        this.showToast('This date is not available for bookings (off date)', 'warning')
+        this.showToast(this.$t('toast.dateNotAvailable'), 'warning')
         return
       }
       
@@ -3089,7 +3093,7 @@ async addTimeSlot(dayIndex) {
       }
     },
     async deleteTimeSlot(id) {
-      if (!confirm('Are you sure you want to delete this time slot?')) return
+      if (!confirm(this.$t('toast.confirmDeleteTimeSlot'))) return
       try {
         await axios.delete(`${process.env.VUE_APP_API_URL}/timeslots/${id}`)
         await this.fetchTimeSlots()
@@ -3130,7 +3134,7 @@ getTimeSlotsForDay(dayIndex) {
       
       const bookings = this.appointments.filter(apt => {
         const aptDate = apt.date.split('T')[0]
-        return aptDate === dateStr
+        return aptDate === dateStr && apt.status !== 'cancelled'
       })
       
       const today = new Date()
@@ -3222,7 +3226,7 @@ getTimeSlotsForDay(dayIndex) {
         }
       } catch (error) {
         console.error('Error loading date details:', error)
-        this.showToast('Error loading date details', 'error')
+        this.showToast(this.$t('common.error'), 'error')
       } finally {
         this.dateDetailModal.loading = false
         // Scroll to active day after modal content loads
@@ -3251,7 +3255,7 @@ getTimeSlotsForDay(dayIndex) {
             reason: 'Off Date'
           })
           this.dateDetailModal.isRestricted = true
-          this.showToast('Date marked as off date', 'success')
+          this.showToast(this.$t('toast.dateMarkedAsOff'), 'success')
           
           // Refresh restrictions list
           await this.fetchRestrictions()
@@ -3263,7 +3267,7 @@ getTimeSlotsForDay(dayIndex) {
           await axios.delete(`${process.env.VUE_APP_API_URL}/restrictions/date/${date}`)
           this.dateDetailModal.isRestricted = false
           this.dateDetailModal.restriction = null
-          this.showToast('Off date removed', 'success')
+          this.showToast(this.$t('toast.offDateRemoved'), 'success')
           
           // Refresh restrictions list
           await this.fetchRestrictions()
@@ -3304,8 +3308,7 @@ getTimeSlotsForDay(dayIndex) {
         const aptTime = apt.time || ''
         const aptHour = parseInt(aptTime.split(':')[0])
         const aptMinute = parseInt(aptTime.split(':')[1]) || 0
-        const duration = apt.totalDuration || 30
-        
+
         // Check if appointment starts at :00 or :30 of this hour
         if (aptHour === parseInt(hour.split(':')[0])) {
           if (aptMinute === 0) {
@@ -3386,7 +3389,7 @@ getTimeSlotsForDay(dayIndex) {
         }
       } catch (error) {
         console.error('Error loading day view data:', error)
-        this.showToast('Error loading day view data', 'error')
+        this.showToast(this.$t('common.error'), 'error')
       } finally {
         this.dayViewData.loading = false
         // Scroll to active day after data loads
@@ -3412,7 +3415,8 @@ getTimeSlotsForDay(dayIndex) {
       this.loadDayViewData(newDate)
     },
     goToTodayDayView() {
-      const today = new Date().toISOString().split('T')[0]
+      const now = new Date()
+      const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
       this.loadDayViewData(today)
     },
     navigateToDayViewDate(date) {
@@ -3420,14 +3424,17 @@ getTimeSlotsForDay(dayIndex) {
     },
     navigateWeek(direction, context) {
       const days = direction === 'next' ? 7 : -7
+      const formatLocal = (d) => {
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+      }
       if (context === 'dayView') {
-        const currentDate = new Date(this.dayViewDate)
+        const currentDate = new Date(this.dayViewDate + 'T00:00:00')
         currentDate.setDate(currentDate.getDate() + days)
-        this.loadDayViewData(currentDate.toISOString().split('T')[0])
+        this.loadDayViewData(formatLocal(currentDate))
       } else if (context === 'modal') {
-        const currentDate = new Date(this.dateDetailModal.dateString)
+        const currentDate = new Date(this.dateDetailModal.dateString + 'T00:00:00')
         currentDate.setDate(currentDate.getDate() + days)
-        this.openDateDetailModal(currentDate.toISOString().split('T')[0])
+        this.openDateDetailModal(formatLocal(currentDate))
       }
     },
     startDrag(event, context) {
@@ -3493,7 +3500,7 @@ getTimeSlotsForDay(dayIndex) {
             reason: 'Off Date'
           })
           this.dayViewData.isRestricted = true
-          this.showToast('Date marked as off date', 'success')
+          this.showToast(this.$t('toast.dateMarkedAsOff'), 'success')
           
           // Refresh restrictions list
           await this.fetchRestrictions()
@@ -3508,7 +3515,7 @@ getTimeSlotsForDay(dayIndex) {
           await axios.delete(`${process.env.VUE_APP_API_URL}/restrictions/date/${date}`)
           this.dayViewData.isRestricted = false
           this.dayViewData.restriction = null
-          this.showToast('Off date removed', 'success')
+          this.showToast(this.$t('toast.offDateRemoved'), 'success')
           
           // Refresh restrictions list
           await this.fetchRestrictions()
@@ -3539,11 +3546,11 @@ getTimeSlotsForDay(dayIndex) {
             date: date,
             reason: 'Off Date'
           })
-          this.showToast('Date marked as off date', 'success')
+          this.showToast(this.$t('toast.dateMarkedAsOff'), 'success')
         } else {
           // Remove off date
           await axios.delete(`${process.env.VUE_APP_API_URL}/restrictions/date/${date}`)
-          this.showToast('Off date removed', 'success')
+          this.showToast(this.$t('toast.offDateRemoved'), 'success')
         }
         
         // Refresh restrictions list
@@ -3810,7 +3817,7 @@ async setReminder(appointment) {
         }
         
         this.closeCancelModal()
-        this.showToast('Appointment cancelled successfully. Customer has been notified.', 'success')
+        this.showToast(this.$t('toast.appointmentCancelled'), 'success')
       } catch (error) {
         console.error('Error cancelling appointment:', error)
         const errorMessage = error.response?.data?.message || 'Failed to cancel appointment'

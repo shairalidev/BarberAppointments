@@ -767,6 +767,18 @@ router.put('/:id', async (req, res) => {
 // Delete appointment
 router.delete('/:id', async (req, res) => {
   try {
+    const appointment = await Appointment.findById(req.params.id);
+    if (!appointment) {
+      return res.status(404).json({ message: 'Appointment not found' });
+    }
+
+    // Cancel any scheduled email notifications before deleting
+    try {
+      await emailScheduler.cancelAppointmentEmails(appointment._id);
+    } catch (emailError) {
+      console.error('Failed to cancel scheduled emails for deleted appointment:', emailError);
+    }
+
     await Appointment.findByIdAndDelete(req.params.id);
     res.json({ message: 'Appointment deleted' });
   } catch (error) {
