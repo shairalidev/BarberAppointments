@@ -1717,6 +1717,7 @@ export default {
         marketingOptIn: true
       },
       bookingCustomerSearch: '',
+      bookingCustomerSearchTimer: null,
       showCustomerDropdown: false,
       customerTouchStart: null,
       showMobileNav: false,
@@ -2386,6 +2387,10 @@ export default {
   },
   beforeUnmount() {
     document.removeEventListener('click', this.handleClickOutside)
+    if (this.bookingCustomerSearchTimer) {
+      clearTimeout(this.bookingCustomerSearchTimer)
+      this.bookingCustomerSearchTimer = null
+    }
     // Reset body overflow and modal class when component is destroyed
     document.body.style.overflow = ''
     document.body.classList.remove('modal-open')
@@ -2525,11 +2530,11 @@ export default {
         console.error('Error fetching services:', error)
       }
     },
-    async fetchCustomers() {
+    async fetchCustomers(term = null) {
       try {
-        const response = await axios.get(`${process.env.VUE_APP_API_URL}/customers`, {
-          params: this.customerSearch ? { q: this.customerSearch } : {}
-        })
+        const query = term != null ? term : this.customerSearch
+        const params = query ? { q: query } : {}
+        const response = await axios.get(`${process.env.VUE_APP_API_URL}/customers`, { params })
         this.customers = response.data
       } catch (error) {
         console.error('Error fetching customers:', error)
@@ -4036,22 +4041,36 @@ async setReminder(appointment) {
     async handleCustomerSearchFocus() {
       // Ensure customers are loaded when user focuses on search
       if (this.customers.length === 0) {
-        await this.fetchCustomers()
+        await this.fetchCustomers(this.bookingCustomerSearch || undefined)
       }
       // Use nextTick to ensure dropdown shows after DOM updates
       await this.$nextTick()
       // Only show dropdown if user has typed something
       this.showCustomerDropdown = !!(this.bookingCustomerSearch && this.bookingCustomerSearch.trim().length > 0)
     },
-    async handleCustomerSearchInput() {
-      // Ensure customers are loaded when user types
-      if (this.customers.length === 0) {
-        await this.fetchCustomers()
+    handleCustomerSearchInput() {
+      // Debounce server requests while typing
+      if (this.bookingCustomerSearchTimer) {
+        clearTimeout(this.bookingCustomerSearchTimer)
+        this.bookingCustomerSearchTimer = null
       }
-      // Use nextTick to ensure dropdown shows after DOM updates
-      await this.$nextTick()
-      // Only show dropdown when there is a non-empty search term
-      this.showCustomerDropdown = !!(this.bookingCustomerSearch && this.bookingCustomerSearch.trim().length > 0)
+
+      const term = this.bookingCustomerSearch ? this.bookingCustomerSearch.trim() : ''
+      // Show dropdown immediately when there's text
+      this.showCustomerDropdown = !!term
+
+      // Delay fetching to reduce API calls
+      this.bookingCustomerSearchTimer = setTimeout(async () => {
+        try {
+          await this.fetchCustomers(term || undefined)
+        } catch (e) {
+          // swallow - fetchCustomers already logs errors
+        } finally {
+          this.bookingCustomerSearchTimer = null
+          await this.$nextTick()
+          this.showCustomerDropdown = !!term
+        }
+      }, 300)
     },
     clearCustomerSearch() {
       this.bookingCustomerSearch = ''
