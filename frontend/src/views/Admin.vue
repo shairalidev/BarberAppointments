@@ -2040,9 +2040,9 @@ export default {
       return `${dayName}, ${monthName} ${date.getDate()}, ${date.getFullYear()}`
     },
     dayViewHourSlots() {
-      // Generate time slots from 9:00 to 17:00 (9 AM to 5 PM)
+      // Generate time slots from 8:00 to 24:00
       const slots = []
-      for (let hour = 9; hour <= 17; hour++) {
+      for (let hour = 8; hour <= 24; hour++) {
         slots.push(`${hour.toString().padStart(2, '0')}:00`)
       }
       return slots
@@ -10042,6 +10042,10 @@ select.booking-service-select {
     flex-shrink: 0;
     background: var(--bg-primary);
   }
+
+  .edit-appointment-modal .modal-footer .btn {
+    font-size: 0.51rem !important;
+  }
   
   .time-slots-grid.mobile-optimized {
     max-height: 200px;
@@ -10235,7 +10239,7 @@ select.booking-service-select {
   }
   
   .edit-appointment-modal .modal-footer .btn {
-    font-size: 0.85rem !important;
+    font-size: 0.51rem !important;
     padding: 0.5rem 1rem !important;
     position: relative;
     z-index: 1053;
@@ -10356,7 +10360,7 @@ select.booking-service-select {
   }
   
   .edit-appointment-modal .modal-footer .btn {
-    font-size: 0.8rem !important;
+    font-size: 0.48rem !important;
     padding: 0.4rem 0.75rem !important;
   }
   
