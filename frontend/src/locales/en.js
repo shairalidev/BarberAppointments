@@ -143,6 +143,7 @@ export default {
     confirmed: 'Confirmed',
     completed: 'Completed',
     cancelled: 'Cancelled',
+    cancelAppointment: 'Cancel Appointment',
     bookingRequests: 'Booking Requests',
     pendingRequests: 'pending request(s)',
     servicesManagement: 'Services Management',

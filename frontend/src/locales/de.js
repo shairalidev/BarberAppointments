@@ -143,6 +143,7 @@ export default {
     confirmed: 'Bestätigt',
     completed: 'Abgeschlossen',
     cancelled: 'Storniert',
+    cancelAppointment: 'Termin stornieren',
     bookingRequests: 'Buchungsanfragen',
     pendingRequests: 'ausstehende Anfrage(n)',
     servicesManagement: 'Dienstleistungsverwaltung',

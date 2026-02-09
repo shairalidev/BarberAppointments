@@ -1466,7 +1466,7 @@
           <div class="modal-footer responsive-modal-footer d-flex justify-content-between">
             <button @click.stop.prevent="closeEditTimeModal" class="btn btn-secondary">{{ $t('common.cancel') }}</button>
             <button @click.stop.prevent="cancelFromEditModal" class="btn btn-danger">
-              <i class="fas fa-ban me-2"></i>{{ $t('admin.cancelAppointment') || 'Cancel Appointment' }}
+              <i class="fas fa-ban me-2"></i>{{ $t('admin.cancelAppointment') }}
             </button>
             <button @click.stop.prevent="updateAppointmentTime" class="btn btn-primary" :disabled="!editTimeModal.newTime || !editTimeModal.newDate">
               <i class="fas fa-save me-2"></i>{{ $t('admin.updateAppointment') }}
