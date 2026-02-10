@@ -425,7 +425,10 @@
                                     class="appointment-block"
                                     :class="[
                                       getAppointmentBlockClass(slot.appointment),
-                                      { 'is-dragging': dragState && dragState.appointment && dragState.appointment._id === slot.appointment._id }
+                                      {
+                                        'is-dragging': dragState && dragState.appointment && dragState.appointment._id === slot.appointment._id && dragState.isDragging,
+                                        'long-press-active': dragState && dragState.appointment && dragState.appointment._id === slot.appointment._id && dragState.isLongPress && !dragState.isDragging
+                                      }
                                     ]"
                                     @click.stop="slot.appointment && slot.appointment.status === 'confirmed' && !dragState ? openEditTimeModal(slot.appointment) : null"
                                     @mousedown="startDrag($event, slot.appointment, hour, index)"
@@ -1677,7 +1680,7 @@ export default {
   },
   data() {
     return {
-      dragState: null, // { appointment, originalHour, originalIndex, targetHour, targetIndex, startX, startY, isDragging, showConfirm, originalTime, newTime }
+      dragState: null, // { appointment, originalHour, originalIndex, targetHour, targetIndex, startX, startY, isDragging, showConfirm, originalTime, newTime, longPressTimer, isLongPress }
       activeTab: 'calendar',
       appointments: [],
       customers: [],
@@ -2496,8 +2499,14 @@ export default {
       // Only allow dragging for confirmed appointments
       if (appointment.status !== 'confirmed') return
 
-      const clientX = event.type.includes('touch') ? event.touches[0].clientX : event.clientX
-      const clientY = event.type.includes('touch') ? event.touches[0].clientY : event.clientY
+      const isTouch = event.type.includes('touch')
+      const clientX = isTouch ? event.touches[0].clientX : event.clientX
+      const clientY = isTouch ? event.touches[0].clientY : event.clientY
+
+      // Clear any existing long press timer
+      if (this.dragState && this.dragState.longPressTimer) {
+        clearTimeout(this.dragState.longPressTimer)
+      }
 
       this.dragState = {
         appointment: appointment,
@@ -2508,15 +2517,34 @@ export default {
         startX: clientX,
         startY: clientY,
         isDragging: false,
+        isLongPress: false,
         showConfirm: false,
         originalTime: appointment.time,
-        newTime: appointment.time
+        newTime: appointment.time,
+        longPressTimer: null
+      }
+
+      // Set up long press detection (500ms for touch, instant for mouse)
+      if (isTouch) {
+        this.dragState.longPressTimer = setTimeout(() => {
+          if (this.dragState) {
+            this.dragState.isLongPress = true
+            // Haptic feedback if available
+            if (navigator.vibrate) {
+              navigator.vibrate(50)
+            }
+          }
+        }, 500)
+      } else {
+        // Mouse drag is instant
+        this.dragState.isLongPress = true
       }
 
       // Add event listeners for drag
-      if (event.type.includes('touch')) {
+      if (isTouch) {
         document.addEventListener('touchmove', this.onTouchMove, { passive: false })
         document.addEventListener('touchend', this.endDrag)
+        document.addEventListener('touchcancel', this.cancelDrag)
       } else {
         // Prevent default for mouse to avoid text selection
         event.preventDefault()
@@ -2535,6 +2563,18 @@ export default {
       if (deltaX > 5 || deltaY > 5) {
         this.dragState.isDragging = true
       }
+
+      // Update target slot during drag
+      if (this.dragState.isDragging) {
+        const element = document.elementFromPoint(event.clientX, event.clientY)
+        if (element) {
+          const slot = element.closest('.half-hour-slot')
+          if (slot) {
+            const mouseEnterEvent = new MouseEvent('mouseenter', { bubbles: true })
+            slot.dispatchEvent(mouseEnterEvent)
+          }
+        }
+      }
     },
 
     onTouchMove(event) {
@@ -2544,9 +2584,14 @@ export default {
       const deltaX = Math.abs(touch.clientX - this.dragState.startX)
       const deltaY = Math.abs(touch.clientY - this.dragState.startY)
 
-      // Only prevent default and start dragging if moved more than 10px
-      // This allows normal scrolling if the user just wants to scroll
-      if (deltaX > 10 || deltaY > 10) {
+      // If user moves significantly before long press completes, cancel drag
+      if (!this.dragState.isLongPress && (deltaX > 10 || deltaY > 10)) {
+        this.cancelDrag()
+        return
+      }
+
+      // Once long press is detected, allow dragging with small movement
+      if (this.dragState.isLongPress && (deltaX > 5 || deltaY > 5)) {
         event.preventDefault()
         this.dragState.isDragging = true
 
@@ -2555,7 +2600,7 @@ export default {
         if (element) {
           const slot = element.closest('.half-hour-slot')
           if (slot) {
-            // Trigger mouse enter event
+            // Trigger mouse enter event to update target
             const mouseEnterEvent = new MouseEvent('mouseenter', { bubbles: true })
             slot.dispatchEvent(mouseEnterEvent)
           }
@@ -2577,11 +2622,17 @@ export default {
     endDrag(event) {
       if (!this.dragState) return
 
+      // Clear long press timer
+      if (this.dragState.longPressTimer) {
+        clearTimeout(this.dragState.longPressTimer)
+      }
+
       // Remove event listeners
       document.removeEventListener('mousemove', this.onMouseMove)
       document.removeEventListener('mouseup', this.endDrag)
       document.removeEventListener('touchmove', this.onTouchMove)
       document.removeEventListener('touchend', this.endDrag)
+      document.removeEventListener('touchcancel', this.cancelDrag)
 
       // If not actually dragged or dropped in same slot, just cancel
       if (!this.dragState.isDragging ||
@@ -2637,6 +2688,16 @@ export default {
     },
 
     cancelDrag() {
+      if (this.dragState && this.dragState.longPressTimer) {
+        clearTimeout(this.dragState.longPressTimer)
+      }
+      // Remove event listeners
+      document.removeEventListener('mousemove', this.onMouseMove)
+      document.removeEventListener('mouseup', this.endDrag)
+      document.removeEventListener('touchmove', this.onTouchMove)
+      document.removeEventListener('touchend', this.endDrag)
+      document.removeEventListener('touchcancel', this.cancelDrag)
+
       this.dragState = null
     },
 
@@ -8168,16 +8229,47 @@ async setReminder(appointment) {
 }
 
 /* Drag and Drop Styles */
+.appointment-block.long-press-active {
+  animation: longPressPulse 0.6s ease-in-out;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4) !important;
+  z-index: 100;
+}
+
 .appointment-block.is-dragging {
-  opacity: 0.5;
-  transform: scale(0.95);
+  opacity: 0.6;
+  transform: scale(1.05);
   cursor: grabbing !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important;
+  z-index: 100;
+}
+
+@keyframes longPressPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1.05);
+  }
 }
 
 .half-hour-slot.drag-over {
   background-color: rgba(16, 185, 129, 0.3) !important;
   border: 2px dashed #10b981 !important;
   box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.2);
+  animation: dragOverPulse 0.8s ease-in-out infinite;
+}
+
+@keyframes dragOverPulse {
+  0%, 100% {
+    background-color: rgba(16, 185, 129, 0.3);
+  }
+  50% {
+    background-color: rgba(16, 185, 129, 0.5);
+  }
 }
 
 .drag-confirm-overlay {
