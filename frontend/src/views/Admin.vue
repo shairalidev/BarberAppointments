@@ -426,13 +426,12 @@
                                     :class="[
                                       getAppointmentBlockClass(slot.appointment),
                                       {
-                                        'is-dragging': dragState && dragState.appointment && dragState.appointment._id === slot.appointment._id && dragState.isDragging,
-                                        'long-press-active': dragState && dragState.appointment && dragState.appointment._id === slot.appointment._id && dragState.isLongPress && !dragState.isDragging
+                                        'is-dragging': dragState && dragState.appointment && dragState.appointment._id === slot.appointment._id && dragState.isDragging
                                       }
                                     ]"
                                     @click.stop="slot.appointment && slot.appointment.status === 'confirmed' && !dragState ? openEditTimeModal(slot.appointment) : null"
                                     @mousedown="startDrag($event, slot.appointment, hour, index)"
-                                    @touchstart="startDrag($event, slot.appointment, hour, index)"
+                                    @touchstart.prevent="startDrag($event, slot.appointment, hour, index)"
                                   >
                                     <div class="appointment-content" v-if="slot.showTime">
                                       <div class="appointment-left">
@@ -1680,7 +1679,7 @@ export default {
   },
   data() {
     return {
-      dragState: null, // { appointment, originalHour, originalIndex, targetHour, targetIndex, startX, startY, isDragging, showConfirm, originalTime, newTime, longPressTimer, isLongPress }
+      dragState: null, // { appointment, originalHour, originalIndex, targetHour, targetIndex, startX, startY, isDragging, showConfirm, originalTime, newTime }
       activeTab: 'calendar',
       appointments: [],
       customers: [],
@@ -2503,9 +2502,9 @@ export default {
       const clientX = isTouch ? event.touches[0].clientX : event.clientX
       const clientY = isTouch ? event.touches[0].clientY : event.clientY
 
-      // Clear any existing long press timer
-      if (this.dragState && this.dragState.longPressTimer) {
-        clearTimeout(this.dragState.longPressTimer)
+      // For touch, prevent default immediately to enable dragging
+      if (isTouch) {
+        event.preventDefault()
       }
 
       this.dragState = {
@@ -2517,27 +2516,9 @@ export default {
         startX: clientX,
         startY: clientY,
         isDragging: false,
-        isLongPress: false,
         showConfirm: false,
         originalTime: appointment.time,
-        newTime: appointment.time,
-        longPressTimer: null
-      }
-
-      // Set up long press detection (500ms for touch, instant for mouse)
-      if (isTouch) {
-        this.dragState.longPressTimer = setTimeout(() => {
-          if (this.dragState) {
-            this.dragState.isLongPress = true
-            // Haptic feedback if available
-            if (navigator.vibrate) {
-              navigator.vibrate(50)
-            }
-          }
-        }, 500)
-      } else {
-        // Mouse drag is instant
-        this.dragState.isLongPress = true
+        newTime: appointment.time
       }
 
       // Add event listeners for drag
@@ -2580,19 +2561,14 @@ export default {
     onTouchMove(event) {
       if (!this.dragState) return
 
+      event.preventDefault()
+
       const touch = event.touches[0]
       const deltaX = Math.abs(touch.clientX - this.dragState.startX)
       const deltaY = Math.abs(touch.clientY - this.dragState.startY)
 
-      // If user moves significantly before long press completes, cancel drag
-      if (!this.dragState.isLongPress && (deltaX > 10 || deltaY > 10)) {
-        this.cancelDrag()
-        return
-      }
-
-      // Once long press is detected, allow dragging with small movement
-      if (this.dragState.isLongPress && (deltaX > 5 || deltaY > 5)) {
-        event.preventDefault()
+      // Start dragging if moved more than 10px
+      if (deltaX > 10 || deltaY > 10) {
         this.dragState.isDragging = true
 
         // Find the element under the touch point
@@ -2621,11 +2597,6 @@ export default {
 
     endDrag(event) {
       if (!this.dragState) return
-
-      // Clear long press timer
-      if (this.dragState.longPressTimer) {
-        clearTimeout(this.dragState.longPressTimer)
-      }
 
       // Remove event listeners
       document.removeEventListener('mousemove', this.onMouseMove)
@@ -2688,9 +2659,6 @@ export default {
     },
 
     cancelDrag() {
-      if (this.dragState && this.dragState.longPressTimer) {
-        clearTimeout(this.dragState.longPressTimer)
-      }
       // Remove event listeners
       document.removeEventListener('mousemove', this.onMouseMove)
       document.removeEventListener('mouseup', this.endDrag)
