@@ -419,7 +419,6 @@
                                   }"
                                   @click.stop.prevent="!dragState ? handleSlotClick($event, slot, dayViewDate, hour, index) : null"
                                   @mouseenter="onDragOver($event, hour, index)"
-                                  @touchmove.prevent="onTouchMove($event)"
                                 >
                                   <div
                                     v-if="slot.isOccupied"
@@ -2497,9 +2496,6 @@ export default {
       // Only allow dragging for confirmed appointments
       if (appointment.status !== 'confirmed') return
 
-      // Prevent default to avoid text selection
-      event.preventDefault()
-
       const clientX = event.type.includes('touch') ? event.touches[0].clientX : event.clientX
       const clientY = event.type.includes('touch') ? event.touches[0].clientY : event.clientY
 
@@ -2522,6 +2518,8 @@ export default {
         document.addEventListener('touchmove', this.onTouchMove, { passive: false })
         document.addEventListener('touchend', this.endDrag)
       } else {
+        // Prevent default for mouse to avoid text selection
+        event.preventDefault()
         document.addEventListener('mousemove', this.onMouseMove)
         document.addEventListener('mouseup', this.endDrag)
       }
@@ -2542,25 +2540,25 @@ export default {
     onTouchMove(event) {
       if (!this.dragState) return
 
-      event.preventDefault()
-
       const touch = event.touches[0]
       const deltaX = Math.abs(touch.clientX - this.dragState.startX)
       const deltaY = Math.abs(touch.clientY - this.dragState.startY)
 
-      // Start dragging if moved more than 5px
-      if (deltaX > 5 || deltaY > 5) {
+      // Only prevent default and start dragging if moved more than 10px
+      // This allows normal scrolling if the user just wants to scroll
+      if (deltaX > 10 || deltaY > 10) {
+        event.preventDefault()
         this.dragState.isDragging = true
-      }
 
-      // Find the element under the touch point
-      const element = document.elementFromPoint(touch.clientX, touch.clientY)
-      if (element) {
-        const slot = element.closest('.half-hour-slot')
-        if (slot) {
-          // Trigger mouse enter event
-          const mouseEnterEvent = new MouseEvent('mouseenter', { bubbles: true })
-          slot.dispatchEvent(mouseEnterEvent)
+        // Find the element under the touch point
+        const element = document.elementFromPoint(touch.clientX, touch.clientY)
+        if (element) {
+          const slot = element.closest('.half-hour-slot')
+          if (slot) {
+            // Trigger mouse enter event
+            const mouseEnterEvent = new MouseEvent('mouseenter', { bubbles: true })
+            slot.dispatchEvent(mouseEnterEvent)
+          }
         }
       }
     },
