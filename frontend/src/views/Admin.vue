@@ -431,7 +431,7 @@
                                     ]"
                                     @click.stop="slot.appointment && slot.appointment.status === 'confirmed' && !dragState ? openEditTimeModal(slot.appointment) : null"
                                     @mousedown="startDrag($event, slot.appointment, hour, index)"
-                                    @touchstart.prevent="startDrag($event, slot.appointment, hour, index)"
+                                    @touchstart="startDrag($event, slot.appointment, hour, index)"
                                   >
                                     <div class="appointment-content" v-if="slot.showTime">
                                       <div class="appointment-left">
@@ -2502,11 +2502,6 @@ export default {
       const clientX = isTouch ? event.touches[0].clientX : event.clientX
       const clientY = isTouch ? event.touches[0].clientY : event.clientY
 
-      // For touch, prevent default immediately to enable dragging
-      if (isTouch) {
-        event.preventDefault()
-      }
-
       this.dragState = {
         appointment: appointment,
         originalHour: hour,
@@ -2561,14 +2556,16 @@ export default {
     onTouchMove(event) {
       if (!this.dragState) return
 
-      event.preventDefault()
-
       const touch = event.touches[0]
       const deltaX = Math.abs(touch.clientX - this.dragState.startX)
       const deltaY = Math.abs(touch.clientY - this.dragState.startY)
 
       // Start dragging if moved more than 10px
       if (deltaX > 10 || deltaY > 10) {
+        // Only prevent default if the event is cancelable
+        if (event.cancelable) {
+          event.preventDefault()
+        }
         this.dragState.isDragging = true
 
         // Find the element under the touch point
@@ -8156,7 +8153,13 @@ async setReminder(appointment) {
   overflow: hidden;
   user-select: none;
   -webkit-user-select: none;
-  touch-action: none;
+  touch-action: none !important;
+  -webkit-touch-callout: none;
+}
+
+/* Prevent scrolling on slots that have appointments */
+.half-hour-slot.has-appointment {
+  touch-action: none !important;
 }
 
 .appointment-block:hover {
