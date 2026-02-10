@@ -406,23 +406,31 @@
                                 <span class="time-label">{{ hour }}</span>
                               </div>
                               <div class="slots-column">
-                                <div 
-                                  v-for="(slot, index) in getDayViewHalfHourSlots(hour)" 
+                                <div
+                                  v-for="(slot, index) in getDayViewHalfHourSlots(hour)"
                                   :key="`${hour}-${index}`"
                                   class="half-hour-slot"
-                                  :class="{ 
+                                  :class="{
                                     'has-appointment': slot.isOccupied,
                                     'slot-first': index === 0,
                                     'slot-second': index === 1,
-                                    'slot-occupied': slot.isOccupied && !slot.showTime
+                                    'slot-occupied': slot.isOccupied && !slot.showTime,
+                                    'drag-over': dragState && dragState.targetHour === hour && dragState.targetIndex === index
                                   }"
-                                  @click.stop.prevent="handleSlotClick($event, slot, dayViewDate, hour, index)"
+                                  @click.stop.prevent="!dragState ? handleSlotClick($event, slot, dayViewDate, hour, index) : null"
+                                  @mouseenter="onDragOver($event, hour, index)"
+                                  @touchmove.prevent="onTouchMove($event)"
                                 >
-                                  <div 
-                                    v-if="slot.isOccupied" 
-                                    class="appointment-block" 
-                                    :class="getAppointmentBlockClass(slot.appointment)"
-                                    @click.stop="slot.appointment && slot.appointment.status === 'confirmed' ? openEditTimeModal(slot.appointment) : null"
+                                  <div
+                                    v-if="slot.isOccupied"
+                                    class="appointment-block"
+                                    :class="[
+                                      getAppointmentBlockClass(slot.appointment),
+                                      { 'is-dragging': dragState && dragState.appointment && dragState.appointment._id === slot.appointment._id }
+                                    ]"
+                                    @click.stop="slot.appointment && slot.appointment.status === 'confirmed' && !dragState ? openEditTimeModal(slot.appointment) : null"
+                                    @mousedown="startDrag($event, slot.appointment, hour, index)"
+                                    @touchstart="startDrag($event, slot.appointment, hour, index)"
                                   >
                                     <div class="appointment-content" v-if="slot.showTime">
                                       <div class="appointment-left">
@@ -442,12 +450,40 @@
                             </div>
                           </div>
                         </div>
+
+                        <!-- Drag & Drop Confirmation -->
+                        <div v-if="dragState && dragState.showConfirm" class="drag-confirm-overlay">
+                          <div class="drag-confirm-dialog">
+                            <div class="drag-confirm-header">
+                              <i class="fas fa-arrows-alt me-2"></i>
+                              <span>{{ $t('admin.moveAppointment') || 'Move Appointment' }}</span>
+                            </div>
+                            <div class="drag-confirm-body">
+                              <p class="mb-2">
+                                <strong>{{ dragState.appointment.customerName }}</strong>
+                              </p>
+                              <p class="mb-2">
+                                <i class="fas fa-clock me-2"></i>
+                                {{ dragState.originalTime }} → <strong>{{ dragState.newTime }}</strong>
+                              </p>
+                              <p class="text-muted small mb-0">{{ $t('admin.confirmTimeChange') || 'Confirm the time change?' }}</p>
+                            </div>
+                            <div class="drag-confirm-actions">
+                              <button @click="cancelDrag" class="btn btn-sm btn-secondary">
+                                <i class="fas fa-times me-1"></i>{{ $t('common.cancel') }}
+                              </button>
+                              <button @click="confirmDrag" class="btn btn-sm btn-primary">
+                                <i class="fas fa-check me-1"></i>{{ $t('common.confirm') }}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              
+
               <!-- Appointments List -->
               <div class="col-12 col-lg-4">
                 <div v-if="selectedCalendarDate" class="card border-0 shadow-sm appointments-card">
@@ -1642,7 +1678,7 @@ export default {
   },
   data() {
     return {
-      dragState: null,
+      dragState: null, // { appointment, originalHour, originalIndex, targetHour, targetIndex, startX, startY, isDragging, showConfirm, originalTime, newTime }
       activeTab: 'calendar',
       appointments: [],
       customers: [],
@@ -2455,6 +2491,157 @@ export default {
     toggleMobileNav() {
       this.showMobileNav = !this.showMobileNav
     },
+
+    // Drag and Drop Methods
+    startDrag(event, appointment, hour, index) {
+      // Only allow dragging for confirmed appointments
+      if (appointment.status !== 'confirmed') return
+
+      // Prevent default to avoid text selection
+      event.preventDefault()
+
+      const clientX = event.type.includes('touch') ? event.touches[0].clientX : event.clientX
+      const clientY = event.type.includes('touch') ? event.touches[0].clientY : event.clientY
+
+      this.dragState = {
+        appointment: appointment,
+        originalHour: hour,
+        originalIndex: index,
+        targetHour: hour,
+        targetIndex: index,
+        startX: clientX,
+        startY: clientY,
+        isDragging: false,
+        showConfirm: false,
+        originalTime: appointment.time,
+        newTime: appointment.time
+      }
+
+      // Add event listeners for drag
+      if (event.type.includes('touch')) {
+        document.addEventListener('touchmove', this.onTouchMove, { passive: false })
+        document.addEventListener('touchend', this.endDrag)
+      } else {
+        document.addEventListener('mousemove', this.onMouseMove)
+        document.addEventListener('mouseup', this.endDrag)
+      }
+    },
+
+    onMouseMove(event) {
+      if (!this.dragState) return
+
+      const deltaX = Math.abs(event.clientX - this.dragState.startX)
+      const deltaY = Math.abs(event.clientY - this.dragState.startY)
+
+      // Start dragging if moved more than 5px
+      if (deltaX > 5 || deltaY > 5) {
+        this.dragState.isDragging = true
+      }
+    },
+
+    onTouchMove(event) {
+      if (!this.dragState) return
+
+      event.preventDefault()
+
+      const touch = event.touches[0]
+      const deltaX = Math.abs(touch.clientX - this.dragState.startX)
+      const deltaY = Math.abs(touch.clientY - this.dragState.startY)
+
+      // Start dragging if moved more than 5px
+      if (deltaX > 5 || deltaY > 5) {
+        this.dragState.isDragging = true
+      }
+
+      // Find the element under the touch point
+      const element = document.elementFromPoint(touch.clientX, touch.clientY)
+      if (element) {
+        const slot = element.closest('.half-hour-slot')
+        if (slot) {
+          // Trigger mouse enter event
+          const mouseEnterEvent = new MouseEvent('mouseenter', { bubbles: true })
+          slot.dispatchEvent(mouseEnterEvent)
+        }
+      }
+    },
+
+    onDragOver(event, hour, index) {
+      if (!this.dragState || !this.dragState.isDragging) return
+
+      this.dragState.targetHour = hour
+      this.dragState.targetIndex = index
+
+      // Calculate the new time
+      const minutes = index === 0 ? '00' : '30'
+      this.dragState.newTime = `${hour}:${minutes}`
+    },
+
+    endDrag(event) {
+      if (!this.dragState) return
+
+      // Remove event listeners
+      document.removeEventListener('mousemove', this.onMouseMove)
+      document.removeEventListener('mouseup', this.endDrag)
+      document.removeEventListener('touchmove', this.onTouchMove)
+      document.removeEventListener('touchend', this.endDrag)
+
+      // If not actually dragged or dropped in same slot, just cancel
+      if (!this.dragState.isDragging ||
+          (this.dragState.originalHour === this.dragState.targetHour &&
+           this.dragState.originalIndex === this.dragState.targetIndex)) {
+        this.dragState = null
+        return
+      }
+
+      // Show confirmation dialog
+      this.dragState.showConfirm = true
+    },
+
+    async confirmDrag() {
+      if (!this.dragState) return
+
+      try {
+        const appointment = this.dragState.appointment
+        const newTime = this.dragState.newTime
+
+        // Call the API to update appointment time using the existing PUT endpoint
+        const response = await axios.put(
+          `http://localhost:5000/api/appointments/${appointment._id}`,
+          {
+            time: newTime,
+            date: this.dayViewDate,
+            sendEmail: true,
+            timeChangeMessage: `Appointment time changed from ${this.dragState.originalTime} to ${newTime}`
+          },
+          {
+            headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
+          }
+        )
+
+        if (response.data) {
+          this.showToast(this.$t('admin.appointmentMovedSuccess') || 'Appointment moved successfully!', 'success')
+
+          // Refresh appointments
+          await this.fetchAppointments()
+          if (this.calendarViewMode === 'day') {
+            await this.loadDayViewData(this.dayViewDate)
+          }
+        }
+      } catch (error) {
+        console.error('Error moving appointment:', error)
+        this.showToast(
+          error.response?.data?.message || this.$t('admin.appointmentMovedError') || 'Failed to move appointment',
+          'error'
+        )
+      } finally {
+        this.dragState = null
+      }
+    },
+
+    cancelDrag() {
+      this.dragState = null
+    },
+
     async fetchData() {
       await Promise.all([
         this.fetchAppointments(),
@@ -7536,33 +7723,33 @@ async setReminder(appointment) {
   
   /* Narrow slots for mobile - EQUAL SIZE (Safari/iOS fix: fixed flex-basis) */
   .half-hour-slot {
-    min-height: 35px !important;
-    height: 35px !important;
-    max-height: 35px !important;
+    min-height: 28px !important;
+    height: 28px !important;
+    max-height: 28px !important;
     padding: 1px 2px !important;
     touch-action: manipulation;
     -webkit-tap-highlight-color: rgba(16, 185, 129, 0.3);
-    flex: 0 0 35px !important;
-    -webkit-flex: 0 0 35px !important;
+    flex: 0 0 28px !important;
+    -webkit-flex: 0 0 28px !important;
     box-sizing: border-box;
     -webkit-box-sizing: border-box;
   }
-  
+
   /* CRITICAL: Both slots same height on Safari/iOS */
   .half-hour-slot.slot-first {
-    min-height: 35px !important;
-    height: 35px !important;
-    max-height: 35px !important;
-    flex: 0 0 35px !important;
-    -webkit-flex: 0 0 35px !important;
+    min-height: 28px !important;
+    height: 28px !important;
+    max-height: 28px !important;
+    flex: 0 0 28px !important;
+    -webkit-flex: 0 0 28px !important;
     background-color: rgba(239, 154, 154, 0.15) !important;
   }
   .half-hour-slot.slot-second {
-    min-height: 35px !important;
-    height: 35px !important;
-    max-height: 35px !important;
-    flex: 0 0 35px !important;
-    -webkit-flex: 0 0 35px !important;
+    min-height: 28px !important;
+    height: 28px !important;
+    max-height: 28px !important;
+    flex: 0 0 28px !important;
+    -webkit-flex: 0 0 28px !important;
     background-color: rgba(165, 214, 167, 0.15) !important;
   }
   
@@ -7576,26 +7763,26 @@ async setReminder(appointment) {
   }
   
   .schedule-row {
-    min-height: 70px !important;
-    height: 70px !important;
+    min-height: 56px !important;
+    height: 56px !important;
     display: flex !important;
     -webkit-flex-direction: row !important;
     flex-direction: row !important;
     align-items: stretch !important;
   }
-  
+
   .schedule-row-wrapper {
-    min-height: 70px !important;
-    height: 70px !important;
+    min-height: 56px !important;
+    height: 56px !important;
   }
-  
+
   .slots-column {
     display: flex !important;
     -webkit-flex-direction: column !important;
     flex-direction: column !important;
     gap: 0 !important;
-    min-height: 70px !important;
-    height: 70px !important;
+    min-height: 56px !important;
+    height: 56px !important;
   }
   
   .empty-slot {
@@ -7605,17 +7792,17 @@ async setReminder(appointment) {
   }
   
   .half-hour-slot.slot-occupied {
-    min-height: 35px !important;
-    height: 35px !important;
-    max-height: 35px !important;
-    flex: 0 0 35px !important;
-    -webkit-flex: 0 0 35px !important;
+    min-height: 28px !important;
+    height: 28px !important;
+    max-height: 28px !important;
+    flex: 0 0 28px !important;
+    -webkit-flex: 0 0 28px !important;
     padding: 0 1px !important;
   }
-  
+
   .half-hour-slot.slot-occupied .appointment-block {
-    min-height: 35px !important;
-    height: 35px !important;
+    min-height: 28px !important;
+    height: 28px !important;
     padding: 1px 3px !important;
     width: 100% !important;
     border-radius: 4px !important;
@@ -7638,8 +7825,8 @@ async setReminder(appointment) {
   }
 
   .appointment-customer {
-    font-size: 0.45rem !important;
-    line-height: 1.1 !important;
+    font-size: 0.7rem !important;
+    line-height: 1.2 !important;
     font-weight: 600;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
@@ -7647,16 +7834,16 @@ async setReminder(appointment) {
   }
 
   .appointment-service {
-    font-size: 0.35rem !important;
-    line-height: 1.1 !important;
+    font-size: 0.6rem !important;
+    line-height: 1.2 !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
   }
 
   .appointment-time {
-    font-size: 0.35rem !important;
-    line-height: 1.0 !important;
+    font-size: 0.6rem !important;
+    line-height: 1.1 !important;
   }
 
   .empty-slot-hint {
@@ -7677,27 +7864,27 @@ async setReminder(appointment) {
       display: flex !important;
       -webkit-flex-direction: column !important;
       flex-direction: column !important;
-      height: 70px !important;
-      min-height: 70px !important;
+      height: 56px !important;
+      min-height: 56px !important;
     }
     .date-time-schedule .half-hour-slot.slot-first,
     .date-time-schedule .half-hour-slot.slot-second {
-      -webkit-flex: 0 0 35px !important;
-      flex: 0 0 35px !important;
-      height: 35px !important;
-      min-height: 35px !important;
-      max-height: 35px !important;
+      -webkit-flex: 0 0 28px !important;
+      flex: 0 0 28px !important;
+      height: 28px !important;
+      min-height: 28px !important;
+      max-height: 28px !important;
     }
     .date-time-schedule .half-hour-slot.slot-occupied {
-      -webkit-flex: 0 0 35px !important;
-      flex: 0 0 35px !important;
-      height: 35px !important;
-      min-height: 35px !important;
+      -webkit-flex: 0 0 28px !important;
+      flex: 0 0 28px !important;
+      height: 28px !important;
+      min-height: 28px !important;
     }
     .date-time-schedule .schedule-row,
     .date-time-schedule .schedule-row-wrapper {
-      height: 70px !important;
-      min-height: 70px !important;
+      height: 56px !important;
+      min-height: 56px !important;
     }
   }
 }
@@ -7936,10 +8123,13 @@ async setReminder(appointment) {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  cursor: pointer;
+  cursor: grab;
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
 }
 
 .appointment-block:hover {
@@ -7977,6 +8167,124 @@ async setReminder(appointment) {
   background: #e9ecef;
   color: #6c757d;
   opacity: 0.7;
+}
+
+/* Drag and Drop Styles */
+.appointment-block.is-dragging {
+  opacity: 0.5;
+  transform: scale(0.95);
+  cursor: grabbing !important;
+}
+
+.half-hour-slot.drag-over {
+  background-color: rgba(16, 185, 129, 0.3) !important;
+  border: 2px dashed #10b981 !important;
+  box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.2);
+}
+
+.drag-confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.2s ease;
+}
+
+.drag-confirm-dialog {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 400px;
+  animation: slideUp 0.3s ease;
+}
+
+.dark-theme .drag-confirm-dialog {
+  background: #2d3748;
+  color: #e2e8f0;
+}
+
+.drag-confirm-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  font-weight: 600;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.dark-theme .drag-confirm-header {
+  border-bottom-color: #4a5568;
+}
+
+.drag-confirm-body {
+  padding: 1.5rem;
+}
+
+.drag-confirm-actions {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.dark-theme .drag-confirm-actions {
+  border-top-color: #4a5568;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Mobile-specific drag styles */
+@media (max-width: 768px) {
+  .drag-confirm-dialog {
+    width: 95%;
+    max-width: 350px;
+  }
+
+  .drag-confirm-header {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .drag-confirm-body {
+    padding: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .drag-confirm-actions {
+    padding: 0.75rem 1rem;
+    flex-wrap: wrap;
+  }
+
+  .drag-confirm-actions .btn {
+    flex: 1;
+    min-width: 100px;
+  }
 }
 
 .appointment-content {
@@ -8128,44 +8436,44 @@ async setReminder(appointment) {
     flex-direction: column !important;
     gap: 0 !important;
     flex: 1 !important;
-    min-height: 70px !important;
-    height: 70px !important;
+    min-height: 56px !important;
+    height: 56px !important;
   }
 
   /* Safari/iOS: fixed height so both slots equal */
   .half-hour-slot {
     padding: 1px 2px !important;
-    min-height: 35px !important;
-    height: 35px !important;
-    max-height: 35px !important;
+    min-height: 28px !important;
+    height: 28px !important;
+    max-height: 28px !important;
     touch-action: manipulation;
     -webkit-tap-highlight-color: rgba(16, 185, 129, 0.3);
     -webkit-appearance: none;
     appearance: none;
-    flex: 0 0 35px !important;
-    -webkit-flex: 0 0 35px !important;
+    flex: 0 0 28px !important;
+    -webkit-flex: 0 0 28px !important;
     box-sizing: border-box;
     -webkit-box-sizing: border-box;
     width: 100% !important;
     overflow: hidden;
   }
-  
+
   /* CRITICAL: Both slots MUST be EQUAL size (Safari) */
   .half-hour-slot.slot-first {
-    min-height: 35px !important;
-    height: 35px !important;
-    max-height: 35px !important;
-    flex: 0 0 35px !important;
-    -webkit-flex: 0 0 35px !important;
+    min-height: 28px !important;
+    height: 28px !important;
+    max-height: 28px !important;
+    flex: 0 0 28px !important;
+    -webkit-flex: 0 0 28px !important;
     background-color: rgba(239, 154, 154, 0.15) !important;
     width: 100% !important;
   }
   .half-hour-slot.slot-second {
-    min-height: 35px !important;
-    height: 35px !important;
-    max-height: 35px !important;
-    flex: 0 0 35px !important;
-    -webkit-flex: 0 0 35px !important;
+    min-height: 28px !important;
+    height: 28px !important;
+    max-height: 28px !important;
+    flex: 0 0 28px !important;
+    -webkit-flex: 0 0 28px !important;
     background-color: rgba(165, 214, 167, 0.15) !important;
     width: 100% !important;
   }
@@ -8204,22 +8512,22 @@ async setReminder(appointment) {
   }
   
   .schedule-row {
-    min-height: 70px !important;
-    height: 70px !important;
+    min-height: 56px !important;
+    height: 56px !important;
     display: flex !important;
     -webkit-flex-direction: row !important;
     flex-direction: row !important;
     align-items: stretch !important;
   }
-  
+
   .schedule-row-wrapper {
-    min-height: 70px !important;
-    height: 70px !important;
+    min-height: 56px !important;
+    height: 56px !important;
   }
-  
+
   .slots-column {
-    min-height: 70px !important;
-    height: 70px !important;
+    min-height: 56px !important;
+    height: 56px !important;
   }
   
   .appointment-block {
@@ -8247,8 +8555,8 @@ async setReminder(appointment) {
   }
 
   .appointment-customer {
-    font-size: 0.5rem !important;
-    line-height: 1.1 !important;
+    font-size: 0.75rem !important;
+    line-height: 1.2 !important;
     font-weight: 600;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
@@ -8256,16 +8564,16 @@ async setReminder(appointment) {
   }
 
   .appointment-service {
-    font-size: 0.4rem !important;
-    line-height: 1.1 !important;
+    font-size: 0.65rem !important;
+    line-height: 1.2 !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
   }
 
   .appointment-time {
-    font-size: 0.4rem !important;
-    line-height: 1.0 !important;
+    font-size: 0.65rem !important;
+    line-height: 1.1 !important;
   }
 
   .empty-slot {
@@ -8521,16 +8829,16 @@ async setReminder(appointment) {
   }
 
   .appointment-customer {
-    font-size: 0.48rem !important;
+    font-size: 0.7rem !important;
     font-weight: 600;
   }
 
   .appointment-service {
-    font-size: 0.38rem !important;
+    font-size: 0.6rem !important;
   }
 
   .appointment-time {
-    font-size: 0.38rem !important;
+    font-size: 0.6rem !important;
   }
 }
 
@@ -10582,17 +10890,17 @@ select.booking-service-select {
   
   @media (max-width: 768px) {
     .half-hour-slot {
-      min-height: 35px !important;
+      min-height: 28px !important;
       padding: 1px 2px !important;
     }
 
     .half-hour-slot.slot-first,
     .half-hour-slot.slot-second {
-      min-height: 35px !important;
+      min-height: 28px !important;
     }
 
     .schedule-row {
-      min-height: 70px !important;
+      min-height: 56px !important;
     }
 
     .empty-slot {
@@ -10612,35 +10920,35 @@ select.booking-service-select {
   @media (max-width: 576px) {
     /* CRITICAL: Both slots EQUAL size on small mobile */
     .slots-column {
-      min-height: 70px !important;
-      height: 70px !important;
+      min-height: 56px !important;
+      height: 56px !important;
     }
 
     .half-hour-slot {
-      min-height: 35px !important;
-      height: 35px !important;
-      max-height: 35px !important;
+      min-height: 28px !important;
+      height: 28px !important;
+      max-height: 28px !important;
       padding: 1px 2px !important;
-      flex: 0 0 35px !important;
-      -webkit-flex: 0 0 35px !important;
+      flex: 0 0 28px !important;
+      -webkit-flex: 0 0 28px !important;
       box-sizing: border-box;
       overflow: hidden;
     }
 
     .half-hour-slot.slot-first {
-      min-height: 35px !important;
-      height: 35px !important;
-      max-height: 35px !important;
-      flex: 0 0 35px !important;
-      -webkit-flex: 0 0 35px !important;
+      min-height: 28px !important;
+      height: 28px !important;
+      max-height: 28px !important;
+      flex: 0 0 28px !important;
+      -webkit-flex: 0 0 28px !important;
       background-color: rgba(239, 154, 154, 0.15) !important;
     }
     .half-hour-slot.slot-second {
-      min-height: 35px !important;
-      height: 35px !important;
-      max-height: 35px !important;
-      flex: 0 0 35px !important;
-      -webkit-flex: 0 0 35px !important;
+      min-height: 28px !important;
+      height: 28px !important;
+      max-height: 28px !important;
+      flex: 0 0 28px !important;
+      -webkit-flex: 0 0 28px !important;
       background-color: rgba(165, 214, 167, 0.15) !important;
     }
 
@@ -10654,8 +10962,8 @@ select.booking-service-select {
     }
 
     .schedule-row {
-      min-height: 70px !important;
-      height: 70px !important;
+      min-height: 56px !important;
+      height: 56px !important;
       display: flex !important;
       align-items: stretch !important;
     }
@@ -10667,16 +10975,16 @@ select.booking-service-select {
     }
 
     .half-hour-slot.slot-occupied {
-      min-height: 35px !important;
-      height: 35px !important;
-      max-height: 35px !important;
+      min-height: 28px !important;
+      height: 28px !important;
+      max-height: 28px !important;
       padding: 0 1px !important;
     }
 
     .half-hour-slot.slot-occupied .appointment-block {
-      min-height: 35px !important;
-      height: 35px !important;
-      max-height: 35px !important;
+      min-height: 28px !important;
+      height: 28px !important;
+      max-height: 28px !important;
       overflow: hidden !important;
       padding: 1px 3px !important;
       width: 100% !important;
@@ -10698,24 +11006,24 @@ select.booking-service-select {
     }
 
     .appointment-customer {
-      font-size: 0.5rem !important;
-      line-height: 1.1 !important;
+      font-size: 0.75rem !important;
+      line-height: 1.2 !important;
       overflow: hidden !important;
       text-overflow: ellipsis !important;
       white-space: nowrap !important;
     }
 
     .appointment-service {
-      font-size: 0.4rem !important;
-      line-height: 1.1 !important;
+      font-size: 0.65rem !important;
+      line-height: 1.2 !important;
       overflow: hidden !important;
       text-overflow: ellipsis !important;
       white-space: nowrap !important;
     }
 
     .appointment-time {
-      font-size: 0.34rem !important;
-      line-height: 1.0 !important;
+      font-size: 0.6rem !important;
+      line-height: 1.1 !important;
     }
   }
 
@@ -11660,52 +11968,52 @@ select.booking-service-select {
 
   /* Safari/iOS: fixed slot height so both equal */
   .half-hour-slot {
-    min-height: 35px !important;
-    height: 35px !important;
-    max-height: 35px !important;
+    min-height: 28px !important;
+    height: 28px !important;
+    max-height: 28px !important;
     padding: 1px 2px !important;
-    flex: 0 0 35px !important;
-    -webkit-flex: 0 0 35px !important;
+    flex: 0 0 28px !important;
+    -webkit-flex: 0 0 28px !important;
   }
 
   .half-hour-slot.slot-first,
   .half-hour-slot.slot-second {
-    min-height: 35px !important;
-    height: 35px !important;
-    max-height: 35px !important;
-    flex: 0 0 35px !important;
-    -webkit-flex: 0 0 35px !important;
+    min-height: 28px !important;
+    height: 28px !important;
+    max-height: 28px !important;
+    flex: 0 0 28px !important;
+    -webkit-flex: 0 0 28px !important;
   }
 
   .half-hour-slot.slot-occupied {
-    min-height: 35px !important;
-    height: 35px !important;
-    max-height: 35px !important;
-    flex: 0 0 35px !important;
-    -webkit-flex: 0 0 35px !important;
+    min-height: 28px !important;
+    height: 28px !important;
+    max-height: 28px !important;
+    flex: 0 0 28px !important;
+    -webkit-flex: 0 0 28px !important;
     padding: 0 1px !important;
   }
 
   .half-hour-slot.slot-occupied .appointment-block {
-    min-height: 35px !important;
-    height: 35px !important;
+    min-height: 28px !important;
+    height: 28px !important;
     padding: 1px 3px !important;
     width: 100% !important;
   }
 
   .schedule-row {
-    min-height: 70px !important;
-    height: 70px !important;
+    min-height: 56px !important;
+    height: 56px !important;
   }
 
   .schedule-row-wrapper {
-    min-height: 70px !important;
-    height: 70px !important;
+    min-height: 56px !important;
+    height: 56px !important;
   }
 
   .slots-column {
-    min-height: 70px !important;
-    height: 70px !important;
+    min-height: 56px !important;
+    height: 56px !important;
   }
 
   .appointment-block {
@@ -11729,8 +12037,8 @@ select.booking-service-select {
   }
 
   .appointment-customer {
-    font-size: 0.4rem !important;
-    line-height: 1.1 !important;
+    font-size: 0.65rem !important;
+    line-height: 1.2 !important;
     font-weight: 600;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
@@ -11738,16 +12046,16 @@ select.booking-service-select {
   }
 
   .appointment-service {
-    font-size: 0.3rem !important;
-    line-height: 1.1 !important;
+    font-size: 0.55rem !important;
+    line-height: 1.2 !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
   }
 
   .appointment-time {
-    font-size: 0.3rem !important;
-    line-height: 1.0 !important;
+    font-size: 0.55rem !important;
+    line-height: 1.1 !important;
   }
 
   .empty-slot {
