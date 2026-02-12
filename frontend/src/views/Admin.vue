@@ -415,10 +415,10 @@
                                     'slot-first': index === 0,
                                     'slot-second': index === 1,
                                     'slot-occupied': slot.isOccupied && !slot.showTime,
-                                    'drag-over': dragState && dragState.targetHour === hour && dragState.targetIndex === index
+                                    'drag-over': appointmentDragState && appointmentDragState.targetHour === hour && appointmentDragState.targetIndex === index
                                   }"
-                                  @click.stop.prevent="!dragState ? handleSlotClick($event, slot, dayViewDate, hour, index) : null"
-                                  @mouseenter="onDragOver($event, hour, index)"
+                                  @click.stop.prevent="!appointmentDragState ? handleSlotClick($event, slot, dayViewDate, hour, index) : null"
+                                  @mouseenter="onAppointmentDragOver($event, hour, index)"
                                 >
                                   <div
                                     v-if="slot.isOccupied"
@@ -426,12 +426,12 @@
                                     :class="[
                                       getAppointmentBlockClass(slot.appointment),
                                       {
-                                        'is-dragging': dragState && dragState.appointment && dragState.appointment._id === slot.appointment._id && dragState.isDragging
+                                        'is-dragging': appointmentDragState && appointmentDragState.appointment && appointmentDragState.appointment._id === slot.appointment._id && appointmentDragState.isDragging
                                       }
                                     ]"
-                                    @click.stop="slot.appointment && slot.appointment.status === 'confirmed' && !dragState ? openEditTimeModal(slot.appointment) : null"
-                                    @mousedown="startDrag($event, slot.appointment, hour, index)"
-                                    @touchstart="startDrag($event, slot.appointment, hour, index)"
+                                    @click.stop="slot.appointment && slot.appointment.status === 'confirmed' && !appointmentDragState ? openEditTimeModal(slot.appointment) : null"
+                                    @mousedown="startAppointmentDrag($event, slot.appointment, hour, index)"
+                                    @touchstart="startAppointmentDrag($event, slot.appointment, hour, index)"
                                   >
                                     <div class="appointment-content" v-if="slot.showTime">
                                       <div class="appointment-left">
@@ -453,7 +453,7 @@
                         </div>
 
                         <!-- Drag & Drop Confirmation -->
-                        <div v-if="dragState && dragState.showConfirm" class="drag-confirm-overlay">
+                        <div v-if="appointmentDragState && appointmentDragState.showConfirm" class="drag-confirm-overlay">
                           <div class="drag-confirm-dialog">
                             <div class="drag-confirm-header">
                               <i class="fas fa-arrows-alt me-2"></i>
@@ -461,19 +461,19 @@
                             </div>
                             <div class="drag-confirm-body">
                               <p class="mb-2">
-                                <strong>{{ dragState.appointment.customerName }}</strong>
+                                <strong>{{ appointmentDragState.appointment.customerName }}</strong>
                               </p>
                               <p class="mb-2">
                                 <i class="fas fa-clock me-2"></i>
-                                {{ dragState.originalTime }} → <strong>{{ dragState.newTime }}</strong>
+                                {{ appointmentDragState.originalTime }} → <strong>{{ appointmentDragState.newTime }}</strong>
                               </p>
                               <p class="text-muted small mb-0">{{ $t('admin.confirmTimeChange') || 'Confirm the time change?' }}</p>
                             </div>
                             <div class="drag-confirm-actions">
-                              <button @click="cancelDrag" class="btn btn-sm btn-secondary">
+                              <button @click="cancelAppointmentDrag" class="btn btn-sm btn-secondary">
                                 <i class="fas fa-times me-1"></i>{{ $t('common.cancel') }}
                               </button>
-                              <button @click="confirmDrag" class="btn btn-sm btn-primary">
+                              <button @click="confirmAppointmentDrag" class="btn btn-sm btn-primary">
                                 <i class="fas fa-check me-1"></i>{{ $t('common.confirm') }}
                               </button>
                             </div>
@@ -1679,7 +1679,8 @@ export default {
   },
   data() {
     return {
-      dragState: null, // { appointment, originalHour, originalIndex, targetHour, targetIndex, startX, startY, isDragging, showConfirm, originalTime, newTime }
+      dragState: null, // week slider drag state
+      appointmentDragState: null, // { appointment, originalHour, originalIndex, targetHour, targetIndex, startX, startY, isDragging, showConfirm, originalTime, newTime }
       activeTab: 'calendar',
       appointments: [],
       customers: [],
@@ -2493,16 +2494,15 @@ export default {
       this.showMobileNav = !this.showMobileNav
     },
 
-    // Drag and Drop Methods
-    startDrag(event, appointment, hour, index) {
-      // Only allow dragging for confirmed appointments
-      if (appointment.status !== 'confirmed') return
+    // Appointment Drag and Drop Methods
+    startAppointmentDrag(event, appointment, hour, index) {
+      if (!appointment || appointment.status !== 'confirmed') return
 
       const isTouch = event.type.includes('touch')
       const clientX = isTouch ? event.touches[0].clientX : event.clientX
       const clientY = isTouch ? event.touches[0].clientY : event.clientY
 
-      this.dragState = {
+      this.appointmentDragState = {
         appointment: appointment,
         originalHour: hour,
         originalIndex: index,
@@ -2516,32 +2516,28 @@ export default {
         newTime: appointment.time
       }
 
-      // Add event listeners for drag
       if (isTouch) {
-        document.addEventListener('touchmove', this.onTouchMove, { passive: false })
-        document.addEventListener('touchend', this.endDrag)
-        document.addEventListener('touchcancel', this.cancelDrag)
+        document.addEventListener('touchmove', this.onAppointmentTouchMove, { passive: false })
+        document.addEventListener('touchend', this.endAppointmentDrag)
+        document.addEventListener('touchcancel', this.cancelAppointmentDrag)
       } else {
-        // Prevent default for mouse to avoid text selection
         event.preventDefault()
-        document.addEventListener('mousemove', this.onMouseMove)
-        document.addEventListener('mouseup', this.endDrag)
+        document.addEventListener('mousemove', this.onAppointmentMouseMove)
+        document.addEventListener('mouseup', this.endAppointmentDrag)
       }
     },
 
-    onMouseMove(event) {
-      if (!this.dragState) return
+    onAppointmentMouseMove(event) {
+      if (!this.appointmentDragState) return
 
-      const deltaX = Math.abs(event.clientX - this.dragState.startX)
-      const deltaY = Math.abs(event.clientY - this.dragState.startY)
+      const deltaX = Math.abs(event.clientX - this.appointmentDragState.startX)
+      const deltaY = Math.abs(event.clientY - this.appointmentDragState.startY)
 
-      // Start dragging if moved more than 5px
       if (deltaX > 5 || deltaY > 5) {
-        this.dragState.isDragging = true
+        this.appointmentDragState.isDragging = true
       }
 
-      // Update target slot during drag
-      if (this.dragState.isDragging) {
+      if (this.appointmentDragState.isDragging) {
         const element = document.elementFromPoint(event.clientX, event.clientY)
         if (element) {
           const slot = element.closest('.half-hour-slot')
@@ -2553,27 +2549,23 @@ export default {
       }
     },
 
-    onTouchMove(event) {
-      if (!this.dragState) return
+    onAppointmentTouchMove(event) {
+      if (!this.appointmentDragState) return
 
       const touch = event.touches[0]
-      const deltaX = Math.abs(touch.clientX - this.dragState.startX)
-      const deltaY = Math.abs(touch.clientY - this.dragState.startY)
+      const deltaX = Math.abs(touch.clientX - this.appointmentDragState.startX)
+      const deltaY = Math.abs(touch.clientY - this.appointmentDragState.startY)
 
-      // Start dragging if moved more than 10px
       if (deltaX > 10 || deltaY > 10) {
-        // Only prevent default if the event is cancelable
         if (event.cancelable) {
           event.preventDefault()
         }
-        this.dragState.isDragging = true
+        this.appointmentDragState.isDragging = true
 
-        // Find the element under the touch point
         const element = document.elementFromPoint(touch.clientX, touch.clientY)
         if (element) {
           const slot = element.closest('.half-hour-slot')
           if (slot) {
-            // Trigger mouse enter event to update target
             const mouseEnterEvent = new MouseEvent('mouseenter', { bubbles: true })
             slot.dispatchEvent(mouseEnterEvent)
           }
@@ -2581,54 +2573,50 @@ export default {
       }
     },
 
-    onDragOver(event, hour, index) {
-      if (!this.dragState || !this.dragState.isDragging) return
+    onAppointmentDragOver(event, hour, index) {
+      if (!this.appointmentDragState || !this.appointmentDragState.isDragging) return
 
-      this.dragState.targetHour = hour
-      this.dragState.targetIndex = index
+      this.appointmentDragState.targetHour = hour
+      this.appointmentDragState.targetIndex = index
 
-      // Calculate the new time
+      const hourNum = hour.split(':')[0]
       const minutes = index === 0 ? '00' : '30'
-      this.dragState.newTime = `${hour}:${minutes}`
+      this.appointmentDragState.newTime = `${hourNum}:${minutes}`
     },
 
-    endDrag(event) {
-      if (!this.dragState) return
+    endAppointmentDrag() {
+      if (!this.appointmentDragState) return
 
-      // Remove event listeners
-      document.removeEventListener('mousemove', this.onMouseMove)
-      document.removeEventListener('mouseup', this.endDrag)
-      document.removeEventListener('touchmove', this.onTouchMove)
-      document.removeEventListener('touchend', this.endDrag)
-      document.removeEventListener('touchcancel', this.cancelDrag)
+      document.removeEventListener('mousemove', this.onAppointmentMouseMove)
+      document.removeEventListener('mouseup', this.endAppointmentDrag)
+      document.removeEventListener('touchmove', this.onAppointmentTouchMove)
+      document.removeEventListener('touchend', this.endAppointmentDrag)
+      document.removeEventListener('touchcancel', this.cancelAppointmentDrag)
 
-      // If not actually dragged or dropped in same slot, just cancel
-      if (!this.dragState.isDragging ||
-          (this.dragState.originalHour === this.dragState.targetHour &&
-           this.dragState.originalIndex === this.dragState.targetIndex)) {
-        this.dragState = null
+      if (!this.appointmentDragState.isDragging ||
+          (this.appointmentDragState.originalHour === this.appointmentDragState.targetHour &&
+           this.appointmentDragState.originalIndex === this.appointmentDragState.targetIndex)) {
+        this.appointmentDragState = null
         return
       }
 
-      // Show confirmation dialog
-      this.dragState.showConfirm = true
+      this.appointmentDragState.showConfirm = true
     },
 
-    async confirmDrag() {
-      if (!this.dragState) return
+    async confirmAppointmentDrag() {
+      if (!this.appointmentDragState) return
 
       try {
-        const appointment = this.dragState.appointment
-        const newTime = this.dragState.newTime
+        const appointment = this.appointmentDragState.appointment
+        const newTime = this.appointmentDragState.newTime
 
-        // Call the API to update appointment time using the existing PUT endpoint
         const response = await axios.put(
-          `http://localhost:5000/api/appointments/${appointment._id}`,
+          `${process.env.VUE_APP_API_URL}/appointments/${appointment._id}`,
           {
             time: newTime,
             date: this.dayViewDate,
             sendEmail: true,
-            timeChangeMessage: `Appointment time changed from ${this.dragState.originalTime} to ${newTime}`
+            timeChangeMessage: `Appointment time changed from ${this.appointmentDragState.originalTime} to ${newTime}`
           },
           {
             headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
@@ -2638,7 +2626,6 @@ export default {
         if (response.data) {
           this.showToast(this.$t('admin.appointmentMovedSuccess') || 'Appointment moved successfully!', 'success')
 
-          // Refresh appointments
           await this.fetchAppointments()
           if (this.calendarViewMode === 'day') {
             await this.loadDayViewData(this.dayViewDate)
@@ -2651,19 +2638,18 @@ export default {
           'error'
         )
       } finally {
-        this.dragState = null
+        this.appointmentDragState = null
       }
     },
 
-    cancelDrag() {
-      // Remove event listeners
-      document.removeEventListener('mousemove', this.onMouseMove)
-      document.removeEventListener('mouseup', this.endDrag)
-      document.removeEventListener('touchmove', this.onTouchMove)
-      document.removeEventListener('touchend', this.endDrag)
-      document.removeEventListener('touchcancel', this.cancelDrag)
+    cancelAppointmentDrag() {
+      document.removeEventListener('mousemove', this.onAppointmentMouseMove)
+      document.removeEventListener('mouseup', this.endAppointmentDrag)
+      document.removeEventListener('touchmove', this.onAppointmentTouchMove)
+      document.removeEventListener('touchend', this.endAppointmentDrag)
+      document.removeEventListener('touchcancel', this.cancelAppointmentDrag)
 
-      this.dragState = null
+      this.appointmentDragState = null
     },
 
     async fetchData() {
