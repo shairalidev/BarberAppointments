@@ -430,7 +430,7 @@
                                         'is-dragging': appointmentDragState && appointmentDragState.appointment && appointmentDragState.appointment._id === slot.appointment._id && appointmentDragState.isDragging
                                       }
                                     ]"
-                                    @click.stop="slot.appointment && slot.appointment.status === 'confirmed' && !appointmentDragState ? openEditTimeModal(slot.appointment) : null"
+                                    @click.stop="slot.appointment && !appointmentDragState ? openEditTimeModal(slot.appointment) : null"
                                     @mousedown="startAppointmentDrag($event, slot.appointment, hour, index)"
                                     @touchstart="startAppointmentDrag($event, slot.appointment, hour, index)"
                                   >
@@ -4000,8 +4000,15 @@ getTimeSlotsForDay(dayIndex) {
         event.stopPropagation()
       }
       
-      // Only handle clicks on empty slots (not occupied)
-      if (!slot || slot.isOccupied || !date) {
+      // If the slot is occupied, open the appointment instead of the booking modal
+      if (slot && slot.isOccupied && slot.appointment) {
+        if (!this.appointmentDragState) {
+          this.openEditTimeModal(slot.appointment)
+        }
+        return
+      }
+
+      if (!slot || !date) {
         return
       }
       
@@ -7991,6 +7998,24 @@ async setReminder(appointment) {
     border-bottom-right-radius: 0 !important;
   }
 
+  /* Remove border between first slot and continuation within same hour (mobile) */
+  .half-hour-slot.slot-first.has-appointment:not(.slot-span-end) {
+    border-bottom: none !important;
+  }
+
+  /* Suppress pink/green tint on continuation slots (mobile) */
+  .half-hour-slot.slot-first.slot-occupied,
+  .half-hour-slot.slot-second.slot-occupied {
+    background-color: transparent !important;
+  }
+
+  /* Cross-hour continuation: bleed upward to cover row border (mobile) */
+  .half-hour-slot.slot-first.slot-occupied .appointment-block {
+    margin-top: -1px !important;
+    min-height: 29px !important;
+    height: 29px !important;
+  }
+
   .half-hour-slot.slot-occupied.slot-span-end .appointment-block {
     border-bottom-left-radius: 4px !important;
     border-bottom-right-radius: 4px !important;
@@ -8243,6 +8268,23 @@ async setReminder(appointment) {
 
 .half-hour-slot.slot-occupied .appointment-content {
   display: none;
+}
+
+/* Remove border between first slot and its continuation within the same hour */
+.half-hour-slot.slot-first.has-appointment:not(.slot-span-end) {
+  border-bottom: none;
+}
+
+/* Suppress the pink/green tint on continuation slots so the appointment color shows cleanly */
+.half-hour-slot.slot-first.slot-occupied,
+.half-hour-slot.slot-second.slot-occupied {
+  background-color: transparent !important;
+}
+
+/* Cross-hour continuation: bleed 1px upward to cover the schedule-row-wrapper border */
+.half-hour-slot.slot-first.slot-occupied .appointment-block {
+  margin-top: -1px;
+  min-height: 26px;
 }
 
 .empty-slot {
