@@ -1555,23 +1555,16 @@
               </div>
             </div>
 
-            <div class="mb-2 flex-grow-1" style="min-height: 0; overflow-y: auto;">
-              <label class="form-label fw-semibold">{{ $t('admin.selectNewTime') }}</label>
-              <div v-if="editTimeModal.availableTimes.length" class="time-slots-grid mobile-optimized">
-                <button
-                  v-for="slot in editTimeModal.availableTimes"
-                  :key="slot"
-                  type="button"
-                  @click.stop="editTimeModal.newTime = slot"
-                  @touchstart.stop="editTimeModal.newTime = slot"
-                  :class="['btn', 'btn-sm', 'time-slot-btn', editTimeModal.newTime === slot ? 'btn-primary' : 'btn-outline-primary']"
-                >
-                  {{ slot }}
-                </button>
-              </div>
-              <div v-else class="alert alert-info mb-0">
-                <i class="fas fa-info-circle me-2"></i>{{ $t('admin.loadingAvailableSlots') }}
-              </div>
+            <div class="mb-2">
+              <label class="form-label fw-semibold">
+                <i class="fas fa-clock me-2"></i>{{ $t('admin.selectNewTime') }}
+              </label>
+              <input
+                type="time"
+                class="form-control"
+                v-model="editTimeModal.newTime"
+                @click.stop
+              />
             </div>
             <div class="mb-0 flex-shrink-0">
               <label class="form-label fw-semibold">{{ $t('admin.messageOptional') }}</label>
@@ -3177,8 +3170,6 @@ async quickBookAppointment() {
       const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
       this.editTimeModal.weekOffset = Math.floor(diffDays / 7)
       
-      // Fetch available time slots for this appointment
-      await this.fetchEditModalAvailableTimes()
     },
     async fetchEditModalAvailableTimes() {
       if (!this.editTimeModal.appointment || !this.editTimeModal.newDate) {
@@ -3216,10 +3207,8 @@ async quickBookAppointment() {
         this.editTimeModal.availableTimes = []
       }
     },
-    async onEditDateChange() {
-      // Reset time selection when date changes
+    onEditDateChange() {
       this.editTimeModal.newTime = ''
-      await this.fetchEditModalAvailableTimes()
     },
     closeEditTimeModal() {
       this.editTimeModal.show = false
