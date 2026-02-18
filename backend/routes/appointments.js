@@ -288,40 +288,33 @@ router.post('/', async (req, res) => {
     const totalPrice = serviceDocs.reduce((sum, s) => sum + s.price, 0);
     const totalDuration = serviceDocs.reduce((sum, s) => sum + s.duration, 0);
 
-    // Validate working hours
-    const dayOfWeek = normalizedDate.getDay();
-    const availableSlots = await TimeSlot.find({ barberId, dayOfWeek, isAvailable: true });
-
-    if (!availableSlots.length) {
-      return res.status(400).json({ message: 'No working hours configured for this day' });
-    }
-
-    // Real-time availability check with conflict detection
-    const existingAppointments = await Appointment.find({ 
-      barberId, 
-      date: normalizedDate,
-      status: { $in: ['pending', 'confirmed', 'completed'] }
-    });
-    
-    // Detect admin requests (they carry a valid JWT) to allow flexible start times
+    // Detect admin requests early (they carry a valid JWT)
     const token = req.header('Authorization')?.replace('Bearer ', '');
     let isAdminRequest = false;
     if (token) {
       try { jwt.verify(token, process.env.JWT_SECRET); isAdminRequest = true; } catch (_) {}
     }
 
+    // Validate working hours (admins bypass this entirely)
+    const dayOfWeek = normalizedDate.getDay();
+    const availableSlots = await TimeSlot.find({ barberId, dayOfWeek, isAvailable: true });
+
+    if (!isAdminRequest && !availableSlots.length) {
+      return res.status(400).json({ message: 'No working hours configured for this day' });
+    }
+
+    // Real-time availability check with conflict detection
+    const existingAppointments = await Appointment.find({
+      barberId,
+      date: normalizedDate,
+      status: { $in: ['pending', 'confirmed', 'completed'] }
+    });
+
     const requestStart = timeStringToMinutes(time);
     const requestEnd = requestStart + totalDuration;
 
     if (isAdminRequest) {
-      // Admin: allow any minute — just verify within working hours and no overlap
-      const withinHours = availableSlots.some(slot => {
-        return requestStart >= timeStringToMinutes(slot.startTime) &&
-               requestEnd   <= timeStringToMinutes(slot.endTime);
-      });
-      if (!withinHours) {
-        return res.status(409).json({ message: 'Selected time is outside working hours' });
-      }
+      // Admin: allow any time — only block on overlap with existing appointments
       const hasOverlap = existingAppointments.some(appt => {
         const aStart = timeStringToMinutes(appt.time);
         const aEnd   = aStart + (appt.totalDuration || 30);
