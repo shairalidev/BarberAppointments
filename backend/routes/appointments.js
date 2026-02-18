@@ -8,6 +8,7 @@ const Restriction = require('../models/Restriction');
 const EmailService = require('../services/emailService');
 const emailScheduler = require('../services/emailScheduler');
 const { normalizeDateToGerman, getGermanToday, isBeforeToday } = require('../utils/timezoneHelper');
+const jwt = require('jsonwebtoken');
 
 const timeStringToMinutes = (timeStr) => {
   const [hours, minutes] = timeStr.split(':').map(Number);
@@ -202,11 +203,63 @@ router.post('/', async (req, res) => {
       services,
       date,
       time,
+      endTime,
+      isBlock,
       status: requestedStatus
     } = req.body;
 
+    // ── BLOCK TIME (admin-only, no customer/service required) ──────────────────
+    if (isBlock) {
+      const token = req.header('Authorization')?.replace('Bearer ', '');
+      let isAdmin = false;
+      if (token) { try { jwt.verify(token, process.env.JWT_SECRET); isAdmin = true; } catch (_) {} }
+      if (!isAdmin) return res.status(403).json({ message: 'Admin authentication required to block time' });
+
+      if (!barberId || !date || !time || !endTime) {
+        return res.status(400).json({ message: 'Missing required fields', required: ['barberId', 'date', 'time', 'endTime'] });
+      }
+
+      const normalizedDate = normalizeDate(date);
+      if (normalizedDate < getGermanToday()) {
+        return res.status(400).json({ message: 'Cannot block time for past dates' });
+      }
+
+      const blockStart = timeStringToMinutes(time);
+      const blockEnd   = timeStringToMinutes(endTime);
+      if (blockEnd <= blockStart) {
+        return res.status(400).json({ message: 'End time must be after start time' });
+      }
+      const totalDuration = blockEnd - blockStart;
+
+      // Check overlaps against existing appointments + other blocks
+      const existingForDay = await Appointment.find({
+        barberId,
+        date: normalizedDate,
+        status: { $in: ['pending', 'confirmed', 'completed'] }
+      });
+      const hasOverlap = existingForDay.some(appt => {
+        const aStart = timeStringToMinutes(appt.time);
+        const aEnd   = aStart + (appt.totalDuration || 30);
+        return blockStart < aEnd && blockEnd > aStart;
+      });
+      if (hasOverlap) {
+        return res.status(409).json({ message: 'Selected time overlaps with an existing appointment or block' });
+      }
+
+      const block = new Appointment({
+        barberId, date: normalizedDate, time, endTime,
+        totalDuration, totalPrice: 0, services: [],
+        customerName: '', customerPhone: '',
+        notes: notes || '',
+        isBlock: true, status: 'confirmed'
+      });
+      const saved = await block.save();
+      return res.status(201).json(saved);
+    }
+    // ── END BLOCK TIME ─────────────────────────────────────────────────────────
+
     if (!customerName || !customerPhone || !barberId || !services?.length || !date || !time) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         message: 'Missing required fields',
         required: ['customerName', 'customerPhone', 'barberId', 'services', 'date', 'time']
       });
@@ -250,14 +303,43 @@ router.post('/', async (req, res) => {
       status: { $in: ['pending', 'confirmed', 'completed'] }
     });
     
-    const validTimes = buildDailyAvailability(availableSlots, existingAppointments, totalDuration);
+    // Detect admin requests (they carry a valid JWT) to allow flexible start times
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    let isAdminRequest = false;
+    if (token) {
+      try { jwt.verify(token, process.env.JWT_SECRET); isAdminRequest = true; } catch (_) {}
+    }
 
-    if (!validTimes.includes(time)) {
-      return res.status(409).json({ 
-        message: 'Selected time slot is no longer available',
-        availableTimes: validTimes,
-        requestedTime: time
+    const requestStart = timeStringToMinutes(time);
+    const requestEnd = requestStart + totalDuration;
+
+    if (isAdminRequest) {
+      // Admin: allow any minute — just verify within working hours and no overlap
+      const withinHours = availableSlots.some(slot => {
+        return requestStart >= timeStringToMinutes(slot.startTime) &&
+               requestEnd   <= timeStringToMinutes(slot.endTime);
       });
+      if (!withinHours) {
+        return res.status(409).json({ message: 'Selected time is outside working hours' });
+      }
+      const hasOverlap = existingAppointments.some(appt => {
+        const aStart = timeStringToMinutes(appt.time);
+        const aEnd   = aStart + (appt.totalDuration || 30);
+        return requestStart < aEnd && requestEnd > aStart;
+      });
+      if (hasOverlap) {
+        return res.status(409).json({ message: 'Selected time overlaps with an existing appointment' });
+      }
+    } else {
+      // Public booking: must land on a pre-generated 30-min boundary slot
+      const validTimes = buildDailyAvailability(availableSlots, existingAppointments, totalDuration);
+      if (!validTimes.includes(time)) {
+        return res.status(409).json({
+          message: 'Selected time slot is no longer available',
+          availableTimes: validTimes,
+          requestedTime: time
+        });
+      }
     }
 
     // Double-check for race conditions

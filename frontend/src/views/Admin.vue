@@ -999,15 +999,34 @@
       <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable booking-modal-dialog responsive-modal-dialog">
         <div class="modal-content booking-modal-content responsive-modal-content">
           <div class="modal-header bg-gradient-primary text-white responsive-modal-header">
-            <h5 class="modal-title"><i class="fas fa-plus me-2"></i>{{ $t('admin.bookNewAppointment') }}</h5>
+            <h5 class="modal-title">
+              <i :class="['fas', 'me-2', bookingMode === 'block' ? 'fa-clock' : 'fa-plus']"></i>
+              {{ bookingMode === 'block' ? $t('admin.blockTimeTitle') : $t('admin.bookNewAppointment') }}
+            </h5>
             <button @click="closeBookingModal" class="btn-close btn-close-white" aria-label="Close"></button>
           </div>
           <div class="modal-body booking-modal-body responsive-modal-body">
-            <form @submit.prevent="quickBookAppointment">
+            <form @submit.prevent="bookingMode === 'block' ? quickBlockTime() : quickBookAppointment()">
               <div class="row g-3">
 
-                <!-- Show selected date/time when opened from slot click -->
-                <div v-if="bookingFromSlotClick" class="col-12">
+                <!-- Mode Toggle -->
+                <div class="col-12">
+                  <div class="btn-group w-100" role="group">
+                    <button
+                      type="button"
+                      :class="['btn', 'btn-sm', bookingMode === 'appointment' ? 'btn-primary' : 'btn-outline-secondary']"
+                      @click="bookingMode = 'appointment'"
+                    ><i class="fas fa-calendar-check me-1"></i>{{ $t('admin.appointmentMode') }}</button>
+                    <button
+                      type="button"
+                      :class="['btn', 'btn-sm', bookingMode === 'block' ? 'btn-warning' : 'btn-outline-secondary']"
+                      @click="bookingMode = 'block'; bookingForm.serviceId = ''; bookingForm.endTime = ''"
+                    ><i class="fas fa-clock me-1"></i>{{ $t('admin.blockTimeMode') }}</button>
+                  </div>
+                </div>
+
+                <!-- Show selected date/time when opened from slot click (appointment mode only) -->
+                <div v-if="bookingFromSlotClick && bookingMode === 'appointment'" class="col-12">
                   <div class="alert alert-info d-flex align-items-center gap-3">
                     <div class="flex-grow-1">
                       <div class="d-flex align-items-center gap-2 mb-2">
@@ -1022,8 +1041,8 @@
                   </div>
                 </div>
 
-                <!-- Professional Date Picker - Only show when NOT from slot click -->
-                <div v-if="!bookingFromSlotClick" class="col-12">
+                <!-- Professional Date Picker: hidden only when slot-click opened an appointment booking -->
+                <div v-if="!bookingFromSlotClick || bookingMode === 'block'" class="col-12">
                   <label class="form-label fw-semibold mb-3 d-flex align-items-center">
                     <i class="fas fa-calendar-alt me-2 text-primary"></i>
                     <span>{{ $t('booking.date') }}</span>
@@ -1140,140 +1159,244 @@
                   </div>
                 </div>
                 
-                <!-- Service Selection -->
-                <div class="col-12 service-selector-wrapper">
-                  <label class="form-label fw-semibold">
-                    <i class="fas fa-cut me-2 text-primary"></i>{{ $t('admin.service') }}
-                  </label>
-                  <div class="service-select-container">
-                    <select
-                      v-model="bookingForm.serviceId"
-                      @change="updateBookingPrice"
-                      class="form-select booking-service-select"
-                      required
-                    >
-                      <option value="">{{ $t('admin.selectService') }}</option>
-                      <option v-for="service in activeServices" :key="service._id" :value="service._id">
-                        {{ service.name }} - {{ formatCurrency(service.price) }}
-                      </option>
-                    </select>
-                  </div>
-                </div>
+                <!-- ═══ APPOINTMENT MODE ═══════════════════════════════════════ -->
+                <template v-if="bookingMode === 'appointment'">
 
-                <!-- Time Slots - Only show when NOT from slot click -->
-                <div v-if="!bookingFromSlotClick && (availableSlots.length || bookingForm.time)" class="col-12">
-                  <label class="form-label">{{ $t('booking.availableTimes') }}</label>
-                  <div v-if="bookingForm.time && !availableSlots.length" class="selected-time-preview mb-2">
-                    <span class="badge bg-success">{{ bookingForm.time }}</span>
-                    <small class="text-muted ms-2">{{ $t('admin.selectService') }} {{ $t('common.to') }} {{ $t('common.continue') }}</small>
-                  </div>
-                  <div v-if="availableSlots.length" class="time-slots-grid">
-                    <button
-                      v-for="slot in availableSlots"
-                      :key="slot"
-                      type="button"
-                      @click="bookingForm.time = slot"
-                      :class="['btn', 'btn-sm', bookingForm.time === slot ? 'btn-primary' : 'btn-outline-primary']"
-                    >
-                      {{ slot }}
-                    </button>
-                  </div>
-                </div>
-                <div class="col-12">
-                  <label class="form-label d-flex align-items-center justify-content-between">
-                    <span><i class="fas fa-users me-2"></i>{{ $t('admin.existingCustomers') }}</span>
-                    <small class="text-muted">{{ $t('admin.selectToPrefill') }}</small>
-                  </label>
-                  <div class="customer-search-container" @click.stop>
-                    <div class="input-group mb-2">
-                      <span class="input-group-text"><i class="fas fa-search"></i></span>
-                      <input
-                        v-model="bookingCustomerSearch"
-                        type="text"
-                        class="form-control"
-                        @focus="handleCustomerSearchFocus"
-                        @input="handleCustomerSearchInput"
-                        @touchstart="handleCustomerSearchFocus"
-                        @click.stop="handleCustomerSearchFocus"
-                        @mousedown.stop
-                        autocomplete="off"
-                      />
-                      <button 
-                        v-if="bookingCustomerSearch"
-                        @click="clearCustomerSearch"
-                        type="button" 
-                        class="btn btn-outline-secondary"
+                  <!-- Service Selection -->
+                  <div class="col-12 service-selector-wrapper">
+                    <label class="form-label fw-semibold">
+                      <i class="fas fa-cut me-2 text-primary"></i>{{ $t('admin.service') }}
+                    </label>
+                    <div class="service-select-container">
+                      <select
+                        v-model="bookingForm.serviceId"
+                        @change="updateBookingPrice"
+                        class="form-select booking-service-select"
+                        required
                       >
-                        <i class="fas fa-times"></i>
-                      </button>
+                        <option value="">{{ $t('admin.selectService') }}</option>
+                        <option v-for="service in activeServices" :key="service._id" :value="service._id">
+                          {{ service.name }} - {{ formatCurrency(service.price) }}
+                        </option>
+                      </select>
                     </div>
-                    
-                    <!-- Customer Dropdown -->
-                    <div
-                      v-if="showCustomerDropdown"
-                      class="customer-dropdown"
-                      @click.stop
-                    >
-                      <div v-if="bookingCustomerMatches.length > 0" class="customer-list">
-                        <div
-                          v-for="customer in bookingCustomerMatches.slice(0, 8)"
-                          :key="customer._id"
-                          class="customer-item"
-                          @click="selectCustomerForBooking(customer)"
-                          @touchstart="handleCustomerTouchStart($event, customer)"
-                          @touchend="handleCustomerTouchEnd($event, customer)"
+                  </div>
+
+                  <!-- Time Selection - Only show when NOT from slot click -->
+                  <div v-if="!bookingFromSlotClick" class="col-12">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                      <label class="form-label mb-0">{{ $t('booking.availableTimes') }}</label>
+                      <div class="btn-group btn-group-sm" role="group">
+                        <button
+                          type="button"
+                          :class="['btn', !manualTimeEntry ? 'btn-primary' : 'btn-outline-secondary']"
+                          @click="manualTimeEntry = false"
+                        ><i class="fas fa-list me-1"></i>{{ $t('booking.slotMode') }}</button>
+                        <button
+                          type="button"
+                          :class="['btn', manualTimeEntry ? 'btn-primary' : 'btn-outline-secondary']"
+                          @click="manualTimeEntry = true; bookingForm.time = ''"
+                        ><i class="fas fa-pen me-1"></i>{{ $t('booking.manualMode') }}</button>
+                      </div>
+                    </div>
+
+                    <!-- Slot mode -->
+                    <template v-if="!manualTimeEntry">
+                      <div v-if="bookingForm.time && !availableSlots.length" class="selected-time-preview mb-2">
+                        <span class="badge bg-success">{{ bookingForm.time }}</span>
+                        <small class="text-muted ms-2">{{ $t('admin.selectService') }} {{ $t('common.to') }} {{ $t('common.continue') }}</small>
+                      </div>
+                      <div v-if="availableSlots.length" class="time-slots-grid">
+                        <button
+                          v-for="slot in availableSlots"
+                          :key="slot"
+                          type="button"
+                          @click="bookingForm.time = slot"
+                          :class="['btn', 'btn-sm', bookingForm.time === slot ? 'btn-primary' : 'btn-outline-primary']"
+                        >{{ slot }}</button>
+                      </div>
+                      <div v-if="!availableSlots.length && bookingForm.date && bookingForm.serviceId" class="text-muted small mt-1">
+                        <i class="fas fa-info-circle me-1"></i>{{ $t('booking.noAvailableSlots') }}
+                      </div>
+                    </template>
+
+                    <!-- Manual time mode -->
+                    <template v-if="manualTimeEntry">
+                      <input
+                        type="time"
+                        class="form-control"
+                        v-model="bookingForm.time"
+                        step="60"
+                      />
+                      <small class="text-muted mt-1 d-block">
+                        <i class="fas fa-info-circle me-1"></i>{{ $t('booking.manualTimeHint') }}
+                      </small>
+                    </template>
+                  </div>
+
+                  <!-- Customer Search -->
+                  <div class="col-12">
+                    <label class="form-label d-flex align-items-center justify-content-between">
+                      <span><i class="fas fa-users me-2"></i>{{ $t('admin.existingCustomers') }}</span>
+                      <small class="text-muted">{{ $t('admin.selectToPrefill') }}</small>
+                    </label>
+                    <div class="customer-search-container" @click.stop>
+                      <div class="input-group mb-2">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input
+                          v-model="bookingCustomerSearch"
+                          type="text"
+                          class="form-control"
+                          @focus="handleCustomerSearchFocus"
+                          @input="handleCustomerSearchInput"
+                          @touchstart="handleCustomerSearchFocus"
+                          @click.stop="handleCustomerSearchFocus"
+                          @mousedown.stop
+                          autocomplete="off"
+                        />
+                        <button
+                          v-if="bookingCustomerSearch"
+                          @click="clearCustomerSearch"
+                          type="button"
+                          class="btn btn-outline-secondary"
                         >
-                          <div class="customer-info">
-                            <div class="customer-name">
-                              <i class="fas fa-user me-2 text-primary"></i>
-                              <strong>{{ customer.name }}</strong>
-                            </div>
-                            <div class="customer-details">
-                              <span class="phone"><i class="fas fa-phone me-1"></i>{{ customer.phone }}</span>
-                              <span v-if="customer.email" class="email"><i class="fas fa-envelope me-1"></i>{{ customer.email }}</span>
-                            </div>
-                            <div v-if="customer.totalBookings" class="customer-stats">
-                              <span class="badge bg-primary">{{ customer.totalBookings }} {{ $t('admin.bookings') }}</span>
+                          <i class="fas fa-times"></i>
+                        </button>
+                      </div>
+
+                      <!-- Customer Dropdown -->
+                      <div v-if="showCustomerDropdown" class="customer-dropdown" @click.stop>
+                        <div v-if="bookingCustomerMatches.length > 0" class="customer-list">
+                          <div
+                            v-for="customer in bookingCustomerMatches.slice(0, 8)"
+                            :key="customer._id"
+                            class="customer-item"
+                            @click="selectCustomerForBooking(customer)"
+                            @touchstart="handleCustomerTouchStart($event, customer)"
+                            @touchend="handleCustomerTouchEnd($event, customer)"
+                          >
+                            <div class="customer-info">
+                              <div class="customer-name">
+                                <i class="fas fa-user me-2 text-primary"></i>
+                                <strong>{{ customer.name }}</strong>
+                              </div>
+                              <div class="customer-details">
+                                <span class="phone"><i class="fas fa-phone me-1"></i>{{ customer.phone }}</span>
+                                <span v-if="customer.email" class="email"><i class="fas fa-envelope me-1"></i>{{ customer.email }}</span>
+                              </div>
+                              <div v-if="customer.totalBookings" class="customer-stats">
+                                <span class="badge bg-primary">{{ customer.totalBookings }} {{ $t('admin.bookings') }}</span>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                      <div v-else-if="bookingCustomerSearch && bookingCustomerMatches.length === 0" class="no-results">
-                        <i class="fas fa-user-slash me-2"></i>{{ $t('admin.noCustomersFound') }}
-                      </div>
-                      <div v-else-if="!bookingCustomerSearch && customers.length === 0" class="no-results">
-                        <i class="fas fa-info-circle me-2"></i>{{ $t('admin.noCustomersAvailable') || 'No customers available' }}
-                      </div>
-                      <div v-else-if="!bookingCustomerSearch && bookingCustomerMatches.length === 0 && customers.length > 0" class="no-results">
-                        <i class="fas fa-spinner fa-spin me-2"></i>{{ $t('common.loading') || 'Loading...' }}
+                        <div v-else-if="bookingCustomerSearch && bookingCustomerMatches.length === 0" class="no-results">
+                          <i class="fas fa-user-slash me-2"></i>{{ $t('admin.noCustomersFound') }}
+                        </div>
+                        <div v-else-if="!bookingCustomerSearch && customers.length === 0" class="no-results">
+                          <i class="fas fa-info-circle me-2"></i>{{ $t('admin.noCustomersAvailable') || 'No customers available' }}
+                        </div>
+                        <div v-else-if="!bookingCustomerSearch && bookingCustomerMatches.length === 0 && customers.length > 0" class="no-results">
+                          <i class="fas fa-spinner fa-spin me-2"></i>{{ $t('common.loading') || 'Loading...' }}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">{{ $t('admin.customerName') }}</label>
-                  <input v-model="bookingForm.customerName" type="text" class="form-control" required>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">{{ $t('admin.phone') }}</label>
-                  <input v-model="bookingForm.customerPhone" type="tel" class="form-control" required>
-                </div>
-                <div class="col-12">
-                  <label class="form-label">{{ $t('admin.email') }}</label>
-                  <input v-model="bookingForm.customerEmail" type="email" class="form-control">
-                </div>
-                <div class="col-12" v-if="bookingForm.totalPrice">
-                  <div class="alert alert-success">
-                    <strong>{{ $t('admin.totalAmount') }}: {{ formatCurrency(bookingForm.totalPrice) }}</strong>
+
+                  <div class="col-md-6">
+                    <label class="form-label">{{ $t('admin.customerName') }}</label>
+                    <input v-model="bookingForm.customerName" type="text" class="form-control" required>
                   </div>
-                </div>
+                  <div class="col-md-6">
+                    <label class="form-label">{{ $t('admin.phone') }}</label>
+                    <input v-model="bookingForm.customerPhone" type="tel" class="form-control" required>
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label">{{ $t('admin.email') }}</label>
+                    <input v-model="bookingForm.customerEmail" type="email" class="form-control">
+                  </div>
+                  <div class="col-12" v-if="bookingForm.totalPrice">
+                    <div class="alert alert-success">
+                      <strong>{{ $t('admin.totalAmount') }}: {{ formatCurrency(bookingForm.totalPrice) }}</strong>
+                    </div>
+                  </div>
+
+                </template>
+                <!-- ═══ END APPOINTMENT MODE ════════════════════════════════════ -->
+
+                <!-- ═══ BLOCK TIME MODE ════════════════════════════════════════ -->
+                <template v-if="bookingMode === 'block'">
+
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold">
+                      <i class="fas fa-play me-1 text-success"></i>{{ $t('admin.startTime') }}
+                    </label>
+                    <input
+                      type="time"
+                      class="form-control"
+                      v-model="bookingForm.time"
+                      step="60"
+                      required
+                    />
+                  </div>
+
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold">
+                      <i class="fas fa-stop me-1 text-danger"></i>{{ $t('admin.endTime') }}
+                    </label>
+                    <input
+                      type="time"
+                      class="form-control"
+                      v-model="bookingForm.endTime"
+                      step="60"
+                      required
+                    />
+                  </div>
+
+                  <div class="col-12" v-if="bookingForm.time && bookingForm.endTime">
+                    <div class="alert alert-warning py-2 mb-0 small">
+                      <i class="fas fa-clock me-1"></i>
+                      {{ bookingForm.time }} – {{ bookingForm.endTime }}
+                      <span v-if="blockDurationMinutes > 0" class="ms-2 text-muted">({{ blockDurationMinutes }} min)</span>
+                    </div>
+                  </div>
+
+                  <div class="col-12">
+                    <label class="form-label">
+                      <i class="fas fa-tag me-1 text-secondary"></i>{{ $t('admin.blockLabel') }}
+                    </label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      v-model="bookingForm.label"
+                      :placeholder="$t('admin.blockLabelPlaceholder')"
+                      maxlength="80"
+                    />
+                  </div>
+
+                </template>
+                <!-- ═══ END BLOCK TIME MODE ════════════════════════════════════ -->
+
               </div>
             </form>
           </div>
           <div class="modal-footer responsive-modal-footer">
             <button @click="closeBookingModal" class="btn btn-secondary">{{ $t('common.cancel') }}</button>
-            <button @click="quickBookAppointment" class="btn btn-success" :disabled="!bookingForm.time">
+            <button
+              v-if="bookingMode === 'appointment'"
+              @click="quickBookAppointment"
+              class="btn btn-success"
+              :disabled="!bookingForm.time"
+            >
               <i class="fas fa-check me-2"></i>{{ $t('admin.bookAppointment') }}
+            </button>
+            <button
+              v-if="bookingMode === 'block'"
+              @click="quickBlockTime"
+              class="btn btn-warning"
+              :disabled="!bookingForm.time || !bookingForm.endTime"
+            >
+              <i class="fas fa-clock me-2"></i>{{ $t('admin.blockTimeTitle') }}
             </button>
           </div>
         </div>
@@ -1708,10 +1831,13 @@ export default {
         status: '',
         message: ''
       },
+      bookingMode: 'appointment', // 'appointment' | 'block'
       bookingForm: {
         date: new Date().toISOString().split('T')[0],
         serviceId: '',
         time: '',
+        endTime: '',   // used by block mode
+        label: '',     // optional label/note for block mode (stored in notes)
         customerName: '',
         customerPhone: '',
         customerEmail: '',
@@ -1723,6 +1849,7 @@ export default {
       primaryBarber: null,
       showBookingModal: false,
       bookingFromSlotClick: false, // Track if booking modal opened from time slot click
+      manualTimeEntry: false, // Admin can type any time instead of picking a slot
       showCustomerModal: false,
       showDeleteCustomerModal: false,
       customerToDelete: null,
@@ -2061,6 +2188,13 @@ export default {
       if (!this.bookingForm.time) return ''
       // Remove seconds if present (e.g., "14:00:30" -> "14:00")
       return this.bookingForm.time.split(':').slice(0, 2).join(':')
+    },
+    blockDurationMinutes() {
+      if (!this.bookingForm.time || !this.bookingForm.endTime) return 0
+      const [sh, sm] = this.bookingForm.time.split(':').map(Number)
+      const [eh, em] = this.bookingForm.endTime.split(':').map(Number)
+      const diff = (eh * 60 + em) - (sh * 60 + sm)
+      return diff > 0 ? diff : 0
     },
     formatSelectedDate() {
       if (!this.selectedCalendarDate) return ''
@@ -2890,16 +3024,20 @@ async quickBookAppointment() {
         date: todayStr,
         serviceId: '',
         time: '',
+        endTime: '',
+        label: '',
         customerName: '',
         customerPhone: '',
         customerEmail: '',
         customerId: '',
         totalPrice: 0
       }
+      this.bookingMode = 'appointment'
+      this.manualTimeEntry = false
       this.bookingCalendarMonth = today.getMonth()
       this.bookingCalendarYear = today.getFullYear()
       this.todayDate = todayStr
-      this.bookingFromSlotClick = false // Reset the slot click flag
+      this.bookingFromSlotClick = false
       this.availableSlots = []
       this.bookingCustomerSearch = ''
       this.showCustomerDropdown = false
@@ -2914,6 +3052,49 @@ async quickBookAppointment() {
     closeBookingModal() {
       this.showBookingModal = false
       this.bookingFromSlotClick = false
+      this.manualTimeEntry = false
+      this.bookingMode = 'appointment'
+    },
+    async quickBlockTime() {
+      if (!this.primaryBarber) {
+        this.showToast(this.$t('toast.noBarber'), 'warning')
+        return
+      }
+      if (!this.bookingForm.date || !this.bookingForm.time || !this.bookingForm.endTime) {
+        this.showToast(this.$t('toast.blockTimeRequired'), 'warning')
+        return
+      }
+      const [sh, sm] = this.bookingForm.time.split(':').map(Number)
+      const [eh, em] = this.bookingForm.endTime.split(':').map(Number)
+      if ((eh * 60 + em) <= (sh * 60 + sm)) {
+        this.showToast(this.$t('toast.endAfterStart'), 'warning')
+        return
+      }
+      const bookedDate = this.bookingForm.date
+      try {
+        await axios.post(`${process.env.VUE_APP_API_URL}/appointments`, {
+          barberId: this.primaryBarber._id,
+          date: this.bookingForm.date,
+          time: this.bookingForm.time,
+          endTime: this.bookingForm.endTime,
+          notes: this.bookingForm.label || '',
+          isBlock: true,
+          status: 'confirmed'
+        })
+        await this.fetchAppointments()
+        if (this.calendarViewMode === 'day' && this.dayViewDate === bookedDate) {
+          this.syncDayViewData()
+        }
+        this.resetBookingForm()
+        this.showBookingModal = false
+        this.showToast(this.$t('toast.blockTimeSuccess'), 'success')
+      } catch (error) {
+        console.error('Error blocking time:', error)
+        this.showToast(
+          this.$t('toast.bookingError', { message: error.response?.data?.message || error.message }),
+          'error'
+        )
+      }
     },
     updateBookingPrice() {
       const service = this.services.find(s => s._id === this.bookingForm.serviceId)
