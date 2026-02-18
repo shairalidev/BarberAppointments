@@ -1185,54 +1185,15 @@
 
                   <!-- Time Selection - Only show when NOT from slot click -->
                   <div v-if="!bookingFromSlotClick" class="col-12">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                      <label class="form-label mb-0">{{ $t('booking.availableTimes') }}</label>
-                      <div class="btn-group btn-group-sm" role="group">
-                        <button
-                          type="button"
-                          :class="['btn', !manualTimeEntry ? 'btn-primary' : 'btn-outline-secondary']"
-                          @click="manualTimeEntry = false"
-                        ><i class="fas fa-list me-1"></i>{{ $t('booking.slotMode') }}</button>
-                        <button
-                          type="button"
-                          :class="['btn', manualTimeEntry ? 'btn-primary' : 'btn-outline-secondary']"
-                          @click="manualTimeEntry = true; bookingForm.time = ''"
-                        ><i class="fas fa-pen me-1"></i>{{ $t('booking.manualMode') }}</button>
-                      </div>
-                    </div>
-
-                    <!-- Slot mode -->
-                    <template v-if="!manualTimeEntry">
-                      <div v-if="bookingForm.time && !availableSlots.length" class="selected-time-preview mb-2">
-                        <span class="badge bg-success">{{ bookingForm.time }}</span>
-                        <small class="text-muted ms-2">{{ $t('admin.selectService') }} {{ $t('common.to') }} {{ $t('common.continue') }}</small>
-                      </div>
-                      <div v-if="availableSlots.length" class="time-slots-grid">
-                        <button
-                          v-for="slot in availableSlots"
-                          :key="slot"
-                          type="button"
-                          @click="bookingForm.time = slot"
-                          :class="['btn', 'btn-sm', bookingForm.time === slot ? 'btn-primary' : 'btn-outline-primary']"
-                        >{{ slot }}</button>
-                      </div>
-                      <div v-if="!availableSlots.length && bookingForm.date && bookingForm.serviceId" class="text-muted small mt-1">
-                        <i class="fas fa-info-circle me-1"></i>{{ $t('booking.noAvailableSlots') }}
-                      </div>
-                    </template>
-
-                    <!-- Manual time mode -->
-                    <template v-if="manualTimeEntry">
-                      <input
-                        type="time"
-                        class="form-control"
-                        v-model="bookingForm.time"
-                        step="60"
-                      />
-                      <small class="text-muted mt-1 d-block">
-                        <i class="fas fa-info-circle me-1"></i>{{ $t('booking.manualTimeHint') }}
-                      </small>
-                    </template>
+                    <label class="form-label fw-semibold mb-2 d-flex align-items-center">
+                      <i class="fas fa-clock me-2 text-primary"></i>
+                      <span>{{ $t('booking.availableTimes') }}</span>
+                    </label>
+                    <input
+                      type="time"
+                      class="form-control"
+                      v-model="bookingForm.time"
+                    />
                   </div>
 
                   <!-- Customer Search -->

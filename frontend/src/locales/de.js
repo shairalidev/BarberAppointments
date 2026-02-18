@@ -69,7 +69,7 @@ export default {
     pickSlot: 'Zeitslot wählen',
     professionalBarber: 'Professioneller Barber',
     noServicesSelected: 'Keine Dienstleistungen ausgewählt',
-    availableTimes: 'Verfügbare Zeiten',
+    availableTimes: 'Uhrzeit',
     slotMode: 'Zeitslots',
     manualMode: 'Manuell',
     manualTimeHint: 'Beliebige Startzeit eingeben.',
