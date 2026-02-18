@@ -415,6 +415,7 @@
                                     'slot-first': index === 0,
                                     'slot-second': index === 1,
                                     'slot-occupied': slot.isOccupied && !slot.showTime,
+                                    'slot-span-end': slot.isSpanEnd,
                                     'drag-over': appointmentDragState && appointmentDragState.targetHour === hour && appointmentDragState.targetIndex === index
                                   }"
                                   @click.stop.prevent="!appointmentDragState ? handleSlotClick($event, slot, dayViewDate, hour, index) : null"
@@ -3949,60 +3950,48 @@ getTimeSlotsForDay(dayIndex) {
       }
     },
     getDayViewHalfHourSlots(hour) {
-      // Return two half-hour slots: :00 and :30
-      const slots = [
-        { time: `${hour}:00`, appointment: null, showTime: false, isOccupied: false },
-        { time: `${hour}:30`, appointment: null, showTime: false, isOccupied: false }
-      ]
-      
       const currentHour = parseInt(hour.split(':')[0])
-      
-      // Process each appointment to determine which slots it occupies
+      const slot0Start = currentHour * 60
+      const slot0End   = currentHour * 60 + 30
+      const slot1Start = currentHour * 60 + 30
+      const slot1End   = currentHour * 60 + 60
+
+      const slots = [
+        { time: `${hour}:00`, appointment: null, showTime: false, isOccupied: false, isSpanEnd: false },
+        { time: `${hour}:30`, appointment: null, showTime: false, isOccupied: false, isSpanEnd: false }
+      ]
+
       this.dayViewData.appointments.forEach(apt => {
         if (!apt.time) return
-        
-        const aptTime = apt.time || ''
-        const aptHour = parseInt(aptTime.split(':')[0])
-        const aptMinute = parseInt(aptTime.split(':')[1]) || 0
-        const duration = apt.totalDuration || 30
-        
-        // Calculate appointment start and end in minutes from midnight
-        const aptStartMinutes = aptHour * 60 + aptMinute
-        const aptEndMinutes = aptStartMinutes + duration
-        
-        // Calculate slot times in minutes from midnight
-        const slot0Minutes = currentHour * 60 + 0   // :00 slot
-        const slot30Minutes = currentHour * 60 + 30 // :30 slot
-        const slot0EndMinutes = slot0Minutes + 30   // :00 slot ends at :30
-        const slot30EndMinutes = slot30Minutes + 30 // :30 slot ends at next hour :00
-        
-        // Check if appointment overlaps with the :00 slot (9:00 - 9:30)
-        // Overlap exists if: appointment starts before slot ends AND appointment ends after slot starts
-        const overlapsSlot0 = aptStartMinutes < slot0EndMinutes && aptEndMinutes > slot0Minutes
-        
-        // Check if appointment overlaps with the :30 slot (9:30 - 10:00)
-        const overlapsSlot30 = aptStartMinutes < slot30EndMinutes && aptEndMinutes > slot30Minutes
-        
-        // Mark slots as occupied if appointment overlaps
-        if (overlapsSlot0) {
+
+        const [ah, am] = apt.time.split(':').map(Number)
+        const aptStart = ah * 60 + am
+        // Block appointments store an explicit endTime; regular ones use totalDuration
+        let aptEnd
+        if (apt.isBlock && apt.endTime) {
+          const [eh, em] = apt.endTime.split(':').map(Number)
+          aptEnd = eh * 60 + em
+        } else {
+          aptEnd = aptStart + (apt.totalDuration || 30)
+        }
+
+        // Slot 0: [slot0Start, slot0End)
+        if (aptStart < slot0End && aptEnd > slot0Start) {
           slots[0].appointment = apt
           slots[0].isOccupied = true
-          // Only show time on the first slot where appointment starts
-          if (aptStartMinutes === slot0Minutes) {
-            slots[0].showTime = true
-          }
+          if (aptStart >= slot0Start && aptStart < slot0End) slots[0].showTime = true
+          if (aptEnd <= slot0End) slots[0].isSpanEnd = true
         }
-        
-        if (overlapsSlot30) {
+
+        // Slot 1: [slot1Start, slot1End)
+        if (aptStart < slot1End && aptEnd > slot1Start) {
           slots[1].appointment = apt
           slots[1].isOccupied = true
-          // Only show time on the first slot where appointment starts
-          if (aptStartMinutes === slot30Minutes) {
-            slots[1].showTime = true
-          }
+          if (aptStart >= slot1Start && aptStart < slot1End) slots[1].showTime = true
+          if (aptEnd <= slot1End) slots[1].isSpanEnd = true
         }
       })
-      
+
       return slots
     },
     async handleSlotClick(event, slot, date, hour, index) {
@@ -7994,9 +7983,17 @@ async setReminder(appointment) {
   .half-hour-slot.slot-occupied .appointment-block {
     min-height: 28px !important;
     height: 28px !important;
-    padding: 1px 3px !important;
+    padding: 0 !important;
     width: 100% !important;
-    border-radius: 4px !important;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+  }
+
+  .half-hour-slot.slot-occupied.slot-span-end .appointment-block {
+    border-bottom-left-radius: 4px !important;
+    border-bottom-right-radius: 4px !important;
   }
 
   /* Smaller fonts for appointment content in mobile */
@@ -8206,60 +8203,42 @@ async setReminder(appointment) {
 }
 
 .half-hour-slot.slot-occupied {
-  /* Slots that are occupied but don't show appointment details (continuation slots) */
+  /* Continuation slots — occupied but content is hidden */
   padding: 0;
-  position: relative;
 }
 
+/* Continuation slots: show the same status color, no top radius (connects to slot above) */
 .half-hour-slot.slot-occupied .appointment-block {
   width: 100%;
   height: 100%;
   min-height: 25px;
   padding: 0;
   margin: 0;
-  border-radius: 0;
   box-shadow: none;
-  background: transparent;
-}
-
-/* Visual indicator for continuation slots */
-.half-hour-slot.slot-occupied::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  background: linear-gradient(to right, 
-    rgba(16, 185, 129, 0.15) 0%, 
-    rgba(16, 185, 129, 0.1) 50%, 
-    rgba(16, 185, 129, 0.15) 100%);
-  border-left: 2px solid var(--success);
-  border-right: 2px solid var(--success);
-  pointer-events: none;
-}
-
-.half-hour-slot.slot-occupied.slot-first::before {
-  border-top: 2px solid var(--success);
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
-}
-
-.half-hour-slot.slot-occupied.slot-second::before {
-  border-bottom: 2px solid var(--success);
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px;
-}
-
-/* When both slots are occupied by same appointment, connect them visually */
-.half-hour-slot.slot-occupied.slot-first + .half-hour-slot.slot-occupied.slot-second::before {
-  border-top: none;
-}
-
-/* Ensure appointment block in continuation slots doesn't interfere */
-.half-hour-slot.slot-occupied .appointment-block {
   pointer-events: auto;
   cursor: pointer;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
+/* Last slot in a span: restore bottom rounding */
+.half-hour-slot.slot-occupied.slot-span-end .appointment-block {
+  border-bottom-left-radius: 6px !important;
+  border-bottom-right-radius: 6px !important;
+}
+
+/* First slot of an appointment that continues further: remove its bottom rounding */
+.half-hour-slot.has-appointment:not(.slot-occupied):not(.slot-span-end) .appointment-block {
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
+/* Don't lift individual continuation slots on hover */
+.half-hour-slot.slot-occupied .appointment-block:hover {
+  transform: none;
+  box-shadow: none;
 }
 
 .half-hour-slot.slot-occupied .appointment-content {
