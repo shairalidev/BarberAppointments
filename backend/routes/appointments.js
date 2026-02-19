@@ -378,6 +378,9 @@ router.post('/', async (req, res) => {
       await customer.save();
     }
 
+    // Remove any cancelled appointment at this exact slot so the unique index doesn't block re-use
+    await Appointment.deleteMany({ barberId, date: normalizedDate, time, status: 'cancelled' });
+
     // Create appointment with immediate slot reservation
     const appointment = new Appointment({
       customer: customer?._id,
@@ -693,6 +696,22 @@ router.put('/:id', async (req, res) => {
     // Add response message if provided
     if (responseMessage) {
       update.responseMessage = responseMessage;
+    }
+
+    // If time (and possibly date) is being changed, clear any cancelled appointment
+    // at the new slot so the unique index doesn't block re-use of that slot
+    if (update.time) {
+      const targetDate = update.date
+        ? normalizeDate(update.date)
+        : currentAppointment.date;
+      const targetBarberId = currentAppointment.barberId._id || currentAppointment.barberId;
+      await Appointment.deleteMany({
+        _id: { $ne: req.params.id },
+        barberId: targetBarberId,
+        date: targetDate,
+        time: update.time,
+        status: 'cancelled'
+      });
     }
 
     const appointment = await Appointment.findByIdAndUpdate(req.params.id, update, { new: true })
