@@ -220,9 +220,6 @@ router.post('/', async (req, res) => {
       }
 
       const normalizedDate = normalizeDate(date);
-      if (normalizedDate < getGermanToday()) {
-        return res.status(400).json({ message: 'Cannot block time for past dates' });
-      }
 
       const blockStart = timeStringToMinutes(time);
       const blockEnd   = timeStringToMinutes(endTime);
@@ -230,21 +227,6 @@ router.post('/', async (req, res) => {
         return res.status(400).json({ message: 'End time must be after start time' });
       }
       const totalDuration = blockEnd - blockStart;
-
-      // Check overlaps against existing appointments + other blocks
-      const existingForDay = await Appointment.find({
-        barberId,
-        date: normalizedDate,
-        status: { $in: ['pending', 'confirmed', 'completed'] }
-      });
-      const hasOverlap = existingForDay.some(appt => {
-        const aStart = timeStringToMinutes(appt.time);
-        const aEnd   = aStart + (appt.totalDuration || 30);
-        return blockStart < aEnd && blockEnd > aStart;
-      });
-      if (hasOverlap) {
-        return res.status(409).json({ message: 'Selected time overlaps with an existing appointment or block' });
-      }
 
       const block = new Appointment({
         barberId, date: normalizedDate, time, endTime,
@@ -258,41 +240,57 @@ router.post('/', async (req, res) => {
     }
     // ── END BLOCK TIME ─────────────────────────────────────────────────────────
 
-    if (!customerName || !customerPhone || !barberId || !services?.length || !date || !time) {
-      return res.status(400).json({
-        message: 'Missing required fields',
-        required: ['customerName', 'customerPhone', 'barberId', 'services', 'date', 'time']
-      });
-    }
-
-    const normalizedDate = normalizeDate(date);
-    const today = getGermanToday();
-    
-    // Prevent booking for past dates (using German timezone)
-    if (normalizedDate < today) {
-      return res.status(400).json({ message: 'Cannot book appointments for past dates' });
-    }
-
-    // Check if date is restricted (off date)
-    const restriction = await Restriction.findOne({ date: normalizedDate });
-    if (restriction) {
-      return res.status(400).json({ message: 'This date is not available for bookings (off date)' });
-    }
-
-    const serviceDocs = await Service.find({ _id: { $in: services } });
-
-    if (!serviceDocs.length || serviceDocs.length !== services.length) {
-      return res.status(400).json({ message: 'Invalid services selection' });
-    }
-
-    const totalPrice = serviceDocs.reduce((sum, s) => sum + s.price, 0);
-    const totalDuration = serviceDocs.reduce((sum, s) => sum + s.duration, 0);
-
     // Detect admin requests early (they carry a valid JWT)
     const token = req.header('Authorization')?.replace('Bearer ', '');
     let isAdminRequest = false;
     if (token) {
       try { jwt.verify(token, process.env.JWT_SECRET); isAdminRequest = true; } catch (_) {}
+    }
+
+    // Public bookings require customer info and services; admin can omit them
+    if (!isAdminRequest && (!customerName || !customerPhone || !services?.length)) {
+      return res.status(400).json({
+        message: 'Missing required fields',
+        required: ['customerName', 'customerPhone', 'services']
+      });
+    }
+
+    if (!barberId || !date || !time) {
+      return res.status(400).json({
+        message: 'Missing required fields',
+        required: ['barberId', 'date', 'time']
+      });
+    }
+
+    const normalizedDate = normalizeDate(date);
+    const today = getGermanToday();
+
+    // Prevent booking for past dates (admin can bypass this)
+    if (!isAdminRequest && normalizedDate < today) {
+      return res.status(400).json({ message: 'Cannot book appointments for past dates' });
+    }
+
+    // Check if date is restricted (off date) — public only
+    if (!isAdminRequest) {
+      const restriction = await Restriction.findOne({ date: normalizedDate });
+      if (restriction) {
+        return res.status(400).json({ message: 'This date is not available for bookings (off date)' });
+      }
+    }
+
+    let serviceDocs = [];
+    let totalPrice = 0;
+    let totalDuration = 30; // default when no service selected
+
+    if (services?.length) {
+      serviceDocs = await Service.find({ _id: { $in: services } });
+      if (!isAdminRequest && (!serviceDocs.length || serviceDocs.length !== services.length)) {
+        return res.status(400).json({ message: 'Invalid services selection' });
+      }
+      if (serviceDocs.length) {
+        totalPrice = serviceDocs.reduce((sum, s) => sum + s.price, 0);
+        totalDuration = serviceDocs.reduce((sum, s) => sum + s.duration, 0);
+      }
     }
 
     // Validate working hours (admins bypass this entirely)
@@ -354,13 +352,13 @@ router.post('/', async (req, res) => {
     // Only use pending if explicitly requested (for admin override scenarios)
     const initialStatus = requestedStatus === 'pending' ? 'pending' : 'confirmed';
 
-    // Ensure customer record exists
+    // Ensure customer record exists (only when customer info is provided)
     let customer = null;
     if (customerId) {
       customer = await Customer.findById(customerId);
     }
 
-    if (!customer) {
+    if (!customer && customerName && customerPhone) {
       customer = await upsertCustomerFromAppointment({
         name: customerName,
         phone: customerPhone,
@@ -369,7 +367,7 @@ router.post('/', async (req, res) => {
         marketingOptIn,
         appointmentDate: normalizedDate
       });
-    } else {
+    } else if (customer) {
       // Keep customer record fresh
       customer.name = customerName;
       customer.phone = customerPhone;

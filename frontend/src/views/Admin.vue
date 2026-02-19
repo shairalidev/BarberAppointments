@@ -1042,122 +1042,17 @@
                   </div>
                 </div>
 
-                <!-- Professional Date Picker: hidden only when slot-click opened an appointment booking -->
-                <div v-if="!bookingFromSlotClick || bookingMode === 'block'" class="col-12">
-                  <label class="form-label fw-semibold mb-3 d-flex align-items-center">
+                <!-- Date Selector (appointment mode only) -->
+                <div v-if="bookingMode === 'appointment'" class="col-12">
+                  <label class="form-label fw-semibold mb-2 d-flex align-items-center">
                     <i class="fas fa-calendar-alt me-2 text-primary"></i>
                     <span>{{ $t('booking.date') }}</span>
                   </label>
-
-                  <!-- Mobile Week View - Compact horizontal strip -->
-                  <div class="mobile-week-picker">
-                    <!-- Week Navigation Header -->
-                    <div class="week-picker-header">
-                      <button
-                        type="button"
-                        @click="changeBookingWeek(-1)"
-                        class="week-nav-btn"
-                        :disabled="isBookingWeekMin()"
-                        :class="{ 'disabled': isBookingWeekMin() }"
-                      >
-                        <i class="fas fa-chevron-left"></i>
-                      </button>
-                      <div class="week-range-display">
-                        <span class="week-range-text">{{ bookingWeekRange }}</span>
-                      </div>
-                      <button
-                        type="button"
-                        @click="changeBookingWeek(1)"
-                        class="week-nav-btn"
-                      >
-                        <i class="fas fa-chevron-right"></i>
-                      </button>
-                    </div>
-
-                    <!-- Horizontal Week Strip -->
-                    <div class="week-strip-container">
-                      <div class="week-strip">
-                        <div
-                          v-for="day in bookingWeekDays"
-                          :key="day.date"
-                          @click="selectBookingDate(day.date)"
-                          :class="['week-day-cell', {
-                            'today': day.isToday,
-                            'selected': day.date === bookingForm.date,
-                            'past': day.isPast,
-                            'off-date': day.isOffDate
-                          }]"
-                        >
-                          <span class="week-day-name">{{ day.dayName }}</span>
-                          <span class="week-day-number">{{ day.dayNumber }}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- Selected Date Display (compact) -->
-                    <div v-if="bookingForm.date" class="week-selected-date">
-                      <i class="fas fa-check-circle text-success me-2"></i>
-                      <span>{{ formatBookingSelectedDate }}</span>
-                    </div>
-                  </div>
-
-                  <!-- Desktop Week Picker (compact) -->
-                  <div class="professional-date-picker desktop-only">
-                    <!-- Month Navigation (kept for context) -->
-                    <div class="date-picker-header-pro">
-                      <button
-                        type="button"
-                        @click="changeBookingMonth(-1)"
-                        class="month-nav-btn"
-                        :disabled="isBookingMonthMin"
-                        :class="{ 'disabled': isBookingMonthMin }"
-                      >
-                        <i class="fas fa-chevron-left"></i>
-                      </button>
-                      <div class="month-year-display">
-                        <div class="month-name">{{ getBookingMonthYear }}</div>
-                        <div class="year-badge">{{ bookingCalendarYear }}</div>
-                      </div>
-                      <button
-                        type="button"
-                        @click="changeBookingMonth(1)"
-                        class="month-nav-btn"
-                      >
-                        <i class="fas fa-chevron-right"></i>
-                      </button>
-                    </div>
-
-                    <!-- Compact Week Strip (desktop) -->
-                    <div class="week-strip-container desktop-week-strip">
-                      <div class="week-strip">
-                        <div
-                          v-for="day in bookingWeekDays"
-                          :key="day.date"
-                          @click="selectBookingDate(day.date)"
-                          :class="['week-day-cell', {
-                            'today': day.isToday,
-                            'selected': day.date === bookingForm.date,
-                            'past': day.isPast,
-                            'off-date': day.isOffDate
-                          }]"
-                        >
-                          <span class="week-day-name">{{ day.dayName }}</span>
-                          <span class="week-day-number">{{ day.dayNumber }}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- Selected Date Display -->
-                    <div v-if="bookingForm.date" class="selected-date-pro">
-                      <div class="selected-date-icon">
-                        <i class="fas fa-check-circle"></i>
-                      </div>
-                      <div class="selected-date-info">
-                        <div class="selected-date-label">Selected Date</div>
-                        <div class="selected-date-value">{{ formatBookingSelectedDate }}</div>
-                      </div>
-                    </div>
-                  </div>
+                  <input
+                    type="date"
+                    class="form-control"
+                    v-model="bookingForm.date"
+                  />
                 </div>
                 
                 <!-- ═══ APPOINTMENT MODE ═══════════════════════════════════════ -->
@@ -1173,7 +1068,6 @@
                         v-model="bookingForm.serviceId"
                         @change="updateBookingPrice"
                         class="form-select booking-service-select"
-                        required
                       >
                         <option value="">{{ $t('admin.selectService') }}</option>
                         <option v-for="service in activeServices" :key="service._id" :value="service._id">
@@ -1183,8 +1077,8 @@
                     </div>
                   </div>
 
-                  <!-- Time Selection - Only show when NOT from slot click -->
-                  <div v-if="!bookingFromSlotClick" class="col-12">
+                  <!-- Time Selection -->
+                  <div class="col-12">
                     <label class="form-label fw-semibold mb-2 d-flex align-items-center">
                       <i class="fas fa-clock me-2 text-primary"></i>
                       <span>{{ $t('booking.availableTimes') }}</span>
@@ -1267,11 +1161,11 @@
 
                   <div class="col-md-6">
                     <label class="form-label">{{ $t('admin.customerName') }}</label>
-                    <input v-model="bookingForm.customerName" type="text" class="form-control" required>
+                    <input v-model="bookingForm.customerName" type="text" class="form-control">
                   </div>
                   <div class="col-md-6">
                     <label class="form-label">{{ $t('admin.phone') }}</label>
-                    <input v-model="bookingForm.customerPhone" type="tel" class="form-control" required>
+                    <input v-model="bookingForm.customerPhone" type="tel" class="form-control">
                   </div>
                   <div class="col-12">
                     <label class="form-label">{{ $t('admin.email') }}</label>
@@ -1289,38 +1183,32 @@
                 <!-- ═══ BLOCK TIME MODE ════════════════════════════════════════ -->
                 <template v-if="bookingMode === 'block'">
 
+                  <!-- Start -->
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold">
+                      <i class="fas fa-play me-1 text-success"></i>{{ $t('admin.startTime') }} – {{ $t('booking.date') }}
+                    </label>
+                    <input type="date" class="form-control" v-model="bookingForm.date" />
+                  </div>
                   <div class="col-md-6">
                     <label class="form-label fw-semibold">
                       <i class="fas fa-play me-1 text-success"></i>{{ $t('admin.startTime') }}
                     </label>
-                    <input
-                      type="time"
-                      class="form-control"
-                      v-model="bookingForm.time"
-                      step="60"
-                      required
-                    />
+                    <input type="time" class="form-control" v-model="bookingForm.time" />
                   </div>
 
+                  <!-- End -->
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold">
+                      <i class="fas fa-stop me-1 text-danger"></i>{{ $t('admin.endTime') }} – {{ $t('booking.date') }}
+                    </label>
+                    <input type="date" class="form-control" v-model="bookingForm.endDate" />
+                  </div>
                   <div class="col-md-6">
                     <label class="form-label fw-semibold">
                       <i class="fas fa-stop me-1 text-danger"></i>{{ $t('admin.endTime') }}
                     </label>
-                    <input
-                      type="time"
-                      class="form-control"
-                      v-model="bookingForm.endTime"
-                      step="60"
-                      required
-                    />
-                  </div>
-
-                  <div class="col-12" v-if="bookingForm.time && bookingForm.endTime">
-                    <div class="alert alert-warning py-2 mb-0 small">
-                      <i class="fas fa-clock me-1"></i>
-                      {{ bookingForm.time }} – {{ bookingForm.endTime }}
-                      <span v-if="blockDurationMinutes > 0" class="ms-2 text-muted">({{ blockDurationMinutes }} min)</span>
-                    </div>
+                    <input type="time" class="form-control" v-model="bookingForm.endTime" />
                   </div>
 
                   <div class="col-12">
@@ -1788,10 +1676,11 @@ export default {
       },
       bookingMode: 'appointment', // 'appointment' | 'block'
       bookingForm: {
-        date: new Date().toISOString().split('T')[0],
+        date: (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` })(),
         serviceId: '',
         time: '',
         endTime: '',   // used by block mode
+        endDate: (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` })(), // end date for block mode
         label: '',     // optional label/note for block mode (stored in notes)
         customerName: '',
         customerPhone: '',
@@ -1799,7 +1688,7 @@ export default {
         customerId: '',
         totalPrice: 0
       },
-      todayDate: new Date().toISOString().split('T')[0],
+      todayDate: (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` })(),
       availableSlots: [],
       primaryBarber: null,
       showBookingModal: false,
@@ -2911,27 +2800,11 @@ async quickBookAppointment() {
           return
         }
 
-        if (!this.bookingForm.customerName || !this.bookingForm.customerPhone) {
-          this.showToast(this.$t('toast.customerRequired'), 'warning')
-          return
-        }
-
-        if (!this.bookingForm.serviceId || !this.bookingForm.time) {
+        if (!this.bookingForm.time) {
           this.showToast(this.$t('toast.selectTimeSlot'), 'warning')
           return
         }
 
-        // Prevent booking for past dates
-        const selectedDate = new Date(this.bookingForm.date + 'T00:00:00')
-        const today = new Date()
-        today.setHours(0, 0, 0, 0)
-        selectedDate.setHours(0, 0, 0, 0)
-        
-        if (selectedDate < today) {
-          this.showToast(this.$t('toast.cannotBookPastDate'), 'warning')
-          return
-        }
-        
         // Store the booked date for syncing views
         const bookedDate = this.bookingForm.date
         
@@ -2941,7 +2814,7 @@ async quickBookAppointment() {
           customerPhone: this.bookingForm.customerPhone,
           customerEmail: this.bookingForm.customerEmail,
           barberId: this.primaryBarber._id,
-          services: [this.bookingForm.serviceId],
+          services: this.bookingForm.serviceId ? [this.bookingForm.serviceId] : [],
           date: this.bookingForm.date,
           time: this.bookingForm.time,
           status: 'confirmed'
@@ -2974,12 +2847,13 @@ async quickBookAppointment() {
     },
     resetBookingForm() {
       const today = new Date()
-      const todayStr = today.toISOString().split('T')[0]
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`
       this.bookingForm = {
         date: todayStr,
         serviceId: '',
         time: '',
         endTime: '',
+        endDate: todayStr,
         label: '',
         customerName: '',
         customerPhone: '',
@@ -3015,31 +2889,55 @@ async quickBookAppointment() {
         this.showToast(this.$t('toast.noBarber'), 'warning')
         return
       }
-      if (!this.bookingForm.date || !this.bookingForm.time || !this.bookingForm.endTime) {
+      const startDate = this.bookingForm.date
+      const endDate = this.bookingForm.endDate || startDate
+      if (!startDate || !this.bookingForm.time || !endDate || !this.bookingForm.endTime) {
         this.showToast(this.$t('toast.blockTimeRequired'), 'warning')
         return
       }
-      const [sh, sm] = this.bookingForm.time.split(':').map(Number)
-      const [eh, em] = this.bookingForm.endTime.split(':').map(Number)
-      if ((eh * 60 + em) <= (sh * 60 + sm)) {
+      if (endDate < startDate) {
         this.showToast(this.$t('toast.endAfterStart'), 'warning')
         return
       }
-      const bookedDate = this.bookingForm.date
-      try {
-        await axios.post(`${process.env.VUE_APP_API_URL}/appointments`, {
-          barberId: this.primaryBarber._id,
-          date: this.bookingForm.date,
-          time: this.bookingForm.time,
-          endTime: this.bookingForm.endTime,
-          notes: this.bookingForm.label || '',
-          isBlock: true,
-          status: 'confirmed'
-        })
-        await this.fetchAppointments()
-        if (this.calendarViewMode === 'day' && this.dayViewDate === bookedDate) {
-          this.syncDayViewData()
+      if (endDate === startDate) {
+        const [sh, sm] = this.bookingForm.time.split(':').map(Number)
+        const [eh, em] = this.bookingForm.endTime.split(':').map(Number)
+        if ((eh * 60 + em) <= (sh * 60 + sm)) {
+          this.showToast(this.$t('toast.endAfterStart'), 'warning')
+          return
         }
+      }
+
+      // Build one block entry per day in the range
+      const blocks = []
+      const cur = new Date(startDate + 'T00:00:00')
+      const last = new Date(endDate + 'T00:00:00')
+      while (cur <= last) {
+        const ds = `${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,'0')}-${String(cur.getDate()).padStart(2,'0')}`
+        const isFirst = ds === startDate
+        const isLast = ds === endDate
+        blocks.push({
+          date: ds,
+          time: isFirst ? this.bookingForm.time : '00:00',
+          endTime: isLast ? this.bookingForm.endTime : '23:59'
+        })
+        cur.setDate(cur.getDate() + 1)
+      }
+
+      try {
+        for (const block of blocks) {
+          await axios.post(`${process.env.VUE_APP_API_URL}/appointments`, {
+            barberId: this.primaryBarber._id,
+            date: block.date,
+            time: block.time,
+            endTime: block.endTime,
+            notes: this.bookingForm.label || '',
+            isBlock: true,
+            status: 'confirmed'
+          })
+        }
+        await this.fetchAppointments()
+        if (this.calendarViewMode === 'day') this.syncDayViewData()
         this.resetBookingForm()
         this.showBookingModal = false
         this.showToast(this.$t('toast.blockTimeSuccess'), 'success')

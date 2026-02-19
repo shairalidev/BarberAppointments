@@ -2,9 +2,8 @@ const mongoose = require('mongoose');
 
 const appointmentSchema = new mongoose.Schema({
   customer: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer' },
-  // customerName/Phone are not required for admin block appointments (isBlock: true)
-  customerName: { type: String, required: function() { return !this.isBlock; } },
-  customerPhone: { type: String, required: function() { return !this.isBlock; } },
+  customerName: { type: String },
+  customerPhone: { type: String },
   customerEmail: { type: String },
   notes: { type: String },
   marketingOptIn: { type: Boolean, default: true },
