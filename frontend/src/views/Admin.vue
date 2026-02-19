@@ -206,11 +206,8 @@
                 <button @click="calendarViewMode === 'calendar' ? goToToday() : goToTodayDayView()" class="btn btn-primary btn-sm mobile-cal-btn">
                   <i class="fas fa-calendar-day"></i>
                 </button>
-                <button @click="openBookingModal" class="btn btn-success btn-sm mobile-cal-btn">
+                <button @click="openBookingModal" class="btn btn-success mobile-cal-btn mobile-cal-btn--add">
                   <i class="fas fa-plus"></i>
-                </button>
-                <button @click="toggleCalendarView" class="btn btn-sm mobile-cal-btn" :class="calendarViewMode === 'calendar' ? 'btn-outline-secondary' : 'btn-secondary'">
-                  <i :class="calendarViewMode === 'calendar' ? 'fas fa-calendar-day' : 'fas fa-calendar-alt'"></i>
                 </button>
               </div>
             </div>
@@ -5759,7 +5756,19 @@ async setReminder(appointment) {
     font-size: 0.7rem;
     margin: 0 !important;
   }
-  
+
+  .mobile-calendar-controls .mobile-cal-btn--add {
+    min-width: 42px;
+    width: 42px;
+    height: 42px;
+    font-size: 1.1rem;
+    border-radius: 8px;
+  }
+
+  .mobile-calendar-controls .mobile-cal-btn--add i {
+    font-size: 1.1rem;
+  }
+
   .mobile-calendar-controls .btn-sm {
     min-width: 28px;
     width: 28px;
@@ -6243,7 +6252,19 @@ async setReminder(appointment) {
     font-size: 0.65rem;
     margin: 0 !important;
   }
-  
+
+  .mobile-calendar-controls .mobile-cal-btn--add {
+    min-width: 42px;
+    width: 42px;
+    height: 42px;
+    font-size: 1.1rem;
+    border-radius: 8px;
+  }
+
+  .mobile-calendar-controls .mobile-cal-btn--add i {
+    font-size: 1.1rem;
+  }
+
   .mobile-calendar-controls .btn-sm {
     min-width: 26px;
     width: 26px;
