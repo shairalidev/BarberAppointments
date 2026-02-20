@@ -1169,7 +1169,7 @@
                     <div class="block-time-card">
                       <!-- Von (From) -->
                       <div class="block-time-row">
-                        <span class="block-time-label">{{ $t('admin.startTime') }}</span>
+                        <span class="block-time-label">{{ $t('admin.from') }}</span>
                         <div class="block-time-inputs">
                           <input type="date" class="block-time-input" v-model="bookingForm.date" />
                           <input type="time" class="block-time-input" v-model="bookingForm.time" />
@@ -1178,7 +1178,7 @@
                       <div class="block-time-divider"></div>
                       <!-- Bis (To) -->
                       <div class="block-time-row">
-                        <span class="block-time-label">{{ $t('admin.endTime') }}</span>
+                        <span class="block-time-label">{{ $t('admin.to') }}</span>
                         <div class="block-time-inputs">
                           <input type="date" class="block-time-input" v-model="bookingForm.endDate" />
                           <input type="time" class="block-time-input" v-model="bookingForm.endTime" />
