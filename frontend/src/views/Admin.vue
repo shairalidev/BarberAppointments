@@ -1024,17 +1024,27 @@
                 </div>
 
 
-                <!-- Date Selector (appointment mode only) -->
+                <!-- Date + Time Card (appointment mode only) -->
                 <div v-if="bookingMode === 'appointment'" class="col-12">
-                  <label class="form-label fw-semibold mb-2 d-flex align-items-center">
-                    <i class="fas fa-calendar-alt me-2 text-primary"></i>
-                    <span>{{ $t('booking.date') }}</span>
-                  </label>
-                  <input
-                    type="date"
-                    class="form-control"
-                    v-model="bookingForm.date"
-                  />
+                  <div class="block-time-card">
+                    <!-- Von (From) -->
+                    <div class="block-time-row">
+                      <span class="block-time-label">{{ $t('admin.from') }}</span>
+                      <div class="block-time-inputs">
+                        <input type="date" class="block-time-input" v-model="bookingForm.date" />
+                        <input type="time" class="block-time-input" v-model="bookingForm.time" />
+                      </div>
+                    </div>
+                    <div class="block-time-divider"></div>
+                    <!-- Bis (To) — computed from service duration -->
+                    <div class="block-time-row">
+                      <span class="block-time-label">{{ $t('admin.to') }}</span>
+                      <div class="block-time-inputs">
+                        <input type="date" class="block-time-input" :value="bookingForm.date" disabled />
+                        <input type="time" class="block-time-input" :value="appointmentEndTime" disabled />
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 
                 <!-- ═══ APPOINTMENT MODE ═══════════════════════════════════════ -->
@@ -1059,18 +1069,6 @@
                     </div>
                   </div>
 
-                  <!-- Time Selection -->
-                  <div class="col-12">
-                    <label class="form-label fw-semibold mb-2 d-flex align-items-center">
-                      <i class="fas fa-clock me-2 text-primary"></i>
-                      <span>{{ $t('booking.availableTimes') }}</span>
-                    </label>
-                    <input
-                      type="time"
-                      class="form-control"
-                      v-model="bookingForm.time"
-                    />
-                  </div>
 
                   <!-- Customer Search -->
                   <div class="col-12">
@@ -1976,6 +1974,15 @@ export default {
       const [eh, em] = this.bookingForm.endTime.split(':').map(Number)
       const diff = (eh * 60 + em) - (sh * 60 + sm)
       return diff > 0 ? diff : 0
+    },
+    appointmentEndTime() {
+      if (!this.bookingForm.time) return ''
+      const service = this.services.find(s => s._id === this.bookingForm.serviceId)
+      const duration = service ? service.duration : 0
+      if (!duration) return ''
+      const [h, m] = this.bookingForm.time.split(':').map(Number)
+      const total = h * 60 + m + duration
+      return `${String(Math.floor(total / 60) % 24).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`
     },
     formatSelectedDate() {
       if (!this.selectedCalendarDate) return ''
