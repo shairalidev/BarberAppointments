@@ -1165,28 +1165,26 @@
                 <!-- ═══ BLOCK TIME MODE ════════════════════════════════════════ -->
                 <template v-if="bookingMode === 'block'">
 
-                  <!-- Date -->
                   <div class="col-12">
-                    <label class="form-label fw-semibold">
-                      <i class="fas fa-calendar-alt me-2 text-primary"></i>{{ $t('booking.date') }}
-                    </label>
-                    <input type="date" class="form-control" v-model="bookingForm.date" />
-                  </div>
-
-                  <!-- Start Time -->
-                  <div class="col-md-6">
-                    <label class="form-label fw-semibold">
-                      <i class="fas fa-play me-1 text-success"></i>{{ $t('admin.startTime') }}
-                    </label>
-                    <input type="time" class="form-control" v-model="bookingForm.time" />
-                  </div>
-
-                  <!-- End Time -->
-                  <div class="col-md-6">
-                    <label class="form-label fw-semibold">
-                      <i class="fas fa-stop me-1 text-danger"></i>{{ $t('admin.endTime') }}
-                    </label>
-                    <input type="time" class="form-control" v-model="bookingForm.endTime" />
+                    <div class="block-time-card">
+                      <!-- Von (From) -->
+                      <div class="block-time-row">
+                        <span class="block-time-label">{{ $t('admin.startTime') }}</span>
+                        <div class="block-time-inputs">
+                          <input type="date" class="block-time-input" v-model="bookingForm.date" />
+                          <input type="time" class="block-time-input" v-model="bookingForm.time" />
+                        </div>
+                      </div>
+                      <div class="block-time-divider"></div>
+                      <!-- Bis (To) -->
+                      <div class="block-time-row">
+                        <span class="block-time-label">{{ $t('admin.endTime') }}</span>
+                        <div class="block-time-inputs">
+                          <input type="date" class="block-time-input" v-model="bookingForm.endDate" />
+                          <input type="time" class="block-time-input" v-model="bookingForm.endTime" />
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   <div class="col-12">
@@ -2828,27 +2826,51 @@ async quickBookAppointment() {
         this.showToast(this.$t('toast.noBarber'), 'warning')
         return
       }
-      if (!this.bookingForm.date || !this.bookingForm.time || !this.bookingForm.endTime) {
+      const startDate = this.bookingForm.date
+      const endDate = this.bookingForm.endDate || startDate
+      if (!startDate || !this.bookingForm.time || !this.bookingForm.endTime) {
         this.showToast(this.$t('toast.blockTimeRequired'), 'warning')
         return
       }
-      const [sh, sm] = this.bookingForm.time.split(':').map(Number)
-      const [eh, em] = this.bookingForm.endTime.split(':').map(Number)
-      if ((eh * 60 + em) <= (sh * 60 + sm)) {
+      if (endDate < startDate) {
         this.showToast(this.$t('toast.endAfterStart'), 'warning')
         return
       }
+      if (endDate === startDate) {
+        const [sh, sm] = this.bookingForm.time.split(':').map(Number)
+        const [eh, em] = this.bookingForm.endTime.split(':').map(Number)
+        if ((eh * 60 + em) <= (sh * 60 + sm)) {
+          this.showToast(this.$t('toast.endAfterStart'), 'warning')
+          return
+        }
+      }
+
+      // Build one block per day in the range
+      const blocks = []
+      const cur = new Date(startDate + 'T00:00:00')
+      const last = new Date(endDate + 'T00:00:00')
+      while (cur <= last) {
+        const ds = `${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,'0')}-${String(cur.getDate()).padStart(2,'0')}`
+        blocks.push({
+          date: ds,
+          time: ds === startDate ? this.bookingForm.time : '00:00',
+          endTime: ds === endDate ? this.bookingForm.endTime : '23:59'
+        })
+        cur.setDate(cur.getDate() + 1)
+      }
 
       try {
-        await axios.post(`${process.env.VUE_APP_API_URL}/appointments`, {
-          barberId: this.primaryBarber._id,
-          date: this.bookingForm.date,
-          time: this.bookingForm.time,
-          endTime: this.bookingForm.endTime,
-          notes: this.bookingForm.label || '',
-          isBlock: true,
-          status: 'confirmed'
-        })
+        for (const block of blocks) {
+          await axios.post(`${process.env.VUE_APP_API_URL}/appointments`, {
+            barberId: this.primaryBarber._id,
+            date: block.date,
+            time: block.time,
+            endTime: block.endTime,
+            notes: this.bookingForm.label || '',
+            isBlock: true,
+            status: 'confirmed'
+          })
+        }
         await this.fetchAppointments()
         if (this.calendarViewMode === 'day') this.syncDayViewData()
         this.resetBookingForm()
@@ -9493,6 +9515,76 @@ async setReminder(appointment) {
   overflow-y: auto;
   max-width: 100%;
   padding: 1rem;
+}
+
+/* Block Time Card */
+.block-time-card {
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.dark-theme .block-time-card {
+  border-color: #3a3a3a;
+  background: #1e1e1e;
+}
+
+.block-time-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  gap: 12px;
+}
+
+.block-time-label {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #212529;
+  min-width: 40px;
+  flex-shrink: 0;
+}
+
+.dark-theme .block-time-label {
+  color: #e0e0e0;
+}
+
+.block-time-inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.block-time-input {
+  border: none;
+  background: transparent;
+  font-size: 0.95rem;
+  color: #495057;
+  padding: 2px 4px;
+  outline: none;
+  cursor: pointer;
+  text-align: right;
+}
+
+.block-time-input:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.dark-theme .block-time-input {
+  color: #adb5bd;
+  color-scheme: dark;
+}
+
+.block-time-divider {
+  height: 1px;
+  background: #dee2e6;
+  margin: 0 18px;
+}
+
+.dark-theme .block-time-divider {
+  background: #3a3a3a;
 }
 
 /* Service Selector Wrapper - Prevent overflow */
