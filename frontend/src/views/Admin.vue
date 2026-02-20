@@ -1018,7 +1018,7 @@
                     <button
                       type="button"
                       :class="['btn', 'btn-sm', bookingMode === 'block' ? 'btn-warning' : 'btn-outline-secondary']"
-                      @click="bookingMode = 'block'; bookingForm.serviceId = ''; bookingForm.endTime = ''"
+                      @click="switchToBlockMode"
                     ><i class="fas fa-clock me-1"></i>{{ $t('admin.blockTimeMode') }}</button>
                   </div>
                 </div>
@@ -2827,6 +2827,18 @@ async quickBookAppointment() {
       this.bookingFromSlotClick = false
       this.manualTimeEntry = false
       this.bookingMode = 'appointment'
+    },
+    switchToBlockMode() {
+      this.bookingMode = 'block'
+      this.bookingForm.serviceId = ''
+      // Set default end time: 1 hour after start time, or fallback to 17:00
+      if (this.bookingForm.time) {
+        const [h, m] = this.bookingForm.time.split(':').map(Number)
+        const total = h * 60 + m + 60
+        this.bookingForm.endTime = `${String(Math.floor(total / 60) % 24).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`
+      } else {
+        this.bookingForm.endTime = '17:00'
+      }
     },
     async quickBlockTime() {
       if (!this.primaryBarber) {
@@ -9565,6 +9577,7 @@ async setReminder(appointment) {
 
 .block-time-input {
   border: none;
+  border-bottom: 1.5px dashed #adb5bd;
   background: transparent;
   font-size: 0.95rem;
   color: #495057;
@@ -9572,6 +9585,10 @@ async setReminder(appointment) {
   outline: none;
   cursor: pointer;
   text-align: right;
+  min-width: 90px;
+}
+.block-time-input:focus {
+  border-bottom-color: #0d6efd;
 }
 
 .block-time-input:disabled {
@@ -9582,6 +9599,10 @@ async setReminder(appointment) {
 .dark-theme .block-time-input {
   color: #adb5bd;
   color-scheme: dark;
+  border-bottom-color: #555;
+}
+.dark-theme .block-time-input:focus {
+  border-bottom-color: #4da3ff;
 }
 
 .block-time-divider {
