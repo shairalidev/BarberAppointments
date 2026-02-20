@@ -1027,21 +1027,11 @@
                 <!-- Date + Time Card (appointment mode only) -->
                 <div v-if="bookingMode === 'appointment'" class="col-12">
                   <div class="block-time-card">
-                    <!-- Von (From) -->
                     <div class="block-time-row">
-                      <span class="block-time-label">{{ $t('admin.from') }}</span>
+                      <span class="block-time-label">{{ $t('booking.time') }}</span>
                       <div class="block-time-inputs">
                         <input type="date" class="block-time-input" v-model="bookingForm.date" />
                         <input type="time" class="block-time-input" v-model="bookingForm.time" />
-                      </div>
-                    </div>
-                    <div class="block-time-divider"></div>
-                    <!-- Bis (To) — computed from service duration -->
-                    <div class="block-time-row">
-                      <span class="block-time-label">{{ $t('admin.to') }}</span>
-                      <div class="block-time-inputs">
-                        <input type="date" class="block-time-input" :value="bookingForm.date" disabled />
-                        <input type="time" class="block-time-input" :value="appointmentEndTime" disabled />
                       </div>
                     </div>
                   </div>
