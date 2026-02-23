@@ -3797,14 +3797,15 @@ getTimeSlotsForDay(dayIndex) {
     },
     getDayViewHalfHourSlots(hour) {
       const currentHour = parseInt(hour.split(':')[0])
+      const hourStr = currentHour.toString().padStart(2, '0')
       const slot0Start = currentHour * 60
       const slot0End   = currentHour * 60 + 30
       const slot1Start = currentHour * 60 + 30
       const slot1End   = currentHour * 60 + 60
 
       const slots = [
-        { time: `${hour}:00`, appointment: null, showTime: false, isOccupied: false, isSpanEnd: false },
-        { time: `${hour}:30`, appointment: null, showTime: false, isOccupied: false, isSpanEnd: false }
+        { time: `${hourStr}:00`, appointment: null, showTime: false, isOccupied: false, isSpanEnd: false },
+        { time: `${hourStr}:30`, appointment: null, showTime: false, isOccupied: false, isSpanEnd: false }
       ]
 
       this.dayViewData.appointments.forEach(apt => {
@@ -9678,12 +9679,12 @@ async setReminder(appointment) {
   background: #3a3a3a;
 }
 
-/* Service Selector Wrapper - Prevent overflow */
+/* Service Selector Wrapper */
 .service-selector-wrapper {
   width: 100% !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
-  overflow: hidden !important;
+  overflow: visible !important;
   padding-left: 0 !important;
   padding-right: 0 !important;
   margin-bottom: 0.5rem !important;
@@ -9693,7 +9694,7 @@ async setReminder(appointment) {
   width: 100% !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
-  overflow: hidden !important;
+  overflow: visible !important;
   position: relative !important;
 }
 
@@ -9723,21 +9724,17 @@ async setReminder(appointment) {
 }
 
 .service-inline-list {
-  position: absolute;
-  top: calc(100% + 2px);
-  left: 0;
-  right: 0;
-  z-index: 1080;
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
   max-height: 220px;
   overflow-y: auto;
+  margin-top: 4px;
   border: 1px solid var(--bs-border-color);
   border-radius: 0.5rem;
   padding: 0.3rem;
   background: var(--bs-body-bg);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .service-inline-item {
@@ -10221,26 +10218,24 @@ select.booking-service-select {
     padding-right: 0 !important;
     max-width: 100% !important;
     width: 100% !important;
-    overflow: hidden !important;
+    overflow: visible !important;
   }
-  
+
   .service-select-container {
     width: 100% !important;
     max-width: 100% !important;
-    overflow: hidden !important;
+    overflow: visible !important;
     padding: 0 !important;
     margin: 0 !important;
   }
-  
-  /* Service Selector Container - Prevent overflow */
-  .modal-body .col-12:has(.booking-service-select),
-  .modal-body .col-12:has(select.booking-service-select),
+
+  /* Service Selector Container */
   .modal-body .service-selector-wrapper {
     padding-left: 0 !important;
     padding-right: 0 !important;
     max-width: 100% !important;
     width: 100% !important;
-    overflow: hidden !important;
+    overflow: visible !important;
   }
   
   /* Service Selector - Compact on mobile */
