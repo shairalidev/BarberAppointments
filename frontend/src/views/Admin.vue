@@ -6710,26 +6710,18 @@ async setReminder(appointment) {
 /* Customer Search Dropdown */
 .customer-search-container {
   position: relative;
-  z-index: 1070;
-  isolation: isolate;
+  overflow: visible;
 }
 
 .customer-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
   border-radius: 8px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  z-index: 1070;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   max-height: 300px;
   overflow-y: auto;
   margin-top: 0.25rem;
   -webkit-overflow-scrolling: touch;
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
 }
 
 .customer-list {
@@ -10326,11 +10318,9 @@ select.booking-service-select {
     box-sizing: border-box !important;
   }
   
-  /* Customer search section - smaller */
+  /* Customer search section */
   .modal-body .customer-search-container {
-    max-height: 120px !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
+    overflow: visible !important;
   }
   
   .modal-body .input-group {
@@ -10358,11 +10348,6 @@ select.booking-service-select {
     max-height: 200px !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
-    z-index: 1070 !important;
-    position: absolute !important;
-    transform: translateZ(0) !important;
-    -webkit-transform: translateZ(0) !important;
-    will-change: transform !important;
   }
   
   .modal-body .customer-item {
@@ -11661,14 +11646,8 @@ select.booking-service-select {
     }
     
     .customer-dropdown {
-      z-index: 1070 !important;
-      position: absolute !important;
-      transform: translateZ(0) !important;
-      -webkit-transform: translateZ(0) !important;
-      will-change: transform !important;
       -webkit-overflow-scrolling: touch !important;
       pointer-events: auto !important;
-      -webkit-touch-callout: none !important;
     }
     
     .customer-item {
@@ -12124,22 +12103,14 @@ select.booking-service-select {
   }
 
   .booking-modal-body .customer-search-container {
-    position: relative !important;
-    z-index: 1070 !important;
     margin-bottom: 0.5rem;
-    isolation: isolate !important;
+    overflow: visible !important;
   }
 
   .booking-modal-body .customer-dropdown {
     max-height: 200px !important;
-    z-index: 1070 !important;
-    position: absolute !important;
-    transform: translateZ(0) !important;
-    -webkit-transform: translateZ(0) !important;
-    will-change: transform !important;
+    overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
-    pointer-events: auto !important;
-    -webkit-touch-callout: none !important;
   }
 
   .booking-modal-body .customer-item {
@@ -12167,12 +12138,9 @@ select.booking-service-select {
     touch-action: pan-y !important;
   }
   
-  /* Allow dropdown to appear above modal body */
   .booking-modal-body .customer-search-container {
-    position: relative !important;
-    z-index: 1070 !important;
     margin-bottom: 0.5rem;
-    isolation: isolate !important;
+    overflow: visible !important;
   }
 
   .booking-modal-body .customer-name {
