@@ -1055,14 +1055,27 @@
                     <label class="form-label fw-semibold">
                       <i class="fas fa-cut me-2 text-primary"></i>{{ $t('admin.service') }}
                     </label>
-                    <div class="service-select-container">
-                      <div class="service-inline-list">
+                    <div class="service-select-container" @click.stop>
+                      <button
+                        type="button"
+                        class="service-dropdown-trigger"
+                        @click="showServiceDropdown = !showServiceDropdown"
+                      >
+                        <span v-if="bookingForm.serviceId">
+                          {{ activeServices.find(s => s._id === bookingForm.serviceId)?.name }}
+                          &nbsp;–&nbsp;
+                          {{ formatCurrency(activeServices.find(s => s._id === bookingForm.serviceId)?.price) }}
+                        </span>
+                        <span v-else class="service-placeholder">{{ $t('admin.selectService') }}</span>
+                        <i :class="['fas', showServiceDropdown ? 'fa-chevron-up' : 'fa-chevron-down']"></i>
+                      </button>
+                      <div v-if="showServiceDropdown" class="service-inline-list">
                         <div
                           class="service-inline-item"
                           :class="{ selected: bookingForm.serviceId === '' }"
                           @click="selectService('')"
                         >
-                          <span class="service-inline-name text-muted">{{ $t('admin.selectService') }}</span>
+                          <span class="service-inline-name service-placeholder">{{ $t('admin.selectService') }}</span>
                         </div>
                         <div
                           v-for="service in activeServices"
@@ -1094,9 +1107,8 @@
                           class="form-control"
                           @focus="handleCustomerSearchFocus"
                           @input="handleCustomerSearchInput"
-                          @touchstart="handleCustomerSearchFocus"
-                          @click.stop="handleCustomerSearchFocus"
-                          @mousedown.stop
+                          @blur="handleCustomerSearchBlur"
+                          @click.stop
                           autocomplete="off"
                         />
                         <button
@@ -1669,6 +1681,7 @@ export default {
         notes: '',
         marketingOptIn: true
       },
+      showServiceDropdown: false,
       bookingCustomerSearch: '',
       bookingCustomerSearchTimer: null,
       showCustomerDropdown: false,
@@ -2816,6 +2829,7 @@ async quickBookAppointment() {
         totalPrice: 0
       }
       this.bookingMode = 'appointment'
+      this.showServiceDropdown = false
       this.manualTimeEntry = false
       this.bookingCalendarMonth = today.getMonth()
       this.bookingCalendarYear = today.getFullYear()
@@ -2837,6 +2851,7 @@ async quickBookAppointment() {
       this.bookingFromSlotClick = false
       this.manualTimeEntry = false
       this.bookingMode = 'appointment'
+      this.showServiceDropdown = false
     },
     switchToBlockMode() {
       this.bookingMode = 'block'
@@ -2915,6 +2930,7 @@ async quickBookAppointment() {
     },
     selectService(id) {
       this.bookingForm.serviceId = id
+      this.showServiceDropdown = false
       this.updateBookingPrice()
     },
     updateBookingPrice() {
@@ -4262,14 +4278,14 @@ async setReminder(appointment) {
       this.customerTouchStart = null
     },
     async handleCustomerSearchFocus() {
-      // Ensure customers are loaded when user focuses on search
       if (this.customers.length === 0) {
-        await this.fetchCustomers(this.bookingCustomerSearch || undefined)
+        await this.fetchCustomers()
       }
-      // Use nextTick to ensure dropdown shows after DOM updates
-      await this.$nextTick()
-      // Only show dropdown if user has typed something
-      this.showCustomerDropdown = !!(this.bookingCustomerSearch && this.bookingCustomerSearch.trim().length > 0)
+      this.showCustomerDropdown = true
+    },
+    handleCustomerSearchBlur() {
+      // Delay so a tap/click on a dropdown item fires before the list disappears
+      setTimeout(() => { this.showCustomerDropdown = false }, 250)
     },
     handleCustomerSearchInput() {
       // Debounce server requests while typing
@@ -4304,12 +4320,12 @@ async setReminder(appointment) {
       this.bookingForm.customerEmail = ''
     },
     handleClickOutside(event) {
-      // Check if click is inside customer search container or dropdown
-      const searchContainer = event.target.closest('.customer-search-container')
-      const dropdown = event.target.closest('.customer-dropdown')
-      const input = event.target.closest('input[type="text"]')
-      // Don't close if clicking inside the search container, dropdown, or the input itself
-      if (!searchContainer && !dropdown && !(input && input.closest('.customer-search-container'))) {
+      // Close service dropdown when clicking outside its container
+      if (!event.target.closest('.service-select-container')) {
+        this.showServiceDropdown = false
+      }
+      // Close customer dropdown when clicking outside its container
+      if (!event.target.closest('.customer-search-container')) {
         this.showCustomerDropdown = false
       }
     },
@@ -9681,17 +9697,47 @@ async setReminder(appointment) {
   position: relative !important;
 }
 
+.service-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  text-align: left;
+  gap: 0.5rem;
+  transition: border-color 0.15s;
+}
+
+.service-dropdown-trigger:hover {
+  border-color: var(--bs-primary);
+}
+
+.service-placeholder {
+  color: var(--bs-secondary-color, #6c757d);
+}
+
 .service-inline-list {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  right: 0;
+  z-index: 1080;
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
-  max-height: 200px;
+  gap: 0.15rem;
+  max-height: 220px;
   overflow-y: auto;
-  width: 100%;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--bs-border-color);
   border-radius: 0.5rem;
   padding: 0.3rem;
-  background: var(--card-bg, #fff);
+  background: var(--bs-body-bg);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 .service-inline-item {
@@ -9707,30 +9753,32 @@ async setReminder(appointment) {
 }
 
 .service-inline-item:hover {
-  background-color: rgba(var(--bs-primary-rgb, 13, 110, 253), 0.08);
+  background-color: rgba(var(--bs-primary-rgb, 13, 110, 253), 0.1);
 }
 
 .service-inline-item.selected {
-  background-color: var(--primary-color, #0d6efd);
+  background-color: var(--bs-primary);
   color: #fff;
 }
 
-.service-inline-item.selected .service-inline-price {
-  color: rgba(255, 255, 255, 0.85);
-}
-
-.service-inline-item.selected .text-muted {
-  color: rgba(255, 255, 255, 0.75) !important;
+.service-inline-item.selected .service-inline-price,
+.service-inline-item.selected .service-placeholder {
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .service-inline-name {
   font-size: 0.875rem;
   font-weight: 500;
+  color: var(--bs-body-color);
+}
+
+.service-inline-item.selected .service-inline-name {
+  color: #fff;
 }
 
 .service-inline-price {
   font-size: 0.8rem;
-  color: #6c757d;
+  color: var(--bs-secondary-color, #6c757d);
   white-space: nowrap;
   margin-left: 0.5rem;
 }
