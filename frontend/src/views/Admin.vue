@@ -3827,9 +3827,9 @@ getTimeSlotsForDay(dayIndex) {
 
         const [ah, am] = apt.time.split(':').map(Number)
         const aptStart = ah * 60 + am
-        // Block appointments store an explicit endTime; regular ones use totalDuration
+        // Use explicit endTime if stored, otherwise calculate from totalDuration
         let aptEnd
-        if (apt.isBlock && apt.endTime) {
+        if (apt.endTime) {
           const [eh, em] = apt.endTime.split(':').map(Number)
           aptEnd = eh * 60 + em
         } else {

@@ -291,6 +291,10 @@ router.post('/', async (req, res) => {
         totalPrice = serviceDocs.reduce((sum, s) => sum + s.price, 0);
         totalDuration = serviceDocs.reduce((sum, s) => sum + s.duration, 0);
       }
+    } else if (isAdminRequest && endTime) {
+      // Admin provided an explicit end time without services — derive duration from it
+      const diff = timeStringToMinutes(endTime) - timeStringToMinutes(time);
+      if (diff > 0) totalDuration = diff;
     }
 
     // Validate working hours (admins bypass this entirely)
