@@ -1384,6 +1384,12 @@
           <div class="modal-body edit-modal-body responsive-modal-body">
             <div v-if="editTimeModal.appointment" class="mb-3 current-appointment-info">
               <p class="mb-1"><strong>{{ $t('admin.customer') }}:</strong> {{ editTimeModal.appointment.customerName }}</p>
+              <p v-if="editTimeModal.appointment.customerPhone" class="mb-1">
+                <strong>{{ $t('admin.phone') }}:</strong>
+                <a :href="'tel:' + editTimeModal.appointment.customerPhone" class="ms-1 text-decoration-none">
+                  <i class="fas fa-phone me-1"></i>{{ editTimeModal.appointment.customerPhone }}
+                </a>
+              </p>
               <p class="mb-1"><strong>{{ $t('admin.currentDate') }}:</strong> {{ formatEditModalCurrentDate }}</p>
               <p class="mb-0"><strong>{{ $t('admin.currentTime') }}:</strong> {{ editTimeModal.appointment.time }}</p>
             </div>
