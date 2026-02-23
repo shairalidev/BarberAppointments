@@ -309,7 +309,7 @@ router.post('/', async (req, res) => {
     });
 
     const requestStart = timeStringToMinutes(time);
-    const requestEnd = requestStart + totalDuration;
+    const requestEnd = endTime ? timeStringToMinutes(endTime) : requestStart + totalDuration;
 
     if (isAdminRequest) {
       // Admin: allow any time — only block on overlap with existing appointments
@@ -394,6 +394,7 @@ router.post('/', async (req, res) => {
       totalDuration,
       date: normalizedDate,
       time,
+      endTime: endTime || undefined,
       marketingOptIn,
       status: initialStatus // Pending unless an admin creates a confirmed booking
     });

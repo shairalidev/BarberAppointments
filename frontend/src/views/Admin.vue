@@ -519,13 +519,13 @@
                             <button v-if="apt.status === 'pending'" @click="openResponseModal(apt, 'confirmed')" class="btn btn-sm btn-success flex-fill">
                               <i class="fas fa-check me-1"></i>{{ $t('admin.accept') }}
                             </button>
-                            <button v-if="apt.status === 'pending'" @click="openResponseModal(apt, 'cancelled')" class="btn btn-sm btn-outline-danger flex-fill">
+                            <button v-if="apt.status === 'pending'" @click="cancelAppointment(apt)" class="btn btn-sm btn-outline-danger flex-fill">
                               <i class="fas fa-times me-1"></i>{{ $t('admin.reject') }}
                             </button>
                             <button v-if="apt.status === 'confirmed'" @click="openEditTimeModal(apt)" class="btn btn-sm btn-primary flex-fill">
                               <i class="fas fa-edit me-1"></i>{{ $t('common.edit') }}
                             </button>
-                            <button v-if="apt.status === 'confirmed'" @click="openCancelModal(apt)" class="btn btn-sm btn-danger flex-fill">
+                            <button v-if="apt.status === 'confirmed'" @click="cancelAppointment(apt)" class="btn btn-sm btn-danger flex-fill">
                               <i class="fas fa-times me-1"></i>{{ $t('admin.reject') }}
                             </button>
                           <button v-if="apt.status === 'confirmed'" @click="setReminder(apt)" class="btn btn-sm btn-warning">
@@ -1024,14 +1024,24 @@
                 </div>
 
 
-                <!-- Date + Time Card (appointment mode only) -->
+                <!-- Date + Time Card (appointment mode) - Von/Bis layout -->
                 <div v-if="bookingMode === 'appointment'" class="col-12">
                   <div class="block-time-card">
+                    <!-- Von (From) -->
                     <div class="block-time-row">
-                      <span class="block-time-label">{{ $t('booking.time') }}</span>
+                      <span class="block-time-label">{{ $t('admin.from') }}</span>
                       <div class="block-time-inputs">
-                        <input type="date" class="block-time-input" v-model="bookingForm.date" />
-                        <input type="time" class="block-time-input" v-model="bookingForm.time" />
+                        <input type="date" class="block-time-input" v-model="bookingForm.date" @change="onAppointmentDateChange" />
+                        <input type="time" class="block-time-input" v-model="bookingForm.time" @change="recalcAppointmentEndTime" />
+                      </div>
+                    </div>
+                    <div class="block-time-divider"></div>
+                    <!-- Bis (To) -->
+                    <div class="block-time-row">
+                      <span class="block-time-label">{{ $t('admin.to') }}</span>
+                      <div class="block-time-inputs">
+                        <input type="date" class="block-time-input" v-model="bookingForm.endDate" />
+                        <input type="time" class="block-time-input" v-model="bookingForm.endTime" />
                       </div>
                     </div>
                   </div>
@@ -1046,16 +1056,25 @@
                       <i class="fas fa-cut me-2 text-primary"></i>{{ $t('admin.service') }}
                     </label>
                     <div class="service-select-container">
-                      <select
-                        v-model="bookingForm.serviceId"
-                        @change="updateBookingPrice"
-                        class="form-select booking-service-select"
-                      >
-                        <option value="">{{ $t('admin.selectService') }}</option>
-                        <option v-for="service in activeServices" :key="service._id" :value="service._id">
-                          {{ service.name }} - {{ formatCurrency(service.price) }}
-                        </option>
-                      </select>
+                      <div class="service-inline-list">
+                        <div
+                          class="service-inline-item"
+                          :class="{ selected: bookingForm.serviceId === '' }"
+                          @click="selectService('')"
+                        >
+                          <span class="service-inline-name text-muted">{{ $t('admin.selectService') }}</span>
+                        </div>
+                        <div
+                          v-for="service in activeServices"
+                          :key="service._id"
+                          class="service-inline-item"
+                          :class="{ selected: bookingForm.serviceId === service._id }"
+                          @click="selectService(service._id)"
+                        >
+                          <span class="service-inline-name">{{ service.name }}</span>
+                          <span class="service-inline-price">{{ formatCurrency(service.price) }}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
@@ -1727,8 +1746,8 @@ export default {
       ).slice(0, 8)
     },
     activeServices() {
-      // Filter out disabled/inactive services for booking
-      return this.services.filter(service => service.active !== false)
+      // Filter out disabled/inactive services for booking, reversed so newest appear first
+      return this.services.filter(service => service.active !== false).slice().reverse()
     },
     currentMonthYear() {
       const monthKeys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
@@ -2751,6 +2770,7 @@ async quickBookAppointment() {
           services: this.bookingForm.serviceId ? [this.bookingForm.serviceId] : [],
           date: this.bookingForm.date,
           time: this.bookingForm.time,
+          endTime: this.bookingForm.endTime || undefined,
           status: 'confirmed'
         }
         
@@ -2893,9 +2913,27 @@ async quickBookAppointment() {
         )
       }
     },
+    selectService(id) {
+      this.bookingForm.serviceId = id
+      this.updateBookingPrice()
+    },
     updateBookingPrice() {
       const service = this.services.find(s => s._id === this.bookingForm.serviceId)
       this.bookingForm.totalPrice = service ? service.price : 0
+      this.recalcAppointmentEndTime()
+    },
+    recalcAppointmentEndTime() {
+      if (!this.bookingForm.time) return
+      const service = this.services.find(s => s._id === this.bookingForm.serviceId)
+      const duration = service ? service.duration : 0
+      if (!duration) return
+      const [h, m] = this.bookingForm.time.split(':').map(Number)
+      const total = h * 60 + m + duration
+      this.bookingForm.endTime = `${String(Math.floor(total / 60) % 24).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`
+      this.bookingForm.endDate = this.bookingForm.date
+    },
+    onAppointmentDateChange() {
+      this.bookingForm.endDate = this.bookingForm.date
     },
     formatCurrency(value) {
       return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(value)
@@ -3069,7 +3107,7 @@ async quickBookAppointment() {
       const appointment = this.editTimeModal.appointment
       this.closeEditTimeModal()
       this.$nextTick(() => {
-        this.openCancelModal(appointment)
+        this.cancelAppointment(appointment)
       })
     },
     changeEditWeek(offset) {
@@ -3951,6 +3989,25 @@ async setReminder(appointment) {
           this.$t('toast.reminderError', { message: error.response?.data?.message || error.message }),
           'error'
         )
+      }
+    },
+    async cancelAppointment(appointment) {
+      try {
+        const appointmentDate = appointment.date.split('T')[0]
+        await axios.put(`${process.env.VUE_APP_API_URL}/appointments/${appointment._id}`, {
+          status: 'cancelled',
+          responseMessage: 'Appointment has been cancelled.',
+          sendEmail: true
+        })
+        await this.fetchAppointments()
+        if (this.calendarViewMode === 'day' && this.dayViewDate === appointmentDate) {
+          this.syncDayViewData()
+        }
+        this.showToast(this.$t('toast.appointmentCancelled'), 'success')
+      } catch (error) {
+        console.error('Error cancelling appointment:', error)
+        const errorMessage = error.response?.data?.message || 'Failed to cancel appointment'
+        this.showToast(errorMessage, 'error')
       }
     },
     openCancelModal(appointment) {
@@ -9622,6 +9679,60 @@ async setReminder(appointment) {
   box-sizing: border-box !important;
   overflow: hidden !important;
   position: relative !important;
+}
+
+.service-inline-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  max-height: 200px;
+  overflow-y: auto;
+  width: 100%;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  padding: 0.3rem;
+  background: var(--card-bg, #fff);
+}
+
+.service-inline-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.45rem 0.75rem;
+  border-radius: 0.35rem;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  width: 100%;
+  user-select: none;
+}
+
+.service-inline-item:hover {
+  background-color: rgba(var(--bs-primary-rgb, 13, 110, 253), 0.08);
+}
+
+.service-inline-item.selected {
+  background-color: var(--primary-color, #0d6efd);
+  color: #fff;
+}
+
+.service-inline-item.selected .service-inline-price {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.service-inline-item.selected .text-muted {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
+.service-inline-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.service-inline-price {
+  font-size: 0.8rem;
+  color: #6c757d;
+  white-space: nowrap;
+  margin-left: 0.5rem;
 }
 
 /* Booking Service Selector - Base Styles */
