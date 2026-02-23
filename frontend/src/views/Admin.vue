@@ -9899,7 +9899,7 @@ select.booking-service-select {
   
   /* Customer search - Normal size */
   .customer-search-container {
-    max-height: 200px !important;
+    overflow: visible !important;
   }
   
   .customer-item {
@@ -10174,7 +10174,8 @@ select.booking-service-select {
     padding-left: 0.25rem !important;
     padding-right: 0.25rem !important;
     max-width: 100% !important;
-    overflow: hidden !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
     width: 100% !important;
     box-sizing: border-box !important;
   }
@@ -11615,9 +11616,7 @@ select.booking-service-select {
     
     /* Customer dropdown iOS Safari fixes */
     .customer-search-container {
-      position: relative !important;
-      z-index: 1070 !important;
-      isolation: isolate !important;
+      overflow: visible !important;
     }
     
     .customer-dropdown {
@@ -11770,7 +11769,8 @@ select.booking-service-select {
       padding-left: 0.25rem;
       padding-right: 0.25rem;
       max-width: 100%;
-      overflow: hidden;
+      overflow-x: hidden;
+      overflow-y: visible;
       box-sizing: border-box;
     }
 
