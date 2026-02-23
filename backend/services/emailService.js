@@ -121,6 +121,8 @@ class EmailService {
         .content { padding: 30px; }
         .booking-card { background: #f0f9ff; border-radius: 12px; padding: 20px; margin: 20px 0; border-left: 4px solid #0ea5e9; }
         .detail { display: flex; justify-content: space-between; margin: 10px 0; padding: 8px 0; border-bottom: 1px solid #e5e7eb; }
+        .cancel-section { text-align: center; margin: 24px 0; padding: 20px; background: #fef2f2; border-radius: 10px; }
+        .cancel-btn { display: inline-block; padding: 12px 28px; background: #ef4444; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px; }
         .footer { background: #f8fafc; padding: 20px; text-align: center; color: #6b7280; }
       </style>
     </head>
@@ -133,7 +135,7 @@ class EmailService {
         <div class="content">
           <h2>Hallo ${appointment.customerName}!</h2>
           <p>Vielen Dank für Ihre Buchung bei Ates Barberos. Ihre Anfrage wurde erhalten und wartet auf Bestätigung.</p>
-          
+
           <div class="booking-card">
             <h3>Ihre Buchungsanfrage</h3>
             <div class="detail">
@@ -153,9 +155,14 @@ class EmailService {
               <span>€${appointment.totalPrice}</span>
             </div>
           </div>
-          
+
           <p><strong>Nächste Schritte:</strong></p>
           <p>Ihr Barber wird diese Anfrage prüfen und Ihren Termin bestätigen. Sie erhalten eine weitere E-Mail, sobald Ihre Buchung bestätigt wurde.</p>
+
+          <div class="cancel-section">
+            <p style="margin: 0 0 12px; color: #6b7280; font-size: 14px;">Möchten Sie Ihre Buchung stornieren?</p>
+            <a href="${process.env.APP_URL}/api/appointments/${appointment._id}/cancel" class="cancel-btn">Buchung stornieren</a>
+          </div>
         </div>
         <div class="footer">
           <p><strong>Ates Barberos</strong> - Professionelle Barberdienstleistungen</p>
@@ -309,6 +316,8 @@ class EmailService {
         .booking-card { background: #f0fdf4; border-radius: 12px; padding: 20px; margin: 20px 0; border-left: 4px solid #10b981; }
         .detail { display: flex; justify-content: space-between; margin: 10px 0; padding: 8px 0; border-bottom: 1px solid #dcfce7; }
         .confirmed { background: #dcfce7; color: #166534; padding: 8px 16px; border-radius: 20px; font-weight: 700; text-align: center; margin: 20px 0; }
+        .cancel-section { text-align: center; margin: 24px 0; padding: 20px; background: #fef2f2; border-radius: 10px; }
+        .cancel-btn { display: inline-block; padding: 12px 28px; background: #ef4444; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px; }
         .footer { background: #f8fafc; padding: 20px; text-align: center; color: #6b7280; }
       </style>
     </head>
@@ -322,7 +331,7 @@ class EmailService {
           <h2>Hallo ${appointment.customerName}!</h2>
           <div class="confirmed">IHRE BUCHUNG IST BESTÄTIGT</div>
           <p>Großartige Neuigkeiten! Ihr Termin bei Ates Barberos wurde bestätigt. Wir freuen uns darauf, Sie zu sehen.</p>
-          
+
           <div class="booking-card">
             <h3>Bestätigter Termin</h3>
             <div class="detail">
@@ -346,9 +355,14 @@ class EmailService {
               <span>${appointment.customerPhone}</span>
             </div>
           </div>
-          
+
           <p><strong>Wichtig:</strong> Bitte kommen Sie 5 Minuten früher. Sie erhalten 30 Minuten vor Ihrem Termin eine Erinnerung.</p>
           ${appointment.responseMessage ? `<div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0;"><p style="margin: 0; color: #1e40af;"><strong>Nachricht von ${barber?.name}:</strong> "${appointment.responseMessage}"</p></div>` : ''}
+
+          <div class="cancel-section">
+            <p style="margin: 0 0 12px; color: #6b7280; font-size: 14px;">Möchten Sie Ihren Termin stornieren?</p>
+            <a href="${process.env.APP_URL}/api/appointments/${appointment._id}/cancel" class="cancel-btn">Termin stornieren</a>
+          </div>
         </div>
         <div class="footer">
           <p><strong>Ates Barberos</strong> - Professionelle Barberdienstleistungen</p>
@@ -853,6 +867,91 @@ class EmailService {
       subject,
       html: emailHtml,
       text
+    });
+  }
+
+  // Customer self-cancellation - notify barber
+  static async sendCustomerCancellationToBarber(appointment, barber) {
+    if (!barber?.email) return;
+
+    const subject = 'Termin storniert vom Kunden - Ates Barberos';
+    const text = this.buildPlainText([
+      `Hallo ${barber.name}!`,
+      'Ein Kunde hat seinen Termin selbst storniert.',
+      `Kunde: ${appointment.customerName} (${appointment.customerPhone})`,
+      `Termin: ${this.formatDateTime(appointment.date, appointment.time)}`,
+      `Dienstleistungen: ${appointment.services?.map(s => s.name).join(', ')}`,
+      `Gesamt: €${appointment.totalPrice}`,
+      'Der Zeitslot ist jetzt wieder verfügbar.'
+    ]);
+
+    const emailHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Termin storniert - Ates Barberos</title>
+      <style>
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; background-color: #f8fafc; }
+        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 30px; text-align: center; }
+        .content { padding: 30px; }
+        .cancel-card { background: #fef2f2; border-radius: 12px; padding: 20px; margin: 20px 0; border-left: 4px solid #ef4444; }
+        .detail { display: flex; justify-content: space-between; margin: 10px 0; padding: 8px 0; border-bottom: 1px solid #fecaca; }
+        .footer { background: #f8fafc; padding: 20px; text-align: center; color: #6b7280; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>Termin storniert</h1>
+          <p>Ates Barberos Admin</p>
+        </div>
+        <div class="content">
+          <h2>Hallo ${barber.name}!</h2>
+          <p>Ein Kunde hat seinen Termin selbst storniert. Der Zeitslot ist jetzt wieder verfügbar.</p>
+
+          <div class="cancel-card">
+            <h3>Stornierter Termin</h3>
+            <div class="detail">
+              <span><strong>Kunde:</strong></span>
+              <span>${appointment.customerName}</span>
+            </div>
+            <div class="detail">
+              <span><strong>Telefon:</strong></span>
+              <span>${appointment.customerPhone}</span>
+            </div>
+            <div class="detail">
+              <span><strong>Datum & Uhrzeit:</strong></span>
+              <span>${new Date(appointment.date).toLocaleDateString('de-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} um ${appointment.time}</span>
+            </div>
+            <div class="detail">
+              <span><strong>Dienstleistungen:</strong></span>
+              <span>${appointment.services?.map(s => s.name).join(', ')}</span>
+            </div>
+            <div class="detail">
+              <span><strong>Gesamt:</strong></span>
+              <span>€${appointment.totalPrice}</span>
+            </div>
+          </div>
+
+          <p>Sie können den Termin im Admin-Portal einsehen.</p>
+          <a href="${process.env.APP_URL}/admin" style="background: #3b82f6; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; margin: 10px 0;">Zum Admin-Portal</a>
+        </div>
+        <div class="footer">
+          <p><strong>Ates Barberos</strong> - Admin-Benachrichtigungen</p>
+          <p>Bahnhofstraße 3, 6410 Telfs</p>
+        </div>
+      </div>
+    </body>
+    </html>`;
+
+    await this.dispatchEmail({
+      to: barber.email,
+      subject,
+      html: emailHtml,
+      text,
+      nameOverride: 'Ates Barberos Admin'
     });
   }
 

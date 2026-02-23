@@ -1038,6 +1038,104 @@ router.post('/:id/reminder', async (req, res) => {
   }
 });
 
+// Public customer self-cancellation endpoint (no auth required)
+router.get('/:id/cancel', async (req, res) => {
+  const renderPage = (title, heading, message, color) => `
+    <!DOCTYPE html>
+    <html lang="de">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>${title} - Ates Barberos</title>
+      <style>
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; background: #f8fafc; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 480px; width: 90%; padding: 40px; text-align: center; }
+        .icon { font-size: 56px; margin-bottom: 16px; }
+        h1 { color: ${color}; margin: 0 0 12px; font-size: 1.6rem; }
+        p { color: #4b5563; line-height: 1.6; }
+        a { display: inline-block; margin-top: 24px; padding: 12px 28px; background: #0ea5e9; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; }
+        a:hover { background: #0369a1; }
+        .footer { margin-top: 32px; color: #9ca3af; font-size: 0.85rem; }
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <div class="icon">${color === '#10b981' ? '✅' : color === '#ef4444' ? '❌' : 'ℹ️'}</div>
+        <h1>${heading}</h1>
+        <p>${message}</p>
+        <a href="${process.env.APP_URL || 'https://ates-barberos.com'}">Neue Buchung</a>
+        <div class="footer">Ates Barberos &bull; Bahnhofstraße 3, 6410 Telfs</div>
+      </div>
+    </body>
+    </html>`;
+
+  try {
+    const appointment = await Appointment.findById(req.params.id).populate('barberId').populate('services');
+
+    if (!appointment) {
+      return res.status(404).send(renderPage(
+        'Termin nicht gefunden',
+        'Termin nicht gefunden',
+        'Dieser Termin existiert nicht oder wurde bereits gelöscht.',
+        '#ef4444'
+      ));
+    }
+
+    if (appointment.status === 'cancelled') {
+      return res.send(renderPage(
+        'Bereits storniert',
+        'Termin bereits storniert',
+        'Dieser Termin wurde bereits storniert. Es ist keine weitere Aktion erforderlich.',
+        '#6b7280'
+      ));
+    }
+
+    if (appointment.status === 'completed') {
+      return res.send(renderPage(
+        'Termin abgeschlossen',
+        'Termin bereits abgeschlossen',
+        'Dieser Termin wurde bereits abgeschlossen und kann nicht mehr storniert werden.',
+        '#6b7280'
+      ));
+    }
+
+    // Cancel the appointment
+    appointment.status = 'cancelled';
+    await appointment.save();
+
+    // Cancel any pending reminder emails
+    try {
+      await emailScheduler.cancelAppointmentEmails(appointment._id);
+    } catch (e) {
+      console.error('Failed to cancel scheduled emails:', e);
+    }
+
+    // Notify barber
+    if (EmailService.isConfigured() && appointment.barberId?.email) {
+      try {
+        await EmailService.sendCustomerCancellationToBarber(appointment, appointment.barberId);
+      } catch (e) {
+        console.error('Failed to send barber cancellation notification:', e);
+      }
+    }
+
+    return res.send(renderPage(
+      'Termin storniert',
+      'Ihr Termin wurde storniert',
+      `Ihr Termin am <strong>${new Date(appointment.date).toLocaleDateString('de-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} um ${appointment.time} Uhr</strong> wurde erfolgreich storniert. Sie können jederzeit einen neuen Termin buchen.`,
+      '#10b981'
+    ));
+  } catch (error) {
+    console.error('Customer cancellation error:', error);
+    return res.status(500).send(renderPage(
+      'Fehler',
+      'Ein Fehler ist aufgetreten',
+      'Bei der Stornierung ist ein Fehler aufgetreten. Bitte kontaktieren Sie uns direkt.',
+      '#ef4444'
+    ));
+  }
+});
+
 // Test email endpoint
 router.post('/test-email', async (req, res) => {
   try {
