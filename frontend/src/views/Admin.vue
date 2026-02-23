@@ -1683,7 +1683,6 @@ export default {
       },
       showServiceDropdown: false,
       bookingCustomerSearch: '',
-      bookingCustomerSearchTimer: null,
       showCustomerDropdown: false,
       customerTouchStart: null,
       showMobileNav: false,
@@ -2369,10 +2368,6 @@ export default {
   },
   beforeUnmount() {
     document.removeEventListener('click', this.handleClickOutside)
-    if (this.bookingCustomerSearchTimer) {
-      clearTimeout(this.bookingCustomerSearchTimer)
-      this.bookingCustomerSearchTimer = null
-    }
     // Reset body overflow and modal class when component is destroyed
     document.body.style.overflow = ''
     document.body.classList.remove('modal-open')
@@ -4289,28 +4284,8 @@ async setReminder(appointment) {
       setTimeout(() => { this.showCustomerDropdown = false }, 250)
     },
     handleCustomerSearchInput() {
-      // Debounce server requests while typing
-      if (this.bookingCustomerSearchTimer) {
-        clearTimeout(this.bookingCustomerSearchTimer)
-        this.bookingCustomerSearchTimer = null
-      }
-
       const term = this.bookingCustomerSearch ? this.bookingCustomerSearch.trim() : ''
-      // Show dropdown immediately when there's text
       this.showCustomerDropdown = !!term
-
-      // Delay fetching to reduce API calls
-      this.bookingCustomerSearchTimer = setTimeout(async () => {
-        try {
-          await this.fetchCustomers(term || undefined)
-        } catch (e) {
-          // swallow - fetchCustomers already logs errors
-        } finally {
-          this.bookingCustomerSearchTimer = null
-          await this.$nextTick()
-          this.showCustomerDropdown = !!term
-        }
-      }, 300)
     },
     clearCustomerSearch() {
       this.bookingCustomerSearch = ''
