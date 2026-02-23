@@ -1098,7 +1098,7 @@
                       <span><i class="fas fa-users me-2"></i>{{ $t('admin.existingCustomers') }}</span>
                       <small class="text-muted">{{ $t('admin.selectToPrefill') }}</small>
                     </label>
-                    <div class="customer-search-container" @click.stop>
+                    <div class="customer-search-container" @click.stop ref="customerSearchContainer">
                       <div class="input-group mb-2">
                         <span class="input-group-text"><i class="fas fa-search"></i></span>
                         <input
@@ -1121,42 +1121,44 @@
                         </button>
                       </div>
 
-                      <!-- Customer Dropdown -->
-                      <div v-if="showCustomerDropdown" class="customer-dropdown" @click.stop>
-                        <div v-if="bookingCustomerMatches.length > 0" class="customer-list">
-                          <div
-                            v-for="customer in bookingCustomerMatches.slice(0, 8)"
-                            :key="customer._id"
-                            class="customer-item"
-                            @click="selectCustomerForBooking(customer)"
-                            @touchstart="handleCustomerTouchStart($event, customer)"
-                            @touchend="handleCustomerTouchEnd($event, customer)"
-                          >
-                            <div class="customer-info">
-                              <div class="customer-name">
-                                <i class="fas fa-user me-2 text-primary"></i>
-                                <strong>{{ customer.name }}</strong>
-                              </div>
-                              <div class="customer-details">
-                                <span class="phone"><i class="fas fa-phone me-1"></i>{{ customer.phone }}</span>
-                                <span v-if="customer.email" class="email"><i class="fas fa-envelope me-1"></i>{{ customer.email }}</span>
-                              </div>
-                              <div v-if="customer.totalBookings" class="customer-stats">
-                                <span class="badge bg-primary">{{ customer.totalBookings }} {{ $t('admin.bookings') }}</span>
+                      <!-- Customer Dropdown - teleported to body to escape overflow clipping -->
+                      <Teleport to="body">
+                        <div v-if="showCustomerDropdown" class="customer-dropdown customer-dropdown-teleport" :style="customerDropdownStyle" @click.stop>
+                          <div v-if="bookingCustomerMatches.length > 0" class="customer-list">
+                            <div
+                              v-for="customer in bookingCustomerMatches.slice(0, 8)"
+                              :key="customer._id"
+                              class="customer-item"
+                              @click="selectCustomerForBooking(customer)"
+                              @touchstart="handleCustomerTouchStart($event, customer)"
+                              @touchend="handleCustomerTouchEnd($event, customer)"
+                            >
+                              <div class="customer-info">
+                                <div class="customer-name">
+                                  <i class="fas fa-user me-2 text-primary"></i>
+                                  <strong>{{ customer.name }}</strong>
+                                </div>
+                                <div class="customer-details">
+                                  <span class="phone"><i class="fas fa-phone me-1"></i>{{ customer.phone }}</span>
+                                  <span v-if="customer.email" class="email"><i class="fas fa-envelope me-1"></i>{{ customer.email }}</span>
+                                </div>
+                                <div v-if="customer.totalBookings" class="customer-stats">
+                                  <span class="badge bg-primary">{{ customer.totalBookings }} {{ $t('admin.bookings') }}</span>
+                                </div>
                               </div>
                             </div>
                           </div>
+                          <div v-else-if="bookingCustomerSearch && bookingCustomerMatches.length === 0" class="no-results">
+                            <i class="fas fa-user-slash me-2"></i>{{ $t('admin.noCustomersFound') }}
+                          </div>
+                          <div v-else-if="!bookingCustomerSearch && customers.length === 0" class="no-results">
+                            <i class="fas fa-info-circle me-2"></i>{{ $t('admin.noCustomersAvailable') || 'No customers available' }}
+                          </div>
+                          <div v-else-if="!bookingCustomerSearch && bookingCustomerMatches.length === 0 && customers.length > 0" class="no-results">
+                            <i class="fas fa-spinner fa-spin me-2"></i>{{ $t('common.loading') || 'Loading...' }}
+                          </div>
                         </div>
-                        <div v-else-if="bookingCustomerSearch && bookingCustomerMatches.length === 0" class="no-results">
-                          <i class="fas fa-user-slash me-2"></i>{{ $t('admin.noCustomersFound') }}
-                        </div>
-                        <div v-else-if="!bookingCustomerSearch && customers.length === 0" class="no-results">
-                          <i class="fas fa-info-circle me-2"></i>{{ $t('admin.noCustomersAvailable') || 'No customers available' }}
-                        </div>
-                        <div v-else-if="!bookingCustomerSearch && bookingCustomerMatches.length === 0 && customers.length > 0" class="no-results">
-                          <i class="fas fa-spinner fa-spin me-2"></i>{{ $t('common.loading') || 'Loading...' }}
-                        </div>
-                      </div>
+                      </Teleport>
                     </div>
                   </div>
 
@@ -1684,6 +1686,7 @@ export default {
       showServiceDropdown: false,
       bookingCustomerSearch: '',
       showCustomerDropdown: false,
+      customerDropdownPosition: { top: 0, left: 0, width: 300 },
       customerTouchStart: null,
       showMobileNav: false,
       dateDetailModal: {
@@ -1744,6 +1747,16 @@ export default {
         c.phone?.toLowerCase().includes(term) ||
         c.email?.toLowerCase().includes(term)
       )
+    },
+    customerDropdownStyle() {
+      const { top, left, width } = this.customerDropdownPosition
+      return {
+        position: 'fixed',
+        top: top + 'px',
+        left: left + 'px',
+        width: width + 'px',
+        zIndex: 99999
+      }
     },
     bookingCustomerMatches() {
       if (!this.customers || this.customers.length === 0) return []
@@ -4273,10 +4286,21 @@ async setReminder(appointment) {
       
       this.customerTouchStart = null
     },
+    updateCustomerDropdownPosition() {
+      const container = this.$refs.customerSearchContainer
+      if (!container) return
+      const rect = container.getBoundingClientRect()
+      this.customerDropdownPosition = {
+        top: rect.bottom + 4,
+        left: rect.left,
+        width: rect.width
+      }
+    },
     async handleCustomerSearchFocus() {
       if (this.customers.length === 0) {
         await this.fetchCustomers()
       }
+      this.updateCustomerDropdownPosition()
       this.showCustomerDropdown = true
     },
     handleCustomerSearchBlur() {
@@ -4285,6 +4309,7 @@ async setReminder(appointment) {
     },
     handleCustomerSearchInput() {
       const term = this.bookingCustomerSearch ? this.bookingCustomerSearch.trim() : ''
+      if (term) this.updateCustomerDropdownPosition()
       this.showCustomerDropdown = !!term
     },
     clearCustomerSearch() {
@@ -6697,6 +6722,19 @@ async setReminder(appointment) {
   overflow-y: auto;
   margin-top: 0.25rem;
   -webkit-overflow-scrolling: touch;
+}
+
+/* Teleported dropdown - rendered on body, positioned with fixed */
+.customer-dropdown-teleport {
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  max-height: 260px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  z-index: 99999;
 }
 
 .customer-list {
