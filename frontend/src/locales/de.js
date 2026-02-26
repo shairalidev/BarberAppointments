@@ -259,7 +259,12 @@ export default {
     noAppointmentsOnOffDate: 'Für dieses Datum können keine Termine gebucht werden.',
     selectedDateTime: 'Ausgewähltes Datum & Uhrzeit',
     thisWeek: 'Diese Woche',
-    nextWeek: 'Nächste Woche'
+    nextWeek: 'Nächste Woche',
+    searchAppointments: 'Termine suchen',
+    searchAppointmentsPlaceholder: 'Nach Kundenname suchen...',
+    appointmentsFound: 'Termin(e) gefunden',
+    noUpcomingAppointments: 'Keine bevorstehenden Termine gefunden',
+    upcomingAppointments: 'Bevorstehende Termine'
   },
   common: {
     loading: 'Laden...',

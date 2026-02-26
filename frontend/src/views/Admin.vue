@@ -209,6 +209,9 @@
                 <button @click="openBookingModal" class="btn btn-success mobile-cal-btn mobile-cal-btn--add">
                   <i class="fas fa-plus"></i>
                 </button>
+                <button @click="openAppointmentSearchModal" class="btn btn-outline-primary mobile-cal-btn">
+                  <i class="fas fa-search"></i>
+                </button>
               </div>
             </div>
 
@@ -225,6 +228,9 @@
                       <div class="d-flex gap-2">
                         <button @click="openBookingModal" class="btn btn-sm btn-success">
                           <i class="fas fa-plus me-1"></i>{{ $t('admin.bookAppointment') }}
+                        </button>
+                        <button @click="openAppointmentSearchModal" class="btn btn-sm btn-outline-primary">
+                          <i class="fas fa-search me-1"></i>{{ $t('admin.searchAppointments') }}
                         </button>
                         <!-- Toggle Button -->
                         <button @click="toggleCalendarView" class="btn btn-sm" :class="calendarViewMode === 'calendar' ? 'btn-outline-secondary' : 'btn-secondary'">
@@ -1372,6 +1378,69 @@
     </div>
 
     <!-- Edit Appointment Modal -->
+    <!-- Appointment Search Modal -->
+    <div v-if="appointmentSearchModal.show" class="modal fade show d-block responsive-modal" style="background:rgba(0,0,0,0.5)" @click.self="closeAppointmentSearchModal" @keydown.esc="closeAppointmentSearchModal">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable responsive-modal-dialog" style="max-width:520px">
+        <div class="modal-content responsive-modal-content" @click.stop>
+          <div class="modal-header bg-gradient-primary text-white responsive-modal-header">
+            <h5 class="modal-title">
+              <i class="fas fa-search me-2"></i>{{ $t('admin.searchAppointments') }}
+            </h5>
+            <button @click="closeAppointmentSearchModal" class="btn-close btn-close-white" aria-label="Close"></button>
+          </div>
+          <div class="modal-body p-3">
+            <input
+              id="appointmentSearchInput"
+              v-model="appointmentSearchModal.query"
+              type="search"
+              class="form-control mb-3"
+              :placeholder="$t('admin.searchAppointmentsPlaceholder')"
+              autocomplete="off"
+            />
+            <div v-if="appointmentSearchModal.query.trim()">
+              <small class="text-muted d-block mb-2">
+                {{ appointmentSearchResults.length }} {{ $t('admin.appointmentsFound') }}
+              </small>
+              <div v-if="appointmentSearchResults.length" class="list-group list-group-flush" style="max-height:380px;overflow-y:auto">
+                <button
+                  v-for="apt in appointmentSearchResults"
+                  :key="apt._id"
+                  class="list-group-item list-group-item-action text-start py-2 px-3"
+                  @click="openAppointmentFromSearch(apt)"
+                >
+                  <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div class="flex-grow-1 min-width-0">
+                      <div class="fw-semibold text-truncate">{{ apt.customerName }}</div>
+                      <small class="text-muted d-block">
+                        <i class="fas fa-calendar-day me-1"></i>{{ formatSearchDate(apt.date) }}
+                        &nbsp;&middot;&nbsp;
+                        <i class="fas fa-clock me-1"></i>{{ apt.time }}
+                      </small>
+                      <small v-if="apt.services?.length" class="text-muted d-block text-truncate">
+                        <i class="fas fa-cut me-1"></i>{{ apt.services.map(s => s.name).join(', ') }}
+                      </small>
+                    </div>
+                    <span class="badge flex-shrink-0" :class="{
+                      'bg-warning text-dark': apt.status === 'pending',
+                      'bg-success': apt.status === 'confirmed',
+                      'bg-secondary': apt.status === 'completed',
+                      'bg-danger': apt.status === 'cancelled'
+                    }">{{ $t('admin.' + apt.status) }}</span>
+                  </div>
+                </button>
+              </div>
+              <p v-else class="text-muted text-center py-3 mb-0">
+                <i class="fas fa-calendar-times me-2"></i>{{ $t('admin.noUpcomingAppointments') }}
+              </p>
+            </div>
+          </div>
+          <div class="modal-footer responsive-modal-footer">
+            <button @click="closeAppointmentSearchModal" class="btn btn-secondary btn-sm">{{ $t('common.cancel') }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div v-if="editTimeModal.show" class="modal fade show d-block edit-appointment-modal responsive-modal" @click.self="closeEditTimeModal">
       <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable edit-appointment-modal-dialog responsive-modal-dialog">
         <div class="modal-content edit-appointment-modal-content responsive-modal-content" @click.stop>
@@ -1730,6 +1799,10 @@ export default {
         isRestricted: false,
         restriction: null,
         loading: false
+      },
+      appointmentSearchModal: {
+        show: false,
+        query: ''
       }
     }
   },
@@ -1753,6 +1826,23 @@ export default {
         c.phone?.toLowerCase().includes(term) ||
         c.email?.toLowerCase().includes(term)
       )
+    },
+    appointmentSearchResults() {
+      const query = this.appointmentSearchModal.query.toLowerCase().trim()
+      if (!query) return []
+      const d = new Date()
+      const today = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+      return this.appointments
+        .filter(apt => {
+          const aptDate = apt.date ? apt.date.split('T')[0] : ''
+          return aptDate >= today && apt.customerName?.toLowerCase().includes(query)
+        })
+        .sort((a, b) => {
+          const dateA = a.date?.split('T')[0] || ''
+          const dateB = b.date?.split('T')[0] || ''
+          if (dateA !== dateB) return dateA < dateB ? -1 : 1
+          return (a.time || '') < (b.time || '') ? -1 : 1
+        })
     },
     customerDropdownStyle() {
       const { top, left, width } = this.customerDropdownPosition
@@ -2568,14 +2658,26 @@ export default {
         const appointment = this.appointmentDragState.appointment
         const newTime = this.appointmentDragState.newTime
 
+        const requestBody = {
+          time: newTime,
+          date: this.dayViewDate,
+          sendEmail: true,
+          timeChangeMessage: `Appointment time changed from ${this.appointmentDragState.originalTime} to ${newTime}`
+        }
+
+        // If appointment has an endTime (block appointments), recalculate it based on same duration
+        // so the stale endTime doesn't make the appointment invisible in getDayViewHalfHourSlots
+        if (appointment.endTime) {
+          const [newH, newM] = newTime.split(':').map(Number)
+          const newEndMinutes = newH * 60 + newM + (appointment.totalDuration || 30)
+          const newEndH = Math.floor(newEndMinutes / 60).toString().padStart(2, '0')
+          const newEndMin = (newEndMinutes % 60).toString().padStart(2, '0')
+          requestBody.endTime = `${newEndH}:${newEndMin}`
+        }
+
         const response = await axios.put(
           `${process.env.VUE_APP_API_URL}/appointments/${appointment._id}`,
-          {
-            time: newTime,
-            date: this.dayViewDate,
-            sendEmail: true,
-            timeChangeMessage: `Appointment time changed from ${this.appointmentDragState.originalTime} to ${newTime}`
-          },
+          requestBody,
           {
             headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
           }
@@ -2585,9 +2687,6 @@ export default {
           this.showToast(this.$t('admin.appointmentMovedSuccess') || 'Appointment moved successfully!', 'success')
 
           await this.fetchAppointments()
-          if (this.calendarViewMode === 'day') {
-            await this.loadDayViewData(this.dayViewDate)
-          }
         }
       } catch (error) {
         console.error('Error moving appointment:', error)
@@ -3062,6 +3161,27 @@ async quickBookAppointment() {
         this.updateBookingPrice()
         this.fetchAvailableSlots()
       })
+    },
+    openAppointmentSearchModal() {
+      this.appointmentSearchModal.show = true
+      this.appointmentSearchModal.query = ''
+      this.$nextTick(() => {
+        const input = document.getElementById('appointmentSearchInput')
+        if (input) input.focus()
+      })
+    },
+    closeAppointmentSearchModal() {
+      this.appointmentSearchModal.show = false
+      this.appointmentSearchModal.query = ''
+    },
+    openAppointmentFromSearch(apt) {
+      this.closeAppointmentSearchModal()
+      this.openEditTimeModal(apt)
+    },
+    formatSearchDate(dateStr) {
+      if (!dateStr) return ''
+      const d = new Date(dateStr)
+      return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`
     },
     async openEditTimeModal(appointment) {
       this.editTimeModal.appointment = appointment

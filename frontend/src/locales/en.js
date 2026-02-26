@@ -262,7 +262,12 @@ export default {
     noAppointmentsOnOffDate: 'No appointments can be booked for this date.',
     selectedDateTime: 'Selected Date & Time',
     thisWeek: 'This Week',
-    nextWeek: 'Next Week'
+    nextWeek: 'Next Week',
+    searchAppointments: 'Search Appointments',
+    searchAppointmentsPlaceholder: 'Search by customer name...',
+    appointmentsFound: 'appointment(s) found',
+    noUpcomingAppointments: 'No upcoming appointments found',
+    upcomingAppointments: 'Upcoming Appointments'
   },
   common: {
     loading: 'Loading...',
