@@ -2,7 +2,7 @@ name: Deploy BarberPro Application
 
 on:
   push:
-    branches:  themetry
+    branches: themetry
   workflow_dispatch:
 
 env:
@@ -11,79 +11,138 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    name: 🚀 Deploy to Hostinger VPS
 
     steps:
-    - name: Checkout code
+    - name: 📦 Checkout Code
       uses: actions/checkout@v4
 
-    - name: Setup Node.js
+    - name: ⚙️ Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
 
-    - name: Deploy to Server
+    - name: 📥 Pull Latest Code on Server
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.SERVER_HOST }}
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
-        script_stop: true
         script: |
           set -e
-          DEPLOY_START=$(date +%s)
-          echo "🚀 Starting BarberAppointments Deployment..."
-
           cd /var/www/BarberAppointments
-          sudo chown -R ubuntu:ubuntu /var/www/BarberAppointments
-          sudo chmod -R 755 /var/www/BarberAppointments
-
-          echo "📥 Pulling latest code..."
+          chown -R root:root /var/www/BarberAppointments
+          chmod -R 755 /var/www/BarberAppointments
           OLD_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "")
           git fetch origin themetry
           git reset --hard origin/themetry
           git clean -fd
           NEW_COMMIT=$(git rev-parse HEAD)
-
+          echo "OLD=$OLD_COMMIT" > /tmp/deploy_state
+          echo "NEW=$NEW_COMMIT" >> /tmp/deploy_state
           if [ "$OLD_COMMIT" = "$NEW_COMMIT" ] && [ -n "$OLD_COMMIT" ]; then
-            echo "⚠️  No new changes. Skipping deployment."
-            exit 0
+            echo "NO_CHANGES=true" >> /tmp/deploy_state
           fi
 
-          # Check if dependencies changed
-          BACKEND_NEED_INSTALL=false
-          FRONTEND_NEED_INSTALL=false
-          if [ -n "$OLD_COMMIT" ]; then
-            git diff "$OLD_COMMIT" HEAD --name-only | grep -qE "backend/(package\.json|package-lock\.json)" && BACKEND_NEED_INSTALL=true || true
-            git diff "$OLD_COMMIT" HEAD --name-only | grep -qE "frontend/(package\.json|package-lock\.json)" && FRONTEND_NEED_INSTALL=true || true
+    - name: 🔧 Install Backend Dependencies
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: 22
+        script: |
+          set -e
+          source /tmp/deploy_state || true
+          if [ "${NO_CHANGES}" = "true" ]; then echo "⚠️ No changes, skipping."; exit 0; fi
+
+          cd /var/www/BarberAppointments/backend
+
+          if [ ! -f ".env" ]; then
+            echo "❌ .env file missing! Aborting."
+            exit 1
+          fi
+
+          NEED_INSTALL=false
+          if [ -n "$OLD" ]; then
+            git diff "$OLD" "$NEW" --name-only | grep -qE "backend/(package\.json|package-lock\.json)" && NEED_INSTALL=true || true
           else
-            BACKEND_NEED_INSTALL=true
-            FRONTEND_NEED_INSTALL=true
+            NEED_INSTALL=true
           fi
 
-          # Backend
-          echo "🔧 Backend..."
-          cd backend
-          if [ "$BACKEND_NEED_INSTALL" = true ] || [ ! -d "node_modules" ]; then
+          if [ "$NEED_INSTALL" = true ] || [ ! -d "node_modules" ]; then
+            echo "📦 Installing backend dependencies..."
             [ -f "package-lock.json" ] && npm ci --no-audit || npm install --no-audit
+          else
+            echo "✅ No dependency changes, skipping install."
           fi
 
-          # PM2
-          command -v pm2 >/dev/null || sudo npm install -g pm2
-          sudo mkdir -p /var/log/pm2
-          sudo chown -R ubuntu:ubuntu /var/log/pm2
+    - name: ♻️ Restart Backend with PM2
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: 22
+        script: |
+          set -e
+          source /tmp/deploy_state || true
+          if [ "${NO_CHANGES}" = "true" ]; then echo "⚠️ No changes, skipping."; exit 0; fi
+
+          command -v pm2 >/dev/null || npm install -g pm2
+          mkdir -p /var/log/pm2
+          chown -R root:root /var/log/pm2
 
           cd /var/www/BarberAppointments
-          pm2 list | grep -q "barberapp-backend" && pm2 restart barberapp-backend --update-env || pm2 start ecosystem.config.js --env production
+          pm2 list | grep -q "barberapp-backend" \
+            && pm2 restart barberapp-backend --update-env \
+            || pm2 start ecosystem.config.js --env production
 
-          # Frontend
-          echo "🎨 Frontend..."
-          cd frontend
-          if [ "$FRONTEND_NEED_INSTALL" = true ] || [ ! -d "node_modules" ]; then
-            [ -f "package-lock.json" ] && npm ci --no-audit || npm install --no-audit
+          pm2 save
+          pm2 status
+
+    - name: 🎨 Install Frontend Dependencies
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: 22
+        script: |
+          set -e
+          source /tmp/deploy_state || true
+          if [ "${NO_CHANGES}" = "true" ]; then echo "⚠️ No changes, skipping."; exit 0; fi
+
+          cd /var/www/BarberAppointments/frontend
+
+          NEED_INSTALL=false
+          if [ -n "$OLD" ]; then
+            git diff "$OLD" "$NEW" --name-only | grep -qE "frontend/(package\.json|package-lock\.json)" && NEED_INSTALL=true || true
+          else
+            NEED_INSTALL=true
           fi
 
-          echo "🏗️  Building..."
+          if [ "$NEED_INSTALL" = true ] || [ ! -d "node_modules" ]; then
+            echo "📦 Installing frontend dependencies..."
+            [ -f "package-lock.json" ] && npm ci --no-audit || npm install --no-audit
+          else
+            echo "✅ No dependency changes, skipping install."
+          fi
+
+    - name: 🏗️ Build Frontend
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: 22
+        script: |
+          set -e
+          source /tmp/deploy_state || true
+          if [ "${NO_CHANGES}" = "true" ]; then echo "⚠️ No changes, skipping."; exit 0; fi
+
+          cd /var/www/BarberAppointments/frontend
           NODE_ENV=production npm run build -- --mode production
 
           # Cache busting
@@ -91,24 +150,45 @@ jobs:
           [ -f "dist/index.html" ] && sed -i "s|/logo.png|/logo.png?v=$VERSION|g" dist/index.html
 
           # Permissions
-          sudo chown -R www-data:www-data dist
-          sudo chmod -R 755 dist
+          chown -R www-data:www-data dist
+          chmod -R 755 dist
           mkdir -p /var/www/BarberAppointments/backend/uploads
-          sudo chown -R www-data:www-data /var/www/BarberAppointments/backend/uploads
+          chown -R www-data:www-data /var/www/BarberAppointments/backend/uploads
 
-          # Nginx
-          pm2 save
-          sudo rm -rf /var/cache/nginx/* 2>/dev/null || true
-          sudo systemctl reload nginx
+    - name: 🌐 Reload Nginx
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: 22
+        script: |
+          set -e
+          source /tmp/deploy_state || true
+          if [ "${NO_CHANGES}" = "true" ]; then echo "⚠️ No changes, skipping."; exit 0; fi
 
-          DEPLOY_DURATION=$(($(date +%s) - DEPLOY_START))
-          echo "✅ Deployment Complete! (${DEPLOY_DURATION}s)"
-          pm2 status
+          rm -rf /var/cache/nginx/* 2>/dev/null || true
+          systemctl reload nginx
+          echo "✅ Nginx reloaded successfully"
 
-    - name: Notify Success
-      if: success()
-      run: echo "Deployment Successful ✔"
+    - name: ✅ Deployment Summary
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: 22
+        script: |
+          source /tmp/deploy_state || true
+          if [ "${NO_CHANGES}" = "true" ]; then
+            echo "⚠️ No changes detected. Deployment skipped."
+          else
+            echo "🎉 Deployment Complete!"
+            echo "📍 Commit: $NEW"
+            pm2 status
+          fi
+          rm -f /tmp/deploy_state
 
-    - name: Notify Failure
+    - name: 🔴 Notify Failure
       if: failure()
-      run: echo "Deployment Failed ❌"
+      run: echo "❌ Deployment Failed — check logs above"
