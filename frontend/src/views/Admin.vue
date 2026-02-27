@@ -435,7 +435,7 @@
                                     ]"
                                     @click.stop="slot.appointment && !appointmentDragState ? openEditTimeModal(slot.appointment) : null"
                                     @mousedown="startAppointmentDrag($event, slot.appointment, hour, index)"
-                                    @touchstart="startAppointmentDrag($event, slot.appointment, hour, index)"
+                                    @touchstart.stop="startAppointmentDrag($event, slot.appointment, hour, index)"
                                   >
                                     <div class="appointment-content" v-if="slot.showTime">
                                       <div class="appointment-left">
@@ -1448,7 +1448,7 @@
             <h5 class="modal-title">
               <i class="fas fa-edit me-2"></i>{{ $t('admin.editAppointment') }}
             </h5>
-            <button @click.stop="closeEditTimeModal" @touchstart.stop="closeEditTimeModal" class="btn-close btn-close-white" aria-label="Close"></button>
+            <button @click.stop="closeEditTimeModal" class="btn-close btn-close-white" aria-label="Close"></button>
           </div>
           <div class="modal-body edit-modal-body responsive-modal-body">
             <div v-if="editTimeModal.appointment" class="mb-3 current-appointment-info">
@@ -2960,6 +2960,7 @@ async quickBookAppointment() {
       this.showBookingModal = true
     },
     closeBookingModal() {
+      this._lastModalClosedAt = Date.now()
       this.showBookingModal = false
       this.bookingFromSlotClick = false
       this.manualTimeEntry = false
@@ -3171,6 +3172,7 @@ async quickBookAppointment() {
       })
     },
     closeAppointmentSearchModal() {
+      this._lastModalClosedAt = Date.now()
       this.appointmentSearchModal.show = false
       this.appointmentSearchModal.query = ''
     },
@@ -3241,6 +3243,7 @@ async quickBookAppointment() {
       this.editTimeModal.newTime = ''
     },
     closeEditTimeModal() {
+      this._lastModalClosedAt = Date.now()
       this.editTimeModal.show = false
       this.editTimeModal.appointment = null
       this.editTimeModal.newDate = ''
@@ -3980,7 +3983,14 @@ getTimeSlotsForDay(dayIndex) {
       if (event && event.stopPropagation) {
         event.stopPropagation()
       }
-      
+
+      // Guard: ignore ghost clicks that arrive shortly after a modal was closed.
+      // On mobile, closing a modal on touchstart/touchend leaves a synthetic click that
+      // falls through to whatever is behind the modal. 400ms covers any device's delay.
+      if (this._lastModalClosedAt && (Date.now() - this._lastModalClosedAt) < 400) {
+        return
+      }
+
       // If the slot is occupied, open the appointment instead of the booking modal
       if (slot && slot.isOccupied && slot.appointment) {
         if (!this.appointmentDragState) {
@@ -4169,6 +4179,7 @@ async setReminder(appointment) {
       }
     },
     closeCancelModal() {
+      this._lastModalClosedAt = Date.now()
       this.cancelModal.show = false
       this.cancelModal.appointment = null
       this.cancelModal.message = ''
