@@ -1,4 +1,5 @@
 const { Resend } = require('resend');
+const EmailOptOut = require('../models/EmailOptOut');
 
 let resendClient = null;
 
@@ -76,6 +77,14 @@ class EmailService {
     }
 
     const recipient = this.formatRecipient(to);
+
+    // Skip sending to opted-out addresses (bounced or complained)
+    const optOut = await EmailOptOut.findOne({ email: recipient });
+    if (optOut) {
+      console.log(`[emailService] Skipping email to opted-out address: ${recipient} (${optOut.reason})`);
+      return;
+    }
+
     const envelope = this.buildEnvelope(nameOverride);
 
     const payload = {

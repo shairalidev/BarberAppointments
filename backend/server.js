@@ -25,6 +25,11 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
 }));
+
+// Webhook routes must receive the raw body for svix signature verification.
+// Mount BEFORE express.json() so the body is not pre-parsed.
+app.use('/api/webhooks', express.raw({ type: 'application/json' }), require('./routes/emailWebhooks'));
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
