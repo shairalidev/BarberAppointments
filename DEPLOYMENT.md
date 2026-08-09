@@ -96,12 +96,17 @@ sudo nginx -t
 sudo systemctl restart nginx
 ```
 
-### SSL Certificate (Optional but Recommended)
+### SSL Certificate and Automatic Renewal
 
 ```bash
-sudo apt-get install -y certbot python3-certbot-nginx
-sudo certbot --nginx -d your-domain.com
+sudo bash scripts/configure-tls-renewal.sh
+systemctl status certbot.timer
+sudo certbot renew --dry-run
 ```
+
+The script covers `ates-barberos.com` and `www.ates-barberos.com`, enables the
+twice-daily Certbot timer, and reloads Nginx after successful renewal. Both DNS
+names must resolve to this VPS and port 80 must be publicly reachable.
 
 ### Manual Deployment
 
@@ -176,7 +181,7 @@ sudo systemctl restart nginx
 - [ ] Change default admin credentials
 - [ ] Update JWT_SECRET in production .env
 - [ ] Configure firewall (UFW)
-- [ ] Enable SSL/HTTPS
+- [ ] Verify `sudo certbot renew --dry-run` succeeds
 - [ ] Set up MongoDB authentication
 - [ ] Configure CORS properly
 - [ ] Set up regular backups

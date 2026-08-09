@@ -28,12 +28,6 @@ if ! command -v nginx &> /dev/null; then
     sudo apt-get install -y nginx
 fi
 
-# Install Certbot if not installed
-if ! command -v certbot &> /dev/null; then
-    echo "📦 Installing Certbot..."
-    sudo apt-get install -y certbot python3-certbot-nginx
-fi
-
 # Create project directory
 echo "📁 Setting up project directory..."
 sudo mkdir -p /var/www/BarberAppointments
@@ -87,8 +81,7 @@ sudo systemctl reload nginx
 
 # Install SSL certificate
 echo "🔒 Setting up SSL certificate..."
-read -p "Enter your email for SSL certificate: " EMAIL
-sudo certbot --nginx -d barberappointment.duckdns.org --non-interactive --agree-tos --email $EMAIL || echo "⚠️  SSL setup failed, you can run: sudo certbot --nginx -d barberappointment.duckdns.org"
+sudo bash scripts/configure-tls-renewal.sh
 
 # Start backend with PM2
 echo "🚀 Starting backend with PM2..."
@@ -101,7 +94,7 @@ echo ""
 echo "✅ Server setup complete!"
 echo ""
 echo "Your application is available at:"
-echo "https://barberappointment.duckdns.org"
+echo "https://www.ates-barberos.com"
 echo ""
 echo "Useful commands:"
 echo "  pm2 status                    - Check backend status"
