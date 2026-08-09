@@ -7,6 +7,8 @@ on:
 
 env:
   NODE_VERSION: '20.x'
+  # The apex currently resolves to a different host where SSH is unreachable.
+  SSH_HOST: 'www.ates-barberos.com'
 
 jobs:
   deploy:
@@ -25,7 +27,7 @@ jobs:
     - name: 📥 Pull Latest Code on Server
       uses: appleboy/ssh-action@v1.0.0
       with:
-        host: ${{ secrets.SERVER_HOST }}
+        host: ${{ env.SSH_HOST }}
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
@@ -48,7 +50,7 @@ jobs:
     - name: Maintain TLS certificate and renewal timer
       uses: appleboy/ssh-action@v1.0.0
       with:
-        host: ${{ secrets.SERVER_HOST }}
+        host: ${{ env.SSH_HOST }}
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
@@ -61,7 +63,7 @@ jobs:
     - name: 🔧 Install Backend Dependencies
       uses: appleboy/ssh-action@v1.0.0
       with:
-        host: ${{ secrets.SERVER_HOST }}
+        host: ${{ env.SSH_HOST }}
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
@@ -94,7 +96,7 @@ jobs:
     - name: ♻️ Restart Backend with PM2
       uses: appleboy/ssh-action@v1.0.0
       with:
-        host: ${{ secrets.SERVER_HOST }}
+        host: ${{ env.SSH_HOST }}
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
@@ -118,7 +120,7 @@ jobs:
     - name: 🎨 Install Frontend Dependencies
       uses: appleboy/ssh-action@v1.0.0
       with:
-        host: ${{ secrets.SERVER_HOST }}
+        host: ${{ env.SSH_HOST }}
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
@@ -146,7 +148,7 @@ jobs:
     - name: 🏗️ Build Frontend
       uses: appleboy/ssh-action@v1.0.0
       with:
-        host: ${{ secrets.SERVER_HOST }}
+        host: ${{ env.SSH_HOST }}
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
@@ -171,7 +173,7 @@ jobs:
     - name: 🌐 Reload Nginx
       uses: appleboy/ssh-action@v1.0.0
       with:
-        host: ${{ secrets.SERVER_HOST }}
+        host: ${{ env.SSH_HOST }}
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
@@ -187,7 +189,7 @@ jobs:
     - name: ✅ Deployment Summary
       uses: appleboy/ssh-action@v1.0.0
       with:
-        host: ${{ secrets.SERVER_HOST }}
+        host: ${{ env.SSH_HOST }}
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22

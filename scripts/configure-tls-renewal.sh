@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DOMAINS="${TLS_DOMAINS:-ates-barberos.com,www.ates-barberos.com}"
-CERT_NAME="${TLS_CERT_NAME:-ates-barberos.com}"
+DOMAINS="${TLS_DOMAINS:-www.ates-barberos.com}"
+CERT_NAME="${TLS_CERT_NAME:-www.ates-barberos.com}"
 
 if [ "$(id -u)" -ne 0 ]; then
   echo "Run this script as root (or with sudo)." >&2

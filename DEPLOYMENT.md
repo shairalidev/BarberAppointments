@@ -104,9 +104,10 @@ systemctl status certbot.timer
 sudo certbot renew --dry-run
 ```
 
-The script covers `ates-barberos.com` and `www.ates-barberos.com`, enables the
-twice-daily Certbot timer, and reloads Nginx after successful renewal. Both DNS
-names must resolve to this VPS and port 80 must be publicly reachable.
+The script covers `www.ates-barberos.com`, enables the twice-daily Certbot timer,
+and reloads Nginx after successful renewal. Its DNS name must resolve to this VPS
+and port 80 must be publicly reachable. The apex `ates-barberos.com` currently
+points at a different server and must be configured and renewed on that server.
 
 ### Manual Deployment
 

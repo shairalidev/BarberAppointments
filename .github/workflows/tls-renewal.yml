@@ -5,6 +5,9 @@ on:
     - cron: '17 4 * * 1'
   workflow_dispatch:
 
+env:
+  SSH_HOST: 'www.ates-barberos.com'
+
 jobs:
   renew:
     runs-on: ubuntu-latest
@@ -12,7 +15,7 @@ jobs:
       - name: Renew certificate and verify Certbot timer
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.SERVER_HOST }}
+          host: ${{ env.SSH_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
